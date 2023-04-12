@@ -1,0 +1,8 @@
+[target.thumbv7em-none-eabihf]
+runner = "qemu-system-arm -cpu cortex-m4 -machine netduinoplus2 -nographic -semihosting-config enable=on,target=native -kernel"
+
+rustflags = [
+]
+
+[build]
+target = "thumbv7em-none-eabihf"
