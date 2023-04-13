@@ -1,9 +1,21 @@
 [package]
-authors = ["N7 Space"]
-edition = "2018"
-readme = "README.md"
 name = "aerugo"
 version = "0.1.0"
+authors = [
+    "N7 Space",
+    "Filip Demski <glamhoth@protonmail.com>",
+]
+edition = "2018"
+rust-version = "1.59"
+description = "Safety-critical applications oriented Real-Time Operating System"
+# documentation
+readme = "README.md"
+# homepage
+repository = "https://github.com/n7space/aerugo"
+license = "MIT OR Apache-2.0"
+keywords = ["cortex-m", "rtos", "space"]
+categories = ["aerospace", "embedded", "hardware-support", "no-std"]
+# workspace
 
 [dependencies]
 cortex-m = "0.7.7"
