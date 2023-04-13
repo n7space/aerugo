@@ -13,5 +13,6 @@ fn main() -> ! {
 
     debug::exit(debug::EXIT_SUCCESS);
 
+    #[allow(clippy::empty_loop)]
     loop {}
 }
