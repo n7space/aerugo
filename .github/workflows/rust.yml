@@ -73,3 +73,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc
+
+  cargo-deny:
+    name: Cargo Deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: EmbarkStudios/cargo-deny-action@v1
