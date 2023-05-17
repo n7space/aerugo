@@ -1,8 +1,10 @@
-///! TODO
+//! Possible system errors.
+
 use super::Aerugo;
 
 use crate::api::{init_api, runtime_api};
 
+/// System initialization error.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum InitError {}
 
@@ -12,6 +14,7 @@ impl init_api::ErrorType for Aerugo {
     type Error = InitError;
 }
 
+/// System runtime error.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum RuntimeError {}
 

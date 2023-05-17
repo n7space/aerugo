@@ -1,19 +1,16 @@
-//! TODO
+//! Generic task.
 
 mod task_handle;
-mod tasklet;
-mod tasklet_storage;
-
-pub(crate) use self::tasklet::Tasklet;
 
 pub use self::task_handle::TaskHandle;
-pub use self::tasklet_storage::TaskletStorage;
 
-/// TODO
+/// Trait for generic task.
 pub(crate) trait Task {
-    /// TODO
+    /// Checks if task is ready for execution.
+    ///
+    /// Returns true if task is ready, false otherwise.
     fn is_ready(&self) -> bool;
 
-    /// TODO
+    /// Executes task.
     fn execute(&self);
 }

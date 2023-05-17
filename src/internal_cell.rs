@@ -1,17 +1,23 @@
-//! TODO
+//! Unsafe cell that implements Sync and Send
+//!
+//! This cell should be only used in the internal parts of the system for elements that are
+//! static and are initialized (and by this - modified) only once - before the system is started.
+//!
+//! SAFETY: Borrows has to be managed by hand, there are no mechanism checking if mutable and
+//! immutable reference exists at the same time.
 
 use core::cell::UnsafeCell;
 use core::fmt::{Debug, Error, Formatter};
 
-/// TODO
+/// Unsafe sync cell.
 #[repr(transparent)]
 pub(crate) struct InternalCell<T: ?Sized>(UnsafeCell<T>);
 
-/// TODO
-unsafe impl<T: ?Sized> Sync for InternalCell<T> where T: Send {}
+/// Safety of the InternalCell has to be managed by hand.
+unsafe impl<T: Send + ?Sized> Sync for InternalCell<T> {}
 
 impl<T> InternalCell<T> {
-    /// TODO
+    /// Creates new cell.
     #[inline(always)]
     pub const fn new(value: T) -> Self {
         InternalCell(UnsafeCell::new(value))
@@ -19,13 +25,21 @@ impl<T> InternalCell<T> {
 }
 
 impl<T: ?Sized> InternalCell<T> {
-    /// TODO
+    /// Borrows an immutable reference to the value.
+    ///
+    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    ///
+    /// Returns reference to the value.
     #[inline(always)]
     pub unsafe fn as_ref(&self) -> &T {
         &*self.0.get()
     }
 
-    /// TODO
+    /// Borrows a mutable reference to the value.
+    ///
+    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    ///
+    /// Returns reference to the value.
     #[inline(always)]
     #[allow(dead_code)]
     pub unsafe fn as_mut_ref(&self) -> &mut T {

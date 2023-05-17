@@ -1,20 +1,28 @@
-//! TODO
+/// Handle to a queue.
+///
+/// Handle is used in the system to referece a queue. It's created from the adequate storage.
 
 use crate::aerugo::error::RuntimeError;
 use crate::data_provider::DataProvider;
-use crate::notifier::Notifier;
 use crate::queue::Queue;
 
-/// TODO
+/// Queue handle.
+///
+/// * `T` - Type that is stored by the queue.
 #[derive(Copy, Clone)]
 pub struct QueueHandle<T: 'static> {
+    /// Reference to the queue.
     queue: &'static dyn Queue<T>,
-    _notifier: &'static dyn Notifier,
+    /// Reference to the queue as a DataProvider.
     _data_provider: &'static dyn DataProvider<T>,
 }
 
 impl<T> QueueHandle<T> {
-    /// TODO
+    /// Send data to the stored queue.
+    ///
+    /// * `data` - Data to send.
+    ///
+    /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
     #[inline(always)]
     pub fn send_data(&self, data: T) -> Result<(), RuntimeError> {
         self.queue.send_data(data)

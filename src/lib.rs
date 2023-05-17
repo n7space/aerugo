@@ -11,12 +11,12 @@ mod crit_cell;
 mod data_provider;
 mod data_receiver;
 mod internal_cell;
-mod notifier;
+mod message_queue;
 mod queue;
 mod task;
+mod tasklet;
 
 pub use self::aerugo::Aerugo;
 pub use self::api::InitApi;
-pub use self::crit_cell::CritCell;
-pub use self::queue::MessageQueueStorage;
-pub use self::task::TaskletStorage;
+pub use self::message_queue::MessageQueueStorage;
+pub use self::tasklet::TaskletStorage;

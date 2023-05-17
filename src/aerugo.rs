@@ -1,29 +1,32 @@
-//! TODO
+//! System control and interface for the user to interact with it.
 
 pub mod error;
 
 mod configuration;
 
-use core::fmt::Debug;
-
 use crate::api::{InitApi, RuntimeApi};
-use crate::queue::{MessageQueueStorage, QueueHandle};
-use crate::task::{TaskHandle, TaskletStorage};
+use crate::message_queue::MessageQueueStorage;
+use crate::queue::QueueHandle;
+use crate::task::TaskHandle;
+use crate::tasklet::TaskletStorage;
 
+/// System structure.
 pub struct Aerugo {}
 
 impl Aerugo {
+    /// Creates new system instance.
     pub const fn new() -> Self {
         Aerugo {}
     }
 
+    /// Starts system scheduler.
     pub fn start_scheduler(&self) -> ! {
         todo!()
     }
 }
 
 impl InitApi for Aerugo {
-    fn create_tasklet<T: Debug, C>(
+    fn create_tasklet<T, C>(
         &'static self,
         _config: Self::TaskConfig,
         _storage: &'static TaskletStorage<T, C>,
@@ -31,14 +34,14 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn create_message_queue<T: Debug, const N: usize>(
+    fn create_message_queue<T, const N: usize>(
         &'static self,
         _storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn register_tasklet_to_queue<T: Debug>(
+    fn register_tasklet_to_queue<T>(
         &'static self,
         _tasklet: &TaskHandle<T>,
         _queue: &QueueHandle<T>,
