@@ -8,6 +8,7 @@ use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::EventId;
 use crate::message_queue::MessageQueueStorage;
+use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
 use crate::task::TaskHandle;
 use crate::tasklet::TaskletStorage;
@@ -79,6 +80,10 @@ impl InitApi for Aerugo {
         _tasklet: &TaskHandle<T>,
         _period: f64,
     ) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn init_hardware(&self, _init_fn: fn(&Peripherals)) {
         todo!()
     }
 }

@@ -4,6 +4,7 @@
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::EventId;
 use crate::message_queue::MessageQueueStorage;
+use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
 use crate::task::TaskHandle;
 use crate::tasklet::TaskletStorage;
@@ -97,6 +98,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
         tasklet: &TaskHandle<T>,
         period: f64,
     ) -> Result<(), Self::Error>;
+
+    /// Set function for hardware initialization
+    ///
+    /// * `init_fn` - Hardware initialization function.
+    fn init_hardware(&self, init_fn: fn(&Peripherals));
 }
 
 /// Initialization error
