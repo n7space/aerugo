@@ -1,7 +1,6 @@
 /// Handle to a queue.
 ///
-/// Handle is used in the system to referece a queue. It's created from the adequate storage.
-
+/// Handle is used in the system to access a queue.
 use crate::aerugo::error::RuntimeError;
 use crate::data_provider::DataProvider;
 use crate::queue::Queue;

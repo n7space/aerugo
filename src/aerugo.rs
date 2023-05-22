@@ -5,6 +5,7 @@ pub mod error;
 mod configuration;
 
 use crate::api::{InitApi, RuntimeApi};
+use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::EventId;
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
@@ -42,6 +43,13 @@ impl InitApi for Aerugo {
         todo!()
     }
 
+    fn create_boolean_condition(
+        &'static self,
+        _storage: &'static BooleanConditionStorage,
+    ) -> Result<(), Self::Error> {
+        todo!()
+    }
+
     fn subscribe_tasklet_to_queue<T>(
         &'static self,
         _tasklet: &TaskHandle<T>,
@@ -54,6 +62,14 @@ impl InitApi for Aerugo {
         &'static self,
         _tasklet: &TaskHandle<T>,
         _event: EventId,
+    ) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn subscribe_tasklet_to_conditions<T>(
+        &'static self,
+        _tasklet: &TaskHandle<T>,
+        _conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error> {
         todo!()
     }

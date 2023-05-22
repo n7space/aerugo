@@ -1,7 +1,6 @@
 /// Handle to a task.
 ///
-/// Handle is used in the system to reference a task. It's created from the adequate storage.
-
+/// Handle is used in the system to access a task.
 use crate::data_receiver::DataReceiver;
 use crate::task::Task;
 

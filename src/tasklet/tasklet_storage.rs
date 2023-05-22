@@ -28,7 +28,7 @@ pub struct TaskletStorage<T: 'static, C> {
 }
 
 impl<T, C> TaskletStorage<T, C> {
-    /// Creates new structure.
+    /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {
             _initialized: InternalCell::new(false),

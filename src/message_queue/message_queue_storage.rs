@@ -1,4 +1,4 @@
-//! Static storage for [message queue](crate::message_queue::MessageQueue)
+//! Static storage for [message queue](crate::message_queue::MessageQueue).
 //!
 //! As this system cannot use dynamic memory allocation, all structures have to be allocated
 //! statically. Per good practices user is separated from the actual implementation and instead
@@ -31,7 +31,7 @@ pub struct MessageQueueStorage<T, const N: usize> {
 }
 
 impl<T, const N: usize> MessageQueueStorage<T, N> {
-    /// Creates new structure.
+    /// Creates new storage.
     pub const fn new() -> Self {
         MessageQueueStorage {
             _initialized: InternalCell::new(false),
