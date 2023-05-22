@@ -73,6 +73,14 @@ impl InitApi for Aerugo {
     ) -> Result<(), Self::Error> {
         todo!()
     }
+
+    fn subscribe_tasklet_to_cyclic<T>(
+        &'static self,
+        _tasklet: &TaskHandle<T>,
+        _period: f64,
+    ) -> Result<(), Self::Error> {
+        todo!()
+    }
 }
 
 impl RuntimeApi for Aerugo {}

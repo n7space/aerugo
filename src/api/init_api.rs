@@ -85,6 +85,18 @@ pub trait InitApi: ErrorType + TaskConfigType {
         tasklet: &TaskHandle<T>,
         conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error>;
+
+    /// Subscribes tasklet to the cyclic execution.
+    ///
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `period` - Time period of the execution.
+    ///
+    /// Returns `Error` in case of an error, `Ok(())` otherwise.
+    fn subscribe_tasklet_to_cyclic<T>(
+        &'static self,
+        tasklet: &TaskHandle<T>,
+        period: f64,
+    ) -> Result<(), Self::Error>;
 }
 
 /// Initialization error
