@@ -5,6 +5,7 @@ pub mod error;
 mod configuration;
 
 use crate::api::{InitApi, RuntimeApi};
+use crate::event::EventId;
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
 use crate::task::TaskHandle;
@@ -41,10 +42,18 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn register_tasklet_to_queue<T>(
+    fn subscribe_tasklet_to_queue<T>(
         &'static self,
         _tasklet: &TaskHandle<T>,
         _queue: &QueueHandle<T>,
+    ) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn subscribe_tasklet_to_event<T>(
+        &'static self,
+        _tasklet: &TaskHandle<T>,
+        _event: EventId,
     ) -> Result<(), Self::Error> {
         todo!()
     }

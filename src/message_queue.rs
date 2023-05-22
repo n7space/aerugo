@@ -28,12 +28,6 @@ pub(crate) struct MessageQueue<'a, T, const N: usize> {
 }
 
 impl<'a, T, const N: usize> Queue<T> for MessageQueue<'a, T, N> {
-    fn send_data(&'static self, _data: T) -> Result<(), RuntimeError> {
-        todo!()
-    }
-}
-
-impl<'a, T, const N: usize> DataProvider<T> for MessageQueue<'a, T, N> {
     fn register_task(&'static self, _task: &'static dyn Task) -> Result<(), InitError> {
         todo!()
     }
@@ -42,6 +36,12 @@ impl<'a, T, const N: usize> DataProvider<T> for MessageQueue<'a, T, N> {
         todo!()
     }
 
+    fn send_data(&'static self, _data: T) -> Result<(), RuntimeError> {
+        todo!()
+    }
+}
+
+impl<'a, T, const N: usize> DataProvider<T> for MessageQueue<'a, T, N> {
     fn data_ready(&'static self) -> bool {
         todo!()
     }

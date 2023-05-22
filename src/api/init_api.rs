@@ -2,6 +2,7 @@
 ///
 /// This API is used for the system initialization, before the scheduler is started.
 
+use crate::event::EventId;
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
 use crate::task::TaskHandle;
@@ -39,12 +40,28 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Subscribes tasklet to the queue.
     ///
+    /// * `T` - Type of the data.
+    ///
     /// * `tasklet` - Handle to the target tasklet.
     /// * `queue` - Handle to the target queue.
+    ///
+    /// Returns `Error` in case of an error, `Ok(())` otherwise.
     fn subscribe_tasklet_to_queue<T>(
         &'static self,
         tasklet: &TaskHandle<T>,
         queue: &QueueHandle<T>,
+    ) -> Result<(), Self::Error>;
+
+    /// Subscribes tasklet to the event.
+    ///
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `event` - Target event ID.
+    ///
+    /// Returns `Error` in case of an error, `Ok(())` otherwise.
+    fn subscribe_tasklet_to_event<T>(
+        &'static self,
+        tasklet: &TaskHandle<T>,
+        event: EventId,
     ) -> Result<(), Self::Error>;
 }
 
