@@ -88,4 +88,24 @@ impl InitApi for Aerugo {
     }
 }
 
-impl RuntimeApi for Aerugo {}
+impl RuntimeApi for Aerugo {
+    fn emit_event(&'static self, _event: EventId) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn emit_event_delayed(&'static self, _event: EventId, _delay: f64) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn cancel_event(&'static self, _event: EventId) -> Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn get_system_time(&'static self) -> f64 {
+        todo!()
+    }
+
+    fn set_system_time_offset(&'static self, _offset: f64) {
+        todo!()
+    }
+}
