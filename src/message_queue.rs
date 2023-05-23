@@ -1,4 +1,4 @@
-/// Message queue used for exchanging data between tasklets.
+//! Message queue used for exchanging data between tasklets.
 mod message_queue_storage;
 
 pub use self::message_queue_storage::MessageQueueStorage;

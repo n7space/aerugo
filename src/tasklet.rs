@@ -1,10 +1,10 @@
-/// Unit of computation in the system.
-///
-/// Tasklet is a fine-grained units of computation, that execute a processing step in a finite
-/// amount of time.
-///
-/// Tasklet should be thought of as a small building block, which processes a given type of data,
-/// one element at the time.
+//! Unit of computation in the system.
+//!
+//! Tasklet is a fine-grained units of computation, that execute a processing step in a finite
+//! amount of time.
+//!
+//! Tasklet should be thought of as a small building block, which processes a given type of data,
+//! one element at the time.
 mod tasklet_storage;
 
 pub use self::tasklet_storage::TaskletStorage;

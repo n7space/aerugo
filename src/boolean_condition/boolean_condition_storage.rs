@@ -14,6 +14,7 @@ use crate::internal_cell::InternalCell;
 /// Type of the queue data storage.
 pub(crate) type BooleanConditionBuffer = Vec<u8, { core::mem::size_of::<BooleanCondition>() }>;
 
+/// Structure containing memory for BooleanCondition creation.
 pub struct BooleanConditionStorage {
     /// Marks whether this storage has been initialized.
     _initialized: InternalCell<bool>,

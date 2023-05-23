@@ -1,4 +1,4 @@
-/// Access to the hardware peripherals.
+//! Access to the hardware peripherals.
 
 /// Peripherals structure.
 pub struct Peripherals {}
