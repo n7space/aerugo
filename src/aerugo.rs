@@ -4,6 +4,8 @@ pub mod error;
 
 mod configuration;
 
+pub use self::configuration::TaskletConfiguration;
+
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::EventId;

@@ -19,7 +19,7 @@ mod queue;
 mod task;
 mod tasklet;
 
-pub use self::aerugo::Aerugo;
+pub use self::aerugo::{Aerugo, TaskletConfiguration};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::message_queue::MessageQueueStorage;

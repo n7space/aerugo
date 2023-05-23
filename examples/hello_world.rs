@@ -7,7 +7,7 @@ extern crate panic_semihosting;
 use cortex_m::peripheral::syst::SystClkSource;
 use cortex_m_rt::{entry, exception};
 
-use aerugo::{Aerugo, InitApi, MessageQueueStorage, TaskletStorage};
+use aerugo::{Aerugo, InitApi, MessageQueueStorage, TaskletConfiguration, TaskletStorage};
 
 static AERUGO: Aerugo = Aerugo::new();
 
@@ -37,20 +37,24 @@ fn main() -> ! {
     syst.enable_interrupt();
     syst.enable_counter();
 
-    AERUGO.create_tasklet(&tasklet_a).unwrap();
+    AERUGO
+        .create_tasklet(TaskletConfiguration::default(), &tasklet_a)
+        .unwrap();
     let tasklet_a_handle = tasklet_a.create_task_handle().unwrap();
 
-    AERUGO.create_tasklet(&tasklet_b).unwrap();
+    AERUGO
+        .create_tasklet(TaskletConfiguration::default(), &tasklet_b)
+        .unwrap();
     let tasklet_b_handle = tasklet_b.create_task_handle().unwrap();
 
     AERUGO.create_message_queue(&queue_x).unwrap();
     let queue_x_handle = queue_x.create_queue_handle().unwrap();
 
     AERUGO
-        .register_tasklet_to_queue(&tasklet_a_handle, &queue_x_handle)
+        .subscribe_tasklet_to_queue(&tasklet_a_handle, &queue_x_handle)
         .unwrap();
     AERUGO
-        .register_tasklet_to_queue(&tasklet_b_handle, &queue_x_handle)
+        .subscribe_tasklet_to_queue(&tasklet_b_handle, &queue_x_handle)
         .unwrap();
 
     AERUGO.start_scheduler();
