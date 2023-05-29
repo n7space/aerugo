@@ -22,6 +22,7 @@ mod tasklet;
 pub use self::aerugo::{Aerugo, TaskletConfiguration};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+pub use self::event::EventStorage;
 pub use self::message_queue::MessageQueueStorage;
 pub use self::peripherals::Peripherals;
 pub use self::tasklet::TaskletStorage;

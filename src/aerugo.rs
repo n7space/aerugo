@@ -8,7 +8,7 @@ pub use self::configuration::TaskletConfiguration;
 
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
-use crate::event::EventId;
+use crate::event::{EventHandle, EventStorage};
 use crate::message_queue::MessageQueueStorage;
 use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
@@ -46,6 +46,10 @@ impl InitApi for Aerugo {
         todo!()
     }
 
+    fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), Self::Error> {
+        todo!()
+    }
+
     fn create_boolean_condition(
         &'static self,
         _storage: &'static BooleanConditionStorage,
@@ -64,7 +68,7 @@ impl InitApi for Aerugo {
     fn subscribe_tasklet_to_event<T>(
         &'static self,
         _tasklet: &TaskHandle<T>,
-        _event: EventId,
+        _event: &EventHandle,
     ) -> Result<(), Self::Error> {
         todo!()
     }
@@ -91,18 +95,6 @@ impl InitApi for Aerugo {
 }
 
 impl RuntimeApi for Aerugo {
-    fn emit_event(&'static self, _event: EventId) -> Result<(), Self::Error> {
-        todo!()
-    }
-
-    fn emit_event_delayed(&'static self, _event: EventId, _delay: f64) -> Result<(), Self::Error> {
-        todo!()
-    }
-
-    fn cancel_event(&'static self, _event: EventId) -> Result<(), Self::Error> {
-        todo!()
-    }
-
     fn get_system_time(&'static self) -> f64 {
         todo!()
     }

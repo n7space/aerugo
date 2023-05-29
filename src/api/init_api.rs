@@ -2,7 +2,7 @@
 ///
 /// This API is used for the system initialization, before the scheduler is started.
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
-use crate::event::EventId;
+use crate::event::{EventHandle, EventStorage};
 use crate::message_queue::MessageQueueStorage;
 use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
@@ -39,6 +39,13 @@ pub trait InitApi: ErrorType + TaskConfigType {
         storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error>;
 
+    /// Creates new event in the system.
+    ///
+    /// * `storage` - Static memory storage where the event should be allocated.
+    ///
+    /// Returns `Error` in case of an error, `Ok(())` otherwise.
+    fn create_event(&'static self, storage: &'static EventStorage) -> Result<(), Self::Error>;
+
     /// Creates new boolean condition in the system.
     ///
     /// * `storage` - Static memory storage where the condition should be allocated.
@@ -72,7 +79,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     fn subscribe_tasklet_to_event<T>(
         &'static self,
         tasklet: &TaskHandle<T>,
-        event: EventId,
+        event: &EventHandle,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the set of conditions.
