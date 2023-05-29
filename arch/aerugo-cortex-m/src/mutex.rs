@@ -10,26 +10,26 @@ use cortex_m::interrupt;
 
 /// Cell based on the critical section.
 #[repr(transparent)]
-pub(crate) struct CritCell<T: ?Sized>(UnsafeCell<T>);
+pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 
-/// CritCell is safe to share between threads because critical section prevents any access to the
+/// Mutex is safe to share between threads because critical section prevents any access to the
 /// data from other threads or interrupts. Value cannot be borrowed outside of the
 /// critical section.
-unsafe impl<T: Send + ?Sized> Sync for CritCell<T> {}
+unsafe impl<T: Send + ?Sized> Sync for Mutex<T> {}
 
-impl<T> CritCell<T> {
+impl<T> Mutex<T> {
     /// Creates new cell with given value
     ///
     /// * `value` - Value to initialize the cell with.
     ///
     /// Returns new cell.
     #[inline(always)]
-    pub(crate) const fn new(value: T) -> Self {
-        CritCell(UnsafeCell::new(value))
+    pub const fn new(value: T) -> Self {
+        Mutex(UnsafeCell::new(value))
     }
 }
 
-impl<T: ?Sized> CritCell<T> {
+impl<T: ?Sized> Mutex<T> {
     /// Gives access to the value in critical section.
     ///
     /// This is the only access to the value. Given lambda is passed a mutable reference to the
@@ -51,14 +51,14 @@ impl<T: ?Sized> CritCell<T> {
     }
 }
 
-impl<T: Default> Default for CritCell<T> {
-    fn default() -> CritCell<T> {
-        CritCell::new(Default::default())
+impl<T: Default> Default for Mutex<T> {
+    fn default() -> Mutex<T> {
+        Mutex::new(Default::default())
     }
 }
 
-impl<T> From<T> for CritCell<T> {
-    fn from(t: T) -> CritCell<T> {
-        CritCell::new(t)
+impl<T> From<T> for Mutex<T> {
+    fn from(t: T) -> Mutex<T> {
+        Mutex::new(t)
     }
 }

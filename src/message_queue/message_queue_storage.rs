@@ -6,9 +6,9 @@
 
 use super::MessageQueue;
 
+use aerugo_cortex_m::Mutex;
 use heapless::Vec;
 
-use crate::crit_cell::CritCell;
 use crate::internal_cell::InternalCell;
 use crate::queue::QueueHandle;
 
@@ -27,7 +27,7 @@ pub struct MessageQueueStorage<T, const N: usize> {
     /// Buffer for the queue structure.
     _queue_buffer: InternalCell<QueueBuffer>,
     /// Buffer for the queue data.
-    _queue_data: CritCell<QueueData<T, N>>,
+    _queue_data: Mutex<QueueData<T, N>>,
 }
 
 impl<T, const N: usize> MessageQueueStorage<T, N> {
@@ -36,7 +36,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         MessageQueueStorage {
             _initialized: InternalCell::new(false),
             _queue_buffer: InternalCell::new(QueueBuffer::new()),
-            _queue_data: CritCell::new(QueueData::new()),
+            _queue_data: Mutex::new(QueueData::new()),
         }
     }
 

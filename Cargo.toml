@@ -1,5 +1,7 @@
-[package]
-name = "aerugo"
+[workspace]
+members = ["arch/aerugo-cortex-m"]
+
+[workspace.package]
 version = "0.1.0"
 authors = [
     "N7 Space",
@@ -7,29 +9,35 @@ authors = [
 ]
 edition = "2018"
 rust-version = "1.59"
+repository = "https://github.com/n7space/aerugo"
+# homepage
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+
+[package]
+name = "aerugo"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
 description = "Safety-critical applications oriented Real-Time Operating System"
 # documentation
 readme = "README.md"
-# homepage
-repository = "https://github.com/n7space/aerugo"
-license = "MIT OR Apache-2.0"
-keywords = ["cortex-m", "rtos", "space"]
+keywords = ["rtos", "space"]
 categories = ["aerospace", "embedded", "hardware-support", "no-std"]
-# workspace
 
 [dependencies]
-cortex-m = "0.7.7"
-cortex-m-rt = "0.7.3"
-cortex-m-semihosting = "0.5.0"
-panic-semihosting = "0.6.0"
-bare-metal = "0.2.4"
 heapless = "0.7"
 fugit = "0.3.6"
+bare-metal = "0.2.4"
+
+[target.thumbv7em-none-eabihf.dependencies]
+aerugo-cortex-m = { version = "0.1.0", path = "arch/aerugo-cortex-m" }
 
 [profile.release]
 codegen-units = 1
 debug = true
 lto = true
-
-[[example]]
-name = "hello_world"

@@ -8,7 +8,6 @@
 mod aerugo;
 mod api;
 mod boolean_condition;
-mod crit_cell;
 mod data_provider;
 mod data_receiver;
 mod event;

@@ -5,13 +5,13 @@ pub use self::message_queue_storage::MessageQueueStorage;
 
 pub(crate) use self::message_queue_storage::QueueData;
 
+use aerugo_cortex_m::Mutex;
 use heapless::Vec;
 
 use crate::aerugo::{
     error::{InitError, RuntimeError},
     Aerugo,
 };
-use crate::crit_cell::CritCell;
 use crate::data_provider::DataProvider;
 use crate::queue::Queue;
 use crate::task::Task;
@@ -22,7 +22,7 @@ use crate::task::Task;
 /// * `N` - Size of the queue.
 pub(crate) struct MessageQueue<'a, T, const N: usize> {
     /// Reference to the queue data storage.
-    _data: &'a CritCell<QueueData<T, N>>,
+    _data: &'a Mutex<QueueData<T, N>>,
     /// System API.
     _system: &'static Aerugo,
 }
