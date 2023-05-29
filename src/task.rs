@@ -14,3 +14,5 @@ pub(crate) trait Task {
     /// Executes task.
     fn execute(&self);
 }
+
+pub struct TaskId(u32);

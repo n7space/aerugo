@@ -12,6 +12,7 @@ mod crit_cell;
 mod data_provider;
 mod data_receiver;
 mod event;
+mod execution_monitoring;
 mod internal_cell;
 mod message_queue;
 mod peripherals;

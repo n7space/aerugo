@@ -9,10 +9,11 @@ pub use self::configuration::TaskletConfiguration;
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
+use crate::execution_monitoring::ExecutionStats;
 use crate::message_queue::MessageQueueStorage;
 use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
-use crate::task::TaskHandle;
+use crate::task::{TaskHandle, TaskId};
 use crate::tasklet::TaskletStorage;
 
 /// System structure.
@@ -100,6 +101,14 @@ impl RuntimeApi for Aerugo {
     }
 
     fn set_system_time_offset(&'static self, _offset: f64) {
+        todo!()
+    }
+
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskId> {
+        todo!()
+    }
+
+    fn get_execution_statistics(&'static self, _task_id: TaskId) -> ExecutionStats {
         todo!()
     }
 }
