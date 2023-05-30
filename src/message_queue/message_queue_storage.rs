@@ -6,9 +6,9 @@
 
 use super::MessageQueue;
 
-use aerugo_cortex_m::Mutex;
 use heapless::Vec;
 
+use crate::arch::Mutex;
 use crate::internal_cell::InternalCell;
 use crate::queue::QueueHandle;
 

@@ -1,14 +1,14 @@
-//! Cell based on the critical section.
+//! Mutex based on the critical section.
 //!
-//! This cell is used for the safe access to the data that have to be declared as static. Access to
-//! the internal value can be only done by performing a lock on the cell which enables critical
+//! This mutex is used for the safe access to the data that have to be declared as static. Access to
+//! the internal value can be only done by performing a lock on the mutex which enables critical
 //! section for the duration.
 
 use core::cell::UnsafeCell;
 
 use cortex_m::interrupt;
 
-/// Cell based on the critical section.
+/// Mutex based on the critical section.
 #[repr(transparent)]
 pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 
@@ -18,11 +18,11 @@ pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 unsafe impl<T: Send + ?Sized> Sync for Mutex<T> {}
 
 impl<T> Mutex<T> {
-    /// Creates new cell with given value
+    /// Creates new mutex with given value
     ///
-    /// * `value` - Value to initialize the cell with.
+    /// * `value` - Value to initialize the mutex with.
     ///
-    /// Returns new cell.
+    /// Returns new mutex.
     #[inline(always)]
     pub const fn new(value: T) -> Self {
         Mutex(UnsafeCell::new(value))

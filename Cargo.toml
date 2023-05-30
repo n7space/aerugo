@@ -1,5 +1,5 @@
 [workspace]
-members = ["arch/aerugo-cortex-m"]
+members = ["arch/aerugo-cortex-m", "arch/aerugo-x86"]
 
 [workspace.package]
 version = "0.1.0"
@@ -33,9 +33,12 @@ categories = ["aerospace", "embedded", "hardware-support", "no-std"]
 heapless = "0.7"
 fugit = "0.3.6"
 bare-metal = "0.2.4"
+aerugo-cortex-m = { version = "0.1.0", path = "arch/aerugo-cortex-m", optional = true }
+aerugo-x86 = { version = "0.1.0", path = "arch/aerugo-x86", optional = true }
 
-[target.thumbv7em-none-eabihf.dependencies]
-aerugo-cortex-m = { version = "0.1.0", path = "arch/aerugo-cortex-m" }
+[features]
+use-aerugo-cortex-m = ["aerugo-cortex-m"]
+use-aerugo-x86 = ["aerugo-x86"]
 
 [profile.release]
 codegen-units = 1

@@ -5,13 +5,13 @@ pub use self::message_queue_storage::MessageQueueStorage;
 
 pub(crate) use self::message_queue_storage::QueueData;
 
-use aerugo_cortex_m::Mutex;
 use heapless::Vec;
 
 use crate::aerugo::{
     error::{InitError, RuntimeError},
     Aerugo,
 };
+use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::queue::Queue;
 use crate::task::Task;

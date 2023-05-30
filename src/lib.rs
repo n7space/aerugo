@@ -28,3 +28,9 @@ pub use self::peripherals::Peripherals;
 pub use self::tasklet::TaskletStorage;
 
 pub use fugit as time;
+
+#[cfg(feature = "use-aerugo-cortex-m")]
+pub(crate) use aerugo_cortex_m as arch;
+
+#[cfg(feature = "use-aerugo-x86")]
+pub(crate) use aerugo_x86 as arch;
