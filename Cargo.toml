@@ -1,5 +1,6 @@
 [workspace]
 members = ["arch/aerugo-cortex-m", "arch/aerugo-x86"]
+exclude = ["examples"]
 
 [workspace.package]
 version = "0.1.0"
