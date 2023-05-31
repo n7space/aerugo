@@ -46,6 +46,7 @@ impl<T: ?Sized> Mutex<T> {
     }
 
     #[inline(always)]
+    #[allow(clippy::mut_from_ref)]
     unsafe fn as_mut_ref(&self) -> &mut T {
         &mut *self.0.get()
     }

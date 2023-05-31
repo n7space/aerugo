@@ -35,6 +35,6 @@ impl BooleanConditionSet {
 
 /// Type of the boolean condition set
 pub enum BooleanConditionSetType {
-    AND,
-    OR,
+    And,
+    Or,
 }

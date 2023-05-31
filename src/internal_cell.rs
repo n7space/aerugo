@@ -42,6 +42,7 @@ impl<T: ?Sized> InternalCell<T> {
     /// Returns reference to the value.
     #[inline(always)]
     #[allow(dead_code)]
+    #[allow(clippy::mut_from_ref)]
     pub unsafe fn as_mut_ref(&self) -> &mut T {
         &mut *self.0.get()
     }
