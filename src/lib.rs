@@ -4,6 +4,9 @@
 `aerugo` is a safety-critical applications oriented Real-Time Operating System.
 */
 #![no_std]
+#![warn(missing_docs)]
+#![warn(clippy::missing_docs_in_private_items)]
+#![warn(rustdoc::missing_crate_level_docs)]
 
 mod aerugo;
 mod api;

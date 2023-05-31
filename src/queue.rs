@@ -1,5 +1,6 @@
 //! Generic queue.
 
+/// Module for Queue handle.
 mod queue_handle;
 
 pub use self::queue_handle::QueueHandle;

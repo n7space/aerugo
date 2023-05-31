@@ -45,6 +45,7 @@ impl<T: ?Sized> Mutex<T> {
         unsafe { interrupt::free(|_| f(self.as_mut_ref())) }
     }
 
+    /// Returns a mutable reference to the stored value.
     #[inline(always)]
     #[allow(clippy::mut_from_ref)]
     unsafe fn as_mut_ref(&self) -> &mut T {
