@@ -90,7 +90,7 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn init_hardware(&self, _init_fn: fn(&Peripherals)) {
+    fn init_hardware(&self, _init_fn: fn(&mut Peripherals)) {
         todo!()
     }
 }

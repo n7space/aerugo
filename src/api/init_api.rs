@@ -109,7 +109,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// Set function for hardware initialization
     ///
     /// * `init_fn` - Hardware initialization function.
-    fn init_hardware(&self, init_fn: fn(&Peripherals));
+    fn init_hardware(&self, init_fn: fn(&mut Peripherals));
 }
 
 /// Initialization error
