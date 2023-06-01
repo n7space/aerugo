@@ -27,3 +27,5 @@ pub use self::event::EventStorage;
 pub use self::message_queue::MessageQueueStorage;
 pub use self::peripherals::Peripherals;
 pub use self::tasklet::TaskletStorage;
+
+pub use fugit as time;

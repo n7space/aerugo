@@ -96,11 +96,14 @@ impl InitApi for Aerugo {
 }
 
 impl RuntimeApi for Aerugo {
-    fn get_system_time(&'static self) -> f64 {
+    type Instant = crate::time::TimerInstantU64<1_000_000>;
+    type Duration = crate::time::TimerDurationU64<1_000_000>;
+
+    fn get_system_time(&'static self) -> Self::Instant {
         todo!()
     }
 
-    fn set_system_time_offset(&'static self, _offset: f64) {
+    fn set_system_time_offset(&'static self, _offset: Self::Duration) {
         todo!()
     }
 
