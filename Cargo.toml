@@ -1,5 +1,5 @@
 [workspace]
-members = ["arch/aerugo-cortex-m", "arch/aerugo-x86"]
+members = ["aerugo-hal", "arch/aerugo-cortex-m", "arch/aerugo-x86"]
 exclude = ["examples"]
 
 [workspace.package]

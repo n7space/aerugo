@@ -1,13 +1,12 @@
 [package]
-name = "aerugo-x86"
+name = "aerugo-hal"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 # homepage.workspace = true
 license.workspace = true
-description = "x86 specific implementation for Aerugo"
+description = "Hardware Abstraction Layer for Aerugo system"
 
 [dependencies]
-aerugo-hal = { version = "0.1.0", path = "../../aerugo-hal" }
 fugit = "0.3.6"

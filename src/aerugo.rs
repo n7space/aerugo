@@ -9,22 +9,28 @@ pub use self::configuration::TaskletConfiguration;
 use bare_metal::CriticalSection;
 
 use crate::api::{InitApi, RuntimeApi};
+use crate::arch::hal::{Hal, Peripherals};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::message_queue::MessageQueueStorage;
-use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
 use crate::task::{TaskHandle, TaskId};
 use crate::tasklet::TaskletStorage;
 
 /// System structure.
-pub struct Aerugo {}
+pub struct Aerugo {
+    _hal: Hal,
+}
 
 impl Aerugo {
     /// Creates new system instance.
     pub const fn new() -> Self {
-        Aerugo {}
+        let peripherals = Peripherals {};
+
+        Aerugo {
+            _hal: Hal::new(peripherals),
+        }
     }
 
     /// Starts system scheduler.
