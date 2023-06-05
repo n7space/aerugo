@@ -20,6 +20,7 @@ use crate::tasklet::TaskletStorage;
 
 /// System structure.
 pub struct Aerugo {
+    /// Hardware Access Layer.
     _hal: Hal,
 }
 

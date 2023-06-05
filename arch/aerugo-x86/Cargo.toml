@@ -10,4 +10,5 @@ description = "x86 specific implementation for Aerugo"
 
 [dependencies]
 aerugo-hal = { version = "0.1.0", path = "../../aerugo-hal" }
+bare-metal = "0.2.4"
 fugit = "0.3.6"

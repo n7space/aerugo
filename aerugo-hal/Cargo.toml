@@ -9,4 +9,5 @@ license.workspace = true
 description = "Hardware Abstraction Layer for Aerugo system"
 
 [dependencies]
+bare-metal = "0.2.4"
 fugit = "0.3.6"

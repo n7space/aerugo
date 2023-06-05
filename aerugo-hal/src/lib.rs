@@ -8,5 +8,4 @@ HAL (Hardware Abstract Layer) for Aerugo system.
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-/// Module for System HAL trait.
 pub mod system_hal;

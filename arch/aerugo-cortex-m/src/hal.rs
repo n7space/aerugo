@@ -4,10 +4,12 @@ mod peripherals;
 
 pub use self::peripherals::Peripherals;
 
-use aerugo_hal::system_hal::SystemHal;
+use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
+use bare_metal::CriticalSection;
 
 /// HAL implementation for x86.
 pub struct Hal {
+    /// Hardware peripherals.
     _peripherals: Peripherals,
 }
 
@@ -24,8 +26,37 @@ impl SystemHal for Hal {
     type Instant = crate::time::TimerInstantU64<1_000_000>;
     type Duration = crate::time::TimerDurationU64<1_000_000>;
 
-    /// Gets current system time timestamp.
-    fn get_system_time(&'static self) -> Self::Instant {
+    fn configure_hardware(&mut self, _config: SystemHardwareConfig) {
         todo!()
+    }
+
+    fn get_system_time(&self) -> Self::Instant {
+        todo!()
+    }
+
+    fn feed_watchdog(&mut self) {
+        todo!()
+    }
+
+    fn enter_critical()
+    where
+        Self: Sized,
+    {
+        cortex_m::interrupt::disable();
+    }
+
+    fn exit_critical()
+    where
+        Self: Sized,
+    {
+        unsafe { cortex_m::interrupt::enable() };
+    }
+
+    fn execute_critical<F, R>(f: F) -> R
+    where
+        F: FnOnce(&CriticalSection) -> R,
+        Self: Sized,
+    {
+        cortex_m::interrupt::free(f)
     }
 }
