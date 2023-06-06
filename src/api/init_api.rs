@@ -129,10 +129,10 @@ impl<T: ErrorType> ErrorType for &mut T {
 }
 
 /// Configuration used for creating tasklets
-pub trait TaskConfiguration: Default {}
+pub trait TaskConfig: Default {}
 
 /// Task configuration type trait
 pub trait TaskConfigType {
     /// Task configuration type
-    type TaskConfig: TaskConfiguration;
+    type TaskConfig: TaskConfig;
 }

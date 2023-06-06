@@ -21,7 +21,7 @@ mod queue;
 mod task;
 mod tasklet;
 
-pub use self::aerugo::{Aerugo, TaskletConfiguration};
+pub use self::aerugo::{Aerugo, TaskletConfig};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::event::EventStorage;

@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 
-use aerugo::{Aerugo, InitApi, MessageQueueStorage, TaskletConfiguration, TaskletStorage};
+use aerugo::{Aerugo, InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage};
 
 static AERUGO: Aerugo = Aerugo::new();
 
@@ -22,12 +22,12 @@ static queue_x: MessageQueueStorage<u8, 16> = MessageQueueStorage::new();
 
 fn main() -> ! {
     AERUGO
-        .create_tasklet(TaskletConfiguration::default(), &tasklet_a)
+        .create_tasklet(TaskletConfig::default(), &tasklet_a)
         .unwrap();
     let tasklet_a_handle = tasklet_a.create_task_handle().unwrap();
 
     AERUGO
-        .create_tasklet(TaskletConfiguration::default(), &tasklet_b)
+        .create_tasklet(TaskletConfig::default(), &tasklet_b)
         .unwrap();
     let tasklet_b_handle = tasklet_b.create_task_handle().unwrap();
 

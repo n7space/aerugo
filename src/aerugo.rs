@@ -2,9 +2,9 @@
 
 pub mod error;
 
-mod configuration;
+mod config;
 
-pub use self::configuration::TaskletConfiguration;
+pub use self::config::TaskletConfig;
 
 use bare_metal::CriticalSection;
 
