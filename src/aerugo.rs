@@ -6,6 +6,8 @@ mod configuration;
 
 pub use self::configuration::TaskletConfiguration;
 
+use bare_metal::CriticalSection;
+
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
@@ -112,6 +114,28 @@ impl RuntimeApi for Aerugo {
     }
 
     fn get_execution_statistics(&'static self, _task_id: TaskId) -> ExecutionStats {
+        todo!()
+    }
+
+    fn enter_critical()
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn exit_critical()
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn execute_critical<F, R>(_f: F) -> R
+    where
+        F: FnOnce(&CriticalSection) -> R,
+        Self: Sized,
+    {
         todo!()
     }
 }

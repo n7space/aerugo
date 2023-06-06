@@ -3,6 +3,8 @@
 /// This API can be used by the user in tasklet functions to interact with the system.
 use core::ops::{Add, Sub};
 
+use bare_metal::CriticalSection;
+
 use crate::execution_monitoring::ExecutionStats;
 use crate::task::TaskId;
 
@@ -33,6 +35,29 @@ pub trait RuntimeApi: ErrorType {
     ///
     /// * `task_id` - ID of the task to
     fn get_execution_statistics(&'static self, task_id: TaskId) -> ExecutionStats;
+
+    /// Enters critical section
+    fn enter_critical()
+    where
+        Self: Sized;
+
+    /// Exits critical section
+    fn exit_critical()
+    where
+        Self: Sized;
+
+    /// Executes closure `f` in an interrupt-free context.
+    ///
+    /// * `F` - Closure type.
+    /// * `R` - Closure return type.
+    ///
+    /// * `f` - Closure to execute.
+    ///
+    /// Returns closure result.
+    fn execute_critical<F, R>(f: F) -> R
+    where
+        F: FnOnce(&CriticalSection) -> R,
+        Self: Sized;
 }
 
 /// Runtime error
