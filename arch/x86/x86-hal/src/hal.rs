@@ -1,15 +1,13 @@
 //! System HAL implementation for x86 target.
 
-mod peripherals;
-
-pub use self::peripherals::Peripherals;
-
 use std::convert::TryInto;
 use std::time::SystemTime;
 
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
+
+use crate::peripherals::Peripherals;
 
 /// HAL implementation for x86.
 pub struct Hal {
@@ -37,12 +35,14 @@ impl SystemHal for Hal {
     fn get_system_time(&self) -> Self::Instant {
         static TIME_START: Lazy<SystemTime> = Lazy::new(|| SystemTime::now());
 
-        let now_as_nanos = SystemTime::now()
-            .duration_since(*TIME_START)
-            .expect("Duration from system start is negative")
-            .as_nanos();
-
-        Self::Instant::from_ticks(now_as_nanos.try_into().unwrap())
+        Self::Instant::from_ticks(
+            TIME_START
+                .elapsed()
+                .expect("{}")
+                .as_nanos()
+                .try_into()
+                .unwrap(),
+        )
     }
 
     fn feed_watchdog(&mut self) {

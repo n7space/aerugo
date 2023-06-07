@@ -1,5 +1,11 @@
 [workspace]
-members = ["aerugo-hal", "arch/aerugo-cortex-m", "arch/aerugo-x86"]
+members = [
+    "aerugo-hal",
+    "arch/cortex-m/aerugo-cortex-m",
+    "arch/cortex-m/samv71-hal",
+    "arch/x86/aerugo-x86",
+    "arch/x86/x86-hal"
+]
 exclude = ["examples"]
 
 [workspace.package]
@@ -35,12 +41,14 @@ heapless = "0.7"
 fugit = "0.3.6"
 bare-metal = "0.2.4"
 aerugo-hal = { version = "0.1.0", path = "aerugo-hal" }
-aerugo-cortex-m = { version = "0.1.0", path = "arch/aerugo-cortex-m", optional = true }
-aerugo-x86 = { version = "0.1.0", path = "arch/aerugo-x86", optional = true }
+aerugo-cortex-m = { version = "0.1.0", path = "arch/cortex-m/aerugo-cortex-m", optional = true }
+samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
+aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
+x86-hal = { version = "0.1.0", path = "arch/x86/x86-hal", optional = true }
 
 [features]
-use-aerugo-cortex-m = ["aerugo-cortex-m"]
-use-aerugo-x86 = ["aerugo-x86"]
+use-aerugo-cortex-m = ["aerugo-cortex-m", "samv71-hal"]
+use-aerugo-x86 = ["aerugo-x86", "x86-hal"]
 
 [profile.release]
 codegen-units = 1

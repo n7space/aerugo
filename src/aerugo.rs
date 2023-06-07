@@ -9,10 +9,10 @@ pub use self::config::TaskletConfig;
 use bare_metal::CriticalSection;
 
 use crate::api::{InitApi, RuntimeApi};
-use crate::arch::hal::{Hal, Peripherals};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
+use crate::hal::{Hal, Peripherals};
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
 use crate::task::{TaskHandle, TaskId};

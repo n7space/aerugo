@@ -32,6 +32,10 @@ pub use fugit as time;
 
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub(crate) use aerugo_cortex_m as arch;
+#[cfg(feature = "use-aerugo-cortex-m")]
+pub(crate) use samv71_hal as hal;
 
 #[cfg(feature = "use-aerugo-x86")]
 pub(crate) use aerugo_x86 as arch;
+#[cfg(feature = "use-aerugo-x86")]
+pub(crate) use x86_hal as hal;

@@ -9,7 +9,4 @@ license.workspace = true
 description = "Cortex-M specific implementation for Aerugo"
 
 [dependencies]
-aerugo-hal = { version = "0.1.0", path = "../../aerugo-hal" }
 cortex-m = "0.7.7"
-bare-metal = "0.2.4"
-fugit = "0.3.6"

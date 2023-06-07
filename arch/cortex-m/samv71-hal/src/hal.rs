@@ -1,11 +1,9 @@
 //! System HAL implementation for x86 target.
 
-mod peripherals;
-
-pub use self::peripherals::Peripherals;
-
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
+
+use crate::peripherals::Peripherals;
 
 /// HAL implementation for x86.
 pub struct Hal {
