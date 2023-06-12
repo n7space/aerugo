@@ -3,6 +3,7 @@
 /// Handle is used in the system to access an event.
 use crate::aerugo::error::RuntimeError;
 use crate::event::Event;
+use crate::time::MillisDurationU32;
 
 /// Event handle.
 #[derive(Copy, Clone)]
@@ -27,7 +28,7 @@ impl EventHandle {
     ///
     /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
     #[inline(always)]
-    pub fn emit_delayed(&self, _delay: f64) -> Result<(), RuntimeError> {
+    pub fn emit_delayed(&self, _delay: MillisDurationU32) -> Result<(), RuntimeError> {
         todo!()
     }
 
