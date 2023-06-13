@@ -11,6 +11,9 @@ use crate::tasklet::TaskletStorage;
 
 /// System initialization API
 pub trait InitApi: ErrorType + TaskConfigType {
+    /// Type for a duration of time.
+    type Duration;
+
     /// Creates new tasklet in the system.
     ///
     /// * `T` - Type of the data processed by the tasklet.
@@ -103,7 +106,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     fn subscribe_tasklet_to_cyclic<T>(
         &'static self,
         tasklet: &TaskHandle<T>,
-        period: f64,
+        period: Self::Duration,
     ) -> Result<(), Self::Error>;
 
     /// Set function for hardware initialization

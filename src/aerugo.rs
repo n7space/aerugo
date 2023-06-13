@@ -34,6 +34,8 @@ impl Aerugo {
 }
 
 impl InitApi for Aerugo {
+    type Duration = crate::time::MillisDurationU32;
+
     fn create_tasklet<T, C>(
         &'static self,
         _config: Self::TaskConfig,
@@ -87,7 +89,7 @@ impl InitApi for Aerugo {
     fn subscribe_tasklet_to_cyclic<T>(
         &'static self,
         _tasklet: &TaskHandle<T>,
-        _period: f64,
+        _period: Self::Duration,
     ) -> Result<(), Self::Error> {
         todo!()
     }
