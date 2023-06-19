@@ -6,8 +6,7 @@ use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
-use crate::task::TaskHandle;
-use crate::tasklet::TaskletStorage;
+use crate::tasklet::{TaskletHandle, TaskletStorage};
 
 /// System initialization API
 pub trait InitApi: ErrorType + TaskConfigType {
@@ -67,9 +66,9 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `queue` - Handle to the target queue.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_queue<T>(
+    fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
-        tasklet: &TaskHandle<T>,
+        tasklet: &TaskletHandle<T, C>,
         queue: &QueueHandle<T>,
     ) -> Result<(), Self::Error>;
 
@@ -79,9 +78,9 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `event` - Target event ID.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_event<T>(
+    fn subscribe_tasklet_to_event<T, C>(
         &'static self,
-        tasklet: &TaskHandle<T>,
+        tasklet: &TaskletHandle<T, C>,
         event: &EventHandle,
     ) -> Result<(), Self::Error>;
 
@@ -91,9 +90,9 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `condition` - Set of conditions.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_conditions<T>(
+    fn subscribe_tasklet_to_conditions<T, C>(
         &'static self,
-        tasklet: &TaskHandle<T>,
+        tasklet: &TaskletHandle<T, C>,
         conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error>;
 
@@ -103,9 +102,9 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `period` - Time period of the execution.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_cyclic<T>(
+    fn subscribe_tasklet_to_cyclic<T, C>(
         &'static self,
-        tasklet: &TaskHandle<T>,
+        tasklet: &TaskletHandle<T, C>,
         period: Self::Duration,
     ) -> Result<(), Self::Error>;
 

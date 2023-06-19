@@ -22,12 +22,12 @@ mod queue;
 mod task;
 mod tasklet;
 
-pub use self::aerugo::{Aerugo, TaskletConfig, AERUGO};
+pub use self::aerugo::{Aerugo, AERUGO};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::event::EventStorage;
 pub use self::message_queue::MessageQueueStorage;
-pub use self::tasklet::TaskletStorage;
+pub use self::tasklet::{TaskletConfig, TaskletStorage};
 
 pub use fugit as time;
 
@@ -40,3 +40,5 @@ pub(crate) use samv71_hal as hal;
 pub(crate) use aerugo_x86 as arch;
 #[cfg(feature = "use-aerugo-x86")]
 pub(crate) use x86_hal as hal;
+
+pub use arch::logln;

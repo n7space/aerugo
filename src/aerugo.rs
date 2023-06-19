@@ -2,9 +2,7 @@
 
 pub mod error;
 
-mod config;
-
-pub use self::config::TaskletConfig;
+pub use self::error::InitError;
 
 use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
@@ -17,8 +15,8 @@ use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
-use crate::task::{TaskHandle, TaskId};
-use crate::tasklet::TaskletStorage;
+use crate::task::TaskId;
+use crate::tasklet::{TaskletHandle, TaskletStorage};
 
 /// Core system.
 pub static AERUGO: Aerugo = Aerugo::new();
@@ -53,10 +51,10 @@ impl InitApi for Aerugo {
 
     fn create_tasklet<T, C>(
         &'static self,
-        _config: Self::TaskConfig,
-        _storage: &'static TaskletStorage<T, C>,
+        config: Self::TaskConfig,
+        storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        storage.init(config)
     }
 
     fn create_message_queue<T, const N: usize>(
@@ -77,33 +75,33 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_queue<T>(
+    fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _queue: &QueueHandle<T>,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_event<T>(
+    fn subscribe_tasklet_to_event<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _event: &EventHandle,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_conditions<T>(
+    fn subscribe_tasklet_to_conditions<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_cyclic<T>(
+    fn subscribe_tasklet_to_cyclic<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _period: Self::Duration,
     ) -> Result<(), Self::Error> {
         todo!()
