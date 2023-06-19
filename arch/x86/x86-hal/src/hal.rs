@@ -9,6 +9,9 @@ use once_cell::sync::Lazy;
 
 use crate::peripherals::Peripherals;
 
+/// Time when system was started
+static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
+
 /// HAL implementation for x86.
 pub struct Hal {
     /// Hardware peripherals.
@@ -33,8 +36,6 @@ impl SystemHal for Hal {
     }
 
     fn get_system_time(&self) -> Self::Instant {
-        static TIME_START: Lazy<SystemTime> = Lazy::new(|| SystemTime::now());
-
         Self::Instant::from_ticks(
             TIME_START
                 .elapsed()
