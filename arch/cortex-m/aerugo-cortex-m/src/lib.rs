@@ -6,6 +6,8 @@ Cortex-M specific implementation for Aerugo.
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-pub mod mutex;
+mod logger;
+mod mutex;
 
 pub use self::mutex::Mutex;
+pub use self::logger::logln;
