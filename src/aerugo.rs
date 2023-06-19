@@ -6,37 +6,45 @@ mod config;
 
 pub use self::config::TaskletConfig;
 
+use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
 
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
+use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
 use crate::task::{TaskHandle, TaskId};
 use crate::tasklet::TaskletStorage;
 
+/// Core system.
+pub static AERUGO: Aerugo = Aerugo::new();
+
+/// System scheduler.
+static EXECUTOR: Executor = Executor::new(&AERUGO);
+
 /// System structure.
 pub struct Aerugo {
     /// Hardware Access Layer.
-    _hal: Hal,
+    hal: Hal,
 }
 
 impl Aerugo {
+    /// Starts the system.
+    pub fn start(&'static self) -> ! {
+        EXECUTOR.run_scheduler()
+    }
+
     /// Creates new system instance.
-    pub const fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         let peripherals = Peripherals {};
 
         Aerugo {
-            _hal: Hal::new(peripherals),
+            hal: Hal::new(peripherals),
         }
-    }
-
-    /// Starts system scheduler.
-    pub fn start_scheduler(&self) -> ! {
-        todo!()
     }
 }
 
@@ -111,7 +119,7 @@ impl RuntimeApi for Aerugo {
     type Duration = crate::time::TimerDurationU64<1_000_000>;
 
     fn get_system_time(&'static self) -> Self::Instant {
-        todo!()
+        self.hal.get_system_time()
     }
 
     fn set_system_time_offset(&'static self, _offset: Self::Duration) {

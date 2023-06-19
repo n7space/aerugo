@@ -15,13 +15,14 @@ mod data_provider;
 mod data_receiver;
 mod event;
 mod execution_monitoring;
+mod executor;
 mod internal_cell;
 mod message_queue;
 mod queue;
 mod task;
 mod tasklet;
 
-pub use self::aerugo::{Aerugo, TaskletConfig};
+pub use self::aerugo::{Aerugo, TaskletConfig, AERUGO};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::event::EventStorage;
