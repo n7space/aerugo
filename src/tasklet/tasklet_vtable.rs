@@ -6,13 +6,21 @@
 //!
 //! For more information look at `TaskletPtr` structure.
 
-use crate::task::Task;
+use crate::task::{Task, TaskStatus};
 use crate::tasklet::Tasklet;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
     /// `get_name` function.
     pub(crate) get_name: fn(*const ()) -> &'static str,
+    /// `get_status` function.
+    pub(crate) get_status: fn(*const ()) -> TaskStatus,
+    /// `set_status` function.
+    pub(crate) set_status: fn(*const (), TaskStatus),
+    /// `has_work` function.
+    pub(crate) has_work: fn(*const ()) -> bool,
+    /// `execute` function.
+    pub(crate) execute: fn(*const ()),
 }
 
 /// Constructs `Tasklet` virtual table for given `T` and `C` types.
@@ -22,6 +30,10 @@ pub(crate) struct TaskletVTable {
 pub(crate) fn tasklet_vtable<T: 'static, C>() -> &'static TaskletVTable {
     &TaskletVTable {
         get_name: get_name::<T, C>,
+        get_status: get_status::<T, C>,
+        set_status: set_status::<T, C>,
+        has_work: has_work::<T, C>,
+        execute: execute::<T, C>,
     }
 }
 
@@ -32,4 +44,40 @@ fn get_name<T: 'static, C>(ptr: *const ()) -> &'static str {
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
     tasklet.get_name()
+}
+
+/// "Virtual" call to the `get_status` `Tasklet` function.
+#[inline(always)]
+fn get_status<T: 'static, C>(ptr: *const ()) -> TaskStatus {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.get_status()
+}
+
+/// "Virtual" call to the `set_status` `Tasklet` function.
+#[inline(always)]
+fn set_status<T: 'static, C>(ptr: *const (), status: TaskStatus) {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.set_status(status)
+}
+
+/// "Virtual" call to the `has_work` `Tasklet` function.
+#[inline(always)]
+fn has_work<T: 'static, C>(ptr: *const ()) -> bool {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.has_work()
+}
+
+/// "Virtual" call to the `execute` `Tasklet` function.
+#[inline(always)]
+fn execute<T: 'static, C>(ptr: *const ()) {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.execute()
 }

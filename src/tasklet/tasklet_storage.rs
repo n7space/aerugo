@@ -43,19 +43,22 @@ impl<T, C> TaskletStorage<T, C> {
     ///
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
     pub fn create_handle(&'static self) -> Option<TaskletHandle<T, C>> {
-        match self.buffer_ptr() {
-            Some(ptr) => {
-                let task_ptr = TaskletPtr::new::<T, C>(ptr);
-                Some(TaskletHandle::new(task_ptr))
+        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
+        // the `init` function.
+        match unsafe { *self.initialized.as_ref() } {
+            true => {
+                // SAFETY:: This is safe because storage has been initialized.
+                let tasklet_ptr = unsafe { self.tasklet_ptr() };
+                Some(TaskletHandle::new(tasklet_ptr))
             }
-            None => None,
+            false => None,
         }
     }
 
     /// Initializes this storage.
     ///
     /// Returns `InitError` in case of an initialization error, `()` otherwise.
-    pub(crate) fn init(&'static self, config: TaskletConfig) -> Result<(), InitError> {
+    pub(crate) fn init(&'static self, config: TaskletConfig) -> Result<TaskletPtr, InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
         if unsafe { *self.initialized.as_ref() } {
@@ -82,18 +85,23 @@ impl<T, C> TaskletStorage<T, C> {
             *self.initialized.as_mut_ref() = true;
         }
 
-        Ok(())
+        // SAFETY: This is safe because we just initialized this storage.
+        unsafe { Ok(self.tasklet_ptr()) }
     }
 
     /// Returns a raw pointer to the stored Tasklet structure.
     ///
-    /// Returns `Some(*const ())` if this storage has been initialized, `None` otherwise.
-    fn buffer_ptr(&self) -> Option<*const ()> {
-        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
-        // the `init` function.
-        match unsafe { *self.initialized.as_ref() } {
-            true => Some(unsafe { &*(self.tasklet_buffer.as_ref().as_ptr() as *const ()) }),
-            false => None,
-        }
+    /// SAFETY: This is safe to call only when this storage has been initialized.
+    #[inline(always)]
+    unsafe fn buffer_ptr(&self) -> *const () {
+        &*(self.tasklet_buffer.as_ref().as_ptr() as *const ())
+    }
+
+    /// Returns a tasklet pointer to the stored Tasklet structure.
+    ///
+    /// SAFETY: This is safe to call only when this storage has been initialized.
+    #[inline(always)]
+    unsafe fn tasklet_ptr(&self) -> TaskletPtr {
+        TaskletPtr::new::<T, C>(self.buffer_ptr())
     }
 }

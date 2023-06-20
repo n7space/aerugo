@@ -54,7 +54,12 @@ impl InitApi for Aerugo {
         config: Self::TaskConfig,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        storage.init(config)
+        let tasklet_ptr = storage.init(config)?;
+        EXECUTOR
+            .schedule_tasklet(tasklet_ptr)
+            .expect("Unable to schedule tasklet");
+
+        Ok(())
     }
 
     fn create_message_queue<T, const N: usize>(

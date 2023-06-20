@@ -7,9 +7,7 @@ extern crate panic_semihosting;
 use cortex_m::peripheral::syst::SystClkSource;
 use cortex_m_rt::{entry, exception};
 
-use aerugo::{Aerugo, InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage};
-
-static AERUGO: Aerugo = Aerugo::new();
+use aerugo::{AERUGO, InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage};
 
 #[allow(dead_code)]
 struct TaskAData {
@@ -40,12 +38,12 @@ fn main() -> ! {
     AERUGO
         .create_tasklet(TaskletConfig::default(), &tasklet_a)
         .unwrap();
-    let tasklet_a_handle = tasklet_a.create_task_handle().unwrap();
+    let tasklet_a_handle = tasklet_a.create_handle().unwrap();
 
     AERUGO
         .create_tasklet(TaskletConfig::default(), &tasklet_b)
         .unwrap();
-    let tasklet_b_handle = tasklet_b.create_task_handle().unwrap();
+    let tasklet_b_handle = tasklet_b.create_handle().unwrap();
 
     AERUGO.create_message_queue(&queue_x).unwrap();
     let queue_x_handle = queue_x.create_queue_handle().unwrap();
@@ -57,7 +55,7 @@ fn main() -> ! {
         .subscribe_tasklet_to_queue(&tasklet_b_handle, &queue_x_handle)
         .unwrap();
 
-    AERUGO.start_scheduler();
+    AERUGO.start()
 }
 
 #[exception]

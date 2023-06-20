@@ -21,10 +21,11 @@ pub use self::tasklet_storage::TaskletStorage;
 use core::marker::PhantomData;
 
 use crate::aerugo::error::InitError;
+use crate::arch::{logln, Mutex};
 use crate::data_provider::DataProvider;
 use crate::data_receiver::DataReceiver;
 use crate::internal_cell::InternalCell;
-use crate::task::Task;
+use crate::task::{Task, TaskStatus};
 
 /// Tasklet structure.
 ///
@@ -33,6 +34,8 @@ use crate::task::Task;
 pub(crate) struct Tasklet<T: 'static, C> {
     /// Tasklet name.
     name: &'static str,
+    /// Tasklet status
+    status: Mutex<TaskStatus>,
     /// Source of the data.
     _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
     /// Marker for tasklet context data type.
@@ -44,6 +47,7 @@ impl<T, C> Tasklet<T, C> {
     pub(crate) const fn new(config: TaskletConfig) -> Self {
         Tasklet {
             name: config.name,
+            status: Mutex::new(TaskStatus::Sleeping),
             _data_provider: InternalCell::new(None),
             _context_type_marker: PhantomData,
         }
@@ -55,8 +59,21 @@ impl<T, C> Task for Tasklet<T, C> {
         self.name
     }
 
+    fn get_status(&self) -> TaskStatus {
+        self.status.lock(|s| *s)
+    }
+
+    fn set_status(&self, status: TaskStatus) {
+        self.status.lock(|s| *s = status)
+    }
+
+    fn has_work(&self) -> bool {
+        // TODO: Stub until we have working data providers.
+        true
+    }
+
     fn execute(&self) {
-        todo!()
+        logln!("Executing {}", self.name);
     }
 }
 
