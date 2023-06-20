@@ -4,11 +4,13 @@
 `aerugo` is a safety-critical applications oriented Real-Time Operating System.
 */
 #![no_std]
+#![warn(missing_docs)]
+#![warn(clippy::missing_docs_in_private_items)]
+#![warn(rustdoc::missing_crate_level_docs)]
 
 mod aerugo;
 mod api;
 mod boolean_condition;
-mod crit_cell;
 mod data_provider;
 mod data_receiver;
 mod event;
@@ -29,3 +31,9 @@ pub use self::peripherals::Peripherals;
 pub use self::tasklet::TaskletStorage;
 
 pub use fugit as time;
+
+#[cfg(feature = "use-aerugo-cortex-m")]
+pub(crate) use aerugo_cortex_m as arch;
+
+#[cfg(feature = "use-aerugo-x86")]
+pub(crate) use aerugo_x86 as arch;

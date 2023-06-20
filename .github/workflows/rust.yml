@@ -3,6 +3,7 @@ name: Rust
 on:
   push:
     branches:
+      - 'main'
       - '**'
   pull_request:
     branches:
@@ -12,19 +13,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          target: thumbv7em-none-eabihf
-          override: true
-          profile: minimal
-      - run: cargo build --bins
-
   rustfmt:
     name: Check formatting
     runs-on: ubuntu-latest
@@ -33,8 +21,6 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
-          target: thumbv7em-none-eabihf
-          override: true
           profile: minimal
           components: rustfmt
       - uses: actions-rs/cargo@v1
@@ -44,20 +30,28 @@ jobs:
 
   clippy:
     name: Clippy
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - TARGET: thumbv7em-none-eabihf
+            FEATURES: use-aerugo-cortex-m
+          - TARGET: x86_64-unknown-linux-gnu
+            FEATURES: use-aerugo-x86
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
-          target: thumbv7em-none-eabihf
+          target: ${{ matrix.TARGET }}
           override: true
           profile: minimal
           components: clippy
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --bins -- -D warnings
+          args: -p aerugo -F ${{ matrix.FEATURES }} -- -D warnings
 
   docs:
     name: Check documentation
@@ -73,10 +67,40 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc
+          args: --workspace --no-deps --document-private-items -F use-aerugo-cortex-m
 
-  cargo-deny:
-    name: Cargo Deny
+  build:
+    name: Build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - TARGET: thumbv7em-none-eabihf
+            FEATURES: use-aerugo-cortex-m
+          - TARGET: x86_64-unknown-linux-gnu
+            FEATURES: use-aerugo-x86
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: EmbarkStudios/cargo-deny-action@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: ${{ matrix.TARGET }}
+          override: true
+          profile: minimal
+          components: clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: -p aerugo --features ${{ matrix.FEATURES }}
+
+  examples:
+    name: Build examples
+    runs-on: ubuntu-latest
+    needs: [rustfmt, clippy, docs, build]
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          rustup target add thumbv7em-none-eabihf
+          rustup target add x86_64-unknown-linux-gnu
+      - run: find examples/ -type f -name Cargo.toml -exec echo "Building {}" \; -execdir cargo build --quiet --release --manifest-path {} +

@@ -21,6 +21,7 @@ use crate::task::Task;
 pub(crate) struct Tasklet<T: 'static, C> {
     /// Source of the data.
     _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
+    /// Marker for tasklet context data type.
     _context_type_marker: PhantomData<C>,
 }
 

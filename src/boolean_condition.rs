@@ -1,6 +1,8 @@
 //! Boolean condition.
 
+/// Module for BooleanCondition handle.
 mod boolean_condition_handle;
+/// Module for BooleanCondition storage.
 mod boolean_condition_storage;
 
 pub use self::boolean_condition_handle::BooleanConditionHandle;
@@ -35,6 +37,8 @@ impl BooleanConditionSet {
 
 /// Type of the boolean condition set
 pub enum BooleanConditionSetType {
-    AND,
-    OR,
+    /// All conditions in the set has to be true.
+    And,
+    /// At least one condition in the set has to be true.
+    Or,
 }

@@ -1,5 +1,6 @@
 //! Generic task.
 
+/// Module for Task handle.
 mod task_handle;
 
 pub use self::task_handle::TaskHandle;
@@ -15,4 +16,5 @@ pub(crate) trait Task {
     fn execute(&self);
 }
 
+/// Task unique ID.
 pub struct TaskId(u32);

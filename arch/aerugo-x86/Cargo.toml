@@ -1,0 +1,11 @@
+[package]
+name = "aerugo-x86"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "x86 specific implementation for Aerugo"
+
+[dependencies]
