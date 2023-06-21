@@ -17,16 +17,13 @@ jobs:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
-          profile: minimal
           components: rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+          targets: x86_64-unknown-linux-gnu
+      - name: cargo fmt
+        run: cargo fmt -- --check --color always
 
   clippy:
     name: Clippy
@@ -40,34 +37,24 @@ jobs:
             FEATURES: use-aerugo-x86
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
-          target: ${{ matrix.TARGET }}
-          override: true
-          profile: minimal
+          targets: ${{ matrix.TARGET }}
           components: clippy
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -p aerugo -F ${{ matrix.FEATURES }} -- -D warnings
+      - name: cargo clippy
+        run: cargo clippy -p aerugo -F ${{ matrix.FEATURES }} -- -D warnings
 
   docs:
     name: Check documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
-          target: thumbv7em-none-eabihf
-          override: true
-          profile: minimal
-      - uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --workspace --no-deps --document-private-items -F use-aerugo-cortex-m
+          targets: thumbv7em-none-eabihf
+      - name: cargo doc
+        run: cargo doc --workspace --no-deps --document-private-items -F use-aerugo-cortex-m
 
   build:
     name: Build
@@ -81,26 +68,21 @@ jobs:
             FEATURES: use-aerugo-x86
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
-          target: ${{ matrix.TARGET }}
-          override: true
-          profile: minimal
-          components: clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: -p aerugo --features ${{ matrix.FEATURES }}
+          targets: ${{ matrix.TARGET }}
+      - name: cargo build
+        run: cargo build -p aerugo --features ${{ matrix.FEATURES }}
 
   examples:
     name: Build examples
     runs-on: ubuntu-latest
     needs: [rustfmt, clippy, docs, build]
     steps:
-      - uses: actions/checkout@v2
-      - run: |
-          rustup target add thumbv7em-none-eabihf
-          rustup target add x86_64-unknown-linux-gnu
-      - run: find examples/ -type f -name Cargo.toml -exec echo "Building {}" \; -execdir cargo build --quiet --release --manifest-path {} +
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
+      - name: build examples
+        run: find examples/ -type f -name Cargo.toml -exec echo "Building {}" \; -execdir cargo build --quiet --release --manifest-path {} +
