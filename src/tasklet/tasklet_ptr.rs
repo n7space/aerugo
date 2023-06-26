@@ -15,6 +15,7 @@ use core::cmp::Ordering;
 
 use crate::task::TaskStatus;
 use crate::tasklet::{tasklet_vtable, TaskletVTable};
+use crate::time::TimerInstantU64;
 
 /// Raw tasklet pointer.
 pub(crate) struct TaskletPtr {
@@ -39,11 +40,13 @@ impl TaskletPtr {
     }
 
     /// Returns tasklet name.
+    #[inline(always)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
 
     /// Returns tasklet status.
+    #[inline(always)]
     pub(crate) fn get_status(&self) -> TaskStatus {
         (self.vtable.get_status)(self.ptr)
     }
@@ -51,37 +54,63 @@ impl TaskletPtr {
     /// Sets tasklet status.
     ///
     /// * `status` - New tasklet status.
+    #[inline(always)]
     pub(crate) fn set_status(&self, status: TaskStatus) {
         (self.vtable.set_status)(self.ptr, status)
     }
 
+    /// Returns last execution time.
+    #[inline(always)]
+    pub(crate) fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000> {
+        (self.vtable.get_last_execution_time)(self.ptr)
+    }
+
+    /// Sets last execution time.
+    ///
+    /// * `time` - Last execution time.
+    #[inline(always)]
+    pub(crate) fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>) {
+        (self.vtable.set_last_execution_time)(self.ptr, time)
+    }
+
     /// Checks if there are any more data for the tasklet to process.
+    #[inline(always)]
     pub(crate) fn has_work(&self) -> bool {
         (self.vtable.has_work)(self.ptr)
     }
 
     /// Executes task.
+    #[inline(always)]
     pub(crate) fn execute(&self) {
         (self.vtable.execute)(self.ptr)
     }
 }
 
 impl Ord for TaskletPtr {
-    fn cmp(&self, _other: &Self) -> Ordering {
-        todo!()
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.get_last_execution_time()
+            .cmp(&other.get_last_execution_time())
+            .reverse()
     }
 }
 
 impl PartialOrd for TaskletPtr {
-    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
-        todo!()
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self
+            .get_last_execution_time()
+            .partial_cmp(&other.get_last_execution_time())
+        {
+            Some(ordering) => return Some(ordering.reverse()),
+            None => return None,
+        }
     }
 }
 
 impl Eq for TaskletPtr {}
 
 impl PartialEq for TaskletPtr {
-    fn eq(&self, _: &Self) -> bool {
-        todo!()
+    fn eq(&self, other: &Self) -> bool {
+        self.get_last_execution_time()
+            .eq(&other.get_last_execution_time())
     }
 }

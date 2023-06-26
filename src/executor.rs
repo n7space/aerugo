@@ -3,6 +3,7 @@
 use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::{error::RuntimeError, Aerugo};
+use crate::api::RuntimeApi;
 use crate::arch::Mutex;
 use crate::task::TaskStatus;
 use crate::tasklet::TaskletPtr;
@@ -15,7 +16,7 @@ pub(crate) struct Executor {
     /// Tasklet queue.
     tasklet_queue: Mutex<TaskletQueue<8>>,
     /// System API.
-    _system_api: &'static Aerugo,
+    system_api: &'static Aerugo,
 }
 
 impl Executor {
@@ -25,7 +26,7 @@ impl Executor {
     pub(crate) const fn new(system_api: &'static Aerugo) -> Self {
         Executor {
             tasklet_queue: Mutex::new(BinaryHeap::new()),
-            _system_api: system_api,
+            system_api,
         }
     }
 
@@ -61,6 +62,7 @@ impl Executor {
     fn execute_next_tasklet(&self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
             tasklet.execute();
+            tasklet.set_last_execution_time(self.system_api.get_system_time());
 
             if tasklet.has_work() {
                 self.add_tasklet_to_queue(tasklet)?;

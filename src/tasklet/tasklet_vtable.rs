@@ -8,6 +8,7 @@
 
 use crate::task::{Task, TaskStatus};
 use crate::tasklet::Tasklet;
+use crate::time::TimerInstantU64;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
@@ -17,6 +18,10 @@ pub(crate) struct TaskletVTable {
     pub(crate) get_status: fn(*const ()) -> TaskStatus,
     /// `set_status` function.
     pub(crate) set_status: fn(*const (), TaskStatus),
+    /// `get_last_execution_time` function.
+    pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
+    /// `set_last_execution_time` function.
+    pub(crate) set_last_execution_time: fn(*const(), TimerInstantU64<1_000_000>),
     /// `has_work` function.
     pub(crate) has_work: fn(*const ()) -> bool,
     /// `execute` function.
@@ -32,6 +37,8 @@ pub(crate) fn tasklet_vtable<T: 'static, C>() -> &'static TaskletVTable {
         get_name: get_name::<T, C>,
         get_status: get_status::<T, C>,
         set_status: set_status::<T, C>,
+        get_last_execution_time: get_last_execution_time::<T, C>,
+        set_last_execution_time: set_last_execution_time::<T, C>,
         has_work: has_work::<T, C>,
         execute: execute::<T, C>,
     }
@@ -62,6 +69,24 @@ fn set_status<T: 'static, C>(ptr: *const (), status: TaskStatus) {
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
     tasklet.set_status(status)
+}
+
+/// "Virtual" call to the `get_last_execution_time` `Tasklet` function.
+#[inline(always)]
+fn get_last_execution_time<T: 'static, C>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.get_last_execution_time()
+}
+
+/// "Virtual" call to the `set_last_execution_time` `Tasklet` function.
+#[inline(always)]
+fn set_last_execution_time<T: 'static, C>(ptr: *const (), time: TimerInstantU64<1_000_000>) {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.set_last_execution_time(time)
 }
 
 /// "Virtual" call to the `has_work` `Tasklet` function.

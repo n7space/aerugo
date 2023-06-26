@@ -26,6 +26,7 @@ use crate::data_provider::DataProvider;
 use crate::data_receiver::DataReceiver;
 use crate::internal_cell::InternalCell;
 use crate::task::{Task, TaskStatus};
+use crate::time::TimerInstantU64;
 
 /// Tasklet structure.
 ///
@@ -34,8 +35,10 @@ use crate::task::{Task, TaskStatus};
 pub(crate) struct Tasklet<T: 'static, C> {
     /// Tasklet name.
     name: &'static str,
-    /// Tasklet status
+    /// Tasklet status.
     status: Mutex<TaskStatus>,
+    /// Last execution time.
+    last_execution_time: Mutex<TimerInstantU64<1_000_000>>,
     /// Source of the data.
     _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
     /// Marker for tasklet context data type.
@@ -48,6 +51,7 @@ impl<T, C> Tasklet<T, C> {
         Tasklet {
             name: config.name,
             status: Mutex::new(TaskStatus::Sleeping),
+            last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             _data_provider: InternalCell::new(None),
             _context_type_marker: PhantomData,
         }
@@ -65,6 +69,14 @@ impl<T, C> Task for Tasklet<T, C> {
 
     fn set_status(&self, status: TaskStatus) {
         self.status.lock(|s| *s = status)
+    }
+
+    fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000> {
+        self.last_execution_time.lock(|t| *t)
+    }
+
+    fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>) {
+        self.last_execution_time.lock(|t| *t = time)
     }
 
     fn has_work(&self) -> bool {
