@@ -97,3 +97,47 @@ impl<T, C> DataReceiver<T> for Tasklet<T, C> {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_default() {
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default());
+
+        assert_eq!(tasklet.get_name(), "MISSING_TASKLET_NAME");
+        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
+        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
+    }
+
+    #[test]
+    fn create_from_config() {
+        let name = "TaskName";
+
+        let config = TaskletConfig { name };
+        let tasklet = Tasklet::<u8, ()>::new(config);
+
+        assert_eq!(tasklet.get_name(), name);
+        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
+        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
+    }
+
+    #[test]
+    fn set_status() {
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default());
+
+        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
+        tasklet.set_status(TaskStatus::Waiting);
+        assert_eq!(tasklet.get_status(), TaskStatus::Waiting);
+    }
+
+    #[test]
+    fn set_last_execution_time() {
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default());
+
+        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
+        tasklet.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
+        assert_eq!(tasklet.get_last_execution_time().ticks(), 42);
+    }
+}

@@ -38,3 +38,31 @@ impl<T: 'static, C> TaskletHandle<T, C> {
         self.tasklet.get_name()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tasklet::{Tasklet, TaskletConfig};
+    use crate::task::Task;
+
+    fn create_tasklet() -> Tasklet<u8, ()> {
+        let tasklet_config = TaskletConfig { name: "TaskName" };
+
+        Tasklet::<u8, ()>::new(tasklet_config)
+    }
+
+    fn create_tasklet_ptr(tasklet: &Tasklet<u8, ()>) -> TaskletPtr {
+        let ptr = tasklet as *const Tasklet<u8, ()> as *const ();
+
+        TaskletPtr::new::<u8, ()>(ptr)
+    }
+
+    #[test]
+    fn get_name() {
+        let tasklet = create_tasklet();
+        let tasklet_ptr = create_tasklet_ptr(&tasklet);
+        let tasklet_handle = TaskletHandle::<u8, ()>::new(tasklet_ptr);
+
+        assert_eq!(tasklet_handle.get_name(), tasklet.get_name());
+    }
+}

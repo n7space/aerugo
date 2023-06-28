@@ -21,7 +21,7 @@ pub(crate) struct TaskletVTable {
     /// `get_last_execution_time` function.
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
     /// `set_last_execution_time` function.
-    pub(crate) set_last_execution_time: fn(*const(), TimerInstantU64<1_000_000>),
+    pub(crate) set_last_execution_time: fn(*const (), TimerInstantU64<1_000_000>),
     /// `has_work` function.
     pub(crate) has_work: fn(*const ()) -> bool,
     /// `execute` function.
@@ -105,4 +105,67 @@ fn execute<T: 'static, C>(ptr: *const ()) {
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
     tasklet.execute()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tasklet::{Tasklet, TaskletConfig};
+
+    fn create_tasklet() -> Tasklet<u8, ()> {
+        let tasklet_config = TaskletConfig { name: "TaskName" };
+
+        Tasklet::<u8, ()>::new(tasklet_config)
+    }
+
+    #[test]
+    fn get_name() {
+        let tasklet = create_tasklet();
+        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
+        let vtable = tasklet_vtable::<u8, ()>();
+
+        assert_eq!((vtable.get_name)(ptr), tasklet.get_name());
+    }
+
+    #[test]
+    fn get_set_status() {
+        let tasklet = create_tasklet();
+        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
+        let vtable = tasklet_vtable::<u8, ()>();
+
+        assert_eq!((vtable.get_status)(ptr), tasklet.get_status());
+        (vtable.set_status)(ptr, TaskStatus::Waiting);
+        assert_eq!((vtable.get_status)(ptr), tasklet.get_status());
+    }
+
+    #[test]
+    fn get_set_last_execution_time() {
+        let tasklet = create_tasklet();
+        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
+        let vtable = tasklet_vtable::<u8, ()>();
+
+        assert_eq!(
+            (vtable.get_last_execution_time)(ptr),
+            tasklet.get_last_execution_time()
+        );
+        (vtable.set_last_execution_time)(ptr, TimerInstantU64::<1_000_000>::from_ticks(42));
+        assert_eq!(
+            (vtable.get_last_execution_time)(ptr),
+            tasklet.get_last_execution_time()
+        );
+    }
+
+    #[test]
+    fn has_work() {
+        let tasklet = create_tasklet();
+        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
+        let vtable = tasklet_vtable::<u8, ()>();
+
+        assert_eq!((vtable.has_work)(ptr), tasklet.has_work());
+    }
+
+    #[test]
+    fn execute() {
+        // TODO
+    }
 }

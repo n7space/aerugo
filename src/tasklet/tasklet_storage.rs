@@ -39,6 +39,13 @@ impl<T, C> TaskletStorage<T, C> {
         }
     }
 
+    /// Returns initialization status of this storage.
+    pub fn is_initialized(&'static self) -> bool {
+        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
+        // the `init` function.
+        unsafe { self.initialized.as_ref().clone() }
+    }
+
     /// Creates new handle to a tasklet allocated in this storage.
     ///
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
@@ -103,5 +110,46 @@ impl<T, C> TaskletStorage<T, C> {
     #[inline(always)]
     unsafe fn tasklet_ptr(&self) -> TaskletPtr {
         TaskletPtr::new::<T, C>(self.buffer_ptr())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create() {
+        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+
+        assert!(!STORAGE.is_initialized());
+    }
+
+    #[test]
+    fn initialize() {
+        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+
+        let name = "TaskName";
+        let config = TaskletConfig { name };
+
+        let init_result = STORAGE.init(config);
+        assert!(init_result.is_ok());
+        assert!(STORAGE.is_initialized());
+
+        assert_eq!(init_result.unwrap().get_name(), name);
+    }
+
+    #[test]
+    fn create_handle() {
+        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+
+        let name = "TaskName";
+        let config = TaskletConfig { name };
+
+        let _ = STORAGE.init(config);
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_some());
+
+        assert_eq!(handle.unwrap().get_name(), name);
     }
 }

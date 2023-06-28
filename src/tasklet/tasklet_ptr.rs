@@ -114,3 +114,69 @@ impl PartialEq for TaskletPtr {
             .eq(&other.get_last_execution_time())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::task::Task;
+    use crate::tasklet::{Tasklet, TaskletConfig};
+
+    fn create_tasklet() -> Tasklet<u8, ()> {
+        let tasklet_config = TaskletConfig { name: "TaskName" };
+
+        Tasklet::<u8, ()>::new(tasklet_config)
+    }
+
+    fn create_tasklet_ptr(tasklet: &Tasklet<u8, ()>) -> TaskletPtr {
+        let ptr = tasklet as *const Tasklet<u8, ()> as *const ();
+
+        TaskletPtr::new::<u8, ()>(ptr)
+    }
+
+    #[test]
+    fn get_name() {
+        let tasklet = create_tasklet();
+        let tasklet_ptr = create_tasklet_ptr(&tasklet);
+
+        assert_eq!(tasklet_ptr.get_name(), tasklet.get_name());
+    }
+
+    #[test]
+    fn get_set_status() {
+        let tasklet = create_tasklet();
+        let tasklet_ptr = create_tasklet_ptr(&tasklet);
+
+        assert_eq!(tasklet_ptr.get_status(), tasklet.get_status());
+        tasklet_ptr.set_status(TaskStatus::Waiting);
+        assert_eq!(tasklet_ptr.get_status(), tasklet.get_status());
+    }
+
+    #[test]
+    fn get_set_last_execution_time() {
+        let tasklet = create_tasklet();
+        let tasklet_ptr = create_tasklet_ptr(&tasklet);
+
+        assert_eq!(
+            tasklet_ptr.get_last_execution_time(),
+            tasklet.get_last_execution_time()
+        );
+        tasklet_ptr.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
+        assert_eq!(
+            tasklet_ptr.get_last_execution_time(),
+            tasklet.get_last_execution_time()
+        );
+    }
+
+    #[test]
+    fn has_work() {
+        let tasklet = create_tasklet();
+        let tasklet_ptr = create_tasklet_ptr(&tasklet);
+
+        assert_eq!(tasklet_ptr.has_work(), tasklet.has_work());
+    }
+
+    #[test]
+    fn execute() {
+        // TODO
+    }
+}
