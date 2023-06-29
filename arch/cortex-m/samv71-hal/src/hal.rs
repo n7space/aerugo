@@ -36,24 +36,17 @@ impl SystemHal for Hal {
         todo!()
     }
 
-    fn enter_critical()
-    where
-        Self: Sized,
-    {
+    fn enter_critical() {
         cortex_m::interrupt::disable();
     }
 
-    fn exit_critical()
-    where
-        Self: Sized,
-    {
+    fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }
 
     fn execute_critical<F, R>(f: F) -> R
     where
         F: FnOnce(&CriticalSection) -> R,
-        Self: Sized,
     {
         cortex_m::interrupt::free(f)
     }

@@ -33,14 +33,10 @@ pub trait SystemHal {
     fn feed_watchdog(&mut self);
 
     /// Enters critical section
-    fn enter_critical()
-    where
-        Self: Sized;
+    fn enter_critical();
 
     /// Exits critical section
-    fn exit_critical()
-    where
-        Self: Sized;
+    fn exit_critical();
 
     /// Executes closure `f` in an interrupt-free context.
     ///
@@ -52,6 +48,5 @@ pub trait SystemHal {
     /// Returns closure result.
     fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R,
-        Self: Sized;
+        F: FnOnce(&CriticalSection) -> R;
 }

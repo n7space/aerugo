@@ -50,24 +50,17 @@ impl SystemHal for Hal {
         todo!()
     }
 
-    fn enter_critical()
-    where
-        Self: Sized,
-    {
+    fn enter_critical() {
         // There is no critical section implementation for x86 target.
     }
 
-    fn exit_critical()
-    where
-        Self: Sized,
-    {
+    fn exit_critical() {
         // There is no critical section implementation for x86 target.
     }
 
     fn execute_critical<F, R>(f: F) -> R
     where
         F: FnOnce(&CriticalSection) -> R,
-        Self: Sized,
     {
         // There is no critical section implementation for x86 target.
         f(unsafe { &CriticalSection::new() })
