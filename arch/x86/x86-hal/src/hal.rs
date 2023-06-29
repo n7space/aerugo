@@ -50,7 +50,7 @@ impl SystemHal for Hal {
     }
 
     fn feed_watchdog(&mut self) {
-        todo!()
+        // There is no watchdog for x86 target.
     }
 
     fn enter_critical() {
