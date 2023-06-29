@@ -12,6 +12,9 @@ pub struct Hal {
 }
 
 impl Hal {
+    /// Frequency for the time types (TODO)
+    const TIMER_FREQ: u32 = 1_000_000;
+
     /// Create new HAL instance.
     pub const fn new(peripherals: Peripherals) -> Self {
         Hal {
@@ -21,8 +24,8 @@ impl Hal {
 }
 
 impl SystemHal for Hal {
-    type Instant = crate::time::TimerInstantU64<1_000_000>;
-    type Duration = crate::time::TimerDurationU64<1_000_000>;
+    type Instant = crate::time::TimerInstantU64<{ Hal::TIMER_FREQ }>;
+    type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
 
     fn configure_hardware(&mut self, _config: SystemHardwareConfig) {
         todo!()
