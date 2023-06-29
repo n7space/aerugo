@@ -1,11 +1,11 @@
-//! System HAL implementation for x86 target.
+//! System HAL implementation for Cortex-M SAMV71 target.
 
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
 use crate::peripherals::Peripherals;
 
-/// HAL implementation for x86.
+/// HAL implementation for Cortex-M SAMV71.
 pub struct Hal {
     /// Hardware peripherals.
     _peripherals: Peripherals,
