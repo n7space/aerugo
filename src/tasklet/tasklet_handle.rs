@@ -42,8 +42,8 @@ impl<T: 'static, C> TaskletHandle<T, C> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tasklet::{Tasklet, TaskletConfig};
     use crate::task::Task;
+    use crate::tasklet::{Tasklet, TaskletConfig};
 
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
