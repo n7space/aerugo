@@ -1,6 +1,6 @@
 [package]
 authors = ["Filip Demski <glamhoth@protonmail.com>"]
-edition = "2018"
+edition = "2021"
 name = "x86-hello-world"
 version = "0.1.0"
 

@@ -14,8 +14,8 @@ authors = [
     "N7 Space",
     "Filip Demski <glamhoth@protonmail.com>",
 ]
-edition = "2018"
-rust-version = "1.59"
+edition = "2021"
+rust-version = "1.70"
 repository = "https://github.com/n7space/aerugo"
 # homepage
 license = "MIT OR Apache-2.0"
@@ -27,6 +27,7 @@ name = "aerugo"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 repository.workspace = true
 # homepage.workspace = true
 license.workspace = true
