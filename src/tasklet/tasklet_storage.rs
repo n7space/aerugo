@@ -43,7 +43,7 @@ impl<T, C> TaskletStorage<T, C> {
     pub fn is_initialized(&'static self) -> bool {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // the `init` function.
-        unsafe { self.initialized.as_ref().clone() }
+        unsafe { *self.initialized.as_ref() }
     }
 
     /// Creates new handle to a tasklet allocated in this storage.
