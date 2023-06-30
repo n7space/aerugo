@@ -1,0 +1,13 @@
+[package]
+name = "aerugo-hal"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "Hardware Abstraction Layer for Aerugo system"
+
+[dependencies]
+bare-metal = "0.2.4"
+fugit = "0.3.6"

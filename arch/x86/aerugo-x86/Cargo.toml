@@ -1,13 +1,12 @@
 [package]
-name = "aerugo-cortex-m"
+name = "aerugo-x86"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 # homepage.workspace = true
 license.workspace = true
-description = "Cortex-M specific implementation for Aerugo"
+description = "x86 specific implementation for Aerugo"
 
 [dependencies]
-cortex-m = "0.7.7"
-critical-section = "1.1.1"
+aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }

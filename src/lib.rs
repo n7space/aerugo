@@ -17,23 +17,25 @@ mod event;
 mod execution_monitoring;
 mod internal_cell;
 mod message_queue;
-mod peripherals;
 mod queue;
 mod task;
 mod tasklet;
 
-pub use self::aerugo::{Aerugo, TaskletConfiguration};
+pub use self::aerugo::{Aerugo, TaskletConfig};
 pub use self::api::InitApi;
 pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::event::EventStorage;
 pub use self::message_queue::MessageQueueStorage;
-pub use self::peripherals::Peripherals;
 pub use self::tasklet::TaskletStorage;
 
 pub use fugit as time;
 
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub(crate) use aerugo_cortex_m as arch;
+#[cfg(feature = "use-aerugo-cortex-m")]
+pub(crate) use samv71_hal as hal;
 
 #[cfg(feature = "use-aerugo-x86")]
 pub(crate) use aerugo_x86 as arch;
+#[cfg(feature = "use-aerugo-x86")]
+pub(crate) use x86_hal as hal;

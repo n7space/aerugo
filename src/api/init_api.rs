@@ -3,8 +3,8 @@
 /// This API is used for the system initialization, before the scheduler is started.
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
+use crate::hal::Peripherals;
 use crate::message_queue::MessageQueueStorage;
-use crate::peripherals::Peripherals;
 use crate::queue::QueueHandle;
 use crate::task::TaskHandle;
 use crate::tasklet::TaskletStorage;
@@ -129,10 +129,10 @@ impl<T: ErrorType> ErrorType for &mut T {
 }
 
 /// Configuration used for creating tasklets
-pub trait TaskConfiguration: Default {}
+pub trait TaskConfig: Default {}
 
 /// Task configuration type trait
 pub trait TaskConfigType {
     /// Task configuration type
-    type TaskConfig: TaskConfiguration;
+    type TaskConfig: TaskConfig;
 }

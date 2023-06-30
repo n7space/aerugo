@@ -1,0 +1,15 @@
+[package]
+name = "samv71-hal"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "SAMV71 implementation of aerugo HAL"
+
+[dependencies]
+aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
+cortex-m = "0.7.7"
+bare-metal = "0.2.4"
+fugit = "0.3.6"
