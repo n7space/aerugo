@@ -39,12 +39,10 @@ fn get_variable_name(item_const: &ItemConst, attr: TokenStream2) -> String {
         _ => panic!("Attribute expression was not a literal."),
     };
 
-    let name = match &literal.lit {
+    match &literal.lit {
         Lit::Str(str_literal) => str_literal.value(),
         _ => panic!("Environment variable name was not String."),
-    };
-
-    name
+    }
 }
 
 fn create_value_expr(name: &str, value: &str, expr: &Expr) -> Expr {
