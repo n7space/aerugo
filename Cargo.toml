@@ -4,7 +4,9 @@ members = [
     "arch/cortex-m/aerugo-cortex-m",
     "arch/cortex-m/samv71-hal",
     "arch/x86/aerugo-x86",
-    "arch/x86/x86-hal"
+    "arch/x86/x86-hal",
+    "utils/env-parser",
+    "utils/env-parser-tests",
 ]
 exclude = ["examples"]
 
@@ -46,6 +48,7 @@ aerugo-cortex-m = { version = "0.1.0", path = "arch/cortex-m/aerugo-cortex-m", o
 samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
 aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
 x86-hal = { version = "0.1.0", path = "arch/x86/x86-hal", optional = true }
+env-parser = { version = "1.0.0", path = "utils/env-parser" }
 
 [features]
 use-aerugo-cortex-m = ["aerugo-cortex-m", "samv71-hal"]
