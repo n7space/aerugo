@@ -14,7 +14,7 @@ type TaskletQueue<const N: usize> = BinaryHeap<TaskletPtr, Max, N>;
 /// System scheduler.
 pub(crate) struct Executor {
     /// Tasklet queue.
-    tasklet_queue: Mutex<TaskletQueue<8>>,
+    tasklet_queue: Mutex<TaskletQueue<{ Aerugo::TASKLET_COUNT }>>,
     /// System API.
     system_api: &'static Aerugo,
 }

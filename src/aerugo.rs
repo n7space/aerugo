@@ -6,6 +6,7 @@ pub use self::error::InitError;
 
 use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
+use env_parser::read_env;
 
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
@@ -31,6 +32,10 @@ pub struct Aerugo {
 }
 
 impl Aerugo {
+    /// Maximum number of tasklets registered in the system.
+    #[read_env("AERUGO_TASKLET_COUNT")]
+    pub(crate) const TASKLET_COUNT: usize = 0;
+
     /// Starts the system.
     pub fn start(&'static self) -> ! {
         EXECUTOR.run_scheduler()
