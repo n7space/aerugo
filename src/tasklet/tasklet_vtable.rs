@@ -118,7 +118,7 @@ mod tests {
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
 
-        Tasklet::<u8, ()>::new(tasklet_config)
+        Tasklet::<u8, ()>::new(tasklet_config, |_| {})
     }
 
     #[test]
