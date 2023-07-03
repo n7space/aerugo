@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 
-use aerugo::{AERUGO, InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage};
+use aerugo::{InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage, AERUGO};
 
 #[allow(dead_code)]
 struct TaskAData {
@@ -8,29 +8,33 @@ struct TaskAData {
     b: u32,
 }
 
+fn task_a(_: u8) {}
+
 #[allow(dead_code)]
 struct TaskBData {
     a: u16,
     b: u16,
 }
 
-static tasklet_a: TaskletStorage<u8, TaskAData> = TaskletStorage::new();
-static tasklet_b: TaskletStorage<u8, TaskBData> = TaskletStorage::new();
-static queue_x: MessageQueueStorage<u8, 16> = MessageQueueStorage::new();
+fn task_b(_: u8) {}
+
+static TASK_A: TaskletStorage<u8, TaskAData> = TaskletStorage::new();
+static TASK_B: TaskletStorage<u8, TaskBData> = TaskletStorage::new();
+static QUEUE_X: MessageQueueStorage<u8, 16> = MessageQueueStorage::new();
 
 fn main() -> ! {
     AERUGO
-        .create_tasklet(TaskletConfig::default(), &tasklet_a)
+        .create_tasklet(TaskletConfig::default(), task_a, &TASK_A)
         .unwrap();
-    let tasklet_a_handle = tasklet_a.create_handle().unwrap();
+    let tasklet_a_handle = TASK_A.create_handle().unwrap();
 
     AERUGO
-        .create_tasklet(TaskletConfig::default(), &tasklet_b)
+        .create_tasklet(TaskletConfig::default(), task_b, &TASK_B)
         .unwrap();
-    let tasklet_b_handle = tasklet_b.create_handle().unwrap();
+    let tasklet_b_handle = TASK_B.create_handle().unwrap();
 
-    AERUGO.create_message_queue(&queue_x).unwrap();
-    let queue_x_handle = queue_x.create_queue_handle().unwrap();
+    AERUGO.create_message_queue(&QUEUE_X).unwrap();
+    let queue_x_handle = QUEUE_X.create_queue_handle().unwrap();
 
     AERUGO
         .subscribe_tasklet_to_queue(&tasklet_a_handle, &queue_x_handle)
