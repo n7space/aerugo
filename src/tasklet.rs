@@ -58,7 +58,7 @@ impl<T, C> Tasklet<T, C> {
     }
 }
 
-impl<T, C> Task for Tasklet<T, C> {
+impl<T: Default, C> Task for Tasklet<T, C> {
     fn get_name(&self) -> &'static str {
         self.name
     }

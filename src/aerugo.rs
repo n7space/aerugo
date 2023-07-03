@@ -54,7 +54,7 @@ impl Aerugo {
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T, C>(
+    fn create_tasklet<T: Default, C>(
         &'static self,
         config: Self::TaskConfig,
         storage: &'static TaskletStorage<T, C>,
