@@ -99,10 +99,7 @@ impl<T: Default, C> Task for Tasklet<T, C> {
 }
 
 impl<T, C> DataReceiver<T> for Tasklet<T, C> {
-    fn subscribe(
-        &'static self,
-        _data_provider: &'static dyn DataProvider<T>,
-    ) -> Result<(), InitError> {
+    fn subscribe(&self, _data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
         todo!()
     }
 }

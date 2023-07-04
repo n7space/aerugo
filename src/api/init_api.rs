@@ -4,8 +4,7 @@
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;
-use crate::message_queue::MessageQueueStorage;
-use crate::queue::QueueHandle;
+use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
 /// System initialization API
@@ -70,7 +69,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
         tasklet: &TaskletHandle<T, C>,
-        queue: &QueueHandle<T>,
+        queue: &MessageQueueHandle<T>,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the event.
@@ -112,7 +111,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// Set function for hardware initialization
     ///
     /// * `init_fn` - Hardware initialization function.
-    fn init_hardware(&self, init_fn: fn(&mut Peripherals));
+    fn init_hardware(&'static self, init_fn: fn(&mut Peripherals));
 }
 
 /// Initialization error

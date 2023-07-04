@@ -10,12 +10,12 @@ pub(crate) trait DataProvider<T> {
     /// Checks whether there is data available for reading.
     ///
     /// Returns `true` if there is data available, `false` otherwise.
-    fn data_ready(&'static self) -> bool;
+    fn data_ready(&self) -> bool;
 
     /// Provides data.
     ///
     /// Returns `Some(T)` if there was data available, `None` otherwise.
-    fn get_data(&'static self) -> Option<T>;
+    fn get_data(&self) -> Option<T>;
 
     /// Provides data without checking.
     ///
@@ -23,5 +23,5 @@ pub(crate) trait DataProvider<T> {
     ///
     /// # Panic
     /// Panics if no data was available.
-    fn get_data_unchecked(&'static self) -> T;
+    fn get_data_unchecked(&self) -> T;
 }

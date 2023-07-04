@@ -17,7 +17,7 @@ use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletPtr};
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>() }>;
 
 /// Structure containing memory for Tasklet creation.
-pub struct TaskletStorage<T: 'static, C> {
+pub struct TaskletStorage<T, C> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
     /// Buffer for the tasklet strucure.
@@ -28,7 +28,7 @@ pub struct TaskletStorage<T: 'static, C> {
     _context_type_marker: PhantomData<C>,
 }
 
-impl<T: Default, C> TaskletStorage<T, C> {
+impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
     /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {
@@ -104,7 +104,7 @@ impl<T: Default, C> TaskletStorage<T, C> {
     ///
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn buffer_ptr(&self) -> *const () {
+    unsafe fn buffer_ptr(&'static self) -> *const () {
         &*(self.tasklet_buffer.as_ref().as_ptr() as *const ())
     }
 
@@ -112,7 +112,7 @@ impl<T: Default, C> TaskletStorage<T, C> {
     ///
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn tasklet_ptr(&self) -> TaskletPtr {
+    unsafe fn tasklet_ptr(&'static self) -> TaskletPtr {
         TaskletPtr::new::<T, C>(self.buffer_ptr())
     }
 }

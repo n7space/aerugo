@@ -12,7 +12,7 @@ use crate::tasklet::TaskletPtr;
 ///
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub struct TaskletHandle<T: 'static, C> {
+pub struct TaskletHandle<T, C> {
     /// Pointer to the tasklet.
     tasklet: TaskletPtr,
     /// Marker for the type that is processed by the tasklet.
@@ -21,7 +21,7 @@ pub struct TaskletHandle<T: 'static, C> {
     _context_marker: PhantomData<C>,
 }
 
-impl<T: 'static, C> TaskletHandle<T, C> {
+impl<T, C> TaskletHandle<T, C> {
     /// Creates new tasklet handle.
     ///
     /// * `tasklet` - Pointer to the tasklet.

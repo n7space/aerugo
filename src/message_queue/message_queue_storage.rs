@@ -10,7 +10,7 @@ use heapless::Vec;
 
 use crate::arch::Mutex;
 use crate::internal_cell::InternalCell;
-use crate::queue::QueueHandle;
+use crate::message_queue::MessageQueueHandle;
 
 /// Type of the queue buffer storage.
 pub(crate) type QueueBuffer = Vec<u8, { core::mem::size_of::<MessageQueue<(), 0>>() }>;
@@ -43,7 +43,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Creates new handle to a queue allocated in this storage.
     ///
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
-    pub fn create_queue_handle(&'static self) -> Option<QueueHandle<T>> {
+    pub fn create_queue_handle(&'static self) -> Option<MessageQueueHandle<T>> {
         todo!()
     }
 }
