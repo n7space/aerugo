@@ -48,7 +48,7 @@ mod tests {
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
 
-        Tasklet::<u8, ()>::new(tasklet_config, |_| {})
+        Tasklet::<u8, ()>::new(tasklet_config, |_, _| {}, ())
     }
 
     fn create_tasklet_ptr(tasklet: &Tasklet<u8, ()>) -> TaskletPtr {

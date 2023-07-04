@@ -120,7 +120,7 @@ mod tests {
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
 
-        Tasklet::<u8, ()>::new(tasklet_config, |_| {})
+        Tasklet::<u8, ()>::new(tasklet_config, |_, _| {}, ())
     }
 
     #[test]
@@ -171,6 +171,24 @@ mod tests {
 
     #[test]
     fn execute() {
-        // TODO
+        let mut value: u8 = 0;
+
+        struct TaskletCtx<'a> {
+            val: &'a mut u8,
+        }
+
+        let tasklet = Tasklet::<u8, TaskletCtx>::new(
+            TaskletConfig::default(),
+            |_, ctx| {
+                *ctx.val = 42;
+            },
+            TaskletCtx { val: &mut value },
+        );
+
+        let ptr = &tasklet as *const Tasklet<u8, TaskletCtx> as *const ();
+        let vtable = tasklet_vtable::<u8, TaskletCtx>();
+
+        (vtable.execute)(ptr);
+        assert_eq!(value, 42);
     }
 }

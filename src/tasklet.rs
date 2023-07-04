@@ -18,8 +18,6 @@ pub use self::tasklet_config::TaskletConfig;
 pub use self::tasklet_handle::TaskletHandle;
 pub use self::tasklet_storage::TaskletStorage;
 
-use core::marker::PhantomData;
-
 use crate::aerugo::error::InitError;
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
@@ -29,7 +27,7 @@ use crate::task::{Task, TaskStatus};
 use crate::time::TimerInstantU64;
 
 /// Type of function that is executed by the tasklet in its step.
-pub(crate) type StepFn<T> = fn(T);
+pub(crate) type StepFn<T, C> = fn(T, &mut C);
 
 /// Tasklet structure.
 ///
@@ -43,23 +41,23 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Last execution time.
     last_execution_time: Mutex<TimerInstantU64<1_000_000>>,
     /// Step function.
-    step_fn: StepFn<T>,
+    step_fn: StepFn<T, C>,
+    /// Context data.
+    context: InternalCell<C>,
     /// Source of the data.
     _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
-    /// Marker for tasklet context data type.
-    _context_type_marker: PhantomData<C>,
 }
 
 impl<T, C> Tasklet<T, C> {
     /// Creates new `Tasklet`.
-    pub(crate) fn new(config: TaskletConfig, step_fn: StepFn<T>) -> Self {
+    pub(crate) fn new(config: TaskletConfig, step_fn: StepFn<T, C>, context: C) -> Self {
         Tasklet {
             name: config.name,
             status: Mutex::new(TaskStatus::Sleeping),
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
+            context: context.into(),
             _data_provider: InternalCell::new(None),
-            _context_type_marker: PhantomData,
         }
     }
 }
@@ -92,9 +90,12 @@ impl<T: Default, C> Task for Tasklet<T, C> {
 
     fn execute(&self) {
         // TODO: Stub until we have working data providers.
-        let value: T = T::default();
+        let value = T::default();
+        // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
+        // be executed only once at a given time.
+        let context = unsafe { self.context.as_mut_ref() };
 
-        (self.step_fn)(value)
+        (self.step_fn)(value, context)
     }
 }
 
@@ -110,7 +111,7 @@ mod tests {
 
     #[test]
     fn create_default() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_| {});
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
 
         assert_eq!(tasklet.get_name(), "MISSING_TASKLET_NAME");
         assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
@@ -122,7 +123,7 @@ mod tests {
         let name = "TaskName";
 
         let config = TaskletConfig { name };
-        let tasklet = Tasklet::<u8, ()>::new(config, |_| {});
+        let tasklet = Tasklet::<u8, ()>::new(config, |_, _| {}, ());
 
         assert_eq!(tasklet.get_name(), name);
         assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
@@ -131,7 +132,7 @@ mod tests {
 
     #[test]
     fn get_set_status() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_| {});
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
 
         assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
         tasklet.set_status(TaskStatus::Waiting);
@@ -140,10 +141,28 @@ mod tests {
 
     #[test]
     fn get_set_last_execution_time() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_| {});
+        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
 
         assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
         tasklet.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
         assert_eq!(tasklet.get_last_execution_time().ticks(), 42);
+    }
+
+    #[test]
+    fn execute() {
+        #[derive(Default)]
+        struct TaskletCtx(u8);
+
+        let tasklet = Tasklet::<u8, TaskletCtx>::new(
+            TaskletConfig::default(),
+            |_, ctx| {
+                ctx.0 = 42;
+            },
+            TaskletCtx::default(),
+        );
+
+        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 0);
+        tasklet.execute();
+        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 42);
     }
 }

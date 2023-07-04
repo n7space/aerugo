@@ -68,7 +68,8 @@ impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
     pub(crate) fn init(
         &'static self,
         config: TaskletConfig,
-        step_fn: StepFn<T>,
+        step_fn: StepFn<T, C>,
+        context: C,
     ) -> Result<TaskletPtr, InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
@@ -76,7 +77,7 @@ impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let tasklet = Tasklet::<T, C>::new(config, step_fn);
+        let tasklet = Tasklet::<T, C>::new(config, step_fn, context);
 
         // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
         // (initialized) only once, because it is guarded by the `initialized` field. No external
@@ -135,7 +136,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let init_result = STORAGE.init(config, |_| {});
+        let init_result = STORAGE.init(config, |_, _| {}, ());
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
 
@@ -149,7 +150,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let _ = STORAGE.init(config, |_| {});
+        let _ = STORAGE.init(config, |_, _| {}, ());
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

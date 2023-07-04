@@ -53,13 +53,28 @@ impl Aerugo {
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T: Default, C>(
+    fn create_tasklet<T: Default, C: Default>(
         &'static self,
         config: Self::TaskConfig,
-        step_fn: StepFn<T>,
+        step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn)?;
+        let tasklet_ptr = storage.init(config, step_fn, C::default())?;
+        EXECUTOR
+            .schedule_tasklet(tasklet_ptr)
+            .expect("Unable to schedule tasklet");
+
+        Ok(())
+    }
+
+    fn create_tasklet_with_context<T: Default, C>(
+        &'static self,
+        config: Self::TaskConfig,
+        step_fn: StepFn<T, C>,
+        context: C,
+        storage: &'static TaskletStorage<T, C>,
+    ) -> Result<(), Self::Error> {
+        let tasklet_ptr = storage.init(config, step_fn, context)?;
         EXECUTOR
             .schedule_tasklet(tasklet_ptr)
             .expect("Unable to schedule tasklet");
