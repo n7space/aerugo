@@ -17,6 +17,9 @@ use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletPtr};
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>() }>;
 
 /// Structure containing memory for Tasklet creation.
+///
+/// * `T` - Type that is processed by the tasklet.
+/// * `C` - Type of tasklet context data.
 pub struct TaskletStorage<T, C> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
