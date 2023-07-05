@@ -57,7 +57,7 @@ impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
         // the `init` function.
         match unsafe { *self.initialized.as_ref() } {
             true => {
-                // SAFETY:: This is safe because storage has been initialized.
+                // SAFETY: This is safe because storage has been initialized.
                 let tasklet_ptr = unsafe { self.tasklet_ptr() };
                 Some(TaskletHandle::new(tasklet_ptr))
             }

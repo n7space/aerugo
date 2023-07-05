@@ -84,9 +84,11 @@ impl InitApi for Aerugo {
 
     fn create_message_queue<T, const N: usize>(
         &'static self,
-        _storage: &'static MessageQueueStorage<T, N>,
+        storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let _ = storage.init()?;
+
+        Ok(())
     }
 
     fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), Self::Error> {

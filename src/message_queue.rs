@@ -9,10 +9,7 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use heapless::Vec;
 
-use crate::aerugo::{
-    error::{InitError, RuntimeError},
-    Aerugo,
-};
+use crate::aerugo::error::{InitError, RuntimeError};
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::queue::Queue;
@@ -22,14 +19,19 @@ use crate::task::Task;
 ///
 /// * `T` - Type of the stored data.
 /// * `N` - Size of the queue.
-pub(crate) struct MessageQueue<'a, T, const N: usize> {
+pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
-    _data: &'a Mutex<QueueData<T, N>>,
-    /// System API.
-    _system: &'static Aerugo,
+    _data: &'static Mutex<QueueData<T, N>>,
 }
 
-impl<'a, T, const N: usize> Queue<T> for MessageQueue<'a, T, N> {
+impl<T, const N: usize> MessageQueue<T, N> {
+    /// Creates new `MessageQueue`.
+    pub(crate) fn new(data: &'static Mutex<QueueData<T, N>>) -> Self {
+        MessageQueue { _data: data }
+    }
+}
+
+impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
     fn register_task(&self, _task: &'static dyn Task) -> Result<(), InitError> {
         todo!()
     }
@@ -43,7 +45,7 @@ impl<'a, T, const N: usize> Queue<T> for MessageQueue<'a, T, N> {
     }
 }
 
-impl<'a, T, const N: usize> DataProvider<T> for MessageQueue<'a, T, N> {
+impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
     fn data_ready(&self) -> bool {
         todo!()
     }

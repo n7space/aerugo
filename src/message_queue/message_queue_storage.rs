@@ -8,6 +8,7 @@ use super::MessageQueue;
 
 use heapless::Vec;
 
+use crate::aerugo::InitError;
 use crate::arch::Mutex;
 use crate::internal_cell::InternalCell;
 use crate::message_queue::MessageQueueHandle;
@@ -23,20 +24,20 @@ pub(crate) type QueueData<T, const N: usize> = heapless::spsc::Queue<T, N>;
 /// * `N` - Size of the queue.
 pub struct MessageQueueStorage<T, const N: usize> {
     /// Marks whether this storage has been initialized.
-    _initialized: InternalCell<bool>,
+    initialized: InternalCell<bool>,
     /// Buffer for the queue structure.
-    _queue_buffer: InternalCell<QueueBuffer>,
+    queue_buffer: InternalCell<QueueBuffer>,
     /// Buffer for the queue data.
-    _queue_data: Mutex<QueueData<T, N>>,
+    queue_data: Mutex<QueueData<T, N>>,
 }
 
 impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Creates new storage.
     pub const fn new() -> Self {
         MessageQueueStorage {
-            _initialized: InternalCell::new(false),
-            _queue_buffer: InternalCell::new(QueueBuffer::new()),
-            _queue_data: Mutex::new(QueueData::new()),
+            initialized: InternalCell::new(false),
+            queue_buffer: InternalCell::new(QueueBuffer::new()),
+            queue_data: Mutex::new(QueueData::new()),
         }
     }
 
@@ -45,5 +46,38 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
     pub fn create_queue_handle(&'static self) -> Option<MessageQueueHandle<T>> {
         todo!()
+    }
+
+    /// Initializes this storage.
+    ///
+    /// TODO: Returns
+    pub(crate) fn init(&'static self) -> Result<(), InitError> {
+        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
+        // this function.
+        if unsafe { *self.initialized.as_ref() } {
+            return Err(InitError::StorageAlreadyInitialized);
+        }
+
+        let queue = MessageQueue::<T, N>::new(&self.queue_data);
+
+        // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
+        // (initialized) only once, because it is guarded by the `initialized` field. No external
+        // borrow can be made before initialization.
+        //
+        // Because the `MessageQueue` structure is of a constant size, the `queue_buffer` field is
+        // statically allocated with enough memory for a 'placement new'.
+        unsafe {
+            let queue_buffer =
+                self.queue_buffer.as_mut_ref().as_mut_ptr() as *mut MessageQueue<T, N>;
+            core::ptr::write(queue_buffer, queue);
+        }
+
+        // SAFETY: This is safe because it is only modified only here, and can't be externally
+        // borrowed.
+        unsafe {
+            *self.initialized.as_mut_ref() = true;
+        }
+
+        Ok(())
     }
 }
