@@ -52,7 +52,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
                 // SAFETY: This is safe because storage has been initialized.
                 let message_queue = unsafe { self.message_queue() };
                 Some(MessageQueueHandle::new(message_queue))
-            },
+            }
             false => None,
         }
     }

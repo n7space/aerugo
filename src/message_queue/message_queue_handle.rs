@@ -31,4 +31,9 @@ impl<T, const N: usize> MessageQueueHandle<T, N> {
     pub fn send_data(&self, data: T) -> Result<(), RuntimeError> {
         self.queue.send_data(data)
     }
+
+    /// Returns reference to the queue.
+    pub(crate) fn queue(&self) -> &'static MessageQueue<T, N> {
+        self.queue
+    }
 }

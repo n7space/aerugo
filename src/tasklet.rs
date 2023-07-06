@@ -45,7 +45,7 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Context data.
     context: InternalCell<C>,
     /// Source of the data.
-    _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
+    data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
 }
 
 impl<T, C> Tasklet<T, C> {
@@ -57,7 +57,7 @@ impl<T, C> Tasklet<T, C> {
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
             context: context.into(),
-            _data_provider: InternalCell::new(None),
+            data_provider: InternalCell::new(None),
         }
     }
 }
@@ -84,24 +84,39 @@ impl<T: Default, C> Task for Tasklet<T, C> {
     }
 
     fn has_work(&self) -> bool {
-        // TODO: Stub until we have working data providers.
-        true
+        // SAFETY: This is safe, because this field is only mutably referenced during
+        // initialization.
+        match unsafe { self.data_provider.as_ref() } {
+            Some(dp) => dp.data_ready(),
+            None => false,
+        }
     }
 
     fn execute(&self) {
-        // TODO: Stub until we have working data providers.
-        let value = T::default();
-        // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
-        // be executed only once at a given time.
-        let context = unsafe { self.context.as_mut_ref() };
+        let value = match unsafe { self.data_provider.as_ref() } {
+            Some(dp) => dp.get_data(),
+            None => return,
+        };
 
-        (self.step_fn)(value, context)
+        match value {
+            Some(val) => {
+                // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
+                // be executed only once at a given time.
+                let context = unsafe { self.context.as_mut_ref() };
+                (self.step_fn)(val, context)
+            }
+            None => (),
+        }
     }
 }
 
 impl<T, C> DataReceiver<T> for Tasklet<T, C> {
-    fn subscribe(&self, _data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
-        todo!()
+    fn subscribe(&self, data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
+        // SAFETY: This is safe, because this function can be only called at the system
+        // initialization, and no other reference can be created.
+        unsafe { *self.data_provider.as_mut_ref() = Some(data_provider) };
+
+        Ok(())
     }
 }
 
@@ -146,23 +161,5 @@ mod tests {
         assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
         tasklet.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
         assert_eq!(tasklet.get_last_execution_time().ticks(), 42);
-    }
-
-    #[test]
-    fn execute() {
-        #[derive(Default)]
-        struct TaskletCtx(u8);
-
-        let tasklet = Tasklet::<u8, TaskletCtx>::new(
-            TaskletConfig::default(),
-            |_, ctx| {
-                ctx.0 = 42;
-            },
-            TaskletCtx::default(),
-        );
-
-        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 0);
-        tasklet.execute();
-        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 42);
     }
 }

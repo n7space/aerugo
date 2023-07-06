@@ -10,6 +10,7 @@ use env_parser::read_env;
 
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
@@ -102,12 +103,17 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_queue<T, C, const N: usize>(
+    fn subscribe_tasklet_to_queue<T: Default, C, const N: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C>,
-        _queue: &MessageQueueHandle<T, N>,
+        tasklet_handle: &TaskletHandle<T, C>,
+        queue_handle: &MessageQueueHandle<T, N>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet = tasklet_handle.tasklet();
+        let queue = queue_handle.queue();
+
+        tasklet.subscribe(queue)?;
+
+        Ok(())
     }
 
     fn subscribe_tasklet_to_event<T, C>(

@@ -50,14 +50,10 @@ impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
 
 impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
     fn data_ready(&self) -> bool {
-        todo!()
+        self.data_queue.lock(|q| !q.is_empty())
     }
 
     fn get_data(&self) -> Option<T> {
-        todo!()
-    }
-
-    fn get_data_unchecked(&self) -> T {
-        todo!()
+        self.data_queue.lock(|q| q.dequeue())
     }
 }

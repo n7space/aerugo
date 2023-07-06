@@ -16,12 +16,4 @@ pub(crate) trait DataProvider<T> {
     ///
     /// Returns `Some(T)` if there was data available, `None` otherwise.
     fn get_data(&self) -> Option<T>;
-
-    /// Provides data without checking.
-    ///
-    /// Returns data.
-    ///
-    /// # Panic
-    /// Panics if no data was available.
-    fn get_data_unchecked(&self) -> T;
 }
