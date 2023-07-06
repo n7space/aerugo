@@ -21,13 +21,13 @@ use crate::task::Task;
 /// * `N` - Size of the queue.
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
-    _data: &'static Mutex<QueueData<T, N>>,
+    data_queue: &'static Mutex<QueueData<T, N>>,
 }
 
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
-    pub(crate) fn new(data: &'static Mutex<QueueData<T, N>>) -> Self {
-        MessageQueue { _data: data }
+    pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
+        MessageQueue { data_queue }
     }
 }
 
@@ -40,8 +40,11 @@ impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
         todo!()
     }
 
-    fn send_data(&self, _data: T) -> Result<(), RuntimeError> {
-        todo!()
+    fn send_data(&self, data: T) -> Result<(), RuntimeError> {
+        match self.data_queue.lock(|q| q.enqueue(data)) {
+            Ok(_) => return Ok(()),
+            Err(_) => return Err(RuntimeError::DataQueueFull),
+        }
     }
 }
 

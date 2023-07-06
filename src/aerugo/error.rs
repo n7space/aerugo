@@ -22,6 +22,8 @@ impl init_api::ErrorType for Aerugo {
 pub enum RuntimeError {
     /// Error occurring when trying to enqueue too many tasklets.
     ExecutorTaskletQueueFull,
+    /// Error occurring when trying to enqueue data to a full data queue.
+    DataQueueFull,
 }
 
 impl runtime_api::Error for RuntimeError {}

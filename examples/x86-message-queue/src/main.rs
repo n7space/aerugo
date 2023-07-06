@@ -34,5 +34,7 @@ fn main() -> ! {
         .create_message_queue(&QUEUE_X)
         .expect("Unable to create QueueX");
 
+    let queue_x_handle = QUEUE_X.create_handle().expect("Unable to create QueueX handle");
+
     AERUGO.start();
 }

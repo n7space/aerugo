@@ -86,10 +86,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `queue` - Handle to the target queue.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_queue<T, C>(
+    fn subscribe_tasklet_to_queue<T, C, const N: usize>(
         &'static self,
         tasklet: &TaskletHandle<T, C>,
-        queue: &MessageQueueHandle<T>,
+        queue: &MessageQueueHandle<T, N>,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the event.

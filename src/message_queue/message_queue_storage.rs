@@ -44,8 +44,17 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Creates new handle to a queue allocated in this storage.
     ///
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
-    pub fn create_queue_handle(&'static self) -> Option<MessageQueueHandle<T>> {
-        todo!()
+    pub fn create_handle(&'static self) -> Option<MessageQueueHandle<T, N>> {
+        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
+        // the `init` function.
+        match unsafe { *self.initialized.as_ref() } {
+            true => {
+                // SAFETY: This is safe because storage has been initialized.
+                let message_queue = unsafe { self.message_queue() };
+                Some(MessageQueueHandle::new(message_queue))
+            },
+            false => None,
+        }
     }
 
     /// Initializes this storage.
@@ -79,5 +88,10 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         }
 
         Ok(())
+    }
+
+    #[inline(always)]
+    unsafe fn message_queue(&'static self) -> &'static MessageQueue<T, N> {
+        &*(self.queue_buffer.as_ref().as_ptr() as *const MessageQueue<T, N>)
     }
 }

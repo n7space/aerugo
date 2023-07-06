@@ -102,10 +102,10 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_queue<T, C>(
+    fn subscribe_tasklet_to_queue<T, C, const N: usize>(
         &'static self,
         _tasklet: &TaskletHandle<T, C>,
-        _queue: &MessageQueueHandle<T>,
+        _queue: &MessageQueueHandle<T, N>,
     ) -> Result<(), Self::Error> {
         todo!()
     }

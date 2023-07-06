@@ -2,21 +2,26 @@
 //!
 //! Handle is used in the system to access a queue.
 use crate::aerugo::error::RuntimeError;
-use crate::data_provider::DataProvider;
+use crate::message_queue::MessageQueue;
 use crate::queue::Queue;
 
 /// Message queue handle.
 ///
 /// * `T` - Type that is stored by the queue.
 #[derive(Copy, Clone)]
-pub struct MessageQueueHandle<T: 'static> {
+pub struct MessageQueueHandle<T: 'static, const N: usize> {
     /// Reference to the queue.
-    queue: &'static dyn Queue<T>,
-    /// Reference to the queue as a DataProvider.
-    _data_provider: &'static dyn DataProvider<T>,
+    queue: &'static MessageQueue<T, N>,
 }
 
-impl<T> MessageQueueHandle<T> {
+impl<T, const N: usize> MessageQueueHandle<T, N> {
+    /// Creates new queue handle.
+    ///
+    /// * `queue` - Reference to the queue.
+    pub(crate) fn new(queue: &'static MessageQueue<T, N>) -> Self {
+        MessageQueueHandle { queue }
+    }
+
     /// Send data to the stored queue.
     ///
     /// * `data` - Data to send.
