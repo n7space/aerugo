@@ -16,7 +16,7 @@ pub struct TaskletHandle<T: 'static, C: 'static> {
     tasklet: &'static Tasklet<T, C>,
 }
 
-impl<T: Default, C> TaskletHandle<T, C> {
+impl<T, C> TaskletHandle<T, C> {
     /// Creates new tasklet handle.
     ///
     /// * `tasklet` - Pointer to the tasklet.

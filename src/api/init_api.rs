@@ -22,7 +22,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet<T: Default, C: Default>(
+    fn create_tasklet<T, C: Default>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
@@ -40,7 +40,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet_with_context<T: Default, C>(
+    fn create_tasklet_with_context<T, C>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,

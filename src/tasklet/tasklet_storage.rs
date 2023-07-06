@@ -31,7 +31,7 @@ pub struct TaskletStorage<T, C> {
     _context_type_marker: PhantomData<C>,
 }
 
-impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
+impl<T: 'static, C: 'static> TaskletStorage<T, C> {
     /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {

@@ -54,7 +54,7 @@ impl Aerugo {
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T: Default, C: Default>(
+    fn create_tasklet<T, C: Default>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
@@ -68,7 +68,7 @@ impl InitApi for Aerugo {
         Ok(())
     }
 
-    fn create_tasklet_with_context<T: Default, C>(
+    fn create_tasklet_with_context<T, C>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
