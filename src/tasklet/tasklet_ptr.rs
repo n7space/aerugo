@@ -41,6 +41,7 @@ impl TaskletPtr {
 
     /// Returns tasklet name.
     #[inline(always)]
+    #[allow(dead_code)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
