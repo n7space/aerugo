@@ -21,7 +21,7 @@ pub use self::tasklet_storage::TaskletStorage;
 use core::marker::PhantomData;
 
 use crate::aerugo::error::InitError;
-use crate::arch::{logln, Mutex};
+use crate::arch::{log, Mutex};
 use crate::data_provider::DataProvider;
 use crate::data_receiver::DataReceiver;
 use crate::internal_cell::InternalCell;
@@ -85,7 +85,7 @@ impl<T, C> Task for Tasklet<T, C> {
     }
 
     fn execute(&self) {
-        logln!("Executing {}", self.name);
+        log!("Executing {}", self.name);
     }
 }
 

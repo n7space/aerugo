@@ -41,4 +41,4 @@ pub(crate) use aerugo_x86 as arch;
 #[cfg(feature = "use-aerugo-x86")]
 pub(crate) use x86_hal as hal;
 
-pub use arch::logln;
+pub use arch::log;

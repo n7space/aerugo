@@ -9,5 +9,5 @@ Cortex-M specific implementation for Aerugo.
 mod logger;
 mod mutex;
 
-pub use self::logger::logln;
+pub use self::logger::log;
 pub use self::mutex::Mutex;
