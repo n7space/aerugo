@@ -18,6 +18,8 @@ pub use self::tasklet_config::TaskletConfig;
 pub use self::tasklet_handle::TaskletHandle;
 pub use self::tasklet_storage::TaskletStorage;
 
+use core::cell::OnceCell;
+
 use crate::aerugo::error::InitError;
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
@@ -45,7 +47,7 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Context data.
     context: InternalCell<C>,
     /// Source of the data.
-    data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
+    data_provider: OnceCell<&'static dyn DataProvider<T>>,
 }
 
 impl<T, C> Tasklet<T, C> {
@@ -57,7 +59,7 @@ impl<T, C> Tasklet<T, C> {
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
             context: context.into(),
-            data_provider: InternalCell::new(None),
+            data_provider: OnceCell::new(),
         }
     }
 }
@@ -86,14 +88,14 @@ impl<T, C> Task for Tasklet<T, C> {
     fn has_work(&self) -> bool {
         // SAFETY: This is safe, because this field is only mutably referenced during
         // initialization.
-        match unsafe { self.data_provider.as_ref() } {
+        match self.data_provider.get() {
             Some(dp) => dp.data_ready(),
             None => false,
         }
     }
 
     fn execute(&self) {
-        let value = match unsafe { self.data_provider.as_ref() } {
+        let value = match self.data_provider.get() {
             Some(dp) => dp.get_data(),
             None => return,
         };
@@ -112,11 +114,10 @@ impl<T, C> Task for Tasklet<T, C> {
 
 impl<T, C> DataReceiver<T> for Tasklet<T, C> {
     fn subscribe(&self, data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
-        // SAFETY: This is safe, because this function can be only called at the system
-        // initialization, and no other reference can be created.
-        unsafe { *self.data_provider.as_mut_ref() = Some(data_provider) };
-
-        Ok(())
+        match self.data_provider.set(data_provider) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletAlreadySubscribed),
+        }
     }
 }
 

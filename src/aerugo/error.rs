@@ -9,6 +9,8 @@ use crate::api::{init_api, runtime_api};
 pub enum InitError {
     /// Error occurring when trying to initialize one storage twice.
     StorageAlreadyInitialized,
+    /// Error occurring when trying to subscribe tasklet to more than one data provider.
+    TaskletAlreadySubscribed,
 }
 
 impl init_api::Error for InitError {}
