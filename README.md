@@ -31,7 +31,10 @@ The repository structure is as follows:
 aerugo requires nightly, make sure you have it installed: \
 `rustup toolchain install nightly`
 
-Tu build the system for the Cortex-M7 target run: \
+For the Cortex-M7 platform you first need to install that target via `rustup`: \
+`rustup target add thumbv7em-none-eabihf`
+
+Then to build the system run: \
 `cargo build -p aerugo --features=use-aerugo-cortex-m --target=thumbv7em-none-eabihf`
 
 x86 target is also supported for development purposes: \
