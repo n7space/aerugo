@@ -48,7 +48,7 @@ Tests can be build and run using a bash script. For all tests run: \
 or for specific package run for example: \
 `./scripts/run_tests.sh aerugo_x86`
 
-Tests can also be run using `cargo tests`.
+Tests can also be run using `cargo test` with `--features` and `--target` flags.
 
 ## Examples
 
