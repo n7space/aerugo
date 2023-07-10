@@ -1,0 +1,15 @@
+[package]
+name = "env-parser-tests"
+version = "1.0.0"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "Tests for env-parser"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+env-parser = { version = "1.0.0", path = "../env-parser" }
