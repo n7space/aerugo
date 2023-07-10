@@ -32,7 +32,7 @@ pub(crate) struct TaskletVTable {
 ///
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub(crate) fn tasklet_vtable<T: 'static, C>() -> &'static TaskletVTable {
+pub(crate) fn tasklet_vtable<T: Default + 'static, C>() -> &'static TaskletVTable {
     &TaskletVTable {
         get_name: get_name::<T, C>,
         get_status: get_status::<T, C>,
@@ -46,7 +46,7 @@ pub(crate) fn tasklet_vtable<T: 'static, C>() -> &'static TaskletVTable {
 
 /// "Virtual" call to the `get_name` `Tasklet` function.
 #[inline(always)]
-fn get_name<T: 'static, C>(ptr: *const ()) -> &'static str {
+fn get_name<T: Default + 'static, C>(ptr: *const ()) -> &'static str {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -55,7 +55,7 @@ fn get_name<T: 'static, C>(ptr: *const ()) -> &'static str {
 
 /// "Virtual" call to the `get_status` `Tasklet` function.
 #[inline(always)]
-fn get_status<T: 'static, C>(ptr: *const ()) -> TaskStatus {
+fn get_status<T: Default + 'static, C>(ptr: *const ()) -> TaskStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -64,7 +64,7 @@ fn get_status<T: 'static, C>(ptr: *const ()) -> TaskStatus {
 
 /// "Virtual" call to the `set_status` `Tasklet` function.
 #[inline(always)]
-fn set_status<T: 'static, C>(ptr: *const (), status: TaskStatus) {
+fn set_status<T: Default + 'static, C>(ptr: *const (), status: TaskStatus) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -73,7 +73,7 @@ fn set_status<T: 'static, C>(ptr: *const (), status: TaskStatus) {
 
 /// "Virtual" call to the `get_last_execution_time` `Tasklet` function.
 #[inline(always)]
-fn get_last_execution_time<T: 'static, C>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
+fn get_last_execution_time<T: Default + 'static, C>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -82,7 +82,10 @@ fn get_last_execution_time<T: 'static, C>(ptr: *const ()) -> TimerInstantU64<1_0
 
 /// "Virtual" call to the `set_last_execution_time` `Tasklet` function.
 #[inline(always)]
-fn set_last_execution_time<T: 'static, C>(ptr: *const (), time: TimerInstantU64<1_000_000>) {
+fn set_last_execution_time<T: Default + 'static, C>(
+    ptr: *const (),
+    time: TimerInstantU64<1_000_000>,
+) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -91,7 +94,7 @@ fn set_last_execution_time<T: 'static, C>(ptr: *const (), time: TimerInstantU64<
 
 /// "Virtual" call to the `has_work` `Tasklet` function.
 #[inline(always)]
-fn has_work<T: 'static, C>(ptr: *const ()) -> bool {
+fn has_work<T: Default + 'static, C>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -100,7 +103,7 @@ fn has_work<T: 'static, C>(ptr: *const ()) -> bool {
 
 /// "Virtual" call to the `execute` `Tasklet` function.
 #[inline(always)]
-fn execute<T: 'static, C>(ptr: *const ()) {
+fn execute<T: Default + 'static, C>(ptr: *const ()) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -115,7 +118,7 @@ mod tests {
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
 
-        Tasklet::<u8, ()>::new(tasklet_config)
+        Tasklet::<u8, ()>::new(tasklet_config, |_| {})
     }
 
     #[test]

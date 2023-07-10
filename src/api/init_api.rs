@@ -6,7 +6,7 @@ use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
-use crate::tasklet::{TaskletHandle, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
 /// System initialization API
 pub trait InitApi: ErrorType + TaskConfigType {
@@ -22,9 +22,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet<T, C>(
+    fn create_tasklet<T: Default, C>(
         &'static self,
         config: Self::TaskConfig,
+        step_fn: StepFn<T>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error>;
 

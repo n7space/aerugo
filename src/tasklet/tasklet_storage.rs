@@ -11,7 +11,7 @@ use heapless::Vec;
 
 use crate::aerugo::InitError;
 use crate::internal_cell::InternalCell;
-use crate::tasklet::{TaskletConfig, TaskletHandle, TaskletPtr};
+use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletPtr};
 
 /// Type of the tasklet buffer storage.
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>() }>;
@@ -28,7 +28,7 @@ pub struct TaskletStorage<T: 'static, C> {
     _context_type_marker: PhantomData<C>,
 }
 
-impl<T, C> TaskletStorage<T, C> {
+impl<T: Default, C> TaskletStorage<T, C> {
     /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {
@@ -65,14 +65,18 @@ impl<T, C> TaskletStorage<T, C> {
     /// Initializes this storage.
     ///
     /// Returns `InitError` in case of an initialization error, `()` otherwise.
-    pub(crate) fn init(&'static self, config: TaskletConfig) -> Result<TaskletPtr, InitError> {
+    pub(crate) fn init(
+        &'static self,
+        config: TaskletConfig,
+        step_fn: StepFn<T>,
+    ) -> Result<TaskletPtr, InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
         if unsafe { *self.initialized.as_ref() } {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let tasklet = Tasklet::<T, C>::new(config);
+        let tasklet = Tasklet::<T, C>::new(config, step_fn);
 
         // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
         // (initialized) only once, because it is guarded by the `initialized` field. No external
@@ -131,7 +135,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let init_result = STORAGE.init(config);
+        let init_result = STORAGE.init(config, |_| {});
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
 
@@ -145,7 +149,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let _ = STORAGE.init(config);
+        let _ = STORAGE.init(config, |_| {});
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

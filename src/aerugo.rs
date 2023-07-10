@@ -17,7 +17,7 @@ use crate::hal::{Hal, Peripherals};
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
 use crate::task::TaskId;
-use crate::tasklet::{TaskletHandle, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
 /// Core system.
 pub static AERUGO: Aerugo = Aerugo::new();
@@ -54,12 +54,13 @@ impl Aerugo {
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T, C>(
+    fn create_tasklet<T: Default, C>(
         &'static self,
         config: Self::TaskConfig,
+        step_fn: StepFn<T>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config)?;
+        let tasklet_ptr = storage.init(config, step_fn)?;
         EXECUTOR
             .schedule_tasklet(tasklet_ptr)
             .expect("Unable to schedule tasklet");

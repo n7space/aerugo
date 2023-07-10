@@ -32,7 +32,7 @@ impl TaskletPtr {
     /// Creates new pointer
     ///
     /// * `ptr` - Pointer to memory where tasklet is allocated.
-    pub(crate) fn new<T: 'static, C>(ptr: *const ()) -> Self {
+    pub(crate) fn new<T: Default + 'static, C>(ptr: *const ()) -> Self {
         TaskletPtr {
             ptr,
             vtable: tasklet_vtable::<T, C>(),
@@ -120,7 +120,7 @@ mod tests {
     fn create_tasklet() -> Tasklet<u8, ()> {
         let tasklet_config = TaskletConfig { name: "TaskName" };
 
-        Tasklet::<u8, ()>::new(tasklet_config)
+        Tasklet::<u8, ()>::new(tasklet_config, |_| {})
     }
 
     fn create_tasklet_ptr(tasklet: &Tasklet<u8, ()>) -> TaskletPtr {
