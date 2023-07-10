@@ -18,20 +18,20 @@ struct TaskBData {
 
 fn task_b(_: u8) {}
 
-static TASK_A: TaskletStorage<u8, TaskAData> = TaskletStorage::new();
-static TASK_B: TaskletStorage<u8, TaskBData> = TaskletStorage::new();
+static TASK_A_STORAGE: TaskletStorage<u8, TaskAData> = TaskletStorage::new();
+static TASK_B_STORAGE: TaskletStorage<u8, TaskBData> = TaskletStorage::new();
 static QUEUE_X: MessageQueueStorage<u8, 16> = MessageQueueStorage::new();
 
 fn main() -> ! {
     AERUGO
-        .create_tasklet(TaskletConfig::default(), task_a, &TASK_A)
+        .create_tasklet(TaskletConfig::default(), task_a, &TASK_A_STORAGE)
         .unwrap();
-    let tasklet_a_handle = TASK_A.create_handle().unwrap();
+    let tasklet_a_handle = TASK_A_STORAGE.create_handle().unwrap();
 
     AERUGO
-        .create_tasklet(TaskletConfig::default(), task_b, &TASK_B)
+        .create_tasklet(TaskletConfig::default(), task_b, &TASK_B_STORAGE)
         .unwrap();
-    let tasklet_b_handle = TASK_B.create_handle().unwrap();
+    let tasklet_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
     AERUGO.create_message_queue(&QUEUE_X).unwrap();
     let queue_x_handle = QUEUE_X.create_queue_handle().unwrap();
