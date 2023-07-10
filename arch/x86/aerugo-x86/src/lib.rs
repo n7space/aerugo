@@ -5,6 +5,8 @@ x86 specific implementation for Aerugo.
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-pub mod mutex;
+mod logger;
+mod mutex;
 
+pub use self::logger::log;
 pub use self::mutex::Mutex;

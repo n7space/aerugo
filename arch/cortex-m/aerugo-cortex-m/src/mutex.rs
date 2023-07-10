@@ -41,7 +41,7 @@ impl<T: ?Sized> Mutex<T> {
     /// Returns the result of the executed lambda.
     #[inline(always)]
     #[allow(dead_code)]
-    pub(crate) fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
+    pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
         unsafe { interrupt::free(|_| f(self.as_mut_ref())) }
     }
 

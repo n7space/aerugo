@@ -2,41 +2,47 @@
 
 pub mod error;
 
-mod config;
+pub use self::error::InitError;
 
-pub use self::config::TaskletConfig;
-
+use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
 
 use crate::api::{InitApi, RuntimeApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
+use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
 use crate::message_queue::MessageQueueStorage;
 use crate::queue::QueueHandle;
-use crate::task::{TaskHandle, TaskId};
-use crate::tasklet::TaskletStorage;
+use crate::task::TaskId;
+use crate::tasklet::{TaskletHandle, TaskletStorage};
+
+/// Core system.
+pub static AERUGO: Aerugo = Aerugo::new();
+
+/// System scheduler.
+static EXECUTOR: Executor = Executor::new(&AERUGO);
 
 /// System structure.
 pub struct Aerugo {
     /// Hardware Access Layer.
-    _hal: Hal,
+    hal: Hal,
 }
 
 impl Aerugo {
+    /// Starts the system.
+    pub fn start(&'static self) -> ! {
+        EXECUTOR.run_scheduler()
+    }
+
     /// Creates new system instance.
-    pub const fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         let peripherals = Peripherals {};
 
         Aerugo {
-            _hal: Hal::new(peripherals),
+            hal: Hal::new(peripherals),
         }
-    }
-
-    /// Starts system scheduler.
-    pub fn start_scheduler(&self) -> ! {
-        todo!()
     }
 }
 
@@ -45,10 +51,15 @@ impl InitApi for Aerugo {
 
     fn create_tasklet<T, C>(
         &'static self,
-        _config: Self::TaskConfig,
-        _storage: &'static TaskletStorage<T, C>,
+        config: Self::TaskConfig,
+        storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet_ptr = storage.init(config)?;
+        EXECUTOR
+            .schedule_tasklet(tasklet_ptr)
+            .expect("Unable to schedule tasklet");
+
+        Ok(())
     }
 
     fn create_message_queue<T, const N: usize>(
@@ -69,33 +80,33 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_queue<T>(
+    fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _queue: &QueueHandle<T>,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_event<T>(
+    fn subscribe_tasklet_to_event<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _event: &EventHandle,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_conditions<T>(
+    fn subscribe_tasklet_to_conditions<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_cyclic<T>(
+    fn subscribe_tasklet_to_cyclic<T, C>(
         &'static self,
-        _tasklet: &TaskHandle<T>,
+        _tasklet: &TaskletHandle<T, C>,
         _period: Self::Duration,
     ) -> Result<(), Self::Error> {
         todo!()
@@ -111,7 +122,7 @@ impl RuntimeApi for Aerugo {
     type Duration = crate::time::TimerDurationU64<1_000_000>;
 
     fn get_system_time(&'static self) -> Self::Instant {
-        todo!()
+        self.hal.get_system_time()
     }
 
     fn set_system_time_offset(&'static self, _offset: Self::Duration) {

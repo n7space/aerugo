@@ -1,16 +1,41 @@
 //! Generic task.
 
-/// Module for Task handle.
-mod task_handle;
+use crate::time::TimerInstantU64;
 
-pub use self::task_handle::TaskHandle;
+/// Task status.
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum TaskStatus {
+    /// Task is inactive.
+    Sleeping,
+    /// Task is waiting for being executed.
+    Waiting,
+    /// Task is being executed.
+    Working,
+}
 
 /// Trait for generic task.
 pub(crate) trait Task {
-    /// Checks if task is ready for execution.
+    /// Returns task name.
+    fn get_name(&self) -> &'static str;
+
+    /// Returns task status.
+    fn get_status(&self) -> TaskStatus;
+
+    /// Sets task status.
     ///
-    /// Returns true if task is ready, false otherwise.
-    fn is_ready(&self) -> bool;
+    /// * `status` - New task status.
+    fn set_status(&self, status: TaskStatus);
+
+    /// Returns last execution time.
+    fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000>;
+
+    /// Sets last execution time.
+    ///
+    /// * `time` - Last execution time.
+    fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>);
+
+    /// Checks if there are any more data for the tasklet to process.
+    fn has_work(&self) -> bool;
 
     /// Executes task.
     fn execute(&self);

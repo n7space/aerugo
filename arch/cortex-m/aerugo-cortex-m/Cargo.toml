@@ -3,6 +3,7 @@ name = "aerugo-cortex-m"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 repository.workspace = true
 # homepage.workspace = true
 license.workspace = true
@@ -10,3 +11,4 @@ description = "Cortex-M specific implementation for Aerugo"
 
 [dependencies]
 cortex-m = "0.7.7"
+cortex-m-semihosting = "0.5.0"
