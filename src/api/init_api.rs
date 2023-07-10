@@ -4,8 +4,7 @@
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;
-use crate::message_queue::MessageQueueStorage;
-use crate::queue::QueueHandle;
+use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
 /// System initialization API
@@ -18,14 +17,34 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// * `config` - Tasklet creation configuration
+    /// * `config` - Tasklet creation configuration.
+    /// * `step_fn` - Tasklet step function.
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet<T: Default, C>(
+    fn create_tasklet<T: Default, C: Default>(
         &'static self,
         config: Self::TaskConfig,
-        step_fn: StepFn<T>,
+        step_fn: StepFn<T, C>,
+        storage: &'static TaskletStorage<T, C>,
+    ) -> Result<(), Self::Error>;
+
+    /// Creates new tasklet in the system with initialized context data.
+    ///
+    /// * `T` - Type of the data processed by the tasklet.
+    /// * `C` - Type of the structure with tasklet context data.
+    ///
+    /// * `config` - Tasklet creation configuration.
+    /// * `step_fn` - Tasklet step function.
+    /// * `context` - Tasklet context data.
+    /// * `storage` - Static memory storage where the tasklet should be allocated.
+    ///
+    /// Returns `Error` in case of an error, `Ok(())` otherwise.
+    fn create_tasklet_with_context<T: Default, C>(
+        &'static self,
+        config: Self::TaskConfig,
+        step_fn: StepFn<T, C>,
+        context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error>;
 
@@ -70,7 +89,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
         tasklet: &TaskletHandle<T, C>,
-        queue: &QueueHandle<T>,
+        queue: &MessageQueueHandle<T>,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the event.
@@ -112,7 +131,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// Set function for hardware initialization
     ///
     /// * `init_fn` - Hardware initialization function.
-    fn init_hardware(&self, init_fn: fn(&mut Peripherals));
+    fn init_hardware(&'static self, init_fn: fn(&mut Peripherals));
 }
 
 /// Initialization error

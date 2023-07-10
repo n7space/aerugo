@@ -31,7 +31,7 @@ impl Executor {
     }
 
     /// Starts tasklet scheduling.
-    pub(crate) fn run_scheduler(&self) -> ! {
+    pub(crate) fn run_scheduler(&'static self) -> ! {
         loop {
             self.execute_next_tasklet()
                 .expect("Failure in tasklet execution");
@@ -45,7 +45,7 @@ impl Executor {
     /// * `tasklet` - Tasklet to schedule.
     ///
     /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
-    pub(crate) fn schedule_tasklet(&self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
+    pub(crate) fn schedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
         let tasklet_status = tasklet.get_status();
 
         if tasklet_status == TaskStatus::Sleeping {
@@ -59,7 +59,7 @@ impl Executor {
     ///
     /// Returns `RuntimeError` in case of an error, `Ok(bool)` otherwise indicating if tasklet
     /// executed.
-    fn execute_next_tasklet(&self) -> Result<bool, RuntimeError> {
+    fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
             tasklet.execute();
             tasklet.set_last_execution_time(self.system_api.get_system_time());
@@ -81,7 +81,7 @@ impl Executor {
     /// This marks tasklet as waiting.
     ///
     /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
-    fn add_tasklet_to_queue(&self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
+    fn add_tasklet_to_queue(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
         self.tasklet_queue.lock(|q| {
             tasklet.set_status(TaskStatus::Waiting);
 
@@ -97,7 +97,7 @@ impl Executor {
     /// Returns next tasklet that is due for execution, or `None` if the execution queue is empty.
     ///
     /// This marks returned tasklet as working.
-    fn get_tasklet_for_execution(&self) -> Option<TaskletPtr> {
+    fn get_tasklet_for_execution(&'static self) -> Option<TaskletPtr> {
         self.tasklet_queue.lock(|q| match q.pop() {
             Some(tasklet) => {
                 tasklet.set_status(TaskStatus::Working);

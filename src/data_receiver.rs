@@ -15,8 +15,5 @@ pub(crate) trait DataReceiver<T> {
     /// * `data_provider` - Data provider.
     ///
     /// Returns `InitError` in case of an error, `Ok(())` otherwise.
-    fn subscribe(
-        &'static self,
-        data_provider: &'static dyn DataProvider<T>,
-    ) -> Result<(), InitError>;
+    fn subscribe(&self, data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError>;
 }

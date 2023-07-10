@@ -17,7 +17,7 @@ use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletPtr};
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>() }>;
 
 /// Structure containing memory for Tasklet creation.
-pub struct TaskletStorage<T: 'static, C> {
+pub struct TaskletStorage<T, C> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
     /// Buffer for the tasklet strucure.
@@ -28,7 +28,7 @@ pub struct TaskletStorage<T: 'static, C> {
     _context_type_marker: PhantomData<C>,
 }
 
-impl<T: Default, C> TaskletStorage<T, C> {
+impl<T: Default + 'static, C: 'static> TaskletStorage<T, C> {
     /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {
@@ -68,7 +68,8 @@ impl<T: Default, C> TaskletStorage<T, C> {
     pub(crate) fn init(
         &'static self,
         config: TaskletConfig,
-        step_fn: StepFn<T>,
+        step_fn: StepFn<T, C>,
+        context: C,
     ) -> Result<TaskletPtr, InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
@@ -76,7 +77,7 @@ impl<T: Default, C> TaskletStorage<T, C> {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let tasklet = Tasklet::<T, C>::new(config, step_fn);
+        let tasklet = Tasklet::<T, C>::new(config, step_fn, context);
 
         // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
         // (initialized) only once, because it is guarded by the `initialized` field. No external
@@ -104,7 +105,7 @@ impl<T: Default, C> TaskletStorage<T, C> {
     ///
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn buffer_ptr(&self) -> *const () {
+    unsafe fn buffer_ptr(&'static self) -> *const () {
         &*(self.tasklet_buffer.as_ref().as_ptr() as *const ())
     }
 
@@ -112,7 +113,7 @@ impl<T: Default, C> TaskletStorage<T, C> {
     ///
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn tasklet_ptr(&self) -> TaskletPtr {
+    unsafe fn tasklet_ptr(&'static self) -> TaskletPtr {
         TaskletPtr::new::<T, C>(self.buffer_ptr())
     }
 }
@@ -135,7 +136,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let init_result = STORAGE.init(config, |_| {});
+        let init_result = STORAGE.init(config, |_, _| {}, ());
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
 
@@ -149,7 +150,7 @@ mod tests {
         let name = "TaskName";
         let config = TaskletConfig { name };
 
-        let _ = STORAGE.init(config, |_| {});
+        let _ = STORAGE.init(config, |_, _| {}, ());
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

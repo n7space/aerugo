@@ -9,20 +9,22 @@ use cortex_m_rt::{entry, exception};
 use aerugo::{InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage, AERUGO};
 
 #[allow(dead_code)]
+#[derive(Default)]
 struct TaskAData {
     a: u8,
     b: u32,
 }
 
-fn task_a(_: u8) {}
+fn task_a(_: u8, _: &mut TaskAData) {}
 
 #[allow(dead_code)]
+#[derive(Default)]
 struct TaskBData {
     a: u16,
     b: u16,
 }
 
-fn task_b(_: u8) {}
+fn task_b(_: u8, _: &mut TaskBData) {}
 
 static TASK_A_STORAGE: TaskletStorage<u8, TaskAData> = TaskletStorage::new();
 static TASK_B_STORAGE: TaskletStorage<u8, TaskBData> = TaskletStorage::new();

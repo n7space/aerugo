@@ -1,6 +1,8 @@
 //! Message queue used for exchanging data between tasklets.
+mod message_queue_handle;
 mod message_queue_storage;
 
+pub use self::message_queue_handle::MessageQueueHandle;
 pub use self::message_queue_storage::MessageQueueStorage;
 
 pub(crate) use self::message_queue_storage::QueueData;
@@ -28,29 +30,29 @@ pub(crate) struct MessageQueue<'a, T, const N: usize> {
 }
 
 impl<'a, T, const N: usize> Queue<T> for MessageQueue<'a, T, N> {
-    fn register_task(&'static self, _task: &'static dyn Task) -> Result<(), InitError> {
+    fn register_task(&self, _task: &'static dyn Task) -> Result<(), InitError> {
         todo!()
     }
 
-    fn get_registered_tasks(&'static self) -> &Vec<&'static dyn Task, 8> {
+    fn get_registered_tasks(&self) -> &Vec<&'static dyn Task, 8> {
         todo!()
     }
 
-    fn send_data(&'static self, _data: T) -> Result<(), RuntimeError> {
+    fn send_data(&self, _data: T) -> Result<(), RuntimeError> {
         todo!()
     }
 }
 
 impl<'a, T, const N: usize> DataProvider<T> for MessageQueue<'a, T, N> {
-    fn data_ready(&'static self) -> bool {
+    fn data_ready(&self) -> bool {
         todo!()
     }
 
-    fn get_data(&'static self) -> Option<T> {
+    fn get_data(&self) -> Option<T> {
         todo!()
     }
 
-    fn get_data_unchecked(&'static self) -> T {
+    fn get_data_unchecked(&self) -> T {
         todo!()
     }
 }

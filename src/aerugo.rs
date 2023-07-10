@@ -14,8 +14,7 @@ use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
-use crate::message_queue::MessageQueueStorage;
-use crate::queue::QueueHandle;
+use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::task::TaskId;
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
@@ -54,13 +53,28 @@ impl Aerugo {
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T: Default, C>(
+    fn create_tasklet<T: Default, C: Default>(
         &'static self,
         config: Self::TaskConfig,
-        step_fn: StepFn<T>,
+        step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn)?;
+        let tasklet_ptr = storage.init(config, step_fn, C::default())?;
+        EXECUTOR
+            .schedule_tasklet(tasklet_ptr)
+            .expect("Unable to schedule tasklet");
+
+        Ok(())
+    }
+
+    fn create_tasklet_with_context<T: Default, C>(
+        &'static self,
+        config: Self::TaskConfig,
+        step_fn: StepFn<T, C>,
+        context: C,
+        storage: &'static TaskletStorage<T, C>,
+    ) -> Result<(), Self::Error> {
+        let tasklet_ptr = storage.init(config, step_fn, context)?;
         EXECUTOR
             .schedule_tasklet(tasklet_ptr)
             .expect("Unable to schedule tasklet");
@@ -89,7 +103,7 @@ impl InitApi for Aerugo {
     fn subscribe_tasklet_to_queue<T, C>(
         &'static self,
         _tasklet: &TaskletHandle<T, C>,
-        _queue: &QueueHandle<T>,
+        _queue: &MessageQueueHandle<T>,
     ) -> Result<(), Self::Error> {
         todo!()
     }
@@ -118,7 +132,7 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn init_hardware(&self, _init_fn: fn(&mut Peripherals)) {
+    fn init_hardware(&'static self, _init_fn: fn(&mut Peripherals)) {
         todo!()
     }
 }
@@ -143,24 +157,17 @@ impl RuntimeApi for Aerugo {
         todo!()
     }
 
-    fn enter_critical()
-    where
-        Self: Sized,
-    {
+    fn enter_critical() {
         todo!()
     }
 
-    fn exit_critical()
-    where
-        Self: Sized,
-    {
+    fn exit_critical() {
         todo!()
     }
 
     fn execute_critical<F, R>(_f: F) -> R
     where
         F: FnOnce(&CriticalSection) -> R,
-        Self: Sized,
     {
         todo!()
     }
