@@ -1,6 +1,6 @@
-/// System initialization API.
-///
-/// This API is used for the system initialization, before the scheduler is started.
+//! System initialization API.
+//!
+//! This API is used for the system initialization, before the scheduler is started.
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;

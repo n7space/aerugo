@@ -90,6 +90,9 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         Ok(())
     }
 
+    /// Returns a reference to the stored MessageQueue structer.
+    ///
+    /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
     unsafe fn message_queue(&'static self) -> &'static MessageQueue<T, N> {
         &*(self.queue_buffer.as_ref().as_ptr() as *const MessageQueue<T, N>)
