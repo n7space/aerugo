@@ -28,6 +28,7 @@ type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 ///
 /// * `T` - Type of the stored data.
 /// * `N` - Size of the queue.
+#[repr(C)]
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
     data_queue: &'static Mutex<QueueData<T, N>>,

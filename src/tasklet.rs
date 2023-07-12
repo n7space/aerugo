@@ -36,6 +36,7 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 ///
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
+#[repr(C)]
 pub(crate) struct Tasklet<T: 'static, C> {
     /// Tasklet name.
     name: &'static str,
