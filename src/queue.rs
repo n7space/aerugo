@@ -15,6 +15,9 @@ pub(crate) trait Queue<T>: DataProvider<T> {
     /// Returns `InitError` in case of an error, `Ok(())` otherwise.
     fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError>;
 
+    /// Wake tasklets registered to this queue.
+    fn wake_tasklets(&self);
+
     /// Sends given data to this queue.
     ///
     /// * `data` - Data to send.

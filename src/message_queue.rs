@@ -9,10 +9,12 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use heapless::Vec;
 
+use crate::aerugo::AERUGO;
 use crate::aerugo::{
     error::{InitError, RuntimeError},
     Aerugo,
 };
+use crate::api::SystemApi;
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::internal_cell::InternalCell;
@@ -53,11 +55,21 @@ impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
         }
     }
 
+    fn wake_tasklets(&self) {
+        for t in unsafe { self.registered_tasklets.as_ref() } {
+            AERUGO.wake_tasklet(t);
+        }
+    }
+
     fn send_data(&self, data: T) -> Result<(), RuntimeError> {
         match self.data_queue.lock(|q| q.enqueue(data)) {
-            Ok(_) => return Ok(()),
+            Ok(_) => (),
             Err(_) => return Err(RuntimeError::DataQueueFull),
-        }
+        };
+
+        self.wake_tasklets();
+
+        Ok(())
     }
 }
 
