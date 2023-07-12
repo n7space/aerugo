@@ -104,3 +104,56 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         &*(self.queue_buffer.as_ref().as_ptr() as *const MessageQueue<T, N>)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create() {
+        static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
+
+        assert!(!STORAGE.is_initialized());
+    }
+
+    #[test]
+    fn initialize() {
+        static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
+
+        let init_result = STORAGE.init();
+        assert!(init_result.is_ok());
+        assert!(STORAGE.is_initialized());
+    }
+
+    #[test]
+    fn fail_double_initialization() {
+        static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
+
+        let mut init_result = STORAGE.init();
+        assert!(init_result.is_ok());
+        init_result = STORAGE.init();
+        assert!(init_result.is_err());
+        assert_eq!(
+            init_result.err().unwrap(),
+            InitError::StorageAlreadyInitialized
+        );
+    }
+
+    #[test]
+    fn create_handle() {
+        static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
+
+        let _ = STORAGE.init();
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_some());
+    }
+
+    #[test]
+    fn fail_create_handle_uninitialized() {
+        static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_none());
+    }
+}
