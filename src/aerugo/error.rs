@@ -11,6 +11,8 @@ pub enum InitError {
     StorageAlreadyInitialized,
     /// Error occurring when trying to subscribe tasklet to more than one data provider.
     TaskletAlreadySubscribed,
+    /// Error occurring when trying to register a tasklet to a full list.
+    TaskletListFull,
 }
 
 impl init_api::Error for InitError {}

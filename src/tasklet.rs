@@ -5,6 +5,7 @@
 //!
 //! Tasklet should be thought of as a small building block, which processes a given type of data,
 //! one element at the time.
+
 mod tasklet_config;
 mod tasklet_handle;
 mod tasklet_ptr;
@@ -62,6 +63,11 @@ impl<T, C> Tasklet<T, C> {
             data_provider: OnceCell::new(),
         }
     }
+
+    /// Creates pointer to this tasklet.
+    pub(crate) fn ptr(&'static self) -> TaskletPtr {
+        TaskletPtr::from_tasklet::<T, C>(self)
+    }
 }
 
 impl<T, C> Task for Tasklet<T, C> {
@@ -86,8 +92,6 @@ impl<T, C> Task for Tasklet<T, C> {
     }
 
     fn has_work(&self) -> bool {
-        // SAFETY: This is safe, because this field is only mutably referenced during
-        // initialization.
         match self.data_provider.get() {
             Some(dp) => dp.data_ready(),
             None => false,
@@ -100,14 +104,11 @@ impl<T, C> Task for Tasklet<T, C> {
             None => return,
         };
 
-        match value {
-            Some(val) => {
-                // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
-                // be executed only once at a given time.
-                let context = unsafe { self.context.as_mut_ref() };
-                (self.step_fn)(val, context)
-            }
-            None => (),
+        if let Some(val) = value {
+            // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
+            // be executed only once at a given time.
+            let context = unsafe { self.context.as_mut_ref() };
+            (self.step_fn)(val, context)
         }
     }
 }

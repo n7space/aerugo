@@ -125,7 +125,7 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]
     unsafe fn tasklet_ptr(&'static self) -> TaskletPtr {
-        TaskletPtr::new::<T, C>(self.buffer_ptr())
+        TaskletPtr::from_memory::<T, C>(self.buffer_ptr())
     }
 }
 

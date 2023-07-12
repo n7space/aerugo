@@ -9,11 +9,18 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use heapless::Vec;
 
-use crate::aerugo::error::{InitError, RuntimeError};
+use crate::aerugo::{
+    error::{InitError, RuntimeError},
+    Aerugo,
+};
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
+use crate::internal_cell::InternalCell;
 use crate::queue::Queue;
-use crate::task::Task;
+use crate::tasklet::TaskletPtr;
+
+// List of tasklets registered to a queue
+type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 
 /// Message queue used for exchanging data between tasklets.
 ///
@@ -22,22 +29,28 @@ use crate::task::Task;
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
     data_queue: &'static Mutex<QueueData<T, N>>,
+    /// Tasklets registered to this queue.
+    registered_tasklets: InternalCell<TaskletList>,
 }
 
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
     pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
-        MessageQueue { data_queue }
+        MessageQueue {
+            data_queue,
+            registered_tasklets: TaskletList::new().into(),
+        }
     }
 }
 
 impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
-    fn register_task(&self, _task: &'static dyn Task) -> Result<(), InitError> {
-        todo!()
-    }
-
-    fn get_registered_tasks(&self) -> &Vec<&'static dyn Task, 8> {
-        todo!()
+    fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+        // SAFETY: This is safe, because this is only mutably referenced here and no external
+        // references can be made.
+        match unsafe { self.registered_tasklets.as_mut_ref().push(tasklet) } {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletListFull),
+        }
     }
 
     fn send_data(&self, data: T) -> Result<(), RuntimeError> {

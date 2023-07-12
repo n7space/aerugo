@@ -45,11 +45,15 @@ impl Executor {
     /// * `tasklet` - Tasklet to schedule.
     ///
     /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
-    pub(crate) fn schedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
+    #[allow(dead_code)]
+    pub(crate) fn schedule_tasklet(
+        &'static self,
+        tasklet: &TaskletPtr,
+    ) -> Result<(), RuntimeError> {
         let tasklet_status = tasklet.get_status();
 
         if tasklet_status == TaskStatus::Sleeping {
-            self.add_tasklet_to_queue(tasklet)?;
+            self.add_tasklet_to_queue(tasklet.clone())?;
         }
 
         Ok(())

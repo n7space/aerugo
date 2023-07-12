@@ -14,10 +14,11 @@
 use core::cmp::Ordering;
 
 use crate::task::TaskStatus;
-use crate::tasklet::{tasklet_vtable, TaskletVTable};
+use crate::tasklet::{tasklet_vtable, Tasklet, TaskletVTable};
 use crate::time::TimerInstantU64;
 
 /// Raw tasklet pointer.
+#[derive(Clone)]
 pub(crate) struct TaskletPtr {
     /// Pointer to the `Tasklet<T, C>` structure.
     ptr: *const (),
@@ -29,12 +30,22 @@ unsafe impl Sync for TaskletPtr {}
 unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
-    /// Creates new pointer
+    /// Creates new from memory pointer
     ///
     /// * `ptr` - Pointer to memory where tasklet is allocated.
-    pub(crate) fn new<T: 'static, C: 'static>(ptr: *const ()) -> Self {
+    pub(crate) fn from_memory<T: 'static, C: 'static>(ptr: *const ()) -> Self {
         TaskletPtr {
             ptr,
+            vtable: tasklet_vtable::<T, C>(),
+        }
+    }
+
+    /// Creates new from tasklet referernce
+    ///
+    /// * `tasklet` - Reference to the tasklet
+    pub(crate) fn from_tasklet<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
+        TaskletPtr {
+            ptr: tasklet as *const Tasklet<T, C> as *const (),
             vtable: tasklet_vtable::<T, C>(),
         }
     }

@@ -16,6 +16,7 @@ use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
+use crate::queue::Queue;
 use crate::task::TaskId;
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
@@ -60,10 +61,7 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn, C::default())?;
-        EXECUTOR
-            .schedule_tasklet(tasklet_ptr)
-            .expect("Unable to schedule tasklet");
+        storage.init(config, step_fn, C::default())?;
 
         Ok(())
     }
@@ -75,10 +73,7 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn, context)?;
-        EXECUTOR
-            .schedule_tasklet(tasklet_ptr)
-            .expect("Unable to schedule tasklet");
+        storage.init(config, step_fn, context)?;
 
         Ok(())
     }
@@ -87,7 +82,7 @@ impl InitApi for Aerugo {
         &'static self,
         storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        let _ = storage.init()?;
+        storage.init()?;
 
         Ok(())
     }
@@ -112,6 +107,7 @@ impl InitApi for Aerugo {
         let queue = queue_handle.queue();
 
         tasklet.subscribe(queue)?;
+        queue.register_tasklet(tasklet.ptr())?;
 
         Ok(())
     }
