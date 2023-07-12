@@ -30,68 +30,54 @@ unsafe impl Sync for TaskletPtr {}
 unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
-    /// Creates new from memory pointer
-    ///
-    /// * `ptr` - Pointer to memory where tasklet is allocated.
-    pub(crate) fn from_memory<T: 'static, C: 'static>(ptr: *const ()) -> Self {
-        TaskletPtr {
-            ptr,
-            vtable: tasklet_vtable::<T, C>(),
-        }
-    }
-
     /// Creates new from tasklet referernce
     ///
     /// * `tasklet` - Reference to the tasklet
-    pub(crate) fn from_tasklet<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
+    pub(crate) fn new<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
         TaskletPtr {
             ptr: tasklet as *const Tasklet<T, C> as *const (),
             vtable: tasklet_vtable::<T, C>(),
         }
     }
 
-    /// Returns tasklet name.
+    /// See: [get_name](crate::task::Task::get_name())
     #[inline(always)]
     #[allow(dead_code)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
 
-    /// Returns tasklet status.
+    /// See: [get_status](crate::task::Task::get_status())
     #[inline(always)]
     pub(crate) fn get_status(&self) -> TaskStatus {
         (self.vtable.get_status)(self.ptr)
     }
 
-    /// Sets tasklet status.
-    ///
-    /// * `status` - New tasklet status.
+    /// See: [set_status](crate::task::Task::set_status())
     #[inline(always)]
     pub(crate) fn set_status(&self, status: TaskStatus) {
         (self.vtable.set_status)(self.ptr, status)
     }
 
-    /// Returns last execution time.
+    /// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
     #[inline(always)]
     pub(crate) fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000> {
         (self.vtable.get_last_execution_time)(self.ptr)
     }
 
-    /// Sets last execution time.
-    ///
-    /// * `time` - Last execution time.
+    /// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
     #[inline(always)]
     pub(crate) fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>) {
         (self.vtable.set_last_execution_time)(self.ptr, time)
     }
 
-    /// Checks if there are any more data for the tasklet to process.
+    /// See: [has_work](crate::task::Task::has_work())
     #[inline(always)]
     pub(crate) fn has_work(&self) -> bool {
         (self.vtable.has_work)(self.ptr)
     }
 
-    /// Executes task.
+    /// See: [execute](crate::task::Task::execute())
     #[inline(always)]
     pub(crate) fn execute(&self) {
         (self.vtable.execute)(self.ptr)

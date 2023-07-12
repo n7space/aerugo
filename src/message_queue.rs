@@ -21,7 +21,7 @@ use crate::internal_cell::InternalCell;
 use crate::queue::Queue;
 use crate::tasklet::TaskletPtr;
 
-// List of tasklets registered to a queue
+/// List of tasklets registered to a queue
 type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 
 /// Message queue used for exchanging data between tasklets.

@@ -6,5 +6,6 @@ use crate::tasklet::TaskletPtr;
 
 /// Internal system API.
 pub(crate) trait SystemApi {
-    fn wake_tasklet(&'static self, _tasklet: &TaskletPtr);
+    /// Wakes given tasklet by scheduling it for execution.
+    fn wake_tasklet(&'static self, tasklet: &TaskletPtr);
 }

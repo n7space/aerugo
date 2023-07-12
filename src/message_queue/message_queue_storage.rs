@@ -41,6 +41,13 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         }
     }
 
+    /// Returns initialization status of this storage.
+    pub fn is_initialized(&'static self) -> bool {
+        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
+        // the `init` function.
+        unsafe { *self.initialized.as_ref() }
+    }
+
     /// Creates new handle to a queue allocated in this storage.
     ///
     /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
@@ -72,10 +79,9 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
         // (initialized) only once, because it is guarded by the `initialized` field. No external
         // borrow can be made before initialization.
-        //
-        // Because the `MessageQueue` structure is of a constant size, the `queue_buffer` field is
-        // statically allocated with enough memory for a 'placement new'.
         unsafe {
+            // Because the `MessageQueue` structure is of a constant size, the `queue_buffer` field is
+            // statically allocated with enough memory for a 'placement new'.
             let queue_buffer =
                 self.queue_buffer.as_mut_ref().as_mut_ptr() as *mut MessageQueue<T, N>;
             core::ptr::write(queue_buffer, queue);

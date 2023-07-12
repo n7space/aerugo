@@ -67,7 +67,7 @@ impl<T, C> Tasklet<T, C> {
 
     /// Creates pointer to this tasklet.
     pub(crate) fn ptr(&'static self) -> TaskletPtr {
-        TaskletPtr::from_tasklet::<T, C>(self)
+        TaskletPtr::new::<T, C>(self)
     }
 }
 

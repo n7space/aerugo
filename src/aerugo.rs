@@ -37,18 +37,18 @@ impl Aerugo {
     #[read_env("AERUGO_TASKLET_COUNT")]
     pub(crate) const TASKLET_COUNT: usize = 0;
 
-    /// Starts the system.
-    pub fn start(&'static self) -> ! {
-        EXECUTOR.run_scheduler()
-    }
-
     /// Creates new system instance.
-    pub(crate) const fn new() -> Self {
+    const fn new() -> Self {
         let peripherals = Peripherals {};
 
         Aerugo {
             hal: Hal::new(peripherals),
         }
+    }
+
+    /// Starts the system.
+    pub fn start(&'static self) -> ! {
+        EXECUTOR.run_scheduler()
     }
 }
 
@@ -61,9 +61,7 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        storage.init(config, step_fn, C::default())?;
-
-        Ok(())
+        storage.init(config, step_fn, C::default())
     }
 
     fn create_tasklet_with_context<T, C>(
@@ -73,18 +71,14 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        storage.init(config, step_fn, context)?;
-
-        Ok(())
+        storage.init(config, step_fn, context)
     }
 
     fn create_message_queue<T, const N: usize>(
         &'static self,
         storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        storage.init()?;
-
-        Ok(())
+        storage.init()
     }
 
     fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), Self::Error> {

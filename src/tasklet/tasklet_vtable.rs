@@ -12,19 +12,19 @@ use crate::time::TimerInstantU64;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
-    /// `get_name` function.
+    /// Pointer to [get_name](get_name()) function.
     pub(crate) get_name: fn(*const ()) -> &'static str,
-    /// `get_status` function.
+    /// Pointer to [get_status](get_status()) function.
     pub(crate) get_status: fn(*const ()) -> TaskStatus,
-    /// `set_status` function.
+    /// Pointer to [set_status](set_status()) function.
     pub(crate) set_status: fn(*const (), TaskStatus),
-    /// `get_last_execution_time` function.
+    /// Pointer to [get_last_execution_time](get_last_execution_time()) function.
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
-    /// `set_last_execution_time` function.
+    /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
     pub(crate) set_last_execution_time: fn(*const (), TimerInstantU64<1_000_000>),
-    /// `has_work` function.
+    /// Pointer to [has_work](has_work()) function.
     pub(crate) has_work: fn(*const ()) -> bool,
-    /// `execute` function.
+    /// Pointer to [execute](execute()) function.
     pub(crate) execute: fn(*const ()),
 }
 
@@ -45,6 +45,8 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable
 }
 
 /// "Virtual" call to the `get_name` `Tasklet` function.
+///
+/// See: [get_name](crate::task::Task::get_name())
 #[inline(always)]
 fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -54,6 +56,8 @@ fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
 }
 
 /// "Virtual" call to the `get_status` `Tasklet` function.
+///
+/// See: [get_status](crate::task::Task::get_status())
 #[inline(always)]
 fn get_status<T: 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -63,6 +67,8 @@ fn get_status<T: 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
 }
 
 /// "Virtual" call to the `set_status` `Tasklet` function.
+///
+/// See: [set_status](crate::task::Task::set_status())
 #[inline(always)]
 fn set_status<T: 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -72,6 +78,8 @@ fn set_status<T: 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
 }
 
 /// "Virtual" call to the `get_last_execution_time` `Tasklet` function.
+///
+/// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
 #[inline(always)]
 fn get_last_execution_time<T: 'static, C: 'static>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -81,6 +89,8 @@ fn get_last_execution_time<T: 'static, C: 'static>(ptr: *const ()) -> TimerInsta
 }
 
 /// "Virtual" call to the `set_last_execution_time` `Tasklet` function.
+///
+/// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
 #[inline(always)]
 fn set_last_execution_time<T: 'static, C: 'static>(
     ptr: *const (),
@@ -93,6 +103,8 @@ fn set_last_execution_time<T: 'static, C: 'static>(
 }
 
 /// "Virtual" call to the `has_work` `Tasklet` function.
+///
+/// See: [has_work](crate::task::Task::has_work())
 #[inline(always)]
 fn has_work<T: 'static, C: 'static>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -102,6 +114,8 @@ fn has_work<T: 'static, C: 'static>(ptr: *const ()) -> bool {
 }
 
 /// "Virtual" call to the `execute` `Tasklet` function.
+///
+/// See: [execute](crate::task::Task::execute())
 #[inline(always)]
 fn execute<T: 'static, C: 'static>(ptr: *const ()) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
