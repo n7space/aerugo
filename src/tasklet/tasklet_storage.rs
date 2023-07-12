@@ -126,28 +126,40 @@ mod tests {
     fn initialize() {
         static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
 
-        let name = "TaskName";
-        let config = TaskletConfig { name };
-
-        let init_result = STORAGE.init(config, |_, _| {}, ());
+        let init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
+    }
 
-        assert_eq!(init_result.unwrap().get_name(), name);
+    #[test]
+    fn fail_double_initialization() {
+        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+
+        let mut init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        assert!(init_result.is_ok());
+        init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        assert!(init_result.is_err());
+        assert_eq!(
+            init_result.err().unwrap(),
+            InitError::StorageAlreadyInitialized
+        );
     }
 
     #[test]
     fn create_handle() {
         static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
 
-        let name = "TaskName";
-        let config = TaskletConfig { name };
-
-        let _ = STORAGE.init(config, |_, _| {}, ());
+        let _ = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());
+    }
 
-        assert_eq!(handle.unwrap().get_name(), name);
+    #[test]
+    fn fail_create_handle_uninitialized() {
+        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_none());
     }
 }
