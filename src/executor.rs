@@ -2,7 +2,7 @@
 
 use heapless::binary_heap::{BinaryHeap, Max};
 
-use crate::aerugo::{error::RuntimeError, Aerugo};
+use crate::aerugo::{error::RuntimeError, Aerugo, AERUGO};
 use crate::api::RuntimeApi;
 use crate::arch::Mutex;
 use crate::task::TaskStatus;
@@ -15,18 +15,13 @@ type TaskletQueue<const N: usize> = BinaryHeap<TaskletPtr, Max, N>;
 pub(crate) struct Executor {
     /// Tasklet queue.
     tasklet_queue: Mutex<TaskletQueue<{ Aerugo::TASKLET_COUNT }>>,
-    /// System API.
-    system_api: &'static Aerugo,
 }
 
 impl Executor {
     /// Creates new executor instance.
-    ///
-    /// * `system_api` - System API.
-    pub(crate) const fn new(system_api: &'static Aerugo) -> Self {
+    pub(crate) const fn new() -> Self {
         Executor {
             tasklet_queue: Mutex::new(BinaryHeap::new()),
-            system_api,
         }
     }
 
@@ -44,29 +39,35 @@ impl Executor {
     ///
     /// * `tasklet` - Tasklet to schedule.
     ///
-    /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
-    pub(crate) fn schedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
+    /// Returns `RuntimeError` in case of an error, `Ok(bool)` otherwise indicating if tasklet was
+    /// scheduled.
+    #[allow(dead_code)]
+    pub(crate) fn schedule_tasklet(
+        &'static self,
+        tasklet: &TaskletPtr,
+    ) -> Result<bool, RuntimeError> {
         let tasklet_status = tasklet.get_status();
 
         if tasklet_status == TaskStatus::Sleeping {
-            self.add_tasklet_to_queue(tasklet)?;
+            self.add_tasklet_to_queue(tasklet.clone())?;
+            Ok(true)
+        } else {
+            Ok(false)
         }
-
-        Ok(())
     }
 
     /// Executes the next tasklet from the queue.
     ///
-    /// Returns `RuntimeError` in case of an error, `Ok(bool)` otherwise indicating if tasklet
+    /// Returns `RuntimeError` in case of an error, `Ok(bool)` otherwise indicating if tasklet was
     /// executed.
     fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
-            tasklet.execute();
-            tasklet.set_last_execution_time(self.system_api.get_system_time());
+            tasklet.set_status(TaskStatus::Working);
 
-            if tasklet.has_work() {
-                self.add_tasklet_to_queue(tasklet)?;
-            } else {
+            tasklet.execute();
+            tasklet.set_last_execution_time(AERUGO.get_system_time());
+
+            if !self.reschedule_tasklet(&tasklet)? {
                 tasklet.set_status(TaskStatus::Sleeping);
             }
 
@@ -86,24 +87,31 @@ impl Executor {
             tasklet.set_status(TaskStatus::Waiting);
 
             match q.push(tasklet) {
-                Ok(_) => (),
-                Err(_) => return Err(RuntimeError::ExecutorTaskletQueueFull),
+                Ok(_) => Ok(()),
+                Err(_) => Err(RuntimeError::ExecutorTaskletQueueFull),
             }
-
-            Ok(())
         })
+    }
+
+    /// Schedules tasklet if there is more work to do.
+    ///
+    /// * `tasklet` - Tasklet to reschedule
+    ///
+    /// Returns `RuntimeError` in case of an error, `Ok(bool)` otherwise indicating if tasklet was
+    /// rescheduled.
+    fn reschedule_tasklet(&'static self, tasklet: &TaskletPtr) -> Result<bool, RuntimeError> {
+        if tasklet.has_work() {
+            self.add_tasklet_to_queue(tasklet.clone())?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     /// Returns next tasklet that is due for execution, or `None` if the execution queue is empty.
     ///
     /// This marks returned tasklet as working.
     fn get_tasklet_for_execution(&'static self) -> Option<TaskletPtr> {
-        self.tasklet_queue.lock(|q| match q.pop() {
-            Some(tasklet) => {
-                tasklet.set_status(TaskStatus::Working);
-                Some(tasklet)
-            }
-            None => None,
-        })
+        self.tasklet_queue.lock(|q| q.pop())
     }
 }

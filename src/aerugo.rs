@@ -8,21 +8,23 @@ use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
 use env_parser::read_env;
 
-use crate::api::{InitApi, RuntimeApi};
+use crate::api::{InitApi, RuntimeApi, SystemApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{Hal, Peripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
+use crate::queue::Queue;
 use crate::task::TaskId;
-use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletHandle, TaskletPtr, TaskletStorage};
 
 /// Core system.
 pub static AERUGO: Aerugo = Aerugo::new();
 
 /// System scheduler.
-static EXECUTOR: Executor = Executor::new(&AERUGO);
+static EXECUTOR: Executor = Executor::new();
 
 /// System structure.
 pub struct Aerugo {
@@ -35,58 +37,48 @@ impl Aerugo {
     #[read_env("AERUGO_TASKLET_COUNT")]
     pub(crate) const TASKLET_COUNT: usize = 0;
 
-    /// Starts the system.
-    pub fn start(&'static self) -> ! {
-        EXECUTOR.run_scheduler()
-    }
-
     /// Creates new system instance.
-    pub(crate) const fn new() -> Self {
+    const fn new() -> Self {
         let peripherals = Peripherals {};
 
         Aerugo {
             hal: Hal::new(peripherals),
         }
     }
+
+    /// Starts the system.
+    pub fn start(&'static self) -> ! {
+        EXECUTOR.run_scheduler()
+    }
 }
 
 impl InitApi for Aerugo {
     type Duration = crate::time::MillisDurationU32;
 
-    fn create_tasklet<T: Default, C: Default>(
+    fn create_tasklet<T, C: Default>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn, C::default())?;
-        EXECUTOR
-            .schedule_tasklet(tasklet_ptr)
-            .expect("Unable to schedule tasklet");
-
-        Ok(())
+        storage.init(config, step_fn, C::default())
     }
 
-    fn create_tasklet_with_context<T: Default, C>(
+    fn create_tasklet_with_context<T, C>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
         context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        let tasklet_ptr = storage.init(config, step_fn, context)?;
-        EXECUTOR
-            .schedule_tasklet(tasklet_ptr)
-            .expect("Unable to schedule tasklet");
-
-        Ok(())
+        storage.init(config, step_fn, context)
     }
 
     fn create_message_queue<T, const N: usize>(
         &'static self,
-        _storage: &'static MessageQueueStorage<T, N>,
+        storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        storage.init()
     }
 
     fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), Self::Error> {
@@ -100,12 +92,18 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_queue<T, C>(
+    fn subscribe_tasklet_to_queue<T: Default, C, const N: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C>,
-        _queue: &MessageQueueHandle<T>,
+        tasklet_handle: &TaskletHandle<T, C>,
+        queue_handle: &MessageQueueHandle<T, N>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet = tasklet_handle.tasklet();
+        let queue = queue_handle.queue();
+
+        tasklet.subscribe(queue)?;
+        queue.register_tasklet(tasklet.ptr())?;
+
+        Ok(())
     }
 
     fn subscribe_tasklet_to_event<T, C>(
@@ -170,5 +168,13 @@ impl RuntimeApi for Aerugo {
         F: FnOnce(&CriticalSection) -> R,
     {
         todo!()
+    }
+}
+
+impl SystemApi for Aerugo {
+    fn wake_tasklet(&'static self, tasklet: &TaskletPtr) {
+        EXECUTOR
+            .schedule_tasklet(tasklet)
+            .expect("Unable to schedule tasklet");
     }
 }

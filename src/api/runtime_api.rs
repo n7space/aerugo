@@ -1,6 +1,6 @@
-/// System runtime API.
-///
-/// This API can be used by the user in tasklet functions to interact with the system.
+//! System runtime API.
+//!
+//! This API can be used by the user in tasklet functions to interact with the system.
 use core::ops::{Add, Sub};
 
 use bare_metal::CriticalSection;

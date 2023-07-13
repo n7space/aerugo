@@ -1,10 +1,8 @@
 //! Generic queue.
 
-use heapless::Vec;
-
 use crate::aerugo::error::{InitError, RuntimeError};
 use crate::data_provider::DataProvider;
-use crate::task::Task;
+use crate::tasklet::TaskletPtr;
 
 /// Trait for generic queue that stores data of type `T`.
 ///
@@ -15,12 +13,10 @@ pub(crate) trait Queue<T>: DataProvider<T> {
     /// * `task` - Task to register.
     ///
     /// Returns `InitError` in case of an error, `Ok(())` otherwise.
-    fn register_task(&self, task: &'static dyn Task) -> Result<(), InitError>;
+    fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError>;
 
-    /// Gets tasks registered to this queue.
-    ///
-    /// Returns a list of references to the registered tasks.
-    fn get_registered_tasks(&self) -> &Vec<&'static dyn Task, 8>;
+    /// Wake tasklets registered to this queue.
+    fn wake_tasklets(&self);
 
     /// Sends given data to this queue.
     ///
