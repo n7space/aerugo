@@ -22,24 +22,3 @@ impl Default for TaskletConfig {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn create_default() {
-        let tasklet_config = TaskletConfig::default();
-
-        assert_eq!(tasklet_config.name, "MISSING_TASKLET_NAME");
-    }
-
-    #[test]
-    fn create() {
-        let name = "TaskName";
-
-        let tasklet_config = TaskletConfig { name };
-
-        assert_eq!(tasklet_config.name, name);
-    }
-}

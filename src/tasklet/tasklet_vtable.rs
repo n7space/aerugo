@@ -12,19 +12,19 @@ use crate::time::TimerInstantU64;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
-    /// `get_name` function.
+    /// Pointer to [get_name](get_name()) function.
     pub(crate) get_name: fn(*const ()) -> &'static str,
-    /// `get_status` function.
+    /// Pointer to [get_status](get_status()) function.
     pub(crate) get_status: fn(*const ()) -> TaskStatus,
-    /// `set_status` function.
+    /// Pointer to [set_status](set_status()) function.
     pub(crate) set_status: fn(*const (), TaskStatus),
-    /// `get_last_execution_time` function.
+    /// Pointer to [get_last_execution_time](get_last_execution_time()) function.
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
-    /// `set_last_execution_time` function.
+    /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
     pub(crate) set_last_execution_time: fn(*const (), TimerInstantU64<1_000_000>),
-    /// `has_work` function.
+    /// Pointer to [has_work](has_work()) function.
     pub(crate) has_work: fn(*const ()) -> bool,
-    /// `execute` function.
+    /// Pointer to [execute](execute()) function.
     pub(crate) execute: fn(*const ()),
 }
 
@@ -32,7 +32,7 @@ pub(crate) struct TaskletVTable {
 ///
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub(crate) fn tasklet_vtable<T: Default + 'static, C: 'static>() -> &'static TaskletVTable {
+pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable {
     &TaskletVTable {
         get_name: get_name::<T, C>,
         get_status: get_status::<T, C>,
@@ -45,8 +45,10 @@ pub(crate) fn tasklet_vtable<T: Default + 'static, C: 'static>() -> &'static Tas
 }
 
 /// "Virtual" call to the `get_name` `Tasklet` function.
+///
+/// See: [get_name](crate::task::Task::get_name())
 #[inline(always)]
-fn get_name<T: Default + 'static, C: 'static>(ptr: *const ()) -> &'static str {
+fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -54,8 +56,10 @@ fn get_name<T: Default + 'static, C: 'static>(ptr: *const ()) -> &'static str {
 }
 
 /// "Virtual" call to the `get_status` `Tasklet` function.
+///
+/// See: [get_status](crate::task::Task::get_status())
 #[inline(always)]
-fn get_status<T: Default + 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
+fn get_status<T: 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -63,8 +67,10 @@ fn get_status<T: Default + 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
 }
 
 /// "Virtual" call to the `set_status` `Tasklet` function.
+///
+/// See: [set_status](crate::task::Task::set_status())
 #[inline(always)]
-fn set_status<T: Default + 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
+fn set_status<T: 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -72,10 +78,10 @@ fn set_status<T: Default + 'static, C: 'static>(ptr: *const (), status: TaskStat
 }
 
 /// "Virtual" call to the `get_last_execution_time` `Tasklet` function.
+///
+/// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
 #[inline(always)]
-fn get_last_execution_time<T: Default + 'static, C: 'static>(
-    ptr: *const (),
-) -> TimerInstantU64<1_000_000> {
+fn get_last_execution_time<T: 'static, C: 'static>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -83,8 +89,10 @@ fn get_last_execution_time<T: Default + 'static, C: 'static>(
 }
 
 /// "Virtual" call to the `set_last_execution_time` `Tasklet` function.
+///
+/// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
 #[inline(always)]
-fn set_last_execution_time<T: Default + 'static, C: 'static>(
+fn set_last_execution_time<T: 'static, C: 'static>(
     ptr: *const (),
     time: TimerInstantU64<1_000_000>,
 ) {
@@ -95,8 +103,10 @@ fn set_last_execution_time<T: Default + 'static, C: 'static>(
 }
 
 /// "Virtual" call to the `has_work` `Tasklet` function.
+///
+/// See: [has_work](crate::task::Task::has_work())
 #[inline(always)]
-fn has_work<T: Default + 'static, C: 'static>(ptr: *const ()) -> bool {
+fn has_work<T: 'static, C: 'static>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
@@ -104,91 +114,12 @@ fn has_work<T: Default + 'static, C: 'static>(ptr: *const ()) -> bool {
 }
 
 /// "Virtual" call to the `execute` `Tasklet` function.
+///
+/// See: [execute](crate::task::Task::execute())
 #[inline(always)]
-fn execute<T: Default + 'static, C: 'static>(ptr: *const ()) {
+fn execute<T: 'static, C: 'static>(ptr: *const ()) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
     tasklet.execute()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tasklet::{Tasklet, TaskletConfig};
-
-    fn create_tasklet() -> Tasklet<u8, ()> {
-        let tasklet_config = TaskletConfig { name: "TaskName" };
-
-        Tasklet::<u8, ()>::new(tasklet_config, |_, _| {}, ())
-    }
-
-    #[test]
-    fn get_name() {
-        let tasklet = create_tasklet();
-        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
-        let vtable = tasklet_vtable::<u8, ()>();
-
-        assert_eq!((vtable.get_name)(ptr), tasklet.get_name());
-    }
-
-    #[test]
-    fn get_set_status() {
-        let tasklet = create_tasklet();
-        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
-        let vtable = tasklet_vtable::<u8, ()>();
-
-        assert_eq!((vtable.get_status)(ptr), tasklet.get_status());
-        (vtable.set_status)(ptr, TaskStatus::Waiting);
-        assert_eq!((vtable.get_status)(ptr), tasklet.get_status());
-    }
-
-    #[test]
-    fn get_set_last_execution_time() {
-        let tasklet = create_tasklet();
-        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
-        let vtable = tasklet_vtable::<u8, ()>();
-
-        assert_eq!(
-            (vtable.get_last_execution_time)(ptr),
-            tasklet.get_last_execution_time()
-        );
-        (vtable.set_last_execution_time)(ptr, TimerInstantU64::<1_000_000>::from_ticks(42));
-        assert_eq!(
-            (vtable.get_last_execution_time)(ptr),
-            tasklet.get_last_execution_time()
-        );
-    }
-
-    #[test]
-    fn has_work() {
-        let tasklet = create_tasklet();
-        let ptr = &tasklet as *const Tasklet<u8, ()> as *const ();
-        let vtable = tasklet_vtable::<u8, ()>();
-
-        assert_eq!((vtable.has_work)(ptr), tasklet.has_work());
-    }
-
-    #[test]
-    fn execute() {
-        let mut value: u8 = 0;
-
-        struct TaskletCtx<'a> {
-            val: &'a mut u8,
-        }
-
-        let tasklet = Tasklet::<u8, TaskletCtx>::new(
-            TaskletConfig::default(),
-            |_, ctx| {
-                *ctx.val = 42;
-            },
-            TaskletCtx { val: &mut value },
-        );
-
-        let ptr = &tasklet as *const Tasklet<u8, TaskletCtx> as *const ();
-        let vtable = tasklet_vtable::<u8, TaskletCtx>();
-
-        (vtable.execute)(ptr);
-        assert_eq!(value, 42);
-    }
 }

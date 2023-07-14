@@ -1,6 +1,6 @@
-/// System initialization API.
-///
-/// This API is used for the system initialization, before the scheduler is started.
+//! System initialization API.
+//!
+//! This API is used for the system initialization, before the scheduler is started.
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
 use crate::hal::Peripherals;
@@ -22,7 +22,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet<T: Default, C: Default>(
+    fn create_tasklet<T, C: Default>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
@@ -40,7 +40,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn create_tasklet_with_context<T: Default, C>(
+    fn create_tasklet_with_context<T, C>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
@@ -86,10 +86,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `queue` - Handle to the target queue.
     ///
     /// Returns `Error` in case of an error, `Ok(())` otherwise.
-    fn subscribe_tasklet_to_queue<T, C>(
+    fn subscribe_tasklet_to_queue<T: Default, C, const N: usize>(
         &'static self,
-        tasklet: &TaskletHandle<T, C>,
-        queue: &MessageQueueHandle<T>,
+        tasklet_handle: &TaskletHandle<T, C>,
+        queue_handle: &MessageQueueHandle<T, N>,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the event.

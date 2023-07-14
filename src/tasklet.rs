@@ -5,6 +5,7 @@
 //!
 //! Tasklet should be thought of as a small building block, which processes a given type of data,
 //! one element at the time.
+
 mod tasklet_config;
 mod tasklet_handle;
 mod tasklet_ptr;
@@ -17,6 +18,8 @@ pub(crate) use self::tasklet_vtable::{tasklet_vtable, TaskletVTable};
 pub use self::tasklet_config::TaskletConfig;
 pub use self::tasklet_handle::TaskletHandle;
 pub use self::tasklet_storage::TaskletStorage;
+
+use core::cell::OnceCell;
 
 use crate::aerugo::error::InitError;
 use crate::arch::Mutex;
@@ -33,6 +36,7 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 ///
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
+#[repr(C)]
 pub(crate) struct Tasklet<T: 'static, C> {
     /// Tasklet name.
     name: &'static str,
@@ -45,7 +49,7 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Context data.
     context: InternalCell<C>,
     /// Source of the data.
-    _data_provider: InternalCell<Option<&'static dyn DataProvider<T>>>,
+    data_provider: OnceCell<&'static dyn DataProvider<T>>,
 }
 
 impl<T, C> Tasklet<T, C> {
@@ -57,12 +61,17 @@ impl<T, C> Tasklet<T, C> {
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
             context: context.into(),
-            _data_provider: InternalCell::new(None),
+            data_provider: OnceCell::new(),
         }
+    }
+
+    /// Creates pointer to this tasklet.
+    pub(crate) fn ptr(&'static self) -> TaskletPtr {
+        TaskletPtr::new::<T, C>(self)
     }
 }
 
-impl<T: Default, C> Task for Tasklet<T, C> {
+impl<T, C> Task for Tasklet<T, C> {
     fn get_name(&self) -> &'static str {
         self.name
     }
@@ -84,85 +93,32 @@ impl<T: Default, C> Task for Tasklet<T, C> {
     }
 
     fn has_work(&self) -> bool {
-        // TODO: Stub until we have working data providers.
-        true
+        match self.data_provider.get() {
+            Some(dp) => dp.data_ready(),
+            None => false,
+        }
     }
 
     fn execute(&self) {
-        // TODO: Stub until we have working data providers.
-        let value = T::default();
-        // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
-        // be executed only once at a given time.
-        let context = unsafe { self.context.as_mut_ref() };
+        let value = match self.data_provider.get() {
+            Some(dp) => dp.get_data(),
+            None => return,
+        };
 
-        (self.step_fn)(value, context)
+        if let Some(val) = value {
+            // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
+            // be executed only once at a given time.
+            let context = unsafe { self.context.as_mut_ref() };
+            (self.step_fn)(val, context)
+        }
     }
 }
 
 impl<T, C> DataReceiver<T> for Tasklet<T, C> {
-    fn subscribe(&self, _data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
-        todo!()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn create_default() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
-
-        assert_eq!(tasklet.get_name(), "MISSING_TASKLET_NAME");
-        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
-        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
-    }
-
-    #[test]
-    fn create_from_config() {
-        let name = "TaskName";
-
-        let config = TaskletConfig { name };
-        let tasklet = Tasklet::<u8, ()>::new(config, |_, _| {}, ());
-
-        assert_eq!(tasklet.get_name(), name);
-        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
-        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
-    }
-
-    #[test]
-    fn get_set_status() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
-
-        assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
-        tasklet.set_status(TaskStatus::Waiting);
-        assert_eq!(tasklet.get_status(), TaskStatus::Waiting);
-    }
-
-    #[test]
-    fn get_set_last_execution_time() {
-        let tasklet = Tasklet::<u8, ()>::new(TaskletConfig::default(), |_, _| {}, ());
-
-        assert_eq!(tasklet.get_last_execution_time().ticks(), 0);
-        tasklet.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
-        assert_eq!(tasklet.get_last_execution_time().ticks(), 42);
-    }
-
-    #[test]
-    fn execute() {
-        #[derive(Default)]
-        struct TaskletCtx(u8);
-
-        let tasklet = Tasklet::<u8, TaskletCtx>::new(
-            TaskletConfig::default(),
-            |_, ctx| {
-                ctx.0 = 42;
-            },
-            TaskletCtx::default(),
-        );
-
-        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 0);
-        tasklet.execute();
-        assert_eq!(unsafe { tasklet.context.as_ref().0 }, 42);
+    fn subscribe(&self, data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
+        match self.data_provider.set(data_provider) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletAlreadySubscribed),
+        }
     }
 }

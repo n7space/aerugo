@@ -14,10 +14,11 @@
 use core::cmp::Ordering;
 
 use crate::task::TaskStatus;
-use crate::tasklet::{tasklet_vtable, TaskletVTable};
+use crate::tasklet::{tasklet_vtable, Tasklet, TaskletVTable};
 use crate::time::TimerInstantU64;
 
 /// Raw tasklet pointer.
+#[derive(Clone)]
 pub(crate) struct TaskletPtr {
     /// Pointer to the `Tasklet<T, C>` structure.
     ptr: *const (),
@@ -29,57 +30,54 @@ unsafe impl Sync for TaskletPtr {}
 unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
-    /// Creates new pointer
+    /// Creates new tasklet pointer from referernce
     ///
-    /// * `ptr` - Pointer to memory where tasklet is allocated.
-    pub(crate) fn new<T: Default + 'static, C: 'static>(ptr: *const ()) -> Self {
+    /// * `tasklet` - Reference to the tasklet
+    pub(crate) fn new<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
         TaskletPtr {
-            ptr,
+            ptr: tasklet as *const Tasklet<T, C> as *const (),
             vtable: tasklet_vtable::<T, C>(),
         }
     }
 
-    /// Returns tasklet name.
+    /// See: [get_name](crate::task::Task::get_name())
     #[inline(always)]
+    #[allow(dead_code)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
 
-    /// Returns tasklet status.
+    /// See: [get_status](crate::task::Task::get_status())
     #[inline(always)]
     pub(crate) fn get_status(&self) -> TaskStatus {
         (self.vtable.get_status)(self.ptr)
     }
 
-    /// Sets tasklet status.
-    ///
-    /// * `status` - New tasklet status.
+    /// See: [set_status](crate::task::Task::set_status())
     #[inline(always)]
     pub(crate) fn set_status(&self, status: TaskStatus) {
         (self.vtable.set_status)(self.ptr, status)
     }
 
-    /// Returns last execution time.
+    /// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
     #[inline(always)]
     pub(crate) fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000> {
         (self.vtable.get_last_execution_time)(self.ptr)
     }
 
-    /// Sets last execution time.
-    ///
-    /// * `time` - Last execution time.
+    /// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
     #[inline(always)]
     pub(crate) fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>) {
         (self.vtable.set_last_execution_time)(self.ptr, time)
     }
 
-    /// Checks if there are any more data for the tasklet to process.
+    /// See: [has_work](crate::task::Task::has_work())
     #[inline(always)]
     pub(crate) fn has_work(&self) -> bool {
         (self.vtable.has_work)(self.ptr)
     }
 
-    /// Executes task.
+    /// See: [execute](crate::task::Task::execute())
     #[inline(always)]
     pub(crate) fn execute(&self) {
         (self.vtable.execute)(self.ptr)
@@ -108,89 +106,5 @@ impl PartialEq for TaskletPtr {
     fn eq(&self, other: &Self) -> bool {
         self.get_last_execution_time()
             .eq(&other.get_last_execution_time())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::task::Task;
-    use crate::tasklet::{Tasklet, TaskletConfig};
-
-    fn create_tasklet() -> Tasklet<u8, ()> {
-        let tasklet_config = TaskletConfig { name: "TaskName" };
-
-        Tasklet::<u8, ()>::new(tasklet_config, |_, _| {}, ())
-    }
-
-    fn create_tasklet_ptr(tasklet: &Tasklet<u8, ()>) -> TaskletPtr {
-        let ptr = tasklet as *const Tasklet<u8, ()> as *const ();
-
-        TaskletPtr::new::<u8, ()>(ptr)
-    }
-
-    #[test]
-    fn get_name() {
-        let tasklet = create_tasklet();
-        let tasklet_ptr = create_tasklet_ptr(&tasklet);
-
-        assert_eq!(tasklet_ptr.get_name(), tasklet.get_name());
-    }
-
-    #[test]
-    fn get_set_status() {
-        let tasklet = create_tasklet();
-        let tasklet_ptr = create_tasklet_ptr(&tasklet);
-
-        assert_eq!(tasklet_ptr.get_status(), tasklet.get_status());
-        tasklet_ptr.set_status(TaskStatus::Waiting);
-        assert_eq!(tasklet_ptr.get_status(), tasklet.get_status());
-    }
-
-    #[test]
-    fn get_set_last_execution_time() {
-        let tasklet = create_tasklet();
-        let tasklet_ptr = create_tasklet_ptr(&tasklet);
-
-        assert_eq!(
-            tasklet_ptr.get_last_execution_time(),
-            tasklet.get_last_execution_time()
-        );
-        tasklet_ptr.set_last_execution_time(TimerInstantU64::<1_000_000>::from_ticks(42));
-        assert_eq!(
-            tasklet_ptr.get_last_execution_time(),
-            tasklet.get_last_execution_time()
-        );
-    }
-
-    #[test]
-    fn has_work() {
-        let tasklet = create_tasklet();
-        let tasklet_ptr = create_tasklet_ptr(&tasklet);
-
-        assert_eq!(tasklet_ptr.has_work(), tasklet.has_work());
-    }
-
-    #[test]
-    fn execute() {
-        let mut value: u8 = 0;
-
-        struct TaskletCtx<'a> {
-            val: &'a mut u8,
-        }
-
-        let tasklet = Tasklet::<u8, TaskletCtx>::new(
-            TaskletConfig::default(),
-            |_, ctx| {
-                *ctx.val = 42;
-            },
-            TaskletCtx { val: &mut value },
-        );
-
-        let ptr = &tasklet as *const Tasklet<u8, TaskletCtx> as *const ();
-        let tasklet_ptr = TaskletPtr::new::<u8, TaskletCtx>(ptr);
-
-        tasklet_ptr.execute();
-        assert_eq!(value, 42);
     }
 }
