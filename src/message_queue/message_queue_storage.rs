@@ -87,7 +87,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
             core::ptr::write(queue_buffer, queue);
         }
 
-        // SAFETY: This is safe because it is only modified only here, and can't be externally
+        // SAFETY: This is safe because it is modified only here, and can't be externally
         // borrowed.
         unsafe {
             *self.initialized.as_mut_ref() = true;
@@ -96,7 +96,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         Ok(())
     }
 
-    /// Returns a reference to the stored MessageQueue structer.
+    /// Returns a reference to the stored MessageQueue structure.
     ///
     /// SAFETY: This is safe to call only when this storage has been initialized.
     #[inline(always)]

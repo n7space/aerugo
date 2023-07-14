@@ -30,7 +30,7 @@ unsafe impl Sync for TaskletPtr {}
 unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
-    /// Creates new from tasklet referernce
+    /// Creates new tasklet pointer from referernce
     ///
     /// * `tasklet` - Reference to the tasklet
     pub(crate) fn new<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
