@@ -94,9 +94,7 @@ impl Ord for TaskletPtr {
 
 impl PartialOrd for TaskletPtr {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.get_last_execution_time()
-            .partial_cmp(&other.get_last_execution_time())
-            .map(|ordering| ordering.reverse())
+        Some(self.cmp(other))
     }
 }
 
