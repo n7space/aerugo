@@ -3,6 +3,7 @@ members = [
     "aerugo-hal",
     "arch/cortex-m/aerugo-cortex-m",
     "arch/cortex-m/samv71-hal",
+    "arch/cortex-m/samv71q21-pac",
     "arch/x86/aerugo-x86",
     "arch/x86/x86-hal",
     "utils/env-parser",
@@ -15,6 +16,7 @@ version = "0.1.0"
 authors = [
     "N7 Space",
     "Filip Demski <glamhoth@protonmail.com>",
+    "Wojciech Olech <wojciech_olech@hotmail.com>"
 ]
 edition = "2021"
 rust-version = "1.70"
