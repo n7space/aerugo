@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Aerugo: x86 Debug",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/build.sh",
+			"args": [
+				"aerugo_x86_debug"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+		},
+		{
+			"label": "Build Aerugo: x86 Release",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/build.sh",
+			"args": [
+				"aerugo_x86_release"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+		},
+		{
+			"label": "Build Aerugo: CM7 Debug",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/build.sh",
+			"args": [
+				"aerugo_cm7_debug"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+		},
+		{
+			"label": "Build Aerugo: CM7 Release",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/build.sh",
+			"args": [
+				"aerugo_cm7_release"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+		},
+	]
+}
