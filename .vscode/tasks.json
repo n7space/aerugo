@@ -1,6 +1,7 @@
 {
 	"version": "2.0.0",
 	"tasks": [
+		// x86
 		{
 			"label": "Build Aerugo: x86 Debug",
 			"type": "shell",
@@ -8,9 +9,7 @@
 			"args": [
 				"aerugo_x86_debug"
 			],
-			"problemMatcher": [
-				"$rustc"
-			],
+			"problemMatcher": "$rustc",
 			"group": "build",
 		},
 		{
@@ -20,11 +19,19 @@
 			"args": [
 				"aerugo_x86_release"
 			],
-			"problemMatcher": [
-				"$rustc"
-			],
+			"problemMatcher": "$rustc",
 			"group": "build",
 		},
+		{
+			"label": "Check code (x86)",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/check_code.sh",
+			"args": [
+				"aerugo_x86"
+			],
+			"problemMatcher": "$rustc",
+		},
+		// Cortex-M
 		{
 			"label": "Build Aerugo: CM7 Debug",
 			"type": "shell",
@@ -32,9 +39,7 @@
 			"args": [
 				"aerugo_cm7_debug"
 			],
-			"problemMatcher": [
-				"$rustc"
-			],
+			"problemMatcher": "$rustc",
 			"group": "build",
 		},
 		{
@@ -44,10 +49,17 @@
 			"args": [
 				"aerugo_cm7_release"
 			],
-			"problemMatcher": [
-				"$rustc"
-			],
+			"problemMatcher": "$rustc",
 			"group": "build",
 		},
+		{
+			"label": "Check code (CM7)",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/check_code.sh",
+			"args": [
+				"aerugo_cm7"
+			],
+			"problemMatcher": "$rustc",
+		}
 	]
 }
