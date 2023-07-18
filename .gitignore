@@ -8,6 +8,6 @@ target/
 .vscode/*
 !.vscode/*.md
 !.vscode/*.svd
-!.vscode/launch.json
+!.vscode/launch.json.example
 !.vscode/tasks.json
 !.vscode/extensions.json
