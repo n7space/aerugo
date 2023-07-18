@@ -8,4 +8,8 @@ aerugo_cm7() {
     cargo clippy -p aerugo -F use-aerugo-cortex-m -- -D warnings
 }
 
+samv71q21_pac() {
+    cargo clippy -p samv71q21-pac -- -D warnings
+}
+
 $@

@@ -60,6 +60,15 @@
 				"aerugo_cm7"
 			],
 			"problemMatcher": "$rustc",
+		},
+		{
+			"label": "Check SAMV71Q21 PAC code",
+			"type": "shell",
+			"command": "${workspaceRoot}/scripts/check_code.sh",
+			"args": [
+				"samv71q21_pac"
+			],
+			"problemMatcher": "$rustc",
 		}
 	]
 }
