@@ -16,6 +16,10 @@ pub(crate) trait Queue<T>: DataProvider<T> {
     ///
     /// # Returns
     /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the list of registered tasklets.
+    /// This is safe to call before the system initialization.
     unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError>;
 
     /// Wakes tasklets registered to this queue.

@@ -3,7 +3,7 @@
 //! This module contains system executor, that schedules and runs tasklets.
 //!
 //! aerugo is build around an executor that run tasklets, which are fine-grained units of
-//! computation. Executor is a cooperative scheduler, that doesn't support pre-emption.
+//! computation. Executor is a cooperative scheduler, that doesn't support preemption.
 
 use heapless::binary_heap::{BinaryHeap, Max};
 

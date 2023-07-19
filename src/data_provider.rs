@@ -1,7 +1,7 @@
 //! Trait with data provider functionality.
 //!
-//! This module contains a trait for a data provider. In the system data providers are structures
-//! that stores data that can be then passed to a data receiver (currently only
+//! This module contains a trait for a data provider. In the system, data providers are structures
+//! that store the data that can be then passed to a data receiver (currently only
 //! [Tasklet](crate::tasklet::Tasklet) is such a receiver).
 
 /// Trait with data provider functionality.

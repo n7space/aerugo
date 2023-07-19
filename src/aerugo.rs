@@ -80,7 +80,7 @@ impl InitApi for Aerugo {
     /// Creates new tasklet in the system.
     ///
     /// Tasklet is created in the passed `storage` memory. Storage has to be static to keep the stored
-    /// tasklet for the whole duration of system life.
+    /// tasklet for the whole duration of systems' life.
     ///
     /// # Generic Arguments
     /// * `T` - Type of the data processed by the tasklet.
@@ -92,7 +92,7 @@ impl InitApi for Aerugo {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// # Return
-    /// `()` is successful, `InitError` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     ///
     /// # Safety
     /// This function shouldn't be called after the system was started, because it initializes the
@@ -126,7 +126,7 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        // SAFETY: This is safe, because this function can be called only during system initialization.
+        // SAFETY: This is safe, as long as this function is called only during system initialization.
         unsafe { storage.init(config, step_fn, C::default()) }
     }
 
@@ -183,7 +183,7 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        // SAFETY: This is safe, because this function is called only during system initialization.
+        // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { storage.init(config, step_fn, context) }
     }
 
@@ -226,7 +226,7 @@ impl InitApi for Aerugo {
         &'static self,
         storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        // SAFETY: This is safe, because this function can be called only during system initialization.
+        // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { storage.init() }
     }
 
@@ -267,7 +267,7 @@ impl InitApi for Aerugo {
     /// `Error` in case of an error, `Ok(())` otherwise.
     ///
     /// # Safety
-    /// This function shouldn't be called after the system was started, because subscripion is safe
+    /// This function shouldn't be called after the system was started, because subscription is safe
     /// only before that.
     ///
     /// # Example
@@ -303,7 +303,7 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let queue = queue_handle.queue();
 
-        // SAFETY: This is safe, because this function can be called only during system initialization.
+        // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
             tasklet.subscribe(queue)?;
             queue.register_tasklet(tasklet.ptr())?;

@@ -29,7 +29,7 @@ pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>(
 pub struct TaskletStorage<T, C> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
-    /// Buffer for the tasklet strucure.
+    /// Buffer for the tasklet structure.
     tasklet_buffer: InternalCell<TaskletBuffer>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
@@ -106,7 +106,7 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
         Ok(())
     }
 
-    /// Returns a reference to the stored Tasklet structer.
+    /// Returns a reference to the stored Tasklet structure.
     ///
     /// # Safety
     /// This is safe to call only when this storage has been initialized.

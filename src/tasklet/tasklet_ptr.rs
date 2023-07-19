@@ -3,7 +3,7 @@
 //! To hide generic parameters of the `Tasklet` we use `Task` trait. It's necessary for in example
 //! storing tasklets that are ready for execution. But then using trait objects creates a dynamic
 //! dispatching, which is unwanted in the embedded environment especially in tight loops (like
-//! tasklet exectution loop). Additionally we don't need polymorphism, as the trait is not used for
+//! tasklet execution loop). Additionally we don't need polymorphism, as the trait is not used for
 //! defining a shared behavior between different types and only one structure (`Tasklet`) is
 //! implementing the trait.
 //!
@@ -30,7 +30,7 @@ unsafe impl Sync for TaskletPtr {}
 unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
-    /// Creates new tasklet pointer from referernce
+    /// Creates new tasklet pointer from reference
     ///
     /// # Parameters
     /// * `tasklet` - Reference to the tasklet
