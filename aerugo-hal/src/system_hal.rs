@@ -23,6 +23,7 @@ pub trait SystemHal {
     ///
     /// Implementation should initialize and configure all core system peripherals.
     ///
+    /// # Parameters
     /// * `config` - System hardware configuration.
     fn configure_hardware(&mut self, config: SystemHardwareConfig);
 
@@ -40,12 +41,15 @@ pub trait SystemHal {
 
     /// Executes closure `f` in an interrupt-free context.
     ///
+    /// # Generic Parameters
     /// * `F` - Closure type.
     /// * `R` - Closure return type.
     ///
+    /// # Parameters
     /// * `f` - Closure to execute.
     ///
-    /// Returns closure result.
+    /// # Return
+    /// Closure result.
     fn execute_critical<F, R>(f: F) -> R
     where
         F: FnOnce(&CriticalSection) -> R;

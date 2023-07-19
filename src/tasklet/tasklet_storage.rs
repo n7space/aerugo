@@ -1,8 +1,7 @@
 //! Static storage for [tasklet](crate::tasklet::Tasklet)
 //!
-//! As this system cannot use dynamic memory allocation, all structures have to be allocated
-//! statically. Per good practices user is separated from the actual implementation and instead
-//! only has to provide a static memory (via this structure) where the Tasklet will be allocated.
+//! This module contains a tasklet storage, which is a statically allocated memory that will
+//! store tasklet structure for the duration of the system life.
 
 use super::Tasklet;
 
@@ -18,12 +17,19 @@ pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>(
 
 /// Structure containing memory for Tasklet creation.
 ///
+/// As this system cannot use dynamic memory allocation, all structures have to be allocated
+/// statically. Per good practices user is separated from the actual implementation and instead
+/// only has to provide a static memory (via this structure) where the Tasklet will be allocated.
+///
+/// Storage shall be a static variable and shall be initialized only once, before the system is started.
+///
+/// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
 pub struct TaskletStorage<T, C> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
-    /// Buffer for the tasklet strucure.
+    /// Buffer for the tasklet structure.
     tasklet_buffer: InternalCell<TaskletBuffer>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
@@ -51,7 +57,8 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
 
     /// Creates new handle to a tasklet allocated in this storage.
     ///
-    /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
+    /// # Return
+    /// `handle` if this storage has been initialized.
     pub fn create_handle(&'static self) -> Option<TaskletHandle<T, C>> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // the `init` function.
@@ -67,8 +74,13 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
 
     /// Initializes this storage.
     ///
-    /// Returns `InitError` in case of an initialization error, `()` otherwise.
-    pub(crate) fn init(
+    /// # Return
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the stored tasklet buffer. This is safe to call
+    /// before the system initialization.
+    pub(crate) unsafe fn init(
         &'static self,
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
@@ -82,29 +94,22 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
 
         let tasklet = Tasklet::<T, C>::new(config, step_fn, context);
 
-        // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
-        // (initialized) only once, because it is guarded by the `initialized` field. No external
-        // borrow can be made before initialization.
+        // This is safe, because `tasklet_buffer` doesn't contain any value yet, and it's size is
+        // guaranteed to be large enough to store tasklet structure.
+        let tasklet_buffer = self.tasklet_buffer.as_mut_ref().as_mut_ptr() as *mut Tasklet<T, C>;
         unsafe {
-            // Because the `Tasklet` structure is of a constant size, the `tasklet_buffer` field is
-            // statically allocated with enough memory for a 'placement new'.
-            let tasklet_buffer =
-                self.tasklet_buffer.as_mut_ref().as_mut_ptr() as *mut Tasklet<T, C>;
             core::ptr::write(tasklet_buffer, tasklet);
         }
 
-        // SAFETY: This is safe because it is only modified only here, and can't be externally
-        // borrowed.
-        unsafe {
-            *self.initialized.as_mut_ref() = true;
-        }
+        *self.initialized.as_mut_ref() = true;
 
         Ok(())
     }
 
-    /// Returns a reference to the stored Tasklet structer.
+    /// Returns a reference to the stored Tasklet structure.
     ///
-    /// SAFETY: This is safe to call only when this storage has been initialized.
+    /// # Safety
+    /// This is safe to call only when this storage has been initialized.
     #[inline(always)]
     unsafe fn tasklet(&'static self) -> &'static Tasklet<T, C> {
         &*(self.tasklet_buffer.as_ref().as_ptr() as *const Tasklet<T, C>)
@@ -126,7 +131,7 @@ mod tests {
     fn initialize() {
         static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
 
-        let init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        let init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
     }
@@ -135,9 +140,9 @@ mod tests {
     fn fail_double_initialization() {
         static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
 
-        let mut init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_ok());
-        init_result = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_err());
         assert_eq!(
             init_result.err().unwrap(),
@@ -149,7 +154,7 @@ mod tests {
     fn create_handle() {
         static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
 
-        let _ = STORAGE.init(TaskletConfig::default(), |_, _| {}, ());
+        let _ = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

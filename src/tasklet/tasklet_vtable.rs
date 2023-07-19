@@ -30,6 +30,7 @@ pub(crate) struct TaskletVTable {
 
 /// Constructs `Tasklet` virtual table for given `T` and `C` types.
 ///
+/// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
 pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable {

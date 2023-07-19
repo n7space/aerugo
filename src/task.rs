@@ -23,6 +23,7 @@ pub(crate) trait Task {
 
     /// Sets task status.
     ///
+    /// # Parameters
     /// * `status` - New task status.
     fn set_status(&self, status: TaskStatus);
 
@@ -31,6 +32,7 @@ pub(crate) trait Task {
 
     /// Sets last execution time.
     ///
+    /// # Parameters
     /// * `time` - Last execution time.
     fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>);
 

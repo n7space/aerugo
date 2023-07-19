@@ -29,7 +29,8 @@ impl<T: ?Sized> InternalCell<T> {
     ///
     /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
     ///
-    /// Returns reference to the value.
+    /// # Return
+    /// Reference to the value.
     #[inline(always)]
     pub unsafe fn as_ref(&self) -> &T {
         &*self.0.get()
@@ -39,7 +40,8 @@ impl<T: ?Sized> InternalCell<T> {
     ///
     /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
     ///
-    /// Returns reference to the value.
+    /// # Return
+    /// Mutable reference to the value.
     #[inline(always)]
     #[allow(dead_code)]
     #[allow(clippy::mut_from_ref)]

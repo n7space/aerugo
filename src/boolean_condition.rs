@@ -1,8 +1,6 @@
 //! Boolean condition.
 
-/// Module for BooleanCondition handle.
 mod boolean_condition_handle;
-/// Module for BooleanCondition storage.
 mod boolean_condition_storage;
 
 pub use self::boolean_condition_handle::BooleanConditionHandle;
@@ -20,6 +18,7 @@ pub struct BooleanConditionSet {
 impl BooleanConditionSet {
     /// Creates new condition set.
     ///
+    /// # Parameters
     /// * `set_type` - Type of the condition set.
     pub const fn new(set_type: BooleanConditionSetType) -> Self {
         BooleanConditionSet {
@@ -29,6 +28,7 @@ impl BooleanConditionSet {
 
     /// Add a condition to the set.
     ///
+    /// # Parameters
     /// * `_handle` - Handle to the condition.
     pub fn add(&mut self, _handle: BooleanConditionHandle) {
         todo!();

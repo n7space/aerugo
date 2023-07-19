@@ -1,6 +1,7 @@
 //! System runtime API.
 //!
 //! This API can be used by the user in tasklet functions to interact with the system.
+
 use core::ops::{Add, Sub};
 
 use bare_metal::CriticalSection;
@@ -25,6 +26,7 @@ pub trait RuntimeApi: ErrorType {
 
     /// Sets system time offset.
     ///
+    /// # Parameters
     /// * `offset` - Time offset.
     fn set_system_time_offset(&'static self, offset: Self::Duration);
 
@@ -33,7 +35,11 @@ pub trait RuntimeApi: ErrorType {
 
     /// Returns execution statistics for given tasklet.
     ///
+    /// # Parameters
     /// * `task_id` - ID of the task to
+    ///
+    /// # Return
+    /// Execution statistics for this tasklet.
     fn get_execution_statistics(&'static self, task_id: TaskId) -> ExecutionStats;
 
     /// Enters critical section
@@ -44,12 +50,15 @@ pub trait RuntimeApi: ErrorType {
 
     /// Executes closure `f` in an interrupt-free context.
     ///
+    /// # Generic Parameters
     /// * `F` - Closure type.
     /// * `R` - Closure return type.
     ///
+    /// # Parameters
     /// * `f` - Closure to execute.
     ///
-    /// Returns closure result.
+    /// # Return
+    /// Closure result.
     fn execute_critical<F, R>(f: F) -> R
     where
         F: FnOnce(&CriticalSection) -> R;

@@ -9,6 +9,9 @@ use core::cell::UnsafeCell;
 use cortex_m::interrupt;
 
 /// Mutex based on the critical section.
+///
+/// # Generic Parameters
+/// * `T` - Type of the stored value.
 #[repr(transparent)]
 pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 
@@ -20,9 +23,8 @@ unsafe impl<T: Send + ?Sized> Sync for Mutex<T> {}
 impl<T> Mutex<T> {
     /// Creates new mutex with given value
     ///
+    /// # Parameters
     /// * `value` - Value to initialize the mutex with.
-    ///
-    /// Returns new mutex.
     #[inline(always)]
     pub const fn new(value: T) -> Self {
         Mutex(UnsafeCell::new(value))
@@ -36,9 +38,11 @@ impl<T: ?Sized> Mutex<T> {
     /// value and executed in critical section. This ensures that the value won't be borrowed more
     /// than once at the given time.
     ///
+    /// # Parameters
     /// * `f` - Lambda to execute.
     ///
-    /// Returns the result of the executed lambda.
+    /// # Return
+    /// Result of the executed lambda.
     #[inline(always)]
     #[allow(dead_code)]
     pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {

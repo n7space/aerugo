@@ -2,6 +2,9 @@
 use core::cell::UnsafeCell;
 
 /// Mutex for x86
+///
+/// # Generic Parameters
+/// * `T` - Type of the stored value.
 #[repr(transparent)]
 pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 
@@ -11,9 +14,8 @@ unsafe impl<T: Send + ?Sized> Sync for Mutex<T> {}
 impl<T> Mutex<T> {
     /// Creates new mutex with given value
     ///
+    /// # Parameters
     /// * `value` - Value to initialize the cell with.
-    ///
-    /// Returns new mutex.
     #[inline(always)]
     pub const fn new(value: T) -> Self {
         Mutex(UnsafeCell::new(value))
@@ -23,9 +25,11 @@ impl<T> Mutex<T> {
 impl<T: ?Sized> Mutex<T> {
     /// Gives access to the value by locking the mutex
     ///
+    /// # Parameters
     /// * `f` - Lambda to execute.
     ///
-    /// Returns the result of the executed lambda.
+    /// # Return
+    /// Result of the executed lambda.
     #[inline(always)]
     #[allow(dead_code)]
     pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
