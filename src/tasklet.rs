@@ -41,7 +41,7 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
 #[repr(C)]
-pub(crate) struct Tasklet<T: 'static, C> {
+pub(crate) struct Tasklet<T: 'static, C: 'static> {
     /// Tasklet name.
     name: &'static str,
     /// Tasklet status.
@@ -51,20 +51,24 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Step function.
     step_fn: StepFn<T, C>,
     /// Context data.
-    context: InternalCell<C>,
+    context: InternalCell<&'static mut C>,
     /// Source of the data.
     data_provider: OnceCell<&'static dyn DataProvider<T>>,
 }
 
 impl<T, C> Tasklet<T, C> {
     /// Creates new `Tasklet`.
-    pub(crate) fn new(config: TaskletConfig, step_fn: StepFn<T, C>, context: C) -> Self {
+    pub(crate) fn new(
+        config: TaskletConfig,
+        step_fn: StepFn<T, C>,
+        context: &'static mut C,
+    ) -> Self {
         Tasklet {
             name: config.name,
             status: Mutex::new(TaskStatus::Sleeping),
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
-            context: context.into(),
+            context: InternalCell::new(context),
             data_provider: OnceCell::new(),
         }
     }
