@@ -13,7 +13,7 @@ pub(crate) trait Queue<T>: DataProvider<T> {
     /// * `task` - Task to register.
     ///
     /// Returns `InitError` in case of an error, `Ok(())` otherwise.
-    fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError>;
+    unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError>;
 
     /// Wake tasklets registered to this queue.
     fn wake_tasklets(&self);

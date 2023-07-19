@@ -115,7 +115,10 @@ impl<T, C> Task for Tasklet<T, C> {
 }
 
 impl<T, C> DataReceiver<T> for Tasklet<T, C> {
-    fn subscribe(&self, data_provider: &'static dyn DataProvider<T>) -> Result<(), InitError> {
+    unsafe fn subscribe(
+        &self,
+        data_provider: &'static dyn DataProvider<T>,
+    ) -> Result<(), InitError> {
         match self.data_provider.set(data_provider) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletAlreadySubscribed),

@@ -67,7 +67,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Initializes this storage.
     ///
     /// TODO: Returns
-    pub(crate) fn init(&'static self) -> Result<(), InitError> {
+    pub(crate) unsafe fn init(&'static self) -> Result<(), InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
         if unsafe { *self.initialized.as_ref() } {
@@ -76,22 +76,14 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
 
         let queue = MessageQueue::<T, N>::new(&self.queue_data);
 
-        // SAFETY: This is safe, because it is borrowed mutably only here. It can be modified
-        // (initialized) only once, because it is guarded by the `initialized` field. No external
-        // borrow can be made before initialization.
+        // This is safe, because `queue_buffer` doesn't contain any value yet, and it's size is
+        // guaranteed to be large enough to store queue structure.
+        let queue_buffer = self.queue_buffer.as_mut_ref().as_mut_ptr() as *mut MessageQueue<T, N>;
         unsafe {
-            // Because the `MessageQueue` structure is of a constant size, the `queue_buffer` field is
-            // statically allocated with enough memory for a 'placement new'.
-            let queue_buffer =
-                self.queue_buffer.as_mut_ref().as_mut_ptr() as *mut MessageQueue<T, N>;
             core::ptr::write(queue_buffer, queue);
         }
 
-        // SAFETY: This is safe because it is modified only here, and can't be externally
-        // borrowed.
-        unsafe {
-            *self.initialized.as_mut_ref() = true;
-        }
+        *self.initialized.as_mut_ref() = true;
 
         Ok(())
     }
@@ -120,7 +112,7 @@ mod tests {
     fn initialize() {
         static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
 
-        let init_result = STORAGE.init();
+        let init_result = unsafe { STORAGE.init() };
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
     }
@@ -129,9 +121,9 @@ mod tests {
     fn fail_double_initialization() {
         static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
 
-        let mut init_result = STORAGE.init();
+        let mut init_result = unsafe { STORAGE.init() };
         assert!(init_result.is_ok());
-        init_result = STORAGE.init();
+        init_result = unsafe { STORAGE.init() };
         assert!(init_result.is_err());
         assert_eq!(
             init_result.err().unwrap(),
@@ -143,7 +135,7 @@ mod tests {
     fn create_handle() {
         static STORAGE: MessageQueueStorage<u8, 2> = MessageQueueStorage::new();
 
-        let _ = STORAGE.init();
+        let _ = unsafe { STORAGE.init() };
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

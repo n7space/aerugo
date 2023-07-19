@@ -61,7 +61,8 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        storage.init(config, step_fn, C::default())
+        // SAFETY: This is safe, because this function can be called only during system initialization.
+        unsafe { storage.init(config, step_fn, C::default()) }
     }
 
     fn create_tasklet_with_context<T, C>(
@@ -71,14 +72,16 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C>,
     ) -> Result<(), Self::Error> {
-        storage.init(config, step_fn, context)
+        // SAFETY: This is safe, because this function is called only during system initialization.
+        unsafe { storage.init(config, step_fn, context) }
     }
 
     fn create_message_queue<T, const N: usize>(
         &'static self,
         storage: &'static MessageQueueStorage<T, N>,
     ) -> Result<(), Self::Error> {
-        storage.init()
+        // SAFETY: This is safe, because this function can be called only during system initialization.
+        unsafe { storage.init() }
     }
 
     fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), Self::Error> {
@@ -100,8 +103,11 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let queue = queue_handle.queue();
 
-        tasklet.subscribe(queue)?;
-        queue.register_tasklet(tasklet.ptr())?;
+        // SAFETY: This is safe, because this function can be called only during system initialization.
+        unsafe {
+            tasklet.subscribe(queue)?;
+            queue.register_tasklet(tasklet.ptr())?;
+        }
 
         Ok(())
     }

@@ -47,16 +47,15 @@ impl<T, const N: usize> MessageQueue<T, N> {
 }
 
 impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
-    fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
-        // SAFETY: This is safe, because this is only mutably referenced here and no external
-        // references can be made.
-        match unsafe { self.registered_tasklets.as_mut_ref().push(tasklet) } {
+    unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+        match self.registered_tasklets.as_mut_ref().push(tasklet) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletListFull),
         }
     }
 
     fn wake_tasklets(&self) {
+        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
         for t in unsafe { self.registered_tasklets.as_ref() } {
             AERUGO.wake_tasklet(t);
         }
