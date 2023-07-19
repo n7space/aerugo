@@ -33,7 +33,8 @@ impl BooleanConditionStorage {
 
     /// Creates new handle to a boolean condition allocated in ths storage.
     ///
-    /// Returns `Some(handle)` if this storage has been initialized. `None` otherwise.
+    /// # Return
+    /// `Some(handle)` if this storage has been initialized. `None` otherwise.
     pub fn create_condition_handle(&'static self) -> Option<BooleanConditionHandle> {
         todo!()
     }

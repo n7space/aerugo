@@ -1,8 +1,7 @@
 //! Static storage for [message queue](crate::message_queue::MessageQueue).
 //!
-//! As this system cannot use dynamic memory allocation, all structures have to be allocated
-//! statically. Per good practices user is separated from the actual implementation and instead
-//! only has to provide a static memory (via this structure) where the MessageQueue will be allocated.
+//! This module contains a message queue storage, which is a statically allocated memory that will
+//! store queue structure for the duration of the system life.
 
 use super::MessageQueue;
 
@@ -20,6 +19,11 @@ pub(crate) type QueueData<T, const N: usize> = heapless::spsc::Queue<T, N>;
 
 /// Structure containing memory for MessageQueue creation.
 ///
+/// As this system cannot use dynamic memory allocation, all structures have to be allocated
+/// statically. Per good practices user is separated from the actual implementation and instead
+/// only has to provide a static memory (via this structure) where the MessageQueue will be allocated.
+///
+/// # Generic Parameters
 /// * `T` - Type of the stored data.
 /// * `N` - Size of the queue.
 pub struct MessageQueueStorage<T, const N: usize> {
@@ -50,7 +54,8 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
 
     /// Creates new handle to a queue allocated in this storage.
     ///
-    /// Returns `Some(handle)` if this storage has been initialized, `None` otherwise.
+    /// # Return
+    /// `handle` if this storage has been initialized.
     pub fn create_handle(&'static self) -> Option<MessageQueueHandle<T, N>> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // the `init` function.
@@ -66,7 +71,12 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
 
     /// Initializes this storage.
     ///
-    /// TODO: Returns
+    /// # Return
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the stored queue and queue data buffers.
+    /// This is safe to call before the system initialization.
     pub(crate) unsafe fn init(&'static self) -> Result<(), InitError> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // this function.
@@ -90,7 +100,8 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
 
     /// Returns a reference to the stored MessageQueue structure.
     ///
-    /// SAFETY: This is safe to call only when this storage has been initialized.
+    /// # Safety
+    /// This is safe to call only when this storage has been initialized.
     #[inline(always)]
     unsafe fn message_queue(&'static self) -> &'static MessageQueue<T, N> {
         &*(self.queue_buffer.as_ref().as_ptr() as *const MessageQueue<T, N>)

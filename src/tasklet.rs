@@ -5,6 +5,9 @@
 //!
 //! Tasklet should be thought of as a small building block, which processes a given type of data,
 //! one element at the time.
+//! Instead
+//! one tasklet is expected to perform one specific operation over received data. A bunch of
+//! tasklets can create
 
 mod tasklet_config;
 mod tasklet_handle;
@@ -34,6 +37,7 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 
 /// Tasklet structure.
 ///
+/// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
 #[repr(C)]

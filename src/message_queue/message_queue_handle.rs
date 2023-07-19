@@ -1,12 +1,19 @@
 //! Handle to a queue.
 //!
-//! Handle is used in the system to access a queue.
+//! This module contains queue handle implementation, which is used to reference a queue in the
+//! system.
+
 use crate::aerugo::error::RuntimeError;
 use crate::message_queue::MessageQueue;
 use crate::queue::Queue;
 
 /// Message queue handle.
 ///
+/// Queue handle is available to the user of the system to reference and interact with the queue
+/// via exposed interface. All system API functions shall use handles when a reference to queue is
+/// required.
+///
+/// # Generic Parameters
 /// * `T` - Type that is stored by the queue.
 #[derive(Copy, Clone)]
 pub struct MessageQueueHandle<T: 'static, const N: usize> {
@@ -17,6 +24,7 @@ pub struct MessageQueueHandle<T: 'static, const N: usize> {
 impl<T, const N: usize> MessageQueueHandle<T, N> {
     /// Creates new queue handle.
     ///
+    /// # Parameters
     /// * `queue` - Reference to the queue.
     pub(crate) fn new(queue: &'static MessageQueue<T, N>) -> Self {
         MessageQueueHandle { queue }
@@ -24,9 +32,11 @@ impl<T, const N: usize> MessageQueueHandle<T, N> {
 
     /// Send data to the stored queue.
     ///
+    /// # Parameters
     /// * `data` - Data to send.
     ///
-    /// Returns `RuntimeError` in case of an error, `Ok(())` otherwise.
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
     #[inline(always)]
     pub fn send_data(&self, data: T) -> Result<(), RuntimeError> {
         self.queue.send_data(data)

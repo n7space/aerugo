@@ -26,6 +26,7 @@ type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 
 /// Message queue used for exchanging data between tasklets.
 ///
+/// # Generic Parameters
 /// * `T` - Type of the stored data.
 /// * `N` - Size of the queue.
 #[repr(C)]
