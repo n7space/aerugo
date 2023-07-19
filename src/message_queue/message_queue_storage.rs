@@ -8,7 +8,6 @@ use super::MessageQueue;
 use heapless::Vec;
 
 use crate::aerugo::InitError;
-use crate::arch::Mutex;
 use crate::internal_cell::InternalCell;
 use crate::message_queue::MessageQueueHandle;
 
@@ -32,7 +31,7 @@ pub struct MessageQueueStorage<T, const N: usize> {
     /// Buffer for the queue structure.
     queue_buffer: InternalCell<QueueBuffer>,
     /// Buffer for the queue data.
-    queue_data: Mutex<QueueData<T, N>>,
+    queue_data: InternalCell<QueueData<T, N>>,
 }
 
 impl<T, const N: usize> MessageQueueStorage<T, N> {
@@ -41,7 +40,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         MessageQueueStorage {
             initialized: InternalCell::new(false),
             queue_buffer: InternalCell::new(QueueBuffer::new()),
-            queue_data: Mutex::new(QueueData::new()),
+            queue_data: InternalCell::new(QueueData::new()),
         }
     }
 
@@ -84,7 +83,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let queue = MessageQueue::<T, N>::new(&self.queue_data);
+        let queue = MessageQueue::<T, N>::new(self.queue_data.as_mut_ref());
 
         // This is safe, because `queue_buffer` doesn't contain any value yet, and it's size is
         // guaranteed to be large enough to store queue structure.

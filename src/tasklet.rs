@@ -41,7 +41,7 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
 #[repr(C)]
-pub(crate) struct Tasklet<T: 'static, C> {
+pub(crate) struct Tasklet<T: 'static, C: 'static> {
     /// Tasklet name.
     name: &'static str,
     /// Tasklet status.
@@ -51,20 +51,24 @@ pub(crate) struct Tasklet<T: 'static, C> {
     /// Step function.
     step_fn: StepFn<T, C>,
     /// Context data.
-    context: InternalCell<C>,
+    context: InternalCell<&'static mut C>,
     /// Source of the data.
     data_provider: OnceCell<&'static dyn DataProvider<T>>,
 }
 
 impl<T, C> Tasklet<T, C> {
     /// Creates new `Tasklet`.
-    pub(crate) fn new(config: TaskletConfig, step_fn: StepFn<T, C>, context: C) -> Self {
+    pub(crate) fn new(
+        config: TaskletConfig,
+        step_fn: StepFn<T, C>,
+        context: &'static mut C,
+    ) -> Self {
         Tasklet {
             name: config.name,
             status: Mutex::new(TaskStatus::Sleeping),
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
-            context: context.into(),
+            context: InternalCell::new(context),
             data_provider: OnceCell::new(),
         }
     }
@@ -127,5 +131,38 @@ impl<T, C> DataReceiver<T> for Tasklet<T, C> {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletAlreadySubscribed),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn const_size() {
+        type TaskletStub = Tasklet<(), ()>;
+        let stub_size = core::mem::size_of::<TaskletStub>();
+
+        struct NoCtx;
+        type TaskletNoCtx = Tasklet<u8, NoCtx>;
+        let noctx_size = core::mem::size_of::<TaskletNoCtx>();
+
+        struct SmallCtx {
+            _a: u16,
+        }
+        type TaskletSmallCtx = Tasklet<u16, SmallCtx>;
+        let smallctx_size = core::mem::size_of::<TaskletSmallCtx>();
+
+        struct BigCtx {
+            _a: u64,
+            _b: f64,
+            _c: u16,
+        }
+        type TaskletBigCtx = Tasklet<u32, BigCtx>;
+        let bigctx_size = core::mem::size_of::<TaskletBigCtx>();
+
+        assert_eq!(noctx_size, stub_size);
+        assert_eq!(smallctx_size, stub_size);
+        assert_eq!(bigctx_size, stub_size);
     }
 }

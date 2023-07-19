@@ -6,6 +6,7 @@
 use super::Tasklet;
 
 use core::marker::PhantomData;
+use core::mem::MaybeUninit;
 use heapless::Vec;
 
 use crate::aerugo::InitError;
@@ -31,10 +32,10 @@ pub struct TaskletStorage<T, C> {
     initialized: InternalCell<bool>,
     /// Buffer for the tasklet structure.
     tasklet_buffer: InternalCell<TaskletBuffer>,
+    /// Buffer for the context data.
+    tasklet_context: InternalCell<MaybeUninit<C>>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
-    /// Marker for the tasklet internal context type.
-    _context_type_marker: PhantomData<C>,
 }
 
 impl<T: 'static, C: 'static> TaskletStorage<T, C> {
@@ -43,8 +44,8 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
         TaskletStorage {
             initialized: InternalCell::new(false),
             tasklet_buffer: InternalCell::new(TaskletBuffer::new()),
+            tasklet_context: InternalCell::new(MaybeUninit::uninit()),
             _data_type_marker: PhantomData,
-            _context_type_marker: PhantomData,
         }
     }
 
@@ -92,7 +93,13 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let tasklet = Tasklet::<T, C>::new(config, step_fn, context);
+        let tasklet_context = self.tasklet_context.as_mut_ref();
+        *tasklet_context = MaybeUninit::new(context);
+
+        // SAFETY: This is safe, because `tasklet_context` was just initialized.
+        let tasklet = Tasklet::<T, C>::new(config, step_fn, unsafe {
+            tasklet_context.assume_init_mut()
+        });
 
         // This is safe, because `tasklet_buffer` doesn't contain any value yet, and it's size is
         // guaranteed to be large enough to store tasklet structure.

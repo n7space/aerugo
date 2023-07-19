@@ -32,16 +32,16 @@ type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 #[repr(C)]
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
-    data_queue: &'static Mutex<QueueData<T, N>>,
+    data_queue: Mutex<&'static mut QueueData<T, N>>,
     /// Tasklets registered to this queue.
     registered_tasklets: InternalCell<TaskletList>,
 }
 
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
-    pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
+    pub(crate) fn new(data_queue: &'static mut QueueData<T, N>) -> Self {
         MessageQueue {
-            data_queue,
+            data_queue: Mutex::new(data_queue),
             registered_tasklets: TaskletList::new().into(),
         }
     }
@@ -81,5 +81,25 @@ impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
 
     fn get_data(&self) -> Option<T> {
         self.data_queue.lock(|q| q.dequeue())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn const_size() {
+        type QueueStub = MessageQueue<(), 0>;
+        let stub_size = core::mem::size_of::<QueueStub>();
+
+        type Queue2u8 = MessageQueue<u8, 2>;
+        let queue2u8_size = core::mem::size_of::<Queue2u8>();
+
+        type Queue100u64 = MessageQueue<u64, 100>;
+        let queue100u64_size = core::mem::size_of::<Queue100u64>();
+
+        assert_eq!(queue2u8_size, stub_size);
+        assert_eq!(queue100u64_size, stub_size);
     }
 }
