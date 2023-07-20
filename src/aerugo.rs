@@ -42,7 +42,7 @@ static EXECUTOR: Executor = Executor::new();
 /// It should be used as a [singleton](crate::aerugo::AERUGO) that acts as a system API,
 /// both for user and for the internal system parts.
 pub struct Aerugo {
-    /// Hardware Access Layer.
+    /// Hardware Access/Abstraction Layer.
     hal: Hal,
 }
 
@@ -56,11 +56,21 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        let peripherals = Peripherals {};
+        Aerugo { hal: Hal::new() }
+    }
 
-        Aerugo {
-            hal: Hal::new(peripherals),
-        }
+    /// Initialize the system runtime.
+    pub fn initialize(&'static self) {
+        let peripherals =
+            Peripherals::new().expect("Cannot initialize peripherals more than once!");
+        self.hal.set_peripherals(peripherals);
+    }
+
+    /// Returns PAC peripherals for the user
+    pub fn peripherals(&'static self) -> Peripherals {
+        self.hal
+            .peripherals()
+            .expect("Peripherals cannot be taken before system initialization!")
     }
 
     /// Starts the system.
