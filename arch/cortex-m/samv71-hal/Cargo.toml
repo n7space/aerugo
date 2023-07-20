@@ -17,3 +17,4 @@ fugit = "0.3.6"
 samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }
 embedded-hal = { version = "0.2.7", features = ["unproven"] }
 aerugo-cortex-m = { version = "0.1.0", path = "../aerugo-cortex-m" }
+internal-cell = { version = "1.0.0", path = "../../../utils/internal_cell" }

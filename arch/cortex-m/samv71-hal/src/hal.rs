@@ -4,11 +4,12 @@ use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
 use crate::peripherals::Peripherals;
+use internal_cell::InternalCell;
 
 /// HAL implementation for Cortex-M SAMV71.
 pub struct Hal {
     /// Hardware peripherals.
-    _peripherals: Peripherals,
+    _peripherals: InternalCell<Option<Peripherals>>,
 }
 
 impl Hal {
@@ -16,10 +17,27 @@ impl Hal {
     const TIMER_FREQ: u32 = 1_000_000;
 
     /// Create new HAL instance.
-    pub const fn new(peripherals: Peripherals) -> Self {
+    pub const fn new() -> Self {
         Hal {
-            _peripherals: peripherals,
+            _peripherals: InternalCell::new(None),
         }
+    }
+
+    /// Set peripherals instance used by HAL. If peripherals have already been set, it has no effect.
+    pub fn set_peripherals(&self, peripherals: Peripherals) {
+        // SAFETY: This is safe, because HAL design guarantees that no other
+        // references to _peripherals exist when this function is called.
+        let peripherals_ref = unsafe { self._peripherals.as_mut_ref() };
+        if peripherals_ref.is_none() {
+            *peripherals_ref = Some(peripherals);
+        }
+    }
+
+    /// Returns PAC peripherals for the user. Can be called successfully only once.
+    pub fn peripherals(&self) -> Option<Peripherals> {
+        // SAFETY: This is safe, because HAL design guarantees that no other
+        // references to _peripherals exist when this function is called.
+        unsafe { self._peripherals.as_mut_ref().take() }
     }
 }
 
@@ -32,7 +50,7 @@ impl SystemHal for Hal {
     }
 
     fn get_system_time(&self) -> Self::Instant {
-        todo!()
+        crate::time::TimerInstantU64::from_ticks(0) // TODO: replace this stub with correct implementation
     }
 
     fn feed_watchdog(&mut self) {

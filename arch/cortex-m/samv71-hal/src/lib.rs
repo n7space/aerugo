@@ -6,6 +6,8 @@ SAMV71 implementation of aerugo HAL.
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
+extern crate internal_cell;
+
 pub(crate) use fugit as time;
 pub(crate) use samv71q21_pac as pac;
 

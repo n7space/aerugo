@@ -17,6 +17,10 @@ pub struct Watchdog {
     configured: bool,
 }
 
+/// SAFETY: Watchdog does not auto-implement Sync due to WDT structure.
+/// Since it owns WDT, and it's running in single-core environment, it's safe to share.
+unsafe impl Sync for Watchdog {}
+
 /// Structure representing Watchdog configuration.
 ///
 /// Note that watchdog can be configured only once.
@@ -26,8 +30,27 @@ pub struct WatchdogConfiguration {
     pub enabled: bool,
     /// If true, watchdog will reset the MCU on timeout.
     pub reset_enabled: bool,
-    /// Defines the
+    /// Defines the counter value for watchdog.
     pub counter: u16,
+    /// If true, watchdog will run in idle state.
+    pub run_in_idle: bool,
+    /// If true, watchdog will run in debug state.
+    pub run_in_debug: bool,
+    /// If true, watchdog underflow or error will trigger interrupt.
+    pub interrupt_enabled: bool,
+}
+
+impl Default for WatchdogConfiguration {
+    fn default() -> Self {
+        WatchdogConfiguration {
+            enabled: true,
+            reset_enabled: true,
+            counter: 0xFFF,
+            run_in_idle: false,
+            run_in_debug: false,
+            interrupt_enabled: false,
+        }
+    }
 }
 
 impl Watchdog {
@@ -59,8 +82,16 @@ impl Watchdog {
 
         // SAFETY: WDV is 12-bit field, value from configuration is clamped to (2^12)-1
         self.wdt.mr.modify(|_, w| unsafe {
-            w.wdrsten()
+            w.wdidlehlt()
+                .variant(!configuration.run_in_idle)
+                .wddbghlt()
+                .variant(!configuration.run_in_debug)
+                .wdd()
+                .bits(clamped_counter_value)
+                .wdrsten()
                 .bit(configuration.reset_enabled)
+                .wdfien()
+                .variant(configuration.interrupt_enabled)
                 .wdv()
                 .bits(clamped_counter_value)
         });
