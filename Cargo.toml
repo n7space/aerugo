@@ -8,6 +8,7 @@ members = [
     "arch/x86/x86-hal",
     "utils/env-parser",
     "utils/env-parser-tests",
+    "utils/internal_cell",
 ]
 exclude = ["examples"]
 
@@ -16,7 +17,7 @@ version = "0.1.0"
 authors = [
     "N7 Space",
     "Filip Demski <glamhoth@protonmail.com>",
-    "Wojciech Olech <wojciech_olech@hotmail.com>"
+    "Wojciech Olech <wojciech_olech@hotmail.com>",
 ]
 edition = "2021"
 rust-version = "1.70"
@@ -51,6 +52,7 @@ samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = 
 aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
 x86-hal = { version = "0.1.0", path = "arch/x86/x86-hal", optional = true }
 env-parser = { version = "1.0.0", path = "utils/env-parser" }
+internal-cell = { version = "1.0.0", path = "utils/internal_cell" }
 
 [features]
 use-aerugo-cortex-m = ["aerugo-cortex-m", "samv71-hal"]

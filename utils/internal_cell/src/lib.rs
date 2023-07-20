@@ -1,3 +1,5 @@
+#![no_std]
+
 //! Unsafe cell that implements Sync and Send
 //!
 //! This cell should be only used in the internal parts of the system for elements that are
@@ -11,7 +13,7 @@ use core::fmt::{Debug, Error, Formatter};
 
 /// Unsafe sync cell.
 #[repr(transparent)]
-pub(crate) struct InternalCell<T: ?Sized>(UnsafeCell<T>);
+pub struct InternalCell<T: ?Sized>(UnsafeCell<T>);
 
 /// Safety of the InternalCell has to be managed by hand.
 unsafe impl<T: Send + ?Sized> Sync for InternalCell<T> {}
