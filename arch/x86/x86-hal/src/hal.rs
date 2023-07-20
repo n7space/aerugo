@@ -15,7 +15,8 @@ static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
 /// HAL implementation for x86.
 pub struct Hal {
     /// Hardware peripherals.
-    _peripherals: Peripherals,
+    #[allow(dead_code)]
+    peripherals: Peripherals,
 }
 
 impl Hal {
@@ -23,10 +24,21 @@ impl Hal {
     const TIMER_FREQ: u32 = 1_000_000;
 
     /// Create new HAL instance.
-    pub const fn new(peripherals: Peripherals) -> Self {
+    pub const fn new() -> Self {
         Hal {
-            _peripherals: peripherals,
+            peripherals: Peripherals {},
         }
+    }
+
+    /// Set peripherals instance used by HAL
+    #[allow(unused_variables)]
+    pub fn set_peripherals(&self, peripherals: Peripherals) {
+        // This is currently no-op, as x86 does not provide any peripherals.
+    }
+
+    /// Returns PAC peripherals for the user. Can be called successfully only once.
+    pub fn peripherals(&self) -> Option<Peripherals> {
+        Some(Peripherals {})
     }
 }
 
