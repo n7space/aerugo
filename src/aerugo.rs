@@ -24,6 +24,7 @@ use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::queue::Queue;
 use crate::task::TaskId;
 use crate::tasklet::{StepFn, TaskletHandle, TaskletPtr, TaskletStorage};
+use crate::time_manager::TimeManager;
 
 /// Core system.
 ///
@@ -35,6 +36,11 @@ pub static AERUGO: Aerugo = Aerugo::new();
 /// Singleton instance of the scheduler. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
 /// structure, which exposes some functionality via it's API.
 static EXECUTOR: Executor = Executor::new();
+/// Time manager.
+///
+/// Singleton instance of the time manager. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
+/// structure.
+static TIME_MANAGER: TimeManager = TimeManager::new();
 
 /// System structure.
 ///
@@ -382,5 +388,9 @@ impl SystemApi for Aerugo {
         EXECUTOR
             .schedule_tasklet(tasklet)
             .expect("Unable to schedule tasklet");
+    }
+
+    fn update(&'static self) {
+        TIME_MANAGER.wake_tasklets();
     }
 }

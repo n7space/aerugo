@@ -1,4 +1,5 @@
 //! Message queue used for exchanging data between tasklets.
+
 mod message_queue_handle;
 mod message_queue_storage;
 
