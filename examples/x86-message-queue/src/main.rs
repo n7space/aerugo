@@ -1,5 +1,3 @@
-#![allow(non_upper_case_globals)]
-
 use aerugo::{
     log, InitApi, MessageQueueHandle, MessageQueueStorage, TaskletConfig, TaskletStorage, AERUGO,
 };

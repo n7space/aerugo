@@ -1,10 +1,8 @@
-#![allow(non_upper_case_globals)]
-
 use aerugo::{log, InitApi, TaskletConfig, TaskletStorage, AERUGO};
 
 #[derive(Default)]
 struct TaskAContext {
-    acc: u8
+    acc: u8,
 }
 
 fn task_a(data: u8, context: &mut TaskAContext) {
@@ -14,7 +12,7 @@ fn task_a(data: u8, context: &mut TaskAContext) {
 
 #[derive(Default)]
 struct TaskBContext {
-    acc: u16
+    acc: u16,
 }
 
 fn task_b(data: u16, context: &mut TaskBContext) {
