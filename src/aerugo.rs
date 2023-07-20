@@ -334,12 +334,62 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_cyclic<T, C>(
+    /// Subscribes tasklet to the cyclic execution.
+    ///
+    /// Tasklet subscribes for cyclic execution. Tasklet will be executed in specified period,
+    /// or will be always ready for execution if such period was not specified. On execution
+    /// tasklet won't receive any data, so cycling tasklets are useful mostly as ex. producers or
+    /// some periodic housekeeping operations.
+    ///
+    /// Each tasklet can be subscribed to at maximum on data provider.
+    ///
+    /// # Generic Arguments
+    /// * `C` - Type of the structure with tasklet context data.
+    ///
+    /// # Arguments
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `period` - Time period of the execution.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{InitApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: (), _: &mut ()) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<(), ()> = TaskletStorage::new();
+    /// #
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///
+    ///     AERUGO
+    ///         .subscribe_tasklet_to_cyclic(&task_handle, None)
+    ///         .expect("Failed to subscribe Task to cyclic execution");
+    /// }
+    /// ```
+    fn subscribe_tasklet_to_cyclic<C>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C>,
-        _period: Self::Duration,
+        tasklet_handle: &TaskletHandle<(), C>,
+        period: Option<Self::Duration>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet = tasklet_handle.tasklet();
+
+        unsafe {
+            let cyclic_execution = TIME_MANAGER.create_cyclic_execution(tasklet.ptr(), period)?;
+            tasklet.subscribe(cyclic_execution)?;
+        }
+
+        Ok(())
     }
 
     fn init_hardware(&'static self, _init_fn: fn(&mut Peripherals)) {

@@ -153,7 +153,6 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// Subscribes tasklet to the cyclic execution.
     ///
     /// # Generic Arguments
-    /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     ///
     /// # Arguments
@@ -162,10 +161,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     ///
     /// # Return
     /// `()` if successful, `Self::Error` otherwise.
-    fn subscribe_tasklet_to_cyclic<T, C>(
+    fn subscribe_tasklet_to_cyclic<C>(
         &'static self,
-        tasklet: &TaskletHandle<T, C>,
-        period: Self::Duration,
+        tasklet: &TaskletHandle<(), C>,
+        period: Option<Self::Duration>,
     ) -> Result<(), Self::Error>;
 
     /// Sets function for hardware initialization
