@@ -14,6 +14,7 @@ use crate::internal_cell::InternalCell;
 use crate::tasklet::TaskletPtr;
 use crate::time::MillisDurationU32;
 
+/// List of cyclic executions registered in the system.
 type CyclicExecutions = Vec<CyclicExecution, { Aerugo::TASKLET_COUNT }>;
 
 /// System time manager.
@@ -22,6 +23,7 @@ type CyclicExecutions = Vec<CyclicExecution, { Aerugo::TASKLET_COUNT }>;
 /// It should be used as a singleton (crate::aerugo::TIME_MANAGER) and shouldn't be directly accessed
 /// by any other part of the system.
 pub(crate) struct TimeManager {
+    /// Registered cyclic executions.
     cyclic_executions: InternalCell<CyclicExecutions>,
 }
 

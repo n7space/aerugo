@@ -10,7 +10,9 @@ use crate::time::MillisDurationU32;
 
 /// Cyclic execution information.
 pub(crate) struct CyclicExecution {
+    /// Tasklet subscribed for cyclic execution.
     tasklet: TaskletPtr,
+    /// Period of cyclic execution.
     period: Option<MillisDurationU32>,
 }
 
