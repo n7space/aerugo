@@ -4,26 +4,26 @@ use aerugo::{log, InitApi, TaskletConfig, TaskletStorage, AERUGO};
 
 #[derive(Default)]
 struct TaskAContext {
-    acc: u8
+    acc: u8,
 }
 
-fn task_a(data: u8, context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext) {
     context.acc = context.acc.wrapping_add(1);
-    log!("TaskA: {} / {}", data, context.acc);
+    log!("TaskA: {}", context.acc);
 }
 
 #[derive(Default)]
 struct TaskBContext {
-    acc: u16
+    acc: u16,
 }
 
-fn task_b(data: u16, context: &mut TaskBContext) {
+fn task_b(_: (), context: &mut TaskBContext) {
     context.acc = context.acc.wrapping_add(2);
-    log!("TaskB: {} / {}", data, context.acc);
+    log!("TaskB: {}", context.acc);
 }
 
-static TASK_A_STORAGE: TaskletStorage<u8, TaskAContext> = TaskletStorage::new();
-static TASK_B_STORAGE: TaskletStorage<u16, TaskBContext> = TaskletStorage::new();
+static TASK_A_STORAGE: TaskletStorage<(), TaskAContext> = TaskletStorage::new();
+static TASK_B_STORAGE: TaskletStorage<(), TaskBContext> = TaskletStorage::new();
 
 fn main() -> ! {
     let task_a_config = TaskletConfig { name: "TaskA" };
@@ -38,6 +38,20 @@ fn main() -> ! {
     AERUGO
         .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
+
+    let task_a_handle = TASK_A_STORAGE
+        .create_handle()
+        .expect("Unable to create handle to TaskA");
+    let task_b_handle = TASK_B_STORAGE
+        .create_handle()
+        .expect("Unable to create handle to TaskB");
+
+    AERUGO
+        .subscribe_tasklet_to_cyclic(&task_a_handle, None)
+        .expect("Unable to set cyclic on TaskA");
+    AERUGO
+        .subscribe_tasklet_to_cyclic(&task_b_handle, None)
+        .expect("Unable to set cyclic on TaskB");
 
     AERUGO.start();
 }
