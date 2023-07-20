@@ -1,0 +1,16 @@
+[package]
+name = "samv71-hal-watchdog"
+authors = ["Wojciech Olech <wojciech_olech@hotmail.com>"]
+edition = "2021"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aerugo = { version = "0.1.0", path = "../..", features = [
+    "use-aerugo-cortex-m",
+] }
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7.3"
+cortex-m-semihosting = "0.5.0"
+panic-semihosting = "0.6.0"
