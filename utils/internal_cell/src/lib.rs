@@ -29,7 +29,8 @@ impl<T> InternalCell<T> {
 impl<T: ?Sized> InternalCell<T> {
     /// Borrows an immutable reference to the value.
     ///
-    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    /// # Safety
+    /// There are no borrow checking mechanism, safety has to be managed by hand.
     ///
     /// # Return
     /// Reference to the value.
@@ -40,7 +41,8 @@ impl<T: ?Sized> InternalCell<T> {
 
     /// Borrows a mutable reference to the value.
     ///
-    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    /// # Safety
+    /// There are no borrow checking mechanism, safety has to be managed by hand.
     ///
     /// # Return
     /// Mutable reference to the value.
