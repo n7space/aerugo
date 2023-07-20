@@ -1,10 +1,12 @@
 #!/bin/bash
 
 aerugo_x86() {
+    cargo clippy -p aerugo -F use-aerugo-x86 -- -D warnings
     cargo clippy -p aerugo -F use-aerugo-x86 --tests -- -D warnings
 }
 
 aerugo_cm7() {
+    cargo clippy -p aerugo -F use-aerugo-cortex-m -- -D warnings
     cargo clippy -p aerugo -F use-aerugo-cortex-m --tests -- -D warnings
 }
 
