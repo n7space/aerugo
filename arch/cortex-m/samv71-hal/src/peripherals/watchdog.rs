@@ -25,7 +25,7 @@ unsafe impl Sync for Watchdog {}
 ///
 /// Note that watchdog can be configured only once.
 /// Configuration is locked until MCU performs a hard reset.
-pub struct WatchdogConfiguration {
+pub struct WatchdogConfig {
     /// If true, watchdog stays enabled.
     pub enabled: bool,
     /// If true, watchdog will reset the MCU on timeout.
@@ -40,9 +40,9 @@ pub struct WatchdogConfiguration {
     pub interrupt_enabled: bool,
 }
 
-impl Default for WatchdogConfiguration {
+impl Default for WatchdogConfig {
     fn default() -> Self {
-        WatchdogConfiguration {
+        WatchdogConfig {
             enabled: true,
             reset_enabled: true,
             counter: 0xFFF,
@@ -66,7 +66,7 @@ impl Watchdog {
     ///
     /// Note that watchdog can be configured only once.
     /// Configuration is locked until MCU performs a hard reset.
-    pub fn configure(&mut self, configuration: WatchdogConfiguration) {
+    pub fn configure(&mut self, configuration: WatchdogConfig) {
         if self.configured {
             return;
         }
