@@ -30,6 +30,10 @@ pub enum RuntimeError {
     ExecutorTaskletQueueFull,
     /// Enqueued data to a full data queue.
     DataQueueFull,
+    /// Tried to perform an operation before system initialization.
+    SystemNotInitialized,
+    /// Tried to initialize system more than once
+    SystemAlreadyInitialized,
 }
 
 impl runtime_api::Error for RuntimeError {}

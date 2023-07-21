@@ -1,3 +1,5 @@
+#![no_std]
+
 //! Unsafe cell that implements Sync and Send
 //!
 //! This cell should be only used in the internal parts of the system for elements that are
@@ -11,7 +13,7 @@ use core::fmt::{Debug, Error, Formatter};
 
 /// Unsafe sync cell.
 #[repr(transparent)]
-pub(crate) struct InternalCell<T: ?Sized>(UnsafeCell<T>);
+pub struct InternalCell<T: ?Sized>(UnsafeCell<T>);
 
 /// Safety of the InternalCell has to be managed by hand.
 unsafe impl<T: Send + ?Sized> Sync for InternalCell<T> {}
@@ -27,7 +29,8 @@ impl<T> InternalCell<T> {
 impl<T: ?Sized> InternalCell<T> {
     /// Borrows an immutable reference to the value.
     ///
-    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    /// # Safety
+    /// There are no borrow checking mechanism, safety has to be managed by hand.
     ///
     /// # Return
     /// Reference to the value.
@@ -38,7 +41,8 @@ impl<T: ?Sized> InternalCell<T> {
 
     /// Borrows a mutable reference to the value.
     ///
-    /// SAFETY: There are no borrow checking mechanism, safety has to be managed by hand.
+    /// # Safety
+    /// There are no borrow checking mechanism, safety has to be managed by hand.
     ///
     /// # Return
     /// Mutable reference to the value.
