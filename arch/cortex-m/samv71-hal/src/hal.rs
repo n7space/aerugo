@@ -24,7 +24,7 @@ impl Hal {
     }
 
     /// Returns PAC peripherals for the user. Can be called successfully only once.
-    pub fn peripherals(&self) -> Option<Peripherals> {
+    pub fn peripherals(&mut self) -> Option<Peripherals> {
         // SAFETY: This is safe, because HAL design guarantees that no other
         // references to `self.peripherals` exist when this function is called.
         unsafe { self.peripherals.as_mut_ref().take() }

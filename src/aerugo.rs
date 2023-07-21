@@ -68,8 +68,8 @@ impl Aerugo {
     }
 
     /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
-    pub fn peripherals(&'static self) -> Result<Option<Peripherals>, RuntimeError> {
-        match self.hal.as_ref() {
+    pub fn peripherals(&'static mut self) -> Result<Option<Peripherals>, RuntimeError> {
+        match self.hal.as_mut() {
             None => Err(RuntimeError::SystemNotInitialized),
             Some(hal) => Ok(hal.peripherals()),
         }
