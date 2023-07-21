@@ -13,6 +13,7 @@ use self::error::RuntimeError;
 use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
 use env_parser::read_env;
+use internal_cell::InternalCell;
 
 use crate::api::{InitApi, RuntimeApi, SystemApi};
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
@@ -44,7 +45,7 @@ static EXECUTOR: Executor = Executor::new();
 /// both for user and for the internal system parts.
 pub struct Aerugo {
     /// Hardware Access/Abstraction Layer.
-    hal: Option<Hal>,
+    hal: InternalCell<Option<Hal>>,
 }
 
 impl Aerugo {
@@ -57,19 +58,28 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        Aerugo { hal: None }
+        Aerugo {
+            hal: InternalCell::new(None),
+        }
     }
 
     /// Initialize the system runtime.
-    pub fn initialize(&'static mut self) {
+    pub fn initialize(&'static self) {
         let peripherals =
             Peripherals::new().expect("Cannot initialize peripherals more than once!");
-        self.hal = Some(Hal::new(peripherals));
+
+        // SAFETY: This is safe, because it's a single-core environment,
+        // and no other references to Hal should exist during this call.
+        unsafe {
+            self.hal.as_mut_ref().replace(Hal::new(peripherals));
+        }
     }
 
     /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
-    pub fn peripherals(&'static mut self) -> Result<Option<Peripherals>, RuntimeError> {
-        match self.hal.as_mut() {
+    pub fn peripherals(&'static self) -> Result<Option<Peripherals>, RuntimeError> {
+        // SAFETY: This is safe, because it's a single-core environment,
+        // and no other references to Hal should exist during this call.
+        match unsafe { self.hal.as_mut_ref() } {
             None => Err(RuntimeError::SystemNotInitialized),
             Some(hal) => Ok(hal.peripherals()),
         }
@@ -358,10 +368,15 @@ impl RuntimeApi for Aerugo {
     type Duration = crate::time::TimerDurationU64<1_000_000>;
 
     fn get_system_time(&'static self) -> Self::Instant {
-        self.hal
-            .as_ref()
-            .expect("Tried to use HAL before Aerugo initialization!")
-            .get_system_time()
+        // SAFETY: This is safe, because it's a single-core environment,
+        // and no other references to Hal should exist during this call.
+        unsafe {
+            self.hal
+                .as_ref()
+                .as_ref()
+                .expect("Tried to use HAL before Aerugo initialization!")
+                .get_system_time()
+        }
     }
 
     fn set_system_time_offset(&'static self, _offset: Self::Duration) {
