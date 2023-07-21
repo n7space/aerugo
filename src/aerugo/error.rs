@@ -31,7 +31,7 @@ pub enum RuntimeError {
     /// Tried to perform an operation before system initialization.
     SystemNotInitialized,
     /// Tried to initialize system more than once
-    SystemReinitialized,
+    SystemAlreadyInitialized,
 }
 
 impl runtime_api::Error for RuntimeError {}

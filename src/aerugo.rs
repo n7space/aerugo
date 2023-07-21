@@ -66,7 +66,7 @@ impl Aerugo {
     /// Initialize the system runtime.
     pub fn initialize(&'static self) -> Result<(), RuntimeError> {
         let peripherals = match Peripherals::new() {
-            None => return Err(RuntimeError::SystemReinitialized),
+            None => return Err(RuntimeError::SystemAlreadyInitialized),
             Some(p) => p,
         };
 
