@@ -111,7 +111,7 @@ impl Watchdog {
     }
 
     /// Returns true if watchdog has been already configured, false otherwise.
-    pub fn has_been_configured(&self) -> bool {
+    pub fn was_configured(&self) -> bool {
         self.configured
     }
 
