@@ -8,6 +8,7 @@
 pub mod error;
 
 pub use self::error::InitError;
+use self::error::RuntimeError;
 
 use aerugo_hal::system_hal::SystemHal;
 use bare_metal::CriticalSection;
@@ -43,7 +44,7 @@ static EXECUTOR: Executor = Executor::new();
 /// both for user and for the internal system parts.
 pub struct Aerugo {
     /// Hardware Access/Abstraction Layer.
-    hal: Hal,
+    hal: Option<Hal>,
 }
 
 impl Aerugo {
@@ -56,21 +57,22 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        Aerugo { hal: Hal::new() }
+        Aerugo { hal: None }
     }
 
     /// Initialize the system runtime.
-    pub fn initialize(&'static self) {
+    pub fn initialize(&'static mut self) {
         let peripherals =
             Peripherals::new().expect("Cannot initialize peripherals more than once!");
-        self.hal.set_peripherals(peripherals);
+        self.hal = Some(Hal::new(peripherals));
     }
 
-    /// Returns PAC peripherals for the user
-    pub fn peripherals(&'static self) -> Peripherals {
-        self.hal
-            .peripherals()
-            .expect("Peripherals cannot be taken before system initialization!")
+    /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
+    pub fn peripherals(&'static self) -> Result<Option<Peripherals>, RuntimeError> {
+        match self.hal.as_ref() {
+            None => Err(RuntimeError::SystemNotInitialized),
+            Some(hal) => Ok(hal.peripherals()),
+        }
     }
 
     /// Starts the system.
@@ -356,7 +358,10 @@ impl RuntimeApi for Aerugo {
     type Duration = crate::time::TimerDurationU64<1_000_000>;
 
     fn get_system_time(&'static self) -> Self::Instant {
-        self.hal.get_system_time()
+        self.hal
+            .as_ref()
+            .expect("Tried to use HAL before Aerugo initialization!")
+            .get_system_time()
     }
 
     fn set_system_time_offset(&'static self, _offset: Self::Duration) {

@@ -17,19 +17,9 @@ impl Hal {
     const TIMER_FREQ: u32 = 1_000_000;
 
     /// Create new HAL instance.
-    pub const fn new() -> Self {
+    pub fn new(peripherals: Peripherals) -> Self {
         Hal {
-            peripherals: InternalCell::new(None),
-        }
-    }
-
-    /// Set peripherals instance used by HAL. If peripherals have already been set, it has no effect.
-    pub fn set_peripherals(&self, peripherals: Peripherals) {
-        // SAFETY: This is safe, because HAL design guarantees that no other
-        // references to `self.peripherals` exist when this function is called.
-        let peripherals_ref = unsafe { self.peripherals.as_mut_ref() };
-        if peripherals_ref.is_none() {
-            *peripherals_ref = Some(peripherals);
+            peripherals: InternalCell::new(Some(peripherals)),
         }
     }
 
