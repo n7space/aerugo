@@ -5,8 +5,7 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_semihosting;
 
-use aerugo::hal::embedded_hal::watchdog::Watchdog as _;
-use aerugo::hal::peripherals::watchdog::{Watchdog, WatchdogConfiguration};
+use aerugo::hal::peripherals::watchdog::{Watchdog, WatchdogConfig};
 use aerugo::{
     InitApi, MessageQueueHandle, MessageQueueStorage, TaskletConfig, TaskletStorage, AERUGO,
 };
@@ -48,14 +47,21 @@ fn main() -> ! {
 
     hprintln!("Task queues initialized! Setting up peripherals...");
 
-    let peripherals = AERUGO.peripherals();
+    let peripherals = AERUGO
+        .peripherals()
+        .expect("Aerugo needs to be initialized first!")
+        .expect("Peripherals have already been taken!");
+
     let mut watchdog = Watchdog::new(peripherals.mcu_pac.WDT);
-    watchdog.configure(WatchdogConfiguration {
-        counter: 0xFF,
-        run_in_idle: true,
-        run_in_debug: true,
-        ..Default::default()
-    });
+
+    watchdog
+        .configure(WatchdogConfig {
+            duration: 0xFF,
+            run_in_idle: true,
+            run_in_debug: true,
+            ..Default::default()
+        })
+        .expect("Cannot re-configure Watchdog!");
 
     hprintln!("Peripherals initialized! Setting up tasks...");
 
