@@ -31,7 +31,7 @@ impl Executor {
     /// Creates new executor instance.
     ///
     /// # Safety
-    /// This shouldn't be called in more than one place.
+    /// This shouldn't be called more than once.
     pub(crate) const fn new() -> Self {
         Executor {
             tasklet_queue: Mutex::new(BinaryHeap::new()),

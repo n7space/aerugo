@@ -31,7 +31,7 @@ impl TimeManager {
     /// Creates new time manager instance.
     ///
     /// # Safety
-    /// This shoudln't be called in more than one place.
+    /// This shouldn't be called more than once.
     pub(crate) const fn new() -> Self {
         TimeManager {
             cyclic_executions: InternalCell::new(CyclicExecutions::new()),
