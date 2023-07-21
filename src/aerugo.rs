@@ -384,6 +384,7 @@ impl InitApi for Aerugo {
     ) -> Result<(), Self::Error> {
         let tasklet = tasklet_handle.tasklet();
 
+        // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
             let cyclic_execution = TIME_MANAGER.create_cyclic_execution(tasklet.ptr(), period)?;
             tasklet.subscribe(cyclic_execution)?;
