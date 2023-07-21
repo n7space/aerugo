@@ -26,7 +26,7 @@ impl Hal {
     /// Set peripherals instance used by HAL. If peripherals have already been set, it has no effect.
     pub fn set_peripherals(&self, peripherals: Peripherals) {
         // SAFETY: This is safe, because HAL design guarantees that no other
-        // references to _peripherals exist when this function is called.
+        // references to `self.peripherals` exist when this function is called.
         let peripherals_ref = unsafe { self.peripherals.as_mut_ref() };
         if peripherals_ref.is_none() {
             *peripherals_ref = Some(peripherals);
@@ -36,7 +36,7 @@ impl Hal {
     /// Returns PAC peripherals for the user. Can be called successfully only once.
     pub fn peripherals(&self) -> Option<Peripherals> {
         // SAFETY: This is safe, because HAL design guarantees that no other
-        // references to _peripherals exist when this function is called.
+        // references to `self.peripherals` exist when this function is called.
         unsafe { self.peripherals.as_mut_ref().take() }
     }
 }
