@@ -8,7 +8,7 @@
 use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::{error::RuntimeError, Aerugo, AERUGO};
-use crate::api::RuntimeApi;
+use crate::api::{RuntimeApi, SystemApi};
 use crate::arch::Mutex;
 use crate::task::TaskStatus;
 use crate::tasklet::TaskletPtr;
@@ -31,7 +31,7 @@ impl Executor {
     /// Creates new executor instance.
     ///
     /// # Safety
-    /// This shouldn't be called in more than one place.
+    /// This shouldn't be called more than once.
     pub(crate) const fn new() -> Self {
         Executor {
             tasklet_queue: Mutex::new(BinaryHeap::new()),
@@ -43,6 +43,8 @@ impl Executor {
         loop {
             self.execute_next_tasklet()
                 .expect("Failure in tasklet execution");
+
+            AERUGO.update();
         }
     }
 

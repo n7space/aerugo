@@ -13,6 +13,8 @@ pub enum InitError {
     TaskletAlreadySubscribed,
     /// Tasklet list was full when tried to register.
     TaskletListFull,
+    /// Cyclic execution list was full when tried to create a new one.
+    CyclicExecutionListFull,
 }
 
 impl init_api::Error for InitError {}

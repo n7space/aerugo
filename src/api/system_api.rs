@@ -11,4 +11,7 @@ pub(crate) trait SystemApi {
     /// # Parameters
     /// * `tasklet` - Tasklet to wake
     fn wake_tasklet(&'static self, tasklet: &TaskletPtr);
+
+    /// Runs subsystems updates between tasklet executions.
+    fn update(&'static self);
 }
