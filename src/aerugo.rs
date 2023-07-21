@@ -64,15 +64,19 @@ impl Aerugo {
     }
 
     /// Initialize the system runtime.
-    pub fn initialize(&'static self) {
-        let peripherals =
-            Peripherals::new().expect("Cannot initialize peripherals more than once!");
+    pub fn initialize(&'static self) -> Result<(), RuntimeError> {
+        let peripherals = match Peripherals::new() {
+            None => return Err(RuntimeError::SystemReinitialized),
+            Some(p) => p,
+        };
 
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.
         unsafe {
-            self.hal.as_mut_ref().replace(Hal::new(peripherals));
+            Some(self.hal.as_mut_ref().replace(Hal::new(peripherals)));
         }
+
+        Ok(())
     }
 
     /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.

@@ -30,6 +30,8 @@ pub enum RuntimeError {
     DataQueueFull,
     /// Tried to perform an operation before system initialization.
     SystemNotInitialized,
+    /// Tried to initialize system more than once
+    SystemReinitialized,
 }
 
 impl runtime_api::Error for RuntimeError {}
