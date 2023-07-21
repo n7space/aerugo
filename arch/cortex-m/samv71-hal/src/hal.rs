@@ -9,7 +9,7 @@ use internal_cell::InternalCell;
 /// HAL implementation for Cortex-M SAMV71.
 pub struct Hal {
     /// Hardware peripherals.
-    _peripherals: InternalCell<Option<Peripherals>>,
+    peripherals: InternalCell<Option<Peripherals>>,
 }
 
 impl Hal {
@@ -19,7 +19,7 @@ impl Hal {
     /// Create new HAL instance.
     pub const fn new() -> Self {
         Hal {
-            _peripherals: InternalCell::new(None),
+            peripherals: InternalCell::new(None),
         }
     }
 
@@ -27,7 +27,7 @@ impl Hal {
     pub fn set_peripherals(&self, peripherals: Peripherals) {
         // SAFETY: This is safe, because HAL design guarantees that no other
         // references to _peripherals exist when this function is called.
-        let peripherals_ref = unsafe { self._peripherals.as_mut_ref() };
+        let peripherals_ref = unsafe { self.peripherals.as_mut_ref() };
         if peripherals_ref.is_none() {
             *peripherals_ref = Some(peripherals);
         }
@@ -37,7 +37,7 @@ impl Hal {
     pub fn peripherals(&self) -> Option<Peripherals> {
         // SAFETY: This is safe, because HAL design guarantees that no other
         // references to _peripherals exist when this function is called.
-        unsafe { self._peripherals.as_mut_ref().take() }
+        unsafe { self.peripherals.as_mut_ref().take() }
     }
 }
 
