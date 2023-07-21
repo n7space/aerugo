@@ -8,14 +8,15 @@
     "configurations": [
         {
             "name": "SAMV71Q21 Debug",
-            "executable": "${workspaceFolder}/target/thumbv7em-none-eabihf/debug/samv71-hal-watchdog",
+            "cwd": "${workspaceFolder}",
+            "executable": "PUT PATH TO EXECUTABLE HERE",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "external", // Change this is your devboard is not remotely accessible
             "device": "samv71q21",
-            "gdbTarget": "192.168.2.240:3333",
-            "svdPath": "${workspaceFolder}../../../arch/cortex-m/samv71q21-pac/ATSAMV71Q21B.svd",
+            "gdbTarget": "PUT IP:PORT OF REMOTE OPENOCD INSTANCE HERE",
+            "svdPath": "${workspaceFolder}/arch/cortex-m/samv71q21-pac/ATSAMV71Q21B.svd",
             "postLaunchCommands": [
                 "set print asm-demangle on",
                 "monitor arm semihosting enable",
