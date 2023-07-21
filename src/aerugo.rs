@@ -73,7 +73,7 @@ impl Aerugo {
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.
         unsafe {
-            Some(self.hal.as_mut_ref().replace(Hal::new(peripherals)));
+            self.hal.as_mut_ref().replace(Hal::new(peripherals));
         }
 
         Ok(())
