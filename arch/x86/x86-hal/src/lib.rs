@@ -7,8 +7,9 @@ x86 implementation of aerugo HAL.
 
 pub(crate) use fugit as time;
 
+pub mod error;
 pub mod hal;
-pub mod peripherals;
+mod system_peripherals;
+pub mod user_peripherals;
 
 pub use self::hal::Hal;
-pub use self::peripherals::Peripherals;
