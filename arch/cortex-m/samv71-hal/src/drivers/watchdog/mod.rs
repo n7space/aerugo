@@ -16,6 +16,9 @@ pub mod error;
 use crate::pac::WDT;
 use config::WatchdogConfig;
 use error::WatchdogError;
+use fugit::MillisDurationU32;
+
+use self::config::MAXIMUM_WATCHDOG_DURATION;
 
 /// Structure representing a watchdog
 pub struct Watchdog {
@@ -38,6 +41,23 @@ impl Watchdog {
         }
     }
 
+    /// Converts duration to watchdog counter value
+    fn convert_duration_to_counter_value(duration: MillisDurationU32) -> u16 {
+        let duration_ratio: f32 =
+            (duration.to_secs() as f32) / (MAXIMUM_WATCHDOG_DURATION.to_secs() as f32);
+
+        (duration_ratio * (0xFFF as f32)) as u16
+    }
+
+    /// Clamp duration to (0, [MAXIMUM_WATCHDOG_DURATION](self::config::MAXIMUM_WATCHDOG_DURATION)) range,
+    /// and convert it to unsigned value that can be put in watchdog's register
+    fn clamp_and_convert_duration(duration: MillisDurationU32) -> u16 {
+        let clamped_duration =
+            duration.clamp(MillisDurationU32::secs(0), MillisDurationU32::secs(16));
+
+        Watchdog::convert_duration_to_counter_value(clamped_duration)
+    }
+
     /// Set watchdog configuration
     ///
     /// Note that watchdog can be configured only once.
@@ -54,22 +74,22 @@ impl Watchdog {
             return Ok(());
         }
 
-        let clamped_counter_value = configuration.duration.clamp(0, 2u16.pow(12) - 1);
+        let raw_duration = Watchdog::clamp_and_convert_duration(configuration.duration);
 
-        // SAFETY: WDV is 12-bit field, value from configuration is clamped to (2^12)-1
+        // SAFETY: WDV is 12-bit field, value from configuration is clamped to 0xFFF
         self.wdt.mr.modify(|_, w| unsafe {
             w.wdidlehlt()
                 .variant(!configuration.run_in_idle)
                 .wddbghlt()
                 .variant(!configuration.run_in_debug)
                 .wdd()
-                .bits(clamped_counter_value)
+                .bits(raw_duration)
                 .wdrsten()
                 .bit(configuration.reset_enabled)
                 .wdfien()
                 .variant(configuration.interrupt_enabled)
                 .wdv()
-                .bits(clamped_counter_value)
+                .bits(raw_duration)
         });
 
         self.configured = true;

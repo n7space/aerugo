@@ -4,6 +4,7 @@ use aerugo_cortex_m::Mutex;
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
+use crate::drivers::watchdog::config::WatchdogConfig;
 use crate::drivers::watchdog::Watchdog;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
@@ -21,7 +22,7 @@ pub struct Hal {
     /// Hardware peripherals.
     user_peripherals: Option<UserPeripherals>,
     /// System peripherals.
-    _system_peripherals: InternalCell<SystemPeripherals>,
+    system_peripherals: InternalCell<SystemPeripherals>,
 }
 
 impl Hal {
@@ -42,7 +43,7 @@ impl Hal {
             let (user_peripherals, system_peripherals) = Hal::create_peripherals();
             Ok(Hal {
                 user_peripherals: Some(user_peripherals),
-                _system_peripherals: InternalCell::new(system_peripherals),
+                system_peripherals: InternalCell::new(system_peripherals),
             })
         })
     }
@@ -75,16 +76,35 @@ impl Hal {
 impl SystemHal for Hal {
     type Instant = crate::time::TimerInstantU64<{ Hal::TIMER_FREQ }>;
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
+    type Error = HalError;
 
-    fn configure_hardware(&mut self, _config: SystemHardwareConfig) {
-        todo!()
+    fn configure_hardware(&mut self, config: SystemHardwareConfig) -> Result<(), HalError> {
+        // SAFETY: This is safe, because this is a single-core system,
+        // and no other references to system peripherals should exist.
+        let peripherals = unsafe { self.system_peripherals.as_mut_ref() };
+
+        match peripherals.watchdog.configure(WatchdogConfig {
+            duration: config.watchdog_timeout,
+            ..Default::default()
+        }) {
+            Ok(()) => {}
+            Err(_) => return Err(HalError::HalAlreadyConfigured),
+        };
+
+        Ok(())
     }
 
     fn get_system_time(&self) -> Self::Instant {
         crate::time::TimerInstantU64::from_ticks(0) // TODO: replace this stub with correct implementation
     }
 
-    fn feed_watchdog(&mut self) {}
+    fn feed_watchdog(&mut self) {
+        // SAFETY: This is safe, because this is a single-core system,
+        // and no other references to system peripherals should exist.
+        let peripherals = unsafe { self.system_peripherals.as_mut_ref() };
+
+        peripherals.watchdog.feed();
+    }
 
     fn enter_critical() {
         cortex_m::interrupt::disable();

@@ -72,7 +72,8 @@ impl Aerugo {
     /// Initialize the system runtime and hardware.
     pub fn initialize(&'static self, config: SystemHardwareConfig) {
         let mut hal = Hal::new().expect("Cannot initialize HAL more than once!");
-        hal.configure_hardware(config);
+        hal.configure_hardware(config)
+            .expect("Cannot re-configure hardware!");
 
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal container should exist during this call.
@@ -467,6 +468,15 @@ impl SystemApi for Aerugo {
     }
 
     fn update(&'static self) {
+        // SAFETY: This code is executed in Aerugo-managed loop on single-core system,
+        // therefore no other mutable references should exist to HAL during this call.
+        let hal = unsafe {
+            self.hal
+                .as_mut_ref()
+                .as_mut()
+                .expect("HAL should be initialized before starting the system!")
+        };
         TIME_MANAGER.wake_tasklets();
+        hal.feed_watchdog();
     }
 }
