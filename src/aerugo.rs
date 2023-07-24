@@ -10,7 +10,7 @@ pub mod error;
 pub use self::error::InitError;
 use self::error::RuntimeError;
 
-use aerugo_hal::system_hal::SystemHal;
+use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use env_parser::read_env;
 use internal_cell::InternalCell;
@@ -21,7 +21,7 @@ use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
-use crate::hal::{Hal, Peripherals};
+use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::queue::Queue;
 use crate::task::TaskId;
@@ -69,29 +69,24 @@ impl Aerugo {
         }
     }
 
-    /// Initialize the system runtime.
-    pub fn initialize(&'static self) -> Result<(), RuntimeError> {
-        let peripherals = match Peripherals::new() {
-            None => return Err(RuntimeError::SystemAlreadyInitialized),
-            Some(p) => p,
-        };
+    /// Initialize the system runtime and hardware.
+    pub fn initialize(&'static self, config: SystemHardwareConfig) {
+        let mut hal = Hal::new().expect("Cannot initialize HAL more than once!");
+        hal.configure_hardware(config);
 
         // SAFETY: This is safe, because it's a single-core environment,
-        // and no other references to Hal should exist during this call.
-        unsafe {
-            self.hal.as_mut_ref().replace(Hal::new(peripherals));
-        }
-
-        Ok(())
+        // and no other references to Hal container should exist during this call.
+        let hal_container = unsafe { self.hal.as_mut_ref() };
+        hal_container.replace(hal);
     }
 
     /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
-    pub fn peripherals(&'static self) -> Result<Option<Peripherals>, RuntimeError> {
+    pub fn peripherals(&'static self) -> Result<Option<UserPeripherals>, RuntimeError> {
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.
         match unsafe { self.hal.as_mut_ref() } {
             None => Err(RuntimeError::SystemNotInitialized),
-            Some(hal) => Ok(hal.peripherals()),
+            Some(hal) => Ok(hal.user_peripherals()),
         }
     }
 
@@ -417,10 +412,6 @@ impl InitApi for Aerugo {
         }
 
         Ok(())
-    }
-
-    fn init_hardware(&'static self, _init_fn: fn(&mut Peripherals)) {
-        todo!()
     }
 }
 
