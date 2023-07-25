@@ -10,7 +10,7 @@ pub mod error;
 pub use self::error::InitError;
 use self::error::RuntimeError;
 
-use aerugo_hal::system_hal::SystemHal;
+use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use env_parser::read_env;
 use internal_cell::InternalCell;
@@ -21,7 +21,7 @@ use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
-use crate::hal::{Hal, Peripherals};
+use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::queue::Queue;
 use crate::task::TaskId;
@@ -69,29 +69,25 @@ impl Aerugo {
         }
     }
 
-    /// Initialize the system runtime.
-    pub fn initialize(&'static self) -> Result<(), RuntimeError> {
-        let peripherals = match Peripherals::new() {
-            None => return Err(RuntimeError::SystemAlreadyInitialized),
-            Some(p) => p,
-        };
+    /// Initialize the system runtime and hardware.
+    pub fn initialize(&'static self, config: SystemHardwareConfig) {
+        let mut hal = Hal::new().expect("Cannot initialize HAL more than once!");
+        hal.configure_hardware(config)
+            .expect("Cannot re-configure hardware!");
 
         // SAFETY: This is safe, because it's a single-core environment,
-        // and no other references to Hal should exist during this call.
-        unsafe {
-            self.hal.as_mut_ref().replace(Hal::new(peripherals));
-        }
-
-        Ok(())
+        // and no other references to Hal container should exist during this call.
+        let hal_container = unsafe { self.hal.as_mut_ref() };
+        hal_container.replace(hal);
     }
 
     /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
-    pub fn peripherals(&'static self) -> Result<Option<Peripherals>, RuntimeError> {
+    pub fn peripherals(&'static self) -> Result<Option<UserPeripherals>, RuntimeError> {
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.
         match unsafe { self.hal.as_mut_ref() } {
             None => Err(RuntimeError::SystemNotInitialized),
-            Some(hal) => Ok(hal.peripherals()),
+            Some(hal) => Ok(hal.user_peripherals()),
         }
     }
 
@@ -114,11 +110,11 @@ impl InitApi for Aerugo {
     /// Tasklet is created in the passed `storage` memory. Storage has to be static to keep the stored
     /// tasklet for the whole duration of systems' life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `storage` - Static memory storage where the tasklet should be allocated.
@@ -167,11 +163,11 @@ impl InitApi for Aerugo {
     /// Tasklet is created in the passed `storage` memory. Storage has to be static to keep the stored
     /// tasklet for the whole duration of system life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `context` - Tasklet context data.
@@ -224,11 +220,11 @@ impl InitApi for Aerugo {
     /// Queue is created in the passed `storage` memory. Storage has to be static to keep the
     /// stored tasklet for the whole duration of system life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data stored in the queue.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `storage` - Static memory storage where the queue should be allocated.
     ///
     /// # Return
@@ -286,12 +282,12 @@ impl InitApi for Aerugo {
     /// Strong typing is enforced, tasklet can only be subscribed to a queue that stores the same
     /// type of data, that is processed by the tasklet.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `queue` - Handle to the target queue.
     ///
@@ -369,10 +365,10 @@ impl InitApi for Aerugo {
     ///
     /// Each tasklet can be subscribed to at maximum on data provider.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `period` - Time period of the execution.
     ///
@@ -417,10 +413,6 @@ impl InitApi for Aerugo {
         }
 
         Ok(())
-    }
-
-    fn init_hardware(&'static self, _init_fn: fn(&mut Peripherals)) {
-        todo!()
     }
 }
 
@@ -476,6 +468,15 @@ impl SystemApi for Aerugo {
     }
 
     fn update(&'static self) {
+        // SAFETY: This code is executed in Aerugo-managed loop on single-core system,
+        // therefore no other mutable references should exist to HAL during this call.
+        let hal = unsafe {
+            self.hal
+                .as_mut_ref()
+                .as_mut()
+                .expect("HAL should be initialized before starting the system!")
+        };
         TIME_MANAGER.wake_tasklets();
+        hal.feed_watchdog();
     }
 }

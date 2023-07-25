@@ -1,5 +1,5 @@
 [package]
-name = "samv71-hal-watchdog"
+name = "samv71-basic-execution"
 authors = ["Wojciech Olech <wojciech_olech@hotmail.com>"]
 edition = "2021"
 version = "0.1.0"

@@ -5,9 +5,9 @@ Cargo.lock
 target/
 
 # editor files
-.vscode/*
 !.vscode/*.md
 !.vscode/*.svd
 !.vscode/launch.json.example
 !.vscode/tasks.json
 !.vscode/extensions.json
+.vscode/

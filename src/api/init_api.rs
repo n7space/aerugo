@@ -7,7 +7,6 @@
 
 use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 use crate::event::{EventHandle, EventStorage};
-use crate::hal::Peripherals;
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
 
@@ -18,11 +17,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Creates new tasklet in the system.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `storage` - Static memory storage where the tasklet should be allocated.
@@ -38,11 +37,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Creates new tasklet in the system with initialized context data.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `context` - Tasklet context data.
@@ -60,11 +59,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Creates new message queue in the system.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data stored in the queue.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `storage` - Static memory storage where the queue should be allocated.
     ///
     /// # Return
@@ -76,7 +75,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Creates new event in the system.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `storage` - Static memory storage where the event should be allocated.
     ///
     /// # Return
@@ -85,7 +84,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Creates new boolean condition in the system.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `storage` - Static memory storage where the condition should be allocated.
     ///
     /// # Return
@@ -97,12 +96,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Subscribes tasklet to the queue.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `queue` - Handle to the target queue.
     ///
@@ -116,11 +115,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Subscribes tasklet to the event.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `event` - Target event ID.
     ///
@@ -134,11 +133,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Subscribes tasklet to the set of conditions.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `condition` - Set of conditions.
     ///
@@ -152,10 +151,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
 
     /// Subscribes tasklet to the cyclic execution.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `period` - Time period of the execution.
     ///
@@ -166,12 +165,6 @@ pub trait InitApi: ErrorType + TaskConfigType {
         tasklet: &TaskletHandle<(), C>,
         period: Option<Self::Duration>,
     ) -> Result<(), Self::Error>;
-
-    /// Sets function for hardware initialization
-    ///
-    /// # Arguments
-    /// * `init_fn` - Hardware initialization function.
-    fn init_hardware(&'static self, init_fn: fn(&mut Peripherals));
 }
 
 /// Initialization error

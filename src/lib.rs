@@ -30,6 +30,7 @@ pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
 pub use self::event::EventStorage;
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
+pub use aerugo_hal::system_hal::SystemHardwareConfig;
 
 pub use fugit as time;
 

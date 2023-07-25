@@ -7,7 +7,9 @@ use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
 
-use crate::peripherals::Peripherals;
+use crate::error::HalError;
+use crate::system_peripherals::SystemPeripherals;
+use crate::user_peripherals::UserPeripherals;
 
 /// Time when system was started
 static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
@@ -15,7 +17,9 @@ static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
 /// HAL implementation for x86.
 pub struct Hal {
     /// Hardware peripherals.
-    peripherals: Option<Peripherals>,
+    user_peripherals: Option<UserPeripherals>,
+    /// System peripherals.
+    _system_peripherals: Option<SystemPeripherals>,
 }
 
 impl Hal {
@@ -23,24 +27,27 @@ impl Hal {
     const TIMER_FREQ: u32 = 1_000_000;
 
     /// Create new HAL instance.
-    pub fn new(peripherals: Peripherals) -> Self {
-        Hal {
-            peripherals: Some(peripherals),
-        }
+    pub fn new() -> Result<Self, HalError> {
+        Ok(Hal {
+            user_peripherals: Some(UserPeripherals::default()),
+            _system_peripherals: Some(SystemPeripherals::default()),
+        })
     }
 
     /// Returns PAC peripherals for the user. Can be called successfully only once.
-    pub fn peripherals(&mut self) -> Option<Peripherals> {
-        self.peripherals.take()
+    pub fn user_peripherals(&mut self) -> Option<UserPeripherals> {
+        self.user_peripherals.take()
     }
 }
 
 impl SystemHal for Hal {
     type Instant = crate::time::TimerInstantU64<{ Hal::TIMER_FREQ }>;
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
+    type Error = HalError;
 
-    fn configure_hardware(&mut self, _config: SystemHardwareConfig) {
-        todo!()
+    fn configure_hardware(&mut self, _config: SystemHardwareConfig) -> Result<(), HalError> {
+        // There is no hardware to configure on x86
+        Ok(())
     }
 
     fn get_system_time(&self) -> Self::Instant {
