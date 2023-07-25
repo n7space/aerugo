@@ -3,7 +3,7 @@
 //! Watchdog can be used to unconditionally reset or interrupt the MCU when program halts.
 //! To indicate that program is running, watchdog needs to be "fed" periodically.
 //! Minimal frequency of feeding can be adjusted by setting watchdog counter reset value (duration).
-//! Behavior of watchdog, it's state and duration can be set using provided API.
+//! Behavior of watchdog, it's state, and duration can be set using provided API.
 //!
 //! # Implementation remarks
 //! On SAMV71, Watchdog is enabled by default with duration of 16 seconds,
@@ -20,20 +20,27 @@ pub use watchdog_error::WatchdogError;
 
 use self::watchdog_config::MAXIMUM_WATCHDOG_DURATION;
 
-/// Structure representing a watchdog
+/// Structure representing a watchdog.
 pub struct Watchdog {
-    /// Watchdog instance
+    /// Watchdog instance.
     wdt: WDT,
     /// Indicates whether the watchdog has already been configured (or disabled).
     configured: bool,
 }
 
-/// SAFETY: Watchdog does not auto-implement Sync due to WDT structure.
+/// # Safety
+/// Watchdog does not auto-implement Sync due to WDT structure containing a pointer.
 /// Since it owns WDT, and it's running in single-core environment, it's safe to share.
 unsafe impl Sync for Watchdog {}
 
 impl Watchdog {
-    /// Create a watchdog instance
+    /// Create a watchdog instance from PAC peripheral.
+    ///
+    /// # Arguments
+    /// * `wdt` - PAC Watchdog peripheral.
+    ///
+    /// # Return
+    /// HAL Watchdog instance.
     pub const fn new(wdt: WDT) -> Self {
         Self {
             wdt,
@@ -44,33 +51,40 @@ impl Watchdog {
     /// Set watchdog configuration
     ///
     /// Note that watchdog can be configured only once.
-    /// Configuration is locked until MCU performs a hard reset.
-    pub fn configure(&mut self, configuration: WatchdogConfig) -> Result<(), WatchdogError> {
+    /// After that, configuration is locked until MCU performs a hard reset.
+    ///
+    /// # Arguments
+    /// * `config` - Watchdog configuration.
+    ///
+    /// # Return
+    /// [`WatchdogError::WatchdogAlreadyConfigured`] if watchdog instance was
+    /// configured earlier, `Ok(())` otherwise.
+    pub fn configure(&mut self, config: WatchdogConfig) -> Result<(), WatchdogError> {
         if self.configured {
             return Err(WatchdogError::WatchdogAlreadyConfigured);
         }
 
         // It's unsafe per SAMV71 documentation to modify configuration and enable/disable
         // watchdog at the same time, therefore disabling is handled separately.
-        if !configuration.enabled {
+        if !config.enabled {
             self.disable()?;
             return Ok(());
         }
 
-        let raw_duration = Watchdog::clamp_and_convert_duration(configuration.duration);
+        let raw_duration = Watchdog::clamp_and_convert_duration(config.duration);
 
         // SAFETY: WDV is 12-bit field, value from configuration is clamped to 0xFFF
         self.wdt.mr.modify(|_, w| unsafe {
             w.wdidlehlt()
-                .variant(!configuration.run_in_idle)
+                .variant(!config.run_in_idle)
                 .wddbghlt()
-                .variant(!configuration.run_in_debug)
+                .variant(!config.run_in_debug)
                 .wdd()
                 .bits(raw_duration)
                 .wdrsten()
-                .bit(configuration.reset_enabled)
+                .bit(config.reset_enabled)
                 .wdfien()
-                .variant(configuration.interrupt_enabled)
+                .variant(config.interrupt_enabled)
                 .wdv()
                 .bits(raw_duration)
         });
@@ -79,7 +93,7 @@ impl Watchdog {
         Ok(())
     }
 
-    /// Returns true if watchdog has been already configured, false otherwise.
+    /// Check if watchdog was configured.
     pub fn was_configured(&self) -> bool {
         self.configured
     }
@@ -89,10 +103,14 @@ impl Watchdog {
         self.wdt.cr.write(|w| w.key().passwd().wdrstt().set_bit());
     }
 
-    /// Disables the watchdog.
+    /// Disable the watchdog.
     ///
     /// Note that watchdog can be configured or disabled only once.
     /// Once disabled, it's off until the MCU performs a hard reset.
+    ///
+    /// # Return
+    /// [`WatchdogError::WatchdogAlreadyConfigured`] if watchdog instance was
+    /// configured earlier, `Ok(())` otherwise.
     pub fn disable(&mut self) -> Result<(), WatchdogError> {
         if self.configured {
             return Err(WatchdogError::WatchdogAlreadyConfigured);
@@ -104,7 +122,18 @@ impl Watchdog {
         Ok(())
     }
 
-    /// Converts duration to watchdog counter value
+    /// Convert duration to watchdog counter value.
+    ///
+    /// # Arguments
+    /// * `duration` - Watchdog duration.
+    ///
+    /// # Returns
+    /// Watchdog counter value representing passed duration.
+    ///
+    /// # Remarks
+    /// `duration` must be in inclusive range [0, [`MAXIMUM_WATCHDOG_DURATION`]].
+    /// Since it's internal, private function, it does not perform any checks.
+    /// To safely convert any duration into watchdog counter value, use [`clamp_and_convert_duration`](Watchdog::clamp_and_convert_duration).
     fn convert_duration_to_counter_value(duration: MillisDurationU32) -> u16 {
         let duration_ratio: f32 =
             (duration.to_secs() as f32) / (MAXIMUM_WATCHDOG_DURATION.to_secs() as f32);
@@ -112,8 +141,14 @@ impl Watchdog {
         (duration_ratio * (0xFFF as f32)) as u16
     }
 
-    /// Clamp duration to (0, [MAXIMUM_WATCHDOG_DURATION](self::config::MAXIMUM_WATCHDOG_DURATION)) range,
+    /// Clamp duration to inclusive [0, [`MAXIMUM_WATCHDOG_DURATION`]] range,
     /// and convert it to unsigned value that can be put in watchdog's register
+    ///
+    /// # Arguments
+    /// * `duration` - Watchdog duration.
+    ///
+    /// # Returns
+    /// Watchdog counter value representing passed duration.
     fn clamp_and_convert_duration(duration: MillisDurationU32) -> u16 {
         let clamped_duration =
             duration.clamp(MillisDurationU32::secs(0), MillisDurationU32::secs(16));
