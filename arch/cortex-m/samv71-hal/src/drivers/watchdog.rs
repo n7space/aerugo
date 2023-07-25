@@ -41,23 +41,6 @@ impl Watchdog {
         }
     }
 
-    /// Converts duration to watchdog counter value
-    fn convert_duration_to_counter_value(duration: MillisDurationU32) -> u16 {
-        let duration_ratio: f32 =
-            (duration.to_secs() as f32) / (MAXIMUM_WATCHDOG_DURATION.to_secs() as f32);
-
-        (duration_ratio * (0xFFF as f32)) as u16
-    }
-
-    /// Clamp duration to (0, [MAXIMUM_WATCHDOG_DURATION](self::config::MAXIMUM_WATCHDOG_DURATION)) range,
-    /// and convert it to unsigned value that can be put in watchdog's register
-    fn clamp_and_convert_duration(duration: MillisDurationU32) -> u16 {
-        let clamped_duration =
-            duration.clamp(MillisDurationU32::secs(0), MillisDurationU32::secs(16));
-
-        Watchdog::convert_duration_to_counter_value(clamped_duration)
-    }
-
     /// Set watchdog configuration
     ///
     /// Note that watchdog can be configured only once.
@@ -119,5 +102,22 @@ impl Watchdog {
         self.configured = true;
 
         Ok(())
+    }
+
+    /// Converts duration to watchdog counter value
+    fn convert_duration_to_counter_value(duration: MillisDurationU32) -> u16 {
+        let duration_ratio: f32 =
+            (duration.to_secs() as f32) / (MAXIMUM_WATCHDOG_DURATION.to_secs() as f32);
+
+        (duration_ratio * (0xFFF as f32)) as u16
+    }
+
+    /// Clamp duration to (0, [MAXIMUM_WATCHDOG_DURATION](self::config::MAXIMUM_WATCHDOG_DURATION)) range,
+    /// and convert it to unsigned value that can be put in watchdog's register
+    fn clamp_and_convert_duration(duration: MillisDurationU32) -> u16 {
+        let clamped_duration =
+            duration.clamp(MillisDurationU32::secs(0), MillisDurationU32::secs(16));
+
+        Watchdog::convert_duration_to_counter_value(clamped_duration)
     }
 }
