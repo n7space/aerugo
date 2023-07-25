@@ -36,7 +36,7 @@ unsafe impl Sync for Watchdog {}
 impl Watchdog {
     /// Create a watchdog instance from PAC peripheral.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `wdt` - PAC Watchdog peripheral.
     pub const fn new(wdt: WDT) -> Self {
         Self {
@@ -50,7 +50,7 @@ impl Watchdog {
     /// Note that watchdog can be configured only once.
     /// After that, configuration is locked until MCU performs a hard reset.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Watchdog configuration.
     ///
     /// # Return
@@ -121,7 +121,7 @@ impl Watchdog {
 
     /// Convert duration to watchdog counter value.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `duration` - Watchdog duration.
     ///
     /// # Returns
@@ -141,7 +141,7 @@ impl Watchdog {
     /// Clamp duration to inclusive [0, [`MAXIMUM_WATCHDOG_DURATION`]] range,
     /// and convert it to unsigned value that can be put in watchdog's register
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `duration` - Watchdog duration.
     ///
     /// # Returns

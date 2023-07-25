@@ -110,11 +110,11 @@ impl InitApi for Aerugo {
     /// Tasklet is created in the passed `storage` memory. Storage has to be static to keep the stored
     /// tasklet for the whole duration of systems' life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `storage` - Static memory storage where the tasklet should be allocated.
@@ -163,11 +163,11 @@ impl InitApi for Aerugo {
     /// Tasklet is created in the passed `storage` memory. Storage has to be static to keep the stored
     /// tasklet for the whole duration of system life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `config` - Tasklet creation configuration.
     /// * `step_fn` - Tasklet step function.
     /// * `context` - Tasklet context data.
@@ -220,11 +220,11 @@ impl InitApi for Aerugo {
     /// Queue is created in the passed `storage` memory. Storage has to be static to keep the
     /// stored tasklet for the whole duration of system life.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data stored in the queue.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `storage` - Static memory storage where the queue should be allocated.
     ///
     /// # Return
@@ -282,12 +282,12 @@ impl InitApi for Aerugo {
     /// Strong typing is enforced, tasklet can only be subscribed to a queue that stores the same
     /// type of data, that is processed by the tasklet.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     /// * `N` - Size of the queue.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `queue` - Handle to the target queue.
     ///
@@ -365,10 +365,10 @@ impl InitApi for Aerugo {
     ///
     /// Each tasklet can be subscribed to at maximum on data provider.
     ///
-    /// # Generic Arguments
+    /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
     /// * `period` - Time period of the execution.
     ///
