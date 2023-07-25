@@ -17,9 +17,9 @@ use pac;
 /// instances of it could be unsafe.
 static HAL_CREATION_LOCK: Mutex<bool> = Mutex::new(false);
 
-/// HAL implementation for Cortex-M SAMV71.
+/// HAL implementation for Cortex-M based SAMV71 MCU.
 pub struct Hal {
-    /// Hardware peripherals.
+    /// User-accessible peripherals.
     user_peripherals: Option<UserPeripherals>,
     /// System peripherals.
     system_peripherals: InternalCell<SystemPeripherals>,
@@ -30,8 +30,13 @@ impl Hal {
     const TIMER_FREQ: u32 = 1_000_000;
 
     /// Create new HAL instance from PAC peripherals.
-    /// SAFETY: This function is safe to call only once.
+    ///
+    /// # Safety
+    /// This function is safe to call only once.
     /// Subsequent calls will return an error, indicating that HAL instance has already been created.
+    ///
+    /// # Return
+    /// `Hal` if it's first call during the program lifetime, [`HalError::HalAlreadyCreated`] otherwise.
     pub fn new() -> Result<Self, HalError> {
         HAL_CREATION_LOCK.lock(|lock| {
             if *lock {
@@ -50,9 +55,11 @@ impl Hal {
     }
 
     /// Create peripherals for HAL
-    /// SAFETY: This function should be only called once inside `new`.
+    ///
+    /// # Safety
+    /// This function should be only called once inside `new`.
     /// Subsequent calls will return valid peripherals, but it's not possible to
-    /// guarantee safety if multiple instances of peripherals will be used in the system.
+    /// guarantee safety if multiple instances of peripherals are used in the system.
     fn create_peripherals() -> (UserPeripherals, SystemPeripherals) {
         let mcu_peripherals = unsafe { pac::Peripherals::steal() };
 
@@ -68,7 +75,12 @@ impl Hal {
     }
 
     /// Returns PAC peripherals for the user
-    /// SAFETY: Can be called successfully only once. Subsequent calls will return None.
+    ///
+    /// # Safety
+    /// Can be called successfully only once. Subsequent calls will return None.
+    ///
+    /// # Return
+    /// [`UserPeripherals`] on first call, `None` on subsequent calls.
     pub fn user_peripherals(&mut self) -> Option<UserPeripherals> {
         self.user_peripherals.take()
     }

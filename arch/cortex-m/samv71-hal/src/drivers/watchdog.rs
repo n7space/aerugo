@@ -38,9 +38,6 @@ impl Watchdog {
     ///
     /// # Arguments
     /// * `wdt` - PAC Watchdog peripheral.
-    ///
-    /// # Return
-    /// HAL Watchdog instance.
     pub const fn new(wdt: WDT) -> Self {
         Self {
             wdt,
