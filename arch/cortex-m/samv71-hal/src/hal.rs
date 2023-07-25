@@ -39,12 +39,13 @@ impl Hal {
             }
 
             *lock = true;
+            Ok(())
+        })?;
 
-            let (user_peripherals, system_peripherals) = Hal::create_peripherals();
-            Ok(Hal {
-                user_peripherals: Some(user_peripherals),
-                system_peripherals: InternalCell::new(system_peripherals),
-            })
+        let (user_peripherals, system_peripherals) = Hal::create_peripherals();
+        Ok(Hal {
+            user_peripherals: Some(user_peripherals),
+            system_peripherals: InternalCell::new(system_peripherals),
         })
     }
 
