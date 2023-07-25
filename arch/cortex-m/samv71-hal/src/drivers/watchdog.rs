@@ -10,15 +10,15 @@
 //! and can only be configured ONCE. Consequent configurations will have no effect,
 //! until the MCU performs a hard reset (via reset controller or power cycle).
 
-pub mod config;
-pub mod error;
+pub mod watchdog_config;
+pub mod watchdog_error;
 
 use crate::pac::WDT;
-use config::WatchdogConfig;
-use error::WatchdogError;
 use fugit::MillisDurationU32;
+pub use watchdog_config::WatchdogConfig;
+pub use watchdog_error::WatchdogError;
 
-use self::config::MAXIMUM_WATCHDOG_DURATION;
+use self::watchdog_config::MAXIMUM_WATCHDOG_DURATION;
 
 /// Structure representing a watchdog
 pub struct Watchdog {

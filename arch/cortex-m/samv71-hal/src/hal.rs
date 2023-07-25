@@ -4,7 +4,7 @@ use aerugo_cortex_m::Mutex;
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
-use crate::drivers::watchdog::config::WatchdogConfig;
+use crate::drivers::watchdog::watchdog_config::WatchdogConfig;
 use crate::drivers::watchdog::Watchdog;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
