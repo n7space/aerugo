@@ -5,7 +5,7 @@
 //! Minimal frequency of feeding can be adjusted by setting watchdog counter reset value (duration).
 //! Behavior of watchdog, it's state, and duration can be set using provided API.
 //!
-//! # Implementation remarks
+//! # Implementation notes
 //! On SAMV71, Watchdog is enabled by default with duration of 16 seconds,
 //! and can only be configured ONCE. Consequent configurations will have no effect,
 //! until the MCU performs a hard reset (via reset controller or power cycle).
@@ -127,7 +127,7 @@ impl Watchdog {
     /// # Returns
     /// Watchdog counter value representing passed duration.
     ///
-    /// # Remarks
+    /// # Notes
     /// `duration` must be in inclusive range [0, [`MAXIMUM_WATCHDOG_DURATION`]].
     /// Since it's internal, private function, it does not perform any checks.
     /// To safely convert any duration into watchdog counter value, use [`clamp_and_convert_duration`](Watchdog::clamp_and_convert_duration).
