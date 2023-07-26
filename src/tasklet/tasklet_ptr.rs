@@ -72,10 +72,10 @@ impl TaskletPtr {
         (self.vtable.set_last_execution_time)(self.ptr, time)
     }
 
-    /// See: [has_work](crate::task::Task::has_work())
+    /// See: [is_ready](crate::task::Task::is_ready())
     #[inline(always)]
-    pub(crate) fn has_work(&self) -> bool {
-        (self.vtable.has_work)(self.ptr)
+    pub(crate) fn is_ready(&self) -> bool {
+        (self.vtable.is_ready)(self.ptr)
     }
 
     /// See: [execute](crate::task::Task::execute())

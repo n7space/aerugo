@@ -36,8 +36,8 @@ pub(crate) trait Task {
     /// * `time` - Last execution time.
     fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>);
 
-    /// Checks if there are any more data for the tasklet to process.
-    fn has_work(&self) -> bool;
+    /// Checks if this tasklet is ready for execution.
+    fn is_ready(&self) -> bool;
 
     /// Executes task.
     fn execute(&self);
