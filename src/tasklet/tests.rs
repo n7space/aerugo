@@ -29,6 +29,7 @@ impl DataProvider<()> for MockDataProvider {
 }
 
 /// @SRS{ROS-FUN-RTOS-50}
+/// @SRS{ROS-FUN-RTOS-60}
 /// @SRS{ROS-FUN-RTOS-70}
 /// @SRS{ROS-FUN-RTOS-80}
 #[cfg_attr(not(doc), test)]
