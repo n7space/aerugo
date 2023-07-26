@@ -32,7 +32,7 @@ impl DataProvider<()> for MockDataProvider {
 /// @SRS{ROS-FUN-RTOS-70}
 /// @SRS{ROS-FUN-RTOS-80}
 #[cfg_attr(not(doc), test)]
-fn tasklet_execution_state() {
+fn req_tasklet_execution_state() {
     static mut MOCK_DATA_PROVIDER: MockDataProvider = MockDataProvider::new();
 
     static mut TASKLET_CONTEXT: () = ();
@@ -49,7 +49,9 @@ fn tasklet_execution_state() {
     assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
 
     assert!(!tasklet.is_ready());
-    unsafe { MOCK_DATA_PROVIDER.set_data_ready(true); };
+    unsafe {
+        MOCK_DATA_PROVIDER.set_data_ready(true);
+    };
     assert!(tasklet.is_ready());
 }
 
