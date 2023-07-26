@@ -2,6 +2,7 @@ use assert_cmd::Command;
 use test_binary::build_test_binary;
 
 /// @SRS{ROS-FUN-RTOS-10}
+/// @SRS{ROS-FUN-RTOS-110}
 #[cfg_attr(not(doc), test)]
 fn req_test_basic_execution() {
     let test_bin_path =
