@@ -82,19 +82,38 @@ impl Executor {
     /// `bool` indicating if tasklet was executed, `RuntimeError` otherwise.
     fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
+            if !tasklet.is_ready() {
+                return Ok(false);
+            }
+
             tasklet.set_status(TaskStatus::Working);
 
             tasklet.execute();
             tasklet.set_last_execution_time(AERUGO.get_system_time());
 
-            if !self.reschedule_tasklet(&tasklet)? {
-                tasklet.set_status(TaskStatus::Sleeping);
-            }
+            self.try_reschedule_tasklet(tasklet)?;
 
             Ok(true)
         } else {
             Ok(false)
         }
+    }
+
+    /// Schedules tasklet if there is more work to do, or sets it sleeping otherwise.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Tasklet to reschedule
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
+    fn try_reschedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
+        if tasklet.is_ready() {
+            self.add_tasklet_to_queue(tasklet)?;
+        } else {
+            tasklet.set_status(TaskStatus::Sleeping);
+        }
+
+        Ok(())
     }
 
     /// Adds given tasklet to the execution queue.
@@ -112,22 +131,6 @@ impl Executor {
                 Err(_) => Err(RuntimeError::ExecutorTaskletQueueFull),
             }
         })
-    }
-
-    /// Schedules tasklet if there is more work to do.
-    ///
-    /// # Parameters
-    /// * `tasklet` - Tasklet to reschedule
-    ///
-    /// # Return
-    /// `bool` indicating if tasklet was rescheduled, `RuntimeError` otherwise.
-    fn reschedule_tasklet(&'static self, tasklet: &TaskletPtr) -> Result<bool, RuntimeError> {
-        if tasklet.is_ready() {
-            self.add_tasklet_to_queue(tasklet.clone())?;
-            Ok(true)
-        } else {
-            Ok(false)
-        }
     }
 
     /// Returns next tasklet that is due for execution, or `None` if the execution queue is empty.
