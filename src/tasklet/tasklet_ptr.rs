@@ -103,7 +103,6 @@ impl Eq for TaskletPtr {}
 
 impl PartialEq for TaskletPtr {
     fn eq(&self, other: &Self) -> bool {
-        self.get_last_execution_time()
-            .eq(&other.get_last_execution_time())
+        self.ptr.eq(&other.ptr)
     }
 }
