@@ -122,7 +122,7 @@ impl Executor {
     /// # Return
     /// `bool` indicating if tasklet was rescheduled, `RuntimeError` otherwise.
     fn reschedule_tasklet(&'static self, tasklet: &TaskletPtr) -> Result<bool, RuntimeError> {
-        if tasklet.has_work() {
+        if tasklet.is_ready() {
             self.add_tasklet_to_queue(tasklet.clone())?;
             Ok(true)
         } else {

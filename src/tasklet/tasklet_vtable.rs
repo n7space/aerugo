@@ -22,8 +22,8 @@ pub(crate) struct TaskletVTable {
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
     /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
     pub(crate) set_last_execution_time: fn(*const (), TimerInstantU64<1_000_000>),
-    /// Pointer to [has_work](has_work()) function.
-    pub(crate) has_work: fn(*const ()) -> bool,
+    /// Pointer to [is_ready](is_ready()) function.
+    pub(crate) is_ready: fn(*const ()) -> bool,
     /// Pointer to [execute](execute()) function.
     pub(crate) execute: fn(*const ()),
 }
@@ -40,7 +40,7 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable
         set_status: set_status::<T, C>,
         get_last_execution_time: get_last_execution_time::<T, C>,
         set_last_execution_time: set_last_execution_time::<T, C>,
-        has_work: has_work::<T, C>,
+        is_ready: is_ready::<T, C>,
         execute: execute::<T, C>,
     }
 }
@@ -103,15 +103,15 @@ fn set_last_execution_time<T: 'static, C: 'static>(
     tasklet.set_last_execution_time(time)
 }
 
-/// "Virtual" call to the `has_work` `Tasklet` function.
+/// "Virtual" call to the `is_ready` `Tasklet` function.
 ///
-/// See: [has_work](crate::task::Task::has_work())
+/// See: [is_ready](crate::task::Task::is_ready())
 #[inline(always)]
-fn has_work<T: 'static, C: 'static>(ptr: *const ()) -> bool {
+fn is_ready<T: 'static, C: 'static>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
-    tasklet.has_work()
+    tasklet.is_ready()
 }
 
 /// "Virtual" call to the `execute` `Tasklet` function.

@@ -100,7 +100,7 @@ impl<T, C> Task for Tasklet<T, C> {
         self.last_execution_time.lock(|t| *t = time)
     }
 
-    fn has_work(&self) -> bool {
+    fn is_ready(&self) -> bool {
         match self.data_provider.get() {
             Some(dp) => dp.data_ready(),
             None => false,
