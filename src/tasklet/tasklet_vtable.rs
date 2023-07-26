@@ -14,6 +14,8 @@ use crate::time::TimerInstantU64;
 pub(crate) struct TaskletVTable {
     /// Pointer to [get_name](get_name()) function.
     pub(crate) get_name: fn(*const ()) -> &'static str,
+    /// Pointer to [get_priority](get_priority()) function.
+    pub(crate) get_priority: fn(*const ()) -> u8,
     /// Pointer to [get_status](get_status()) function.
     pub(crate) get_status: fn(*const ()) -> TaskStatus,
     /// Pointer to [set_status](set_status()) function.
@@ -36,6 +38,7 @@ pub(crate) struct TaskletVTable {
 pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable {
     &TaskletVTable {
         get_name: get_name::<T, C>,
+        get_priority: get_priority::<T, C>,
         get_status: get_status::<T, C>,
         set_status: set_status::<T, C>,
         get_last_execution_time: get_last_execution_time::<T, C>,
@@ -54,6 +57,17 @@ fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
     tasklet.get_name()
+}
+
+/// "Virtual" call to the `get_priority` `Tasklet` function.
+///
+/// See: [get_priority](crate::task::Task::get_priority())
+#[inline(always)]
+fn get_priority<T: 'static, C: 'static>(ptr: *const ()) -> u8 {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    tasklet.get_priority()
 }
 
 /// "Virtual" call to the `get_status` `Tasklet` function.

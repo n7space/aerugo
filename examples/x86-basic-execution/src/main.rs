@@ -31,13 +31,19 @@ fn main() -> ! {
         watchdog_timeout: MillisDurationU32::secs(5),
     });
 
-    let task_a_config = TaskletConfig { name: "TaskA" };
+    let task_a_config = TaskletConfig {
+        name: "TaskA",
+        ..Default::default()
+    };
 
     AERUGO
         .create_tasklet(task_a_config, task_a, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
 
-    let task_b_config = TaskletConfig { name: "TaskB" };
+    let task_b_config = TaskletConfig {
+        name: "TaskB",
+        ..Default::default()
+    };
     let task_b_context = TaskBContext { acc: 0 };
 
     AERUGO

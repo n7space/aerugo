@@ -18,6 +18,9 @@ pub(crate) trait Task {
     /// Returns task name.
     fn get_name(&self) -> &'static str;
 
+    /// Returns task priority.
+    fn get_priority(&self) -> u8;
+
     /// Returns task status.
     fn get_status(&self) -> TaskStatus;
 

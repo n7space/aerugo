@@ -34,7 +34,7 @@ fn main() -> ! {
     });
 
     hprintln!("Creating tasks...");
-    let dummy_task_config = TaskletConfig { name: "DummyTask" };
+    let dummy_task_config = TaskletConfig { name: "DummyTask", ..Default::default() };
     let dummy_task_context = DummyTaskContext::default();
 
     AERUGO

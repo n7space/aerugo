@@ -44,6 +44,8 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 pub(crate) struct Tasklet<T: 'static, C: 'static> {
     /// Tasklet name.
     name: &'static str,
+    /// Tasklet priority.
+    priority: u8,
     /// Tasklet status.
     status: Mutex<TaskStatus>,
     /// Last execution time.
@@ -65,6 +67,7 @@ impl<T, C> Tasklet<T, C> {
     ) -> Self {
         Tasklet {
             name: config.name,
+            priority: config.priority,
             status: Mutex::new(TaskStatus::Sleeping),
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
@@ -82,6 +85,10 @@ impl<T, C> Tasklet<T, C> {
 impl<T, C> Task for Tasklet<T, C> {
     fn get_name(&self) -> &'static str {
         self.name
+    }
+
+    fn get_priority(&self) -> u8 {
+        self.priority
     }
 
     fn get_status(&self) -> TaskStatus {
