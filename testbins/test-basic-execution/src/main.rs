@@ -1,7 +1,4 @@
-use aerugo::{
-    log, time::MillisDurationU32, InitApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
-    AERUGO,
-};
+use aerugo::{log, InitApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO};
 
 #[derive(Default)]
 struct TaskAContext {
@@ -37,14 +34,20 @@ static TASK_B_STORAGE: TaskletStorage<(), TaskBContext> = TaskletStorage::new();
 fn main() -> ! {
     AERUGO.initialize(SystemHardwareConfig::default());
 
-    let task_a_config = TaskletConfig { name: "TaskA" };
+    let task_a_config = TaskletConfig {
+        name: "TaskA",
+        ..Default::default()
+    };
     let task_a_context = TaskAContext { cnt: 0 };
 
     AERUGO
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
 
-    let task_b_config = TaskletConfig { name: "TaskB" };
+    let task_b_config = TaskletConfig {
+        name: "TaskB",
+        ..Default::default()
+    };
     let task_b_context = TaskBContext { cnt: 0 };
 
     AERUGO
