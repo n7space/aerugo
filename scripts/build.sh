@@ -16,8 +16,4 @@ aerugo_cm7_release() {
     cargo build --release --features=use-aerugo-cortex-m --target=thumbv7em-none-eabihf --package aerugo
 }
 
-aerugo_cm7_docs() {
-    cargo doc --workspace --no-deps --document-private-items -F use-aerugo-cortex-m
-}
-
 $@

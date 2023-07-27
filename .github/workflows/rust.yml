@@ -22,43 +22,20 @@ jobs:
         with:
           components: rustfmt
           targets: x86_64-unknown-linux-gnu
-      - name: format project
-        run: cargo fmt -- --check --color always
-      - name: format testbins
-        run: find testbins/ -type f -name '*.rs' -exec cargo fmt -- --check --color always {} +
-      - name: format examples
-        run: find examples/ -type f -name '*.rs' -exec cargo fmt -- --check --color always {} +
+      - name: run format
+        run: ./scripts/check_fmt.sh
 
   clippy:
     name: Clippy
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - TARGET: thumbv7em-none-eabihf
-            FEATURES: use-aerugo-cortex-m
-          - TARGET: x86_64-unknown-linux-gnu
-            FEATURES: use-aerugo-x86
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.TARGET }}
           components: clippy
-      - name: cargo clippy
-        run: cargo clippy -p aerugo -F ${{ matrix.FEATURES }} -- -D warnings
-
-  docs:
-    name: Check documentation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          targets: thumbv7em-none-eabihf
-      - name: cargo doc
-        run: cargo doc --workspace --no-deps --document-private-items -F use-aerugo-cortex-m
+          targets: x86_64-unknown-linux-gnu
+      - name: check code
+        run: ./scripts/check_code.sh
 
   build:
     name: Build
@@ -82,9 +59,9 @@ jobs:
   tests:
     name: Run tests
     runs-on: ubuntu-latest
-    needs: [rustfmt, clippy, docs, build]
+    needs: [rustfmt, clippy, build]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
         with:
           targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
@@ -94,7 +71,7 @@ jobs:
   examples:
     name: Build examples
     runs-on: ubuntu-latest
-    needs: [rustfmt, clippy, docs, build]
+    needs: [rustfmt, clippy, build]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
