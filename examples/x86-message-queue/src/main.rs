@@ -11,6 +11,7 @@ struct TaskBContext {
     queue_handle: MessageQueueHandle<u8, 10>,
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_a(data: u8, context: &mut TaskAContext) {
     log!("TaskA: {}", data);
     context
@@ -19,6 +20,7 @@ fn task_a(data: u8, context: &mut TaskAContext) {
         .expect("Unable to send data from TaskA");
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_b(data: u8, context: &mut TaskBContext) {
     log!("TaskB: {}", data);
     context
@@ -45,8 +47,14 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create QueueX handle");
 
-    let task_a_config = TaskletConfig { name: "TaskA" };
-    let task_b_config = TaskletConfig { name: "TaskB" };
+    let task_a_config = TaskletConfig {
+        name: "TaskA",
+        ..Default::default()
+    };
+    let task_b_config = TaskletConfig {
+        name: "TaskB",
+        ..Default::default()
+    };
 
     let task_a_context = TaskAContext {
         queue_handle: queue_x_handle,

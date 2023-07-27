@@ -60,7 +60,7 @@ fn main() -> ! {
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
-        ..Default::default()
+        priority: 0,
     };
     let task_a_context = TaskAContext {
         queue_handle: queue_x_handle,
@@ -71,7 +71,7 @@ fn main() -> ! {
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
-        ..Default::default()
+        priority: 1,
     };
     let task_b_context = TaskBContext { cnt: 0 };
     AERUGO
@@ -80,7 +80,7 @@ fn main() -> ! {
 
     let task_c_config = TaskletConfig {
         name: "TaskC",
-        ..Default::default()
+        priority: 0,
     };
     let task_c_context = TaskCContext { cnt: 0 };
     AERUGO

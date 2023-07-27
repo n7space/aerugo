@@ -48,6 +48,13 @@ impl TaskletPtr {
         (self.vtable.get_name)(self.ptr)
     }
 
+    /// See: [get_priority](crate::task::Task::get_priority())
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub(crate) fn get_priority(&self) -> u8 {
+        (self.vtable.get_priority)(self.ptr)
+    }
+
     /// See: [get_status](crate::task::Task::get_status())
     #[inline(always)]
     pub(crate) fn get_status(&self) -> TaskStatus {
@@ -87,9 +94,13 @@ impl TaskletPtr {
 
 impl Ord for TaskletPtr {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.get_last_execution_time()
-            .cmp(&other.get_last_execution_time())
-            .reverse()
+        if self.get_priority() == other.get_priority() {
+            self.get_last_execution_time()
+                .cmp(&other.get_last_execution_time())
+                .reverse()
+        } else {
+            self.get_priority().cmp(&other.get_priority())
+        }
     }
 }
 
@@ -103,7 +114,6 @@ impl Eq for TaskletPtr {}
 
 impl PartialEq for TaskletPtr {
     fn eq(&self, other: &Self) -> bool {
-        self.get_last_execution_time()
-            .eq(&other.get_last_execution_time())
+        self.ptr.eq(&other.ptr)
     }
 }

@@ -7,6 +7,8 @@ use crate::api::init_api;
 pub struct TaskletConfig {
     /// Name of the tasklet.
     pub name: &'static str,
+    /// Priority of the tasklet.
+    pub priority: u8,
 }
 
 impl init_api::TaskConfig for TaskletConfig {}
@@ -19,6 +21,7 @@ impl Default for TaskletConfig {
     fn default() -> Self {
         TaskletConfig {
             name: "MISSING_TASKLET_NAME",
+            priority: 0,
         }
     }
 }

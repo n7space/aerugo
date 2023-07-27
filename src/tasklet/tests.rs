@@ -39,6 +39,7 @@ fn req_tasklet_execution_state() {
     static mut TASKLET_CONTEXT: () = ();
     let tasklet_config = TaskletConfig {
         name: "TestTasklet",
+        ..Default::default()
     };
     let tasklet: Tasklet<(), ()> =
         Tasklet::new(tasklet_config, |_, _| {}, unsafe { &mut TASKLET_CONTEXT });

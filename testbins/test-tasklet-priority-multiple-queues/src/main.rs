@@ -4,7 +4,9 @@ use aerugo::{
 };
 
 struct TaskAContext {
-    queue_handle: MessageQueueHandle<u8, 10>,
+    cnt: u8,
+    queue_x_handle: MessageQueueHandle<u8, 10>,
+    queue_y_handle: MessageQueueHandle<u8, 10>,
 }
 
 struct TaskBContext {
@@ -15,21 +17,29 @@ struct TaskCContext {
     cnt: u8,
 }
 
-#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_a(_: (), context: &mut TaskAContext) {
+    context.cnt += 1;
+
+    if context.cnt <= 3 {
+        context
+            .queue_x_handle
+            .send_data(1)
+            .expect("Unable to send data from TaskA to QueueX");
+        context
+            .queue_x_handle
+            .send_data(1)
+            .expect("Unable to send data from TaskA to QueueX");
+    }
+
     context
-        .queue_handle
+        .queue_y_handle
         .send_data(1)
-        .expect("Unable to send data from TaskA");
+        .expect("Unable to send data from TaskA to QueueY");
 }
 
 fn task_b(data: u8, context: &mut TaskBContext) {
     context.cnt += data;
     log!("TaskB: {}", context.cnt);
-
-    if context.cnt == 5 {
-        std::process::exit(0)
-    }
 }
 
 fn task_c(data: u8, context: &mut TaskCContext) {
@@ -46,6 +56,7 @@ static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext> = TaskletStorage::new();
 static TASK_C_STORAGE: TaskletStorage<u8, TaskCContext> = TaskletStorage::new();
 
 static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
+static QUEUE_Y: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 
 fn main() -> ! {
     AERUGO.initialize(SystemHardwareConfig::default());
@@ -53,17 +64,25 @@ fn main() -> ! {
     AERUGO
         .create_message_queue(&QUEUE_X)
         .expect("Unable to create QueueX");
+    AERUGO
+        .create_message_queue(&QUEUE_Y)
+        .expect("Unable to create QueueY");
 
     let queue_x_handle = QUEUE_X
         .create_handle()
         .expect("Unable to create QueueX handle");
+    let queue_y_handle = QUEUE_Y
+        .create_handle()
+        .expect("Unable to create QueueY handle");
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
-        ..Default::default()
+        priority: 0,
     };
     let task_a_context = TaskAContext {
-        queue_handle: queue_x_handle,
+        cnt: 0,
+        queue_x_handle,
+        queue_y_handle,
     };
     AERUGO
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
@@ -71,7 +90,7 @@ fn main() -> ! {
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
-        ..Default::default()
+        priority: 1,
     };
     let task_b_context = TaskBContext { cnt: 0 };
     AERUGO
@@ -80,7 +99,7 @@ fn main() -> ! {
 
     let task_c_config = TaskletConfig {
         name: "TaskC",
-        ..Default::default()
+        priority: 0,
     };
     let task_c_context = TaskCContext { cnt: 0 };
     AERUGO
@@ -104,8 +123,8 @@ fn main() -> ! {
         .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
         .expect("Unable to subscribe TaskB to QueueX");
     AERUGO
-        .subscribe_tasklet_to_queue(&task_c_handle, &queue_x_handle)
-        .expect("Unable to subscribe TaskC to QueueX");
+        .subscribe_tasklet_to_queue(&task_c_handle, &queue_y_handle)
+        .expect("Unable to subscribe TaskC to QueueY");
 
     AERUGO.start();
 }
