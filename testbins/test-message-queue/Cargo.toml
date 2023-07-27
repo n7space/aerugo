@@ -1,8 +1,8 @@
 [package]
 authors = ["Filip Demski <glamhoth@protonmail.com>"]
 edition = "2021"
-name = "x86-basic-execution"
-version = "0.1.0"
+name = "test-message-queue"
+version = "1.0.0"
 
 [dependencies]
 aerugo = { version = "0.1.0", path = "../..", features = ["use-aerugo-x86"] }
