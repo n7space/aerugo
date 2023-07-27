@@ -2,4 +2,4 @@
 target = "x86_64-unknown-linux-gnu"
 
 [env]
-AERUGO_TASKLET_COUNT = { value = "2" }
+AERUGO_TASKLET_COUNT = { value = "3" }

@@ -1,6 +1,7 @@
 use assert_cmd::Command;
 use test_binary::build_test_binary;
 
+/// @SRS{ROS-FUN-RTOS-10}
 /// @SRS{ROS-FUN-RTOS-2010}
 /// @SRS{ROS-FUN-RTOS-2020}
 /// @SRS{ROS-FUN-RTOS-2030}
@@ -17,9 +18,13 @@ fn req_test_message_queue() {
         .code(0)
         .stdout(
             r#"TaskB: 1
+TaskC: 1
 TaskB: 2
+TaskC: 2
 TaskB: 3
+TaskC: 3
 TaskB: 4
+TaskC: 4
 TaskB: 5
 "#,
         );
