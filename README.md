@@ -24,8 +24,6 @@ The repository structure is as follows:
 - `src` - Code of the core system.
 - `utils` - Code of additional utils.
 
-## Cloning
-
 ## Building
 
 aerugo requires nightly, make sure you have it installed: \
