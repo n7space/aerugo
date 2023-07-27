@@ -1,0 +1,22 @@
+default_stages: [commit, manual]
+
+repos:
+  - repo: local
+    hooks:
+      - id: check-commit-msg
+        name: Check commit message
+        entry: scripts/check_commit_msg.sh
+        stages: [commit-msg]
+        language: system
+
+      - id: fmt-check
+        name: Check formatting
+        entry: scripts/check_fmt.sh
+        stages: [commit]
+        language: system
+
+      - id: clippy-check
+        name: Run Clippy
+        entry: scripts/check_code.sh
+        stages: [commit]
+        language: system
