@@ -27,9 +27,15 @@ while read -r line; do
     ((line_number += 1))
 
     if [[ $line_number -eq 1 ]]; then
-        # Ignore fixup comments
+        # Ignore fixup commits
         fixup_regex="^fixup"
         if (grep -Eq "$fixup_regex" <<< "$line"); then
+            break
+        fi
+
+        # Ignore WIP commits
+        wip_regex="^WIP"
+        if (grep -Eq "$wip_regex" <<< "$line"); then
             break
         fi
 
