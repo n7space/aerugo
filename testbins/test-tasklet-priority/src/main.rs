@@ -15,6 +15,7 @@ struct TaskCContext {
     cnt: u8,
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_a(_: (), context: &mut TaskAContext) {
     context
         .queue_handle

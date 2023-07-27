@@ -81,8 +81,8 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext {
         cnt: 0,
-        queue_x_handle: queue_x_handle,
-        queue_y_handle: queue_y_handle,
+        queue_x_handle,
+        queue_y_handle,
     };
     AERUGO
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
