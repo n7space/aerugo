@@ -83,6 +83,7 @@ impl Executor {
     fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
             if !tasklet.is_ready() {
+                tasklet.set_status(TaskStatus::Sleeping);
                 return Ok(false);
             }
 
