@@ -22,8 +22,12 @@ jobs:
         with:
           components: rustfmt
           targets: x86_64-unknown-linux-gnu
-      - name: cargo fmt
+      - name: format project
         run: cargo fmt -- --check --color always
+      - name: format testbins
+        run: find testbins/ -type f -name '*.rs' -exec cargo fmt -- --check --color always {} +
+      - name: format examples
+        run: find examples/ -type f -name '*.rs' -exec cargo fmt -- --check --color always {} +
 
   clippy:
     name: Clippy
