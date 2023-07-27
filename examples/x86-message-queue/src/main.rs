@@ -11,6 +11,7 @@ struct TaskBContext {
     queue_handle: MessageQueueHandle<u8, 10>,
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_a(data: u8, context: &mut TaskAContext) {
     log!("TaskA: {}", data);
     context
@@ -19,6 +20,7 @@ fn task_a(data: u8, context: &mut TaskAContext) {
         .expect("Unable to send data from TaskA");
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 fn task_b(data: u8, context: &mut TaskBContext) {
     log!("TaskB: {}", data);
     context
