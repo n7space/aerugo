@@ -34,10 +34,12 @@ impl TaskletPtr {
     ///
     /// # Parameters
     /// * `tasklet` - Reference to the tasklet
-    pub(crate) fn new<T: 'static, C: 'static>(tasklet: &'static Tasklet<T, C>) -> Self {
+    pub(crate) fn new<T: 'static, C: 'static, const COND_COUNT: usize>(
+        tasklet: &'static Tasklet<T, C, COND_COUNT>,
+    ) -> Self {
         TaskletPtr {
-            ptr: tasklet as *const Tasklet<T, C> as *const (),
-            vtable: tasklet_vtable::<T, C>(),
+            ptr: tasklet as *const Tasklet<T, C, COND_COUNT> as *const (),
+            vtable: tasklet_vtable::<T, C, COND_COUNT>(),
         }
     }
 

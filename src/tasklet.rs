@@ -26,6 +26,7 @@ use core::cell::OnceCell;
 
 use crate::aerugo::error::InitError;
 use crate::arch::Mutex;
+use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
 use crate::data_receiver::DataReceiver;
 use crate::internal_cell::InternalCell;
@@ -40,8 +41,9 @@ pub(crate) type StepFn<T, C> = fn(T, &mut C);
 /// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
+/// * `COND_COUNT` - Number of conditions.
 #[repr(C)]
-pub(crate) struct Tasklet<T: 'static, C: 'static> {
+pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     /// Tasklet name.
     name: &'static str,
     /// Tasklet priority.
@@ -56,9 +58,11 @@ pub(crate) struct Tasklet<T: 'static, C: 'static> {
     context: InternalCell<&'static mut C>,
     /// Source of the data.
     data_provider: OnceCell<&'static dyn DataProvider<T>>,
+    /// Condition set.
+    _condition_set: OnceCell<&'static BooleanConditionSet<COND_COUNT>>,
 }
 
-impl<T, C> Tasklet<T, C> {
+impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Creates new `Tasklet`.
     pub(crate) fn new(
         config: TaskletConfig,
@@ -73,16 +77,17 @@ impl<T, C> Tasklet<T, C> {
             step_fn,
             context: InternalCell::new(context),
             data_provider: OnceCell::new(),
+            _condition_set: OnceCell::new(),
         }
     }
 
     /// Creates pointer to this tasklet.
     pub(crate) fn ptr(&'static self) -> TaskletPtr {
-        TaskletPtr::new::<T, C>(self)
+        TaskletPtr::new::<T, C, COND_COUNT>(self)
     }
 }
 
-impl<T, C> Task for Tasklet<T, C> {
+impl<T, C, const COND_COUNT: usize> Task for Tasklet<T, C, COND_COUNT> {
     fn get_name(&self) -> &'static str {
         self.name
     }
@@ -129,7 +134,7 @@ impl<T, C> Task for Tasklet<T, C> {
     }
 }
 
-impl<T, C> DataReceiver<T> for Tasklet<T, C> {
+impl<T, C, const COND_COUNT: usize> DataReceiver<T> for Tasklet<T, C, COND_COUNT> {
     unsafe fn subscribe(
         &self,
         data_provider: &'static dyn DataProvider<T>,

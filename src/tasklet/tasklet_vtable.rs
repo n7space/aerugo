@@ -35,16 +35,17 @@ pub(crate) struct TaskletVTable {
 /// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable {
+pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
+) -> &'static TaskletVTable {
     &TaskletVTable {
-        get_name: get_name::<T, C>,
-        get_priority: get_priority::<T, C>,
-        get_status: get_status::<T, C>,
-        set_status: set_status::<T, C>,
-        get_last_execution_time: get_last_execution_time::<T, C>,
-        set_last_execution_time: set_last_execution_time::<T, C>,
-        is_ready: is_ready::<T, C>,
-        execute: execute::<T, C>,
+        get_name: get_name::<T, C, COND_COUNT>,
+        get_priority: get_priority::<T, C, COND_COUNT>,
+        get_status: get_status::<T, C, COND_COUNT>,
+        set_status: set_status::<T, C, COND_COUNT>,
+        get_last_execution_time: get_last_execution_time::<T, C, COND_COUNT>,
+        set_last_execution_time: set_last_execution_time::<T, C, COND_COUNT>,
+        is_ready: is_ready::<T, C, COND_COUNT>,
+        execute: execute::<T, C, COND_COUNT>,
     }
 }
 
@@ -52,10 +53,10 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static>() -> &'static TaskletVTable
 ///
 /// See: [get_name](crate::task::Task::get_name())
 #[inline(always)]
-fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
+fn get_name<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> &'static str {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.get_name()
 }
 
@@ -63,10 +64,10 @@ fn get_name<T: 'static, C: 'static>(ptr: *const ()) -> &'static str {
 ///
 /// See: [get_priority](crate::task::Task::get_priority())
 #[inline(always)]
-fn get_priority<T: 'static, C: 'static>(ptr: *const ()) -> u8 {
+fn get_priority<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> u8 {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.get_priority()
 }
 
@@ -74,10 +75,10 @@ fn get_priority<T: 'static, C: 'static>(ptr: *const ()) -> u8 {
 ///
 /// See: [get_status](crate::task::Task::get_status())
 #[inline(always)]
-fn get_status<T: 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
+fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> TaskStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.get_status()
 }
 
@@ -85,10 +86,10 @@ fn get_status<T: 'static, C: 'static>(ptr: *const ()) -> TaskStatus {
 ///
 /// See: [set_status](crate::task::Task::set_status())
 #[inline(always)]
-fn set_status<T: 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
+fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const (), status: TaskStatus) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.set_status(status)
 }
 
@@ -96,10 +97,12 @@ fn set_status<T: 'static, C: 'static>(ptr: *const (), status: TaskStatus) {
 ///
 /// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
 #[inline(always)]
-fn get_last_execution_time<T: 'static, C: 'static>(ptr: *const ()) -> TimerInstantU64<1_000_000> {
+fn get_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
+    ptr: *const (),
+) -> TimerInstantU64<1_000_000> {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.get_last_execution_time()
 }
 
@@ -107,13 +110,13 @@ fn get_last_execution_time<T: 'static, C: 'static>(ptr: *const ()) -> TimerInsta
 ///
 /// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
 #[inline(always)]
-fn set_last_execution_time<T: 'static, C: 'static>(
+fn set_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
     time: TimerInstantU64<1_000_000>,
 ) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.set_last_execution_time(time)
 }
 
@@ -121,10 +124,10 @@ fn set_last_execution_time<T: 'static, C: 'static>(
 ///
 /// See: [is_ready](crate::task::Task::is_ready())
 #[inline(always)]
-fn is_ready<T: 'static, C: 'static>(ptr: *const ()) -> bool {
+fn is_ready<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.is_ready()
 }
 
@@ -132,9 +135,9 @@ fn is_ready<T: 'static, C: 'static>(ptr: *const ()) -> bool {
 ///
 /// See: [execute](crate::task::Task::execute())
 #[inline(always)]
-fn execute<T: 'static, C: 'static>(ptr: *const ()) {
+fn execute<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
-    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C>) };
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.execute()
 }

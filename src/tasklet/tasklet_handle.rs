@@ -15,17 +15,18 @@ use crate::tasklet::Tasklet;
 /// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub struct TaskletHandle<T: 'static, C: 'static> {
+/// * `COND_COUNT` - Number of tasklet conditions.
+pub struct TaskletHandle<T: 'static, C: 'static, const COND_COUNT: usize> {
     /// Reference to the tasklet.
-    tasklet: &'static Tasklet<T, C>,
+    tasklet: &'static Tasklet<T, C, COND_COUNT>,
 }
 
-impl<T, C> TaskletHandle<T, C> {
+impl<T, C, const COND_COUNT: usize> TaskletHandle<T, C, COND_COUNT> {
     /// Creates new tasklet handle.
     ///
     /// # Parameters
     /// * `tasklet` - Pointer to the tasklet.
-    pub(crate) fn new(tasklet: &'static Tasklet<T, C>) -> Self {
+    pub(crate) fn new(tasklet: &'static Tasklet<T, C, COND_COUNT>) -> Self {
         TaskletHandle { tasklet }
     }
 
@@ -36,7 +37,7 @@ impl<T, C> TaskletHandle<T, C> {
     }
 
     /// Returns reference to the tasklet.
-    pub(crate) fn tasklet(&self) -> &'static Tasklet<T, C> {
+    pub(crate) fn tasklet(&self) -> &'static Tasklet<T, C, COND_COUNT> {
         self.tasklet
     }
 }

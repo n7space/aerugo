@@ -41,7 +41,7 @@ fn req_tasklet_execution_state() {
         name: "TestTasklet",
         ..Default::default()
     };
-    let tasklet: Tasklet<(), ()> =
+    let tasklet: Tasklet<(), (), 0> =
         Tasklet::new(tasklet_config, |_, _| {}, unsafe { &mut TASKLET_CONTEXT });
 
     let subscribe_result = unsafe { tasklet.subscribe(&MOCK_DATA_PROVIDER) };
@@ -59,17 +59,17 @@ fn req_tasklet_execution_state() {
 
 #[test]
 fn const_size() {
-    type TaskletStub = Tasklet<(), ()>;
+    type TaskletStub = Tasklet<(), (), 0>;
     let stub_size = core::mem::size_of::<TaskletStub>();
 
     struct NoCtx;
-    type TaskletNoCtx = Tasklet<u8, NoCtx>;
+    type TaskletNoCtx = Tasklet<u8, NoCtx, 1>;
     let noctx_size = core::mem::size_of::<TaskletNoCtx>();
 
     struct SmallCtx {
         _a: u16,
     }
-    type TaskletSmallCtx = Tasklet<u16, SmallCtx>;
+    type TaskletSmallCtx = Tasklet<u16, SmallCtx, 2>;
     let smallctx_size = core::mem::size_of::<TaskletSmallCtx>();
 
     struct BigCtx {
@@ -77,7 +77,7 @@ fn const_size() {
         _b: f64,
         _c: u16,
     }
-    type TaskletBigCtx = Tasklet<u32, BigCtx>;
+    type TaskletBigCtx = Tasklet<u32, BigCtx, 5>;
     let bigctx_size = core::mem::size_of::<TaskletBigCtx>();
 
     assert_eq!(noctx_size, stub_size);

@@ -29,8 +29,8 @@ fn task_b(data: u8, context: &mut TaskBContext) {
         .expect("Unable to send data from TaskB");
 }
 
-static TASK_A_STORAGE: TaskletStorage<u8, TaskAContext> = TaskletStorage::new();
-static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext> = TaskletStorage::new();
+static TASK_A_STORAGE: TaskletStorage<u8, TaskAContext, 0> = TaskletStorage::new();
+static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext, 0> = TaskletStorage::new();
 
 static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 
