@@ -48,7 +48,7 @@ fn req_tasklet_execution_state() {
     assert!(subscribe_result.is_ok());
 
     // Execution status is managed by the executor.
-    assert_eq!(tasklet.get_status(), TaskStatus::Sleeping);
+    assert_eq!(tasklet.get_status(), TaskletStatus::Sleeping);
 
     assert!(!tasklet.is_ready());
     unsafe {

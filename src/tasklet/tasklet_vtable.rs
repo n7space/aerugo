@@ -6,8 +6,7 @@
 //!
 //! For more information look at `TaskletPtr` structure.
 
-use crate::task::{Task, TaskStatus};
-use crate::tasklet::Tasklet;
+use crate::tasklet::{Tasklet, TaskletStatus};
 use crate::time::TimerInstantU64;
 
 /// Hand-made tasklet virtual table.
@@ -17,9 +16,9 @@ pub(crate) struct TaskletVTable {
     /// Pointer to [get_priority](get_priority()) function.
     pub(crate) get_priority: fn(*const ()) -> u8,
     /// Pointer to [get_status](get_status()) function.
-    pub(crate) get_status: fn(*const ()) -> TaskStatus,
+    pub(crate) get_status: fn(*const ()) -> TaskletStatus,
     /// Pointer to [set_status](set_status()) function.
-    pub(crate) set_status: fn(*const (), TaskStatus),
+    pub(crate) set_status: fn(*const (), TaskletStatus),
     /// Pointer to [get_last_execution_time](get_last_execution_time()) function.
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
     /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
@@ -75,7 +74,7 @@ fn get_priority<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ())
 ///
 /// See: [get_status](crate::task::Task::get_status())
 #[inline(always)]
-fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> TaskStatus {
+fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> TaskletStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
@@ -86,7 +85,10 @@ fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -
 ///
 /// See: [set_status](crate::task::Task::set_status())
 #[inline(always)]
-fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const (), status: TaskStatus) {
+fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(
+    ptr: *const (),
+    status: TaskletStatus,
+) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };

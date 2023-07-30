@@ -3,7 +3,6 @@
 //! This module contains tasklet handle implementation, which is used to reference a tasklet in the
 //! system.
 
-use crate::task::Task;
 use crate::tasklet::Tasklet;
 
 /// Tasklet handle.

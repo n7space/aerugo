@@ -24,8 +24,7 @@ use crate::executor::Executor;
 use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::queue::Queue;
-use crate::task::TaskId;
-use crate::tasklet::{StepFn, TaskletHandle, TaskletPtr, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
 
 /// Core system.
@@ -477,11 +476,11 @@ impl RuntimeApi for Aerugo {
         todo!()
     }
 
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskId> {
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskId) -> ExecutionStats {
+    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
         todo!()
     }
 

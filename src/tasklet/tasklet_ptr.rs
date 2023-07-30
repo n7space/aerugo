@@ -13,8 +13,7 @@
 
 use core::cmp::Ordering;
 
-use crate::task::TaskStatus;
-use crate::tasklet::{tasklet_vtable, Tasklet, TaskletVTable};
+use crate::tasklet::{tasklet_vtable, Tasklet, TaskletStatus, TaskletVTable};
 use crate::time::TimerInstantU64;
 
 /// Raw tasklet pointer.
@@ -59,13 +58,13 @@ impl TaskletPtr {
 
     /// See: [get_status](crate::task::Task::get_status())
     #[inline(always)]
-    pub(crate) fn get_status(&self) -> TaskStatus {
+    pub(crate) fn get_status(&self) -> TaskletStatus {
         (self.vtable.get_status)(self.ptr)
     }
 
     /// See: [set_status](crate::task::Task::set_status())
     #[inline(always)]
-    pub(crate) fn set_status(&self, status: TaskStatus) {
+    pub(crate) fn set_status(&self, status: TaskletStatus) {
         (self.vtable.set_status)(self.ptr, status)
     }
 
