@@ -380,14 +380,6 @@ impl InitApi for Aerugo {
         todo!()
     }
 
-    fn subscribe_tasklet_to_conditions<T, C>(
-        &'static self,
-        _tasklet: &TaskletHandle<T, C>,
-        _conditions: BooleanConditionSet,
-    ) -> Result<(), Self::Error> {
-        todo!()
-    }
-
     /// Subscribes tasklet to the cyclic execution.
     ///
     /// Tasklet subscribes for cyclic execution. Tasklet will be executed in specified period,
@@ -445,6 +437,14 @@ impl InitApi for Aerugo {
         }
 
         Ok(())
+    }
+
+    fn set_tasklet_conditions<T, C>(
+        &'static self,
+        _tasklet: &TaskletHandle<T, C>,
+        _conditions: BooleanConditionSet,
+    ) -> Result<(), Self::Error> {
+        todo!()
     }
 }
 

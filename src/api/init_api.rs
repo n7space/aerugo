@@ -132,24 +132,6 @@ pub trait InitApi: ErrorType + TaskConfigType {
         event: &EventHandle,
     ) -> Result<(), Self::Error>;
 
-    /// Subscribes tasklet to the set of conditions.
-    ///
-    /// # Generic Parameters
-    /// * `T` - Type of the data.
-    /// * `C` - Type of the structure with tasklet context data.
-    ///
-    /// # Parameters
-    /// * `tasklet` - Handle to the target tasklet.
-    /// * `condition` - Set of conditions.
-    ///
-    /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
-    fn subscribe_tasklet_to_conditions<T, C>(
-        &'static self,
-        tasklet: &TaskletHandle<T, C>,
-        conditions: BooleanConditionSet,
-    ) -> Result<(), Self::Error>;
-
     /// Subscribes tasklet to the cyclic execution.
     ///
     /// # Generic Parameters
@@ -165,6 +147,24 @@ pub trait InitApi: ErrorType + TaskConfigType {
         &'static self,
         tasklet: &TaskletHandle<(), C>,
         period: Option<Self::Duration>,
+    ) -> Result<(), Self::Error>;
+
+    /// Sets tasklet condition set.
+    ///
+    /// # Generic Parameters
+    /// * `T` - Type of the data.
+    /// * `C` - Type of the structure with tasklet context data.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Set of conditions.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    fn set_tasklet_conditions<T, C>(
+        &'static self,
+        tasklet: &TaskletHandle<T, C>,
+        conditions: BooleanConditionSet,
     ) -> Result<(), Self::Error>;
 }
 
