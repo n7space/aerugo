@@ -12,5 +12,25 @@ use super::BooleanCondition;
 /// boolean condition is required.
 pub struct BooleanConditionHandle {
     /// Reference to the boolean condition.
-    _condition: &'static BooleanCondition,
+    condition: &'static BooleanCondition,
+}
+
+impl BooleanConditionHandle {
+    /// Creates new condition handle.
+    ///
+    /// # Parameters
+    /// * `condition` - Reference to the condition
+    pub(crate) fn new(condition: &'static BooleanCondition) -> Self {
+        BooleanConditionHandle { condition }
+    }
+
+    /// Gets value of the condition.
+    pub fn get_value(&self) -> bool {
+        self.condition.get_value()
+    }
+
+    /// Sets value of the condition.
+    pub fn set_value(&self, value: bool) {
+        self.condition.set_value(value)
+    }
 }

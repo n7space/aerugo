@@ -262,11 +262,43 @@ impl InitApi for Aerugo {
         todo!()
     }
 
+    /// Creates new boolean condition in the system.
+    ///
+    /// Condition is created in the passed `storage` memory. Storage has to be static to keep the
+    /// stored condition for the whole duration of system life
+    ///
+    /// # Parameters
+    /// * `storage` - Static memory storage where the condition should be allocated.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because it initializes the
+    /// passed storage which is safe only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{InitApi, BooleanConditionStorage, AERUGO};
+    /// static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    ///
+    /// fn main() {
+    ///     AERUGO.create_boolean_condition(&CONDITION_STORAGE, true);
+    ///     #
+    ///     # assert!(CONDITION_STORAGE.is_initialized());
+    ///
+    ///     // Do something with the condition via handle.
+    ///     let condition_handle = CONDITION_STORAGE.create_handle();
+    ///     #
+    ///     # assert!(condition_handle.is_some())
+    /// }
+    /// ```
     fn create_boolean_condition(
         &'static self,
-        _storage: &'static BooleanConditionStorage,
+        storage: &'static BooleanConditionStorage,
+        value: bool,
     ) -> Result<(), Self::Error> {
-        todo!()
+        unsafe { storage.init(value) }
     }
 
     /// Subscribes a tasklet to a queue.

@@ -92,6 +92,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     fn create_boolean_condition(
         &'static self,
         storage: &'static BooleanConditionStorage,
+        value: bool,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the queue.
