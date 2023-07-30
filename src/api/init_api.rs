@@ -154,6 +154,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
+    /// * `N` - Number of conditions.
     ///
     /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
@@ -161,10 +162,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     ///
     /// # Return
     /// `()` if successful, `Self::Error` otherwise.
-    fn set_tasklet_conditions<T, C>(
+    fn set_tasklet_conditions<T, C, const N: usize>(
         &'static self,
         tasklet: &TaskletHandle<T, C>,
-        conditions: BooleanConditionSet,
+        conditions: BooleanConditionSet<N>,
     ) -> Result<(), Self::Error>;
 }
 

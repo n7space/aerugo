@@ -439,10 +439,10 @@ impl InitApi for Aerugo {
         Ok(())
     }
 
-    fn set_tasklet_conditions<T, C>(
+    fn set_tasklet_conditions<T, C, const N: usize>(
         &'static self,
         _tasklet: &TaskletHandle<T, C>,
-        _conditions: BooleanConditionSet,
+        _conditions: BooleanConditionSet<N>,
     ) -> Result<(), Self::Error> {
         todo!()
     }

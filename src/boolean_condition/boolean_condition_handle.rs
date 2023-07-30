@@ -10,6 +10,7 @@ use super::BooleanCondition;
 /// Boolean condition handle is available to the user of the system to reference and interact with the
 /// condition via exposed interface. All system API functions shall use handles when a reference to
 /// boolean condition is required.
+#[derive(Copy, Clone)]
 pub struct BooleanConditionHandle {
     /// Reference to the boolean condition.
     condition: &'static BooleanCondition,
@@ -32,5 +33,10 @@ impl BooleanConditionHandle {
     /// Sets value of the condition.
     pub fn set_value(&self, value: bool) {
         self.condition.set_value(value)
+    }
+
+    /// Returns reference to the condition.
+    pub(crate) fn condition(&self) -> &'static BooleanCondition {
+        self.condition
     }
 }
