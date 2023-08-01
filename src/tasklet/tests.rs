@@ -1,5 +1,7 @@
 use super::*;
 
+use crate::boolean_condition::BooleanConditionSetType;
+
 struct MockDataProvider {
     data_ready: bool,
 }
@@ -28,6 +30,20 @@ impl DataProvider<()> for MockDataProvider {
     }
 }
 
+struct MockConditionSet<const N: usize> {
+    pub storage: OnceCell<BooleanConditionSet<N>>,
+}
+
+unsafe impl<const N: usize> Sync for MockConditionSet<N> {}
+
+impl<const N: usize> MockConditionSet<N> {
+    const fn new() -> Self {
+        MockConditionSet {
+            storage: OnceCell::new(),
+        }
+    }
+}
+
 /// @SRS{ROS-FUN-RTOS-50}
 /// @SRS{ROS-FUN-RTOS-60}
 /// @SRS{ROS-FUN-RTOS-70}
@@ -35,14 +51,22 @@ impl DataProvider<()> for MockDataProvider {
 #[cfg_attr(not(doc), test)]
 fn req_tasklet_execution_state() {
     static mut MOCK_DATA_PROVIDER: MockDataProvider = MockDataProvider::new();
+    static MOCK_CONDITION_SET: MockConditionSet<0> = MockConditionSet::new();
+    let _ = MOCK_CONDITION_SET
+        .storage
+        .set(BooleanConditionSet::new(BooleanConditionSetType::And));
 
     static mut TASKLET_CONTEXT: () = ();
     let tasklet_config = TaskletConfig {
         name: "TestTasklet",
         ..Default::default()
     };
-    let tasklet: Tasklet<(), (), 0> =
-        Tasklet::new(tasklet_config, |_, _| {}, unsafe { &mut TASKLET_CONTEXT });
+    let tasklet: Tasklet<(), (), 0> = Tasklet::new(
+        tasklet_config,
+        |_, _| {},
+        unsafe { &mut TASKLET_CONTEXT },
+        &MOCK_CONDITION_SET.storage,
+    );
 
     let subscribe_result = unsafe { tasklet.subscribe(&MOCK_DATA_PROVIDER) };
     assert!(subscribe_result.is_ok());

@@ -10,7 +10,7 @@ type ConditionsList<const N: usize> = Vec<&'static BooleanCondition, N>;
 /// Set of boolean conditions.
 pub struct BooleanConditionSet<const N: usize> {
     /// Type of the set.
-    _set_type: BooleanConditionSetType,
+    set_type: BooleanConditionSetType,
     /// Set conditions.
     conditions: ConditionsList<N>,
 }
@@ -22,7 +22,7 @@ impl<const N: usize> BooleanConditionSet<N> {
     /// * `set_type` - Type of the condition set.
     pub fn new(set_type: BooleanConditionSetType) -> Self {
         BooleanConditionSet {
-            _set_type: set_type,
+            set_type,
             conditions: ConditionsList::new(),
         }
     }
@@ -37,7 +37,7 @@ impl<const N: usize> BooleanConditionSet<N> {
         set_type: BooleanConditionSetType,
     ) -> Self {
         BooleanConditionSet {
-            _set_type: set_type,
+            set_type,
             conditions: ConditionsList::from_slice(&conditions.map(|handle| handle.condition()))
                 .unwrap(),
         }
@@ -53,13 +53,47 @@ impl<const N: usize> BooleanConditionSet<N> {
             Err(_) => Err(BooleanConditionSetError::SetFull),
         }
     }
+
+    /// Evaluates value of this condition set.
+    pub(crate) fn evaluate(&self) -> bool {
+        match self.set_type {
+            BooleanConditionSetType::And => self.evaluate_and(),
+            BooleanConditionSetType::Or => self.evaluate_or(),
+        }
+    }
+
+    /// Evaluates value of this condition set for `and` type.
+    fn evaluate_and(&self) -> bool {
+        for i in 0..N {
+            let condition = self.conditions[i];
+
+            if !condition.get_value() {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Evaluates value of this condition set for `or` type.
+    fn evaluate_or(&self) -> bool {
+        for i in 0..N {
+            let condition = self.conditions[i];
+
+            if condition.get_value() {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
 impl Default for BooleanConditionSet<1> {
     /// Creates new condition set with one element.
     fn default() -> Self {
         BooleanConditionSet {
-            _set_type: BooleanConditionSetType::And,
+            set_type: BooleanConditionSetType::And,
             conditions: ConditionsList::new(),
         }
     }
@@ -69,7 +103,7 @@ impl From<BooleanConditionHandle> for BooleanConditionSet<1> {
     /// Creates new condition set with given condition.
     fn from(handle: BooleanConditionHandle) -> Self {
         BooleanConditionSet {
-            _set_type: BooleanConditionSetType::And,
+            set_type: BooleanConditionSetType::And,
             conditions: ConditionsList::from_slice(&[handle.condition()]).unwrap(),
         }
     }

@@ -5,6 +5,7 @@
 
 use super::Tasklet;
 
+use core::cell::OnceCell;
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
@@ -37,7 +38,7 @@ pub struct TaskletStorage<T, C, const COND_COUNT: usize> {
     /// Storage for the context data.
     tasklet_context: InternalCell<MaybeUninit<C>>,
     /// Storage for the tasklet conditions.
-    _tasklet_conditions: InternalCell<MaybeUninit<BooleanConditionSet<COND_COUNT>>>,
+    tasklet_conditions: InternalCell<OnceCell<BooleanConditionSet<COND_COUNT>>>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
 }
@@ -49,7 +50,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             initialized: InternalCell::new(false),
             tasklet_buffer: InternalCell::new(TaskletBuffer::new()),
             tasklet_context: InternalCell::new(MaybeUninit::uninit()),
-            _tasklet_conditions: InternalCell::new(MaybeUninit::uninit()),
+            tasklet_conditions: InternalCell::new(OnceCell::new()),
             _data_type_marker: PhantomData,
         }
     }
@@ -102,9 +103,12 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         *tasklet_context = MaybeUninit::new(context);
 
         // SAFETY: This is safe, because `tasklet_context` was just initialized.
-        let tasklet = Tasklet::<T, C, COND_COUNT>::new(config, step_fn, unsafe {
-            tasklet_context.assume_init_mut()
-        });
+        let tasklet = Tasklet::<T, C, COND_COUNT>::new(
+            config,
+            step_fn,
+            unsafe { tasklet_context.assume_init_mut() },
+            self.tasklet_conditions.as_mut_ref(),
+        );
 
         // This is safe, because `tasklet_buffer` doesn't contain any value yet, and it's size is
         // guaranteed to be large enough to store tasklet structure.

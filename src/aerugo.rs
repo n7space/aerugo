@@ -449,10 +449,17 @@ impl InitApi for Aerugo {
 
     fn set_tasklet_conditions<T, C, const COND_COUNT: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C, COND_COUNT>,
-        _conditions: BooleanConditionSet<COND_COUNT>,
+        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
+        condition_set: BooleanConditionSet<COND_COUNT>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet = tasklet_handle.tasklet();
+
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe {
+            tasklet.set_condition_set(condition_set)?;
+        }
+
+        Ok(())
     }
 }
 

@@ -6,6 +6,7 @@ mod boolean_condition_storage;
 
 pub use self::boolean_condition_handle::BooleanConditionHandle;
 pub use self::boolean_condition_set::BooleanConditionSet;
+pub use self::boolean_condition_set::BooleanConditionSetType;
 pub use self::boolean_condition_storage::BooleanConditionStorage;
 
 use crate::arch::Mutex;

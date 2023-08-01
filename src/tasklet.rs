@@ -60,10 +60,10 @@ pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     step_fn: StepFn<T, C>,
     /// Context data.
     context: InternalCell<&'static mut C>,
+    /// Condition set.
+    condition_set: &'static OnceCell<BooleanConditionSet<COND_COUNT>>,
     /// Source of the data.
     data_provider: OnceCell<&'static dyn DataProvider<T>>,
-    /// Condition set.
-    _condition_set: OnceCell<&'static BooleanConditionSet<COND_COUNT>>,
 }
 
 impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
@@ -72,6 +72,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: &'static mut C,
+        condition_set: &'static OnceCell<BooleanConditionSet<COND_COUNT>>,
     ) -> Self {
         Tasklet {
             name: config.name,
@@ -80,8 +81,8 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             last_execution_time: Mutex::new(TimerInstantU64::<1_000_000>::from_ticks(0)),
             step_fn,
             context: InternalCell::new(context),
+            condition_set,
             data_provider: OnceCell::new(),
-            _condition_set: OnceCell::new(),
         }
     }
 
@@ -121,10 +122,30 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         self.last_execution_time.lock(|t| *t = time)
     }
 
+    /// Sets this tasklet conditions.
+    pub(crate) unsafe fn set_condition_set(
+        &self,
+        condition_set: BooleanConditionSet<COND_COUNT>,
+    ) -> Result<(), InitError> {
+        match self.condition_set.set(condition_set) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletAlreadyConditioned),
+        }
+    }
+
     /// Checks if this tasklet is ready for execution.
     pub(crate) fn is_ready(&self) -> bool {
+        let condition_value = match self.condition_set.get() {
+            Some(condition_set) => condition_set.evaluate(),
+            None => true,
+        };
+
+        if !condition_value {
+            return false;
+        }
+
         match self.data_provider.get() {
-            Some(dp) => dp.data_ready(),
+            Some(data_provider) => data_provider.data_ready(),
             None => false,
         }
     }

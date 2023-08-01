@@ -169,8 +169,8 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// `()` if successful, `Self::Error` otherwise.
     fn set_tasklet_conditions<T, C, const COND_COUNT: usize>(
         &'static self,
-        tasklet: &TaskletHandle<T, C, COND_COUNT>,
-        conditions: BooleanConditionSet<COND_COUNT>,
+        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
+        condition_set: BooleanConditionSet<COND_COUNT>,
     ) -> Result<(), Self::Error>;
 }
 
