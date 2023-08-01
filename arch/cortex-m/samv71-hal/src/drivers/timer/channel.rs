@@ -84,6 +84,51 @@ where
     State: ChannelState,
     Mode: ChannelMode,
 {
+    /// Returns current counter value read from channel's registers.
+    ///
+    /// # Implementation note
+    /// CV register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn counter_value(&self) -> u16 {
+        self.registers_ref().cv.read().cv().bits() as u16
+    }
+
+    /// Returns current value of channel's `A` register.
+    ///
+    /// # Implementation note
+    /// RA register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn ra(&self) -> u16 {
+        self.registers_ref().ra.read().ra().bits() as u16
+    }
+
+    /// Returns current value of channel's `B` register.
+    ///
+    /// # Implementation note
+    /// RB register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn rb(&self) -> u16 {
+        self.registers_ref().rb.read().rb().bits() as u16
+    }
+
+    /// Returns current value of channel's `C` register.
+    ///
+    /// # Implementation note
+    /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn rc(&self) -> u16 {
+        self.registers_ref().rc.read().rc().bits() as u16
+    }
+
+    /// Set the value of channel's `C` register.
+    ///
+    /// # Implementation note
+    /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn set_rc(&self, rc: u16) {
+        self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
+    }
+
     /// Returns a reference to Channel's registers.
     ///
     /// # Safety
@@ -191,5 +236,13 @@ where
     pub fn disable(self) -> Channel<Timer, ID, Disabled, Mode> {
         self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
         Channel::transform(self)
+    }
+
+    /// Triggers the channel via software, starting it.
+    ///
+    /// Channel instance does not store the state indicating whether the timer is running or not,
+    /// due to the fact that it can automatically stop without notifications, depending on configuration.
+    pub fn trigger(&self) {
+        self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
     }
 }
