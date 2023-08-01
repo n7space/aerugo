@@ -11,8 +11,22 @@ pub struct Channel<Timer, ID, State, Mode> {
     _mode: PhantomData<Mode>,
 }
 
+/// Enumeration listing available channels.
+/// It's value-level equivalent of ChannelId trait.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ChannelNo {
+    /// Channel 0.
+    Ch0 = 0,
+    /// Channel 1.
+    Ch1 = 1,
+    /// Channel 2.
+    Ch2 = 2,
+}
+
 /// Trait representing channel's ID
+/// It's type-level equivalent of ChannelNo enumeration.
 pub trait ChannelId {
+    /// Numeric value od channel ID.
     const ID: usize;
 }
 

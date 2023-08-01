@@ -4,9 +4,9 @@ mod tc_metadata;
 mod timer_config;
 mod timer_error;
 
-use channel::*;
-use tc_metadata::*;
-use timer_config::*;
+pub use channel::*;
+pub use tc_metadata::*;
+pub use timer_config::*;
 
 use core::marker::PhantomData;
 
@@ -16,7 +16,7 @@ use self::timer_error::TimerConfigurationError;
 ///
 /// # Generic parameters
 /// * `TimerMetadata` - PAC timer counter instance metadata, see [`TcMetadata`](tc_metadata::TcMetadata) trait.
-struct Timer<TimerMetadata> {
+pub struct Timer<TimerMetadata> {
     /// Tuple with available channels.
     pub channels: (
         Channel<TimerMetadata, Ch0, Disabled, NotConfigured>,
@@ -63,15 +63,32 @@ where
     pub fn trigger_all_channels(&self) {
         self.registers_ref().bcr.write(|w| w.sync().set_bit());
     }
-}
 
-/// test
-pub fn test_timer() {
-    let peripherals = unsafe { pac::Peripherals::steal() };
-    let tc = peripherals.TC0;
+    /// Configures external clock signal source. This signal can be used as timer channel's input clock.
+    ///
+    /// # Parameters
+    /// * `clock` - Selected external clock that will be changed.
+    /// * `source` - External clock source that will be connected to selected clock.
+    ///
+    /// # Return
+    /// `Ok(())` if configuration arguments are valid,
+    /// `Err(TimerConfigurationError::InvalidClockSourceForExternalClock)` otherwise.
+    pub fn configure_external_clock_source(
+        &self,
+        clock: ExternalClock,
+        source: ExternalClockSource,
+    ) -> Result<(), TimerConfigurationError> {
+        let reg = &self.registers_ref().bmr;
+        let clock_source_id = source.to_clock_source_id(clock)?;
 
-    let timer = Timer::new(tc);
-    timer.trigger_all_channels();
+        // SAFETY: `ExternalClockSource::to_clock_source_id` should return valid register value
+        // or perform early exit due to `?`, so this should be safe.
+        match clock {
+            ExternalClock::XC0 => reg.modify(|_, w| unsafe { w.tc0xc0s().bits(clock_source_id) }),
+            ExternalClock::XC1 => reg.modify(|_, w| unsafe { w.tc1xc1s().bits(clock_source_id) }),
+            ExternalClock::XC2 => reg.modify(|_, w| unsafe { w.tc2xc2s().bits(clock_source_id) }),
+        }
 
-    let ch1 = timer.channels.1;
+        Ok(())
+    }
 }
