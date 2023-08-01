@@ -2,7 +2,9 @@
 
 use heapless::Vec;
 
+use crate::aerugo::error::InitError;
 use crate::boolean_condition::{BooleanCondition, BooleanConditionHandle};
+use crate::tasklet::TaskletPtr;
 
 /// Type of the set conditions list.
 type ConditionsList<const N: usize> = Vec<&'static BooleanCondition, N>;
@@ -52,6 +54,25 @@ impl<const N: usize> BooleanConditionSet<N> {
             Ok(_) => Ok(()),
             Err(_) => Err(BooleanConditionSetError::SetFull),
         }
+    }
+
+    /// Registers tasklet to each condition in this set.
+    ///
+    /// # Parameter
+    /// * `tasklet` - Tasklet to register
+    ///
+    /// # Return
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the list of registered tasklets.
+    /// This is safe to call before the system initialization.
+    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+        for cond in &self.conditions {
+            cond.register_tasklet(tasklet.clone())?;
+        }
+
+        Ok(())
     }
 
     /// Evaluates value of this condition set.

@@ -10,10 +10,9 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use heapless::Vec;
 
-use crate::aerugo::AERUGO;
 use crate::aerugo::{
     error::{InitError, RuntimeError},
-    Aerugo,
+    Aerugo, AERUGO,
 };
 use crate::api::SystemApi;
 use crate::arch::Mutex;

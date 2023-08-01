@@ -456,6 +456,7 @@ impl InitApi for Aerugo {
 
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
+            condition_set.register_tasklet(tasklet.ptr())?;
             tasklet.set_condition_set(condition_set)?;
         }
 
