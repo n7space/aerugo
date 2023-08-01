@@ -2,7 +2,9 @@
 use core::marker::PhantomData;
 use pac::tc0::tc_channel::TC_CHANNEL;
 
-/// Structure representing a timer.
+use super::TcMetadata;
+
+/// Structure representing a timer's channel.
 pub struct Channel<Timer, ID, State, Mode> {
     registers: *const TC_CHANNEL,
     _timer: PhantomData<Timer>,
@@ -74,7 +76,14 @@ impl ChannelMode for NotConfigured {}
 impl ChannelMode for WaveformMode {}
 impl ChannelMode for CaptureMode {}
 
-impl<Timer, ID, State, Mode> Channel<Timer, ID, State, Mode> {
+/// Channel implementation for all available states and modes
+impl<Timer, ID, State, Mode> Channel<Timer, ID, State, Mode>
+where
+    Timer: TcMetadata,
+    ID: ChannelId,
+    State: ChannelState,
+    Mode: ChannelMode,
+{
     /// Returns a reference to Channel's registers.
     ///
     /// # Safety
@@ -84,10 +93,44 @@ impl<Timer, ID, State, Mode> Channel<Timer, ID, State, Mode> {
     fn registers_ref(&self) -> &TC_CHANNEL {
         unsafe { &*self.registers }
     }
+
+    /// Transform the channel into a type with different state and/or mode.
+    ///
+    /// This is a helper function that allows to reduce state transition boilerplate to minimum.
+    ///
+    /// Rust compiler can deduce `Self` from function's return type, and transformation is basically a
+    /// no-op, so no code should be generated from this. This function is only to signalize the compiler
+    /// that we really want to change the type of an object.
+    ///
+    /// # Example
+    /// ```no_run
+    /// fn disable(self) -> Channel<Timer, ID, Disabled, Mode> {
+    ///     // Do some logic to disable the timer here
+    ///     // ...
+    ///     
+    ///     // Return channel with `State` changed to `Disabled`
+    ///     // All generic arguments are deduced from this function's return type.
+    ///     Channel::transform(self)
+    /// }
+    /// ```
+    ///
+    /// # Parameters
+    /// * `channel` - Channel to be transformed.
+    const fn transform<NewState, NewMode>(channel: Channel<Timer, ID, NewState, NewMode>) -> Self {
+        Self {
+            registers: channel.registers,
+            _timer: PhantomData,
+            _id: PhantomData,
+            _state: PhantomData,
+            _mode: PhantomData,
+        }
+    }
 }
 
+/// Channel implementation for disabled and not configured channels (default state).
 impl<Timer, ID> Channel<Timer, ID, Disabled, NotConfigured>
 where
+    Timer: TcMetadata,
     ID: ChannelId,
 {
     /// Create new timer channel.
@@ -116,5 +159,37 @@ where
     fn synced_with_hardware(self) -> Self {
         self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
         self
+    }
+}
+
+/// Channel implementation for disabled channels.
+impl<Timer, ID, Mode> Channel<Timer, ID, Disabled, Mode>
+where
+    Timer: TcMetadata,
+    ID: ChannelId,
+    Mode: ChannelMode,
+{
+    /// Enables the channel.
+    ///
+    /// Consumes current instance and returns new one, with `Enabled` state.
+    pub fn enable(self) -> Channel<Timer, ID, Enabled, Mode> {
+        self.registers_ref().ccr.write(|w| w.clken().set_bit());
+        Channel::transform(self)
+    }
+}
+
+/// Channel implementation for enabled channels.
+impl<Timer, ID, Mode> Channel<Timer, ID, Enabled, Mode>
+where
+    Timer: TcMetadata,
+    ID: ChannelId,
+    Mode: ChannelMode,
+{
+    /// Disables the channel.
+    ///
+    /// Consumes current instance and returns new one, with `Disabled` state.
+    pub fn disable(self) -> Channel<Timer, ID, Disabled, Mode> {
+        self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
+        Channel::transform(self)
     }
 }

@@ -72,7 +72,7 @@ where
     ///
     /// # Return
     /// `Ok(())` if configuration arguments are valid,
-    /// `Err(TimerConfigurationError::InvalidClockSourceForExternalClock)` otherwise.
+    /// `Err(TimerConfigurationError::InvalidClockSource)` otherwise.
     ///
     /// # Safety
     /// This function directly modifies the registers of a timer, but values put in these
