@@ -3,6 +3,6 @@
 /// Timer configuration error.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TimerConfigurationError {
-    /// Invalid clock source was selected for external clock signal.
-    InvalidClockSourceForExternalClock,
+    /// Invalid clock source was selected.
+    InvalidClockSource,
 }

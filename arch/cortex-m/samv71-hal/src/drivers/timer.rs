@@ -73,13 +73,17 @@ where
     /// # Return
     /// `Ok(())` if configuration arguments are valid,
     /// `Err(TimerConfigurationError::InvalidClockSourceForExternalClock)` otherwise.
+    ///
+    /// # Safety
+    /// This function directly modifies the registers of a timer, but values put in these
+    /// registers come from PAC, so they should be valid.
     pub fn configure_external_clock_source(
         &self,
         clock: ExternalClock,
         source: ExternalClockSource,
     ) -> Result<(), TimerConfigurationError> {
         let reg = &self.registers_ref().bmr;
-        let clock_source_id = source.to_clock_source_id(clock)?;
+        let clock_source_id = clock.source_id(source)?;
 
         // SAFETY: `ExternalClockSource::to_clock_source_id` should return valid register value
         // or perform early exit due to `?`, so this should be safe.
