@@ -159,6 +159,7 @@ mod tests {
 
         let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_ok());
+
         init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_err());
         assert_eq!(

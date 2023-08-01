@@ -98,3 +98,57 @@ impl BooleanConditionStorage {
         &*(self.condition_buffer.as_ref().as_ptr() as *const BooleanCondition)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create() {
+        static STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+        assert!(!STORAGE.is_initialized());
+    }
+
+    #[test]
+    fn initialize() {
+        static STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+        let init_result = unsafe { STORAGE.init(true) };
+        assert!(init_result.is_ok());
+        assert!(STORAGE.is_initialized());
+    }
+
+    #[test]
+    fn fail_double_initialization() {
+        static STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+        let init_result = unsafe { STORAGE.init(true) };
+        assert!(init_result.is_ok());
+        let init_result = unsafe { STORAGE.init(false) };
+
+        assert!(init_result.is_err());
+        assert_eq!(
+            init_result.err().unwrap(),
+            InitError::StorageAlreadyInitialized
+        );
+    }
+
+    #[test]
+    fn create_handle() {
+        static STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+        let _ = unsafe { STORAGE.init(true) };
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_some());
+    }
+
+    #[test]
+    fn fail_create_handle_uninitialized() {
+        static STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+        let handle = STORAGE.create_handle();
+        assert!(handle.is_none());
+    }
+}

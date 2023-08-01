@@ -133,6 +133,7 @@ mod tests {
 
         let mut init_result = unsafe { STORAGE.init() };
         assert!(init_result.is_ok());
+
         init_result = unsafe { STORAGE.init() };
         assert!(init_result.is_err());
         assert_eq!(
