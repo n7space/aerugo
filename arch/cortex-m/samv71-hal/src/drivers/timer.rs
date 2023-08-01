@@ -1,0 +1,77 @@
+//! Implementation of HAL Timer Counter driver.
+mod channel;
+mod tc_metadata;
+mod timer_config;
+mod timer_error;
+
+use channel::*;
+use tc_metadata::*;
+use timer_config::*;
+
+use core::marker::PhantomData;
+
+use self::timer_error::TimerConfigurationError;
+
+/// Structure representing a Timer instance.
+///
+/// # Generic parameters
+/// * `TimerMetadata` - PAC timer counter instance metadata, see [`TcMetadata`](tc_metadata::TcMetadata) trait.
+struct Timer<TimerMetadata> {
+    /// Tuple with available channels.
+    pub channels: (
+        Channel<TimerMetadata, Ch0, Disabled, NotConfigured>,
+        Channel<TimerMetadata, Ch1, Disabled, NotConfigured>,
+        Channel<TimerMetadata, Ch2, Disabled, NotConfigured>,
+    ),
+
+    _tc_peripheral: PhantomData<TimerMetadata>,
+}
+
+impl<Instance> Timer<Instance>
+where
+    Instance: TcMetadata,
+{
+    /// Returns a reference to Timer's registers.
+    ///
+    /// # Safety
+    /// This function dereferences a raw pointer.
+    /// It's safe to use, as long as there aren't multiple instances of [`Timer`] sharing the same registers,
+    /// and existing instances of [`Timer`] are created only with [`new`](Timer::new()) method  
+    fn registers_ref(&self) -> &RegisterBlock {
+        unsafe { &*Instance::REGISTERS }
+    }
+
+    /// Create a new timer instance from PAC timer structure.
+    ///
+    /// # Parameters
+    /// * `_instance` - PAC Timer Counter instance, consumed on construction to prevent
+    ///                 creation of duplicate Timer instances.
+    pub fn new(_instance: Instance) -> Self {
+        let tc = unsafe { &*Instance::REGISTERS };
+
+        Self {
+            channels: (
+                Channel::new(&tc.tc_channel0),
+                Channel::new(&tc.tc_channel1),
+                Channel::new(&tc.tc_channel2),
+            ),
+            _tc_peripheral: PhantomData,
+        }
+    }
+
+    /// Triggers all channels, starting them if they are enabled.
+    pub fn trigger_all_channels(&self) {
+        self.registers_ref().bcr.write(|w| w.sync().set_bit());
+    }
+}
+
+/// test
+pub fn test_timer() {
+    let peripherals = unsafe { pac::Peripherals::steal() };
+    let tc = peripherals.TC0;
+
+    let timer = Timer::new(tc);
+    timer.trigger_all_channels();
+
+    let ch1 = timer.channels.1;
+}
