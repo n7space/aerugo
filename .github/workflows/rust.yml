@@ -78,4 +78,4 @@ jobs:
         with:
           targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: build examples
-        run: find examples/ -type f -name Cargo.toml -exec echo "Building {}" \; -execdir cargo build --quiet --release --manifest-path {} +
+        run: ./scripts/build_examples.sh
