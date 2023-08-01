@@ -5,7 +5,6 @@
 
 use crate::aerugo::error::RuntimeError;
 use crate::message_queue::MessageQueue;
-use crate::queue::Queue;
 
 /// Message queue handle.
 ///

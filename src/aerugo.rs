@@ -23,7 +23,6 @@ use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
-use crate::queue::Queue;
 use crate::tasklet::{StepFn, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
 
