@@ -34,8 +34,12 @@ impl ExternalClock {
     /// Converts external clock source to numeric ID representing it's value
     /// in Timer's Block Mode configuration register.
     ///
-    /// To prevent accidental typos, returned values are taken directly from PAC
-    /// and converted to u8. This allows easy type erasure, while also retaining
+    /// Normally, [`From`] trait implementation would be used, but this enum values
+    /// are used in multiple registers fields, while also having different types
+    /// in PAC, so it's much less boilerplate to erase their type into u8.
+    ///
+    /// To prevent accidental typos, values are taken directly from PAC, and
+    /// converted to u8. This allows easy type erasure, while also retaining
     /// value safety.
     ///
     /// # Parameters
@@ -44,7 +48,7 @@ impl ExternalClock {
     /// # Returns
     /// `Some(u8)` if conversion was successful, `None` if selected clock source
     /// cannot be connected to the external clock.
-    pub(super) fn to_source_id(self, clock: ExternalClockSource) -> Option<u8> {
+    pub(super) fn id(self, clock: ExternalClockSource) -> Option<u8> {
         match self {
             ExternalClock::XC0 => match clock {
                 ExternalClockSource::TCLKx => Some(TC0XC0SSELECT_A::TCLK0 as u8),

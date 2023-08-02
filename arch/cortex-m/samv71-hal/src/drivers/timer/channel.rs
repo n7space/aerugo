@@ -5,6 +5,7 @@ use pac::tc0::tc_channel::TC_CHANNEL;
 
 use super::channel_config::*;
 use super::TcMetadata;
+use super::WaveformModeConfig;
 
 /// Structure representing a timer's channel.
 pub struct Channel<Timer, ID, State, Mode> {
@@ -373,6 +374,21 @@ where
         self.registers_ref().ccr.write(|w| w.clken().set_bit());
         Channel::transform(self)
     }
+
+    /// Change channel's mode to Waveform mode.
+    ///
+    /// Consumes current instance and returns new one, in `Waveform` mode.
+    ///
+    /// # Parameters
+    /// * `config` - Waveform mode configuration. Can be changed later.
+    pub fn into_waveform_channel(
+        self,
+        config: WaveformModeConfig,
+    ) -> Channel<Timer, ID, Disabled, WaveformMode> {
+        let transformed_channel = Channel::transform(self);
+        transformed_channel.configure(config);
+        transformed_channel
+    }
 }
 
 /// Channel implementation for enabled channels.
@@ -393,5 +409,48 @@ where
     /// Triggers the channel via software, starting it.
     pub fn trigger(&self) {
         self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
+    }
+}
+
+/// Channel implementation for Waveform mode while disabled.
+impl<Timer, ID> Channel<Timer, ID, Disabled, WaveformMode>
+where
+    Timer: TcMetadata,
+    ID: ChannelId,
+{
+    /// Set waveform mode configuration.
+    pub fn configure(&self, config: WaveformModeConfig) {
+        self.registers_ref().cmr_waveform_mode().write(|w| {
+            w.cpcstop()
+                .variant(config.stop_clock_on_rc_compare)
+                .cpcdis()
+                .variant(config.disable_clock_on_rc_compare)
+                .eevtedg()
+                .variant(config.external_event.edge.into())
+                .eevt()
+                .variant(config.external_event.signal.into())
+                .enetrg()
+                .variant(config.external_event.enabled)
+                .wavsel()
+                .variant(config.mode.into())
+                .wave()
+                .set_bit()
+                .acpa()
+                .bits(config.tioa_effects.rx_comparison.id())
+                .acpc()
+                .bits(config.tioa_effects.rc_comparison.id())
+                .aeevt()
+                .bits(config.tioa_effects.external_event.id())
+                .aswtrg()
+                .bits(config.tioa_effects.software_trigger.id())
+                .bcpb()
+                .bits(config.tiob_effects.rx_comparison.id())
+                .bcpc()
+                .bits(config.tiob_effects.rc_comparison.id())
+                .beevt()
+                .bits(config.tiob_effects.external_event.id())
+                .bswtrg()
+                .bits(config.tiob_effects.software_trigger.id())
+        });
     }
 }

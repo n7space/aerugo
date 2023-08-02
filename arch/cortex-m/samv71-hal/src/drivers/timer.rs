@@ -4,6 +4,7 @@ pub mod channel_config;
 mod tc_metadata;
 pub mod timer_config;
 pub mod timer_error;
+pub mod waveform_config;
 
 use channel::*;
 use tc_metadata::*;
@@ -12,6 +13,7 @@ pub use channel::Channel;
 pub use channel_config::*;
 pub use timer_config::*;
 pub use timer_error::*;
+pub use waveform_config::*;
 
 use core::marker::PhantomData;
 
@@ -88,7 +90,7 @@ where
         source: ExternalClockSource,
     ) -> Result<(), TimerConfigurationError> {
         let reg = &self.registers_ref().bmr;
-        let clock_source_id = match clock.to_source_id(source) {
+        let clock_source_id = match clock.id(source) {
             Some(id) => id,
             None => return Err(TimerConfigurationError::InvalidClockSource),
         };
