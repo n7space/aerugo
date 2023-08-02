@@ -22,6 +22,7 @@ pub struct Channel<Timer, ID, State, Mode> {
 }
 
 /// Enumeration listing available channels.
+///
 /// It's value-level equivalent of ChannelId trait.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ChannelNo {
@@ -34,6 +35,7 @@ pub enum ChannelNo {
 }
 
 /// Trait representing channel's ID
+///
 /// It's type-level equivalent of ChannelNo enumeration.
 pub trait ChannelId {
     /// Numeric value od channel ID.
@@ -120,7 +122,7 @@ where
         }
     }
 
-    /// Get currently used clock source.
+    /// Returns currently used clock source.
     pub fn clock_source(&self) -> ChannelClock {
         let is_timer_peripheral_clock_used =
             self.registers_ref().emr.read().nodivclk().bit_is_set();
@@ -174,7 +176,7 @@ where
         self.registers_ref().rc.read().rc().bits() as u16
     }
 
-    /// Set the value of channel's `C` register.
+    /// Sets the value of channel's `C` register.
     ///
     /// # Implementation notes
     /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
@@ -183,7 +185,7 @@ where
         self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
     }
 
-    /// Read channel's status register, and clean interrupt status flags after that.
+    /// Reads channel's status register, and clean interrupt status flags after that.
     ///
     /// # Safety
     /// **Reading status register will clear interrupt status flags**. If you are using interrupts,
@@ -212,7 +214,8 @@ where
         }
     }
 
-    /// Enable selected interrupts.
+    /// Enables selected interrupts.
+    ///
     /// State of other interrupts will not be changed.
     ///
     /// # Parameters
@@ -239,7 +242,8 @@ where
         });
     }
 
-    /// Disable selected interrupts.
+    /// Disables selected interrupts.
+    ///
     /// State of other interrupts will not be changed.
     ///
     /// # Parameters
@@ -292,7 +296,7 @@ where
         unsafe { &*self.registers }
     }
 
-    /// Transform the channel into a type with different state and/or mode.
+    /// Transforms the channel into a type with different state and/or mode.
     ///
     /// This is a helper function that allows to reduce state transition boilerplate to minimum.
     ///
@@ -331,7 +335,7 @@ where
     Timer: TcMetadata,
     ID: ChannelId,
 {
-    /// Create new timer channel.
+    /// Creates new timer channel.
     ///
     /// # Parameters
     /// * `channel` - Pointer to Timer Counter channel registers.
@@ -351,6 +355,7 @@ where
     }
 
     /// Resets the hardware state of the timer to correctly reflect it's typestate.
+    ///
     /// In this state, the function will disable timer's channel.
     /// Our typestate should always be treated as "hard" guarantee, to which the hardware
     /// state of timer's channel is always synchronized.
@@ -418,7 +423,7 @@ where
     Timer: TcMetadata,
     ID: ChannelId,
 {
-    /// Set waveform mode configuration.
+    /// Sets waveform mode configuration.
     pub fn configure(&self, config: WaveformModeConfig) {
         self.registers_ref().cmr_waveform_mode().write(|w| {
             w.cpcstop()

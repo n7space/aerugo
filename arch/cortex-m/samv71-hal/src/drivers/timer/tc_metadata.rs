@@ -6,6 +6,7 @@ use pac::{Interrupt, TC0, TC1, TC2, TC3};
 const CHANNELS_COUNT_PER_TIMER: usize = 3;
 
 /// Trait for PAC timer counter instances.
+///
 /// This trait erases the type of TC instance, so it can be used as generic argument for [`Timer`](super::Timer)
 pub trait TcMetadata {
     /// Pointer to Timer Counter's registers block.

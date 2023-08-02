@@ -21,7 +21,7 @@ use self::timer_error::TimerConfigurationError;
 
 /// Structure representing a Timer instance.
 ///
-/// # Generic parameters
+/// # Generic Parameters
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
 pub struct Timer<TimerMetadata> {
     /// Channel 0.
@@ -48,7 +48,7 @@ where
         unsafe { &*Instance::REGISTERS }
     }
 
-    /// Create a new timer instance from PAC timer structure.
+    /// Creates a new timer instance from PAC timer structure.
     ///
     /// # Parameters
     /// * `_instance` - PAC Timer Counter instance, consumed on construction to prevent
