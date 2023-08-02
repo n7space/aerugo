@@ -85,8 +85,8 @@ where
             None => return Err(TimerConfigurationError::InvalidClockSource),
         };
 
-        // SAFETY: `ExternalClockSource::to_clock_source_id` should return valid register value
-        // or perform early exit due to `?`, so this should be safe.
+        // SAFETY: `ExternalClockSource::id` will either return a valid clock source ID from PAC,
+        // or None, which is handled above.
         match clock {
             ExternalClock::XC0 => reg.modify(|_, w| unsafe { w.tc0xc0s().bits(clock_source_id) }),
             ExternalClock::XC1 => reg.modify(|_, w| unsafe { w.tc1xc1s().bits(clock_source_id) }),
