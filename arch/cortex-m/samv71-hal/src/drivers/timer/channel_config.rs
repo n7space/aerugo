@@ -1,5 +1,7 @@
 //! Module containing channel configuration and status structures.
 
+use pac::tc0::tc_channel::cmr_capture_mode::TCCLKSSELECT_A;
+
 /// Structure representing available channel interrupts.
 #[derive(Debug, Eq, PartialEq)]
 pub struct ChannelInterrupts {
@@ -69,4 +71,55 @@ pub struct ChannelStatus {
     pub tioa_state: bool,
     /// TIOB state - depending on config, it'll be either an internal signal, or a pin.
     pub tiob_state: bool,
+}
+
+/// Enumeration listing available channel's clock sources.
+#[derive(Debug, Default, Eq, PartialEq)]
+pub enum ChannelClock {
+    /// PCK6 (or PCK7 for TC0 Ch0) clock signal from PMC
+    #[default]
+    PmcPeripheralClock,
+    /// MCK divided by 8
+    MckDividedBy8,
+    /// MCK divided by 32
+    MckDividedBy32,
+    /// MCK divided by 128
+    MckDividedBy128,
+    /// Slow clock (SLCK)
+    SlowClock,
+    /// External clock 0
+    XC0,
+    /// External clock 1
+    XC1,
+    /// External clock 2
+    XC2,
+    /// Timer peripheral clock
+    TimerPeripheralClock,
+}
+
+impl ChannelClock {
+    /// Converts channel clock source to numeric ID representing it's value
+    /// in Channel's mode configuration register.
+    ///
+    /// To prevent accidental typos, returned values are taken directly from PAC.
+    /// This allows easy type erasure, while also retaining value safety.
+    ///
+    /// Not all values from this enumeration are meant to be written into CMR,
+    /// hence an Option is returned.
+    ///
+    /// # Returns
+    /// `Some(u8)` if current clock ID can be represented as value in CMR, otherwise None.
+    pub(super) fn clock_id(self) -> Option<u8> {
+        match self {
+            ChannelClock::PmcPeripheralClock => Some(TCCLKSSELECT_A::TIMER_CLOCK1 as u8),
+            ChannelClock::MckDividedBy8 => Some(TCCLKSSELECT_A::TIMER_CLOCK2 as u8),
+            ChannelClock::MckDividedBy32 => Some(TCCLKSSELECT_A::TIMER_CLOCK3 as u8),
+            ChannelClock::MckDividedBy128 => Some(TCCLKSSELECT_A::TIMER_CLOCK4 as u8),
+            ChannelClock::SlowClock => Some(TCCLKSSELECT_A::TIMER_CLOCK5 as u8),
+            ChannelClock::XC0 => Some(TCCLKSSELECT_A::XC0 as u8),
+            ChannelClock::XC1 => Some(TCCLKSSELECT_A::XC1 as u8),
+            ChannelClock::XC2 => Some(TCCLKSSELECT_A::XC2 as u8),
+            ChannelClock::TimerPeripheralClock => None,
+        }
+    }
 }

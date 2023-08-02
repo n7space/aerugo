@@ -1,6 +1,5 @@
 //! Module containing configuration structures for Timer
 
-use super::timer_error::TimerConfigurationError;
 use pac::tc0::bmr::{TC0XC0SSELECT_A, TC1XC1SSELECT_A, TC2XC2SSELECT_A};
 
 /// External clock signal source.
@@ -36,36 +35,33 @@ impl ExternalClock {
     /// in Timer's Block Mode configuration register.
     ///
     /// To prevent accidental typos, returned values are taken directly from PAC.
-    /// This allows for easy type erasure, while also retaining value safety.
+    /// This allows easy type erasure, while also retaining value safety.
     ///
     /// # Parameters
     /// * `clock` - External clock source to apply for current clock.
     ///
     /// # Returns
-    /// `Ok(u8)` if conversion was successful, `Err(TimerConfigurationError::InvalidClockSource)` if
-    /// selected clock source cannot be connected to the external clock.
-    pub(super) fn source_id(
-        self,
-        clock: ExternalClockSource,
-    ) -> Result<u8, TimerConfigurationError> {
+    /// `Some(u8)` if conversion was successful, `None` if selected clock source
+    /// cannot be connected to the external clock.
+    pub(super) fn source_id(self, clock: ExternalClockSource) -> Option<u8> {
         match self {
             ExternalClock::XC0 => match clock {
-                ExternalClockSource::TCLKx => Ok(TC0XC0SSELECT_A::TCLK0 as u8),
-                ExternalClockSource::TIOA0 => Err(TimerConfigurationError::InvalidClockSource),
-                ExternalClockSource::TIOA1 => Ok(TC0XC0SSELECT_A::TIOA1 as u8),
-                ExternalClockSource::TIOA2 => Ok(TC0XC0SSELECT_A::TIOA2 as u8),
+                ExternalClockSource::TCLKx => Some(TC0XC0SSELECT_A::TCLK0 as u8),
+                ExternalClockSource::TIOA0 => None,
+                ExternalClockSource::TIOA1 => Some(TC0XC0SSELECT_A::TIOA1 as u8),
+                ExternalClockSource::TIOA2 => Some(TC0XC0SSELECT_A::TIOA2 as u8),
             },
             ExternalClock::XC1 => match clock {
-                ExternalClockSource::TCLKx => Ok(TC1XC1SSELECT_A::TCLK1 as u8),
-                ExternalClockSource::TIOA0 => Ok(TC1XC1SSELECT_A::TIOA0 as u8),
-                ExternalClockSource::TIOA1 => Err(TimerConfigurationError::InvalidClockSource),
-                ExternalClockSource::TIOA2 => Ok(TC1XC1SSELECT_A::TIOA2 as u8),
+                ExternalClockSource::TCLKx => Some(TC1XC1SSELECT_A::TCLK1 as u8),
+                ExternalClockSource::TIOA0 => Some(TC1XC1SSELECT_A::TIOA0 as u8),
+                ExternalClockSource::TIOA1 => None,
+                ExternalClockSource::TIOA2 => Some(TC1XC1SSELECT_A::TIOA2 as u8),
             },
             ExternalClock::XC2 => match clock {
-                ExternalClockSource::TCLKx => Ok(TC2XC2SSELECT_A::TCLK2 as u8),
-                ExternalClockSource::TIOA0 => Ok(TC2XC2SSELECT_A::TIOA0 as u8),
-                ExternalClockSource::TIOA1 => Ok(TC2XC2SSELECT_A::TIOA1 as u8),
-                ExternalClockSource::TIOA2 => Err(TimerConfigurationError::InvalidClockSource),
+                ExternalClockSource::TCLKx => Some(TC2XC2SSELECT_A::TCLK2 as u8),
+                ExternalClockSource::TIOA0 => Some(TC2XC2SSELECT_A::TIOA0 as u8),
+                ExternalClockSource::TIOA1 => Some(TC2XC2SSELECT_A::TIOA1 as u8),
+                ExternalClockSource::TIOA2 => None,
             },
         }
     }
