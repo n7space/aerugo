@@ -1,13 +1,17 @@
 //! Implementation of HAL Timer Counter driver.
-mod channel;
-mod channel_config;
+pub mod channel;
+pub mod channel_config;
 mod tc_metadata;
-mod timer_config;
-mod timer_error;
+pub mod timer_config;
+pub mod timer_error;
 
-pub use channel::*;
-pub use tc_metadata::*;
+use channel::*;
+use tc_metadata::*;
+
+pub use channel::Channel;
+pub use channel_config::*;
 pub use timer_config::*;
+pub use timer_error::*;
 
 use core::marker::PhantomData;
 
@@ -16,7 +20,7 @@ use self::timer_error::TimerConfigurationError;
 /// Structure representing a Timer instance.
 ///
 /// # Generic parameters
-/// * `TimerMetadata` - PAC timer counter instance metadata, see [`TcMetadata`](tc_metadata::TcMetadata) trait.
+/// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
 pub struct Timer<TimerMetadata> {
     /// Tuple with available channels.
     pub channels: (

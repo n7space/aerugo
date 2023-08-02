@@ -3,14 +3,21 @@
 /// Structure representing available channel interrupts.
 #[derive(Debug, Eq, PartialEq)]
 pub struct ChannelInterrupts {
+    /// Counter overflow
     pub counter_overflow: bool,
     /// RA or RB have been loaded at least twice without any read since last time the status was read)
     pub load_overrun: bool,
+    /// RA Compare
     pub ra_compare: bool,
+    /// RB Compare
     pub rb_compare: bool,
+    /// RC Compare
     pub rc_compare: bool,
+    /// RA Load
     pub ra_load: bool,
+    /// RB Load
     pub rb_load: bool,
+    /// External trigger
     pub external_trigger: bool,
 }
 
@@ -56,6 +63,7 @@ impl Default for ChannelInterrupts {
 pub struct ChannelStatus {
     /// Status of interrupts. Note that these flags are cleared when status register is read.
     pub interrupts: ChannelInterrupts,
+    /// Clock is enabled
     pub clock_enabled: bool,
     /// TIOA state - depending on config, it'll be either an internal signal, or a pin.
     pub tioa_state: bool,
