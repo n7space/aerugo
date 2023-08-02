@@ -74,10 +74,9 @@ pub struct ChannelStatus {
 }
 
 /// Enumeration listing available channel's clock sources.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum ChannelClock {
     /// PCK6 (or PCK7 for TC0 Ch0, if configured in PMC) clock signal from PMC
-    #[default]
     PmcPeripheralClock,
     /// Host clock divided by 8
     MckDividedBy8,
