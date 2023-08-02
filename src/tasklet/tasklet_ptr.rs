@@ -42,57 +42,57 @@ impl TaskletPtr {
         }
     }
 
-    /// See: [get_name](crate::task::Task::get_name())
+    /// See: [get_name](crate::tasklet::Tasklet::get_name())
     #[inline(always)]
     #[allow(dead_code)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
 
-    /// See: [get_priority](crate::task::Task::get_priority())
+    /// See: [get_priority](crate::tasklet::Tasklet::get_priority())
     #[inline(always)]
     #[allow(dead_code)]
     pub(crate) fn get_priority(&self) -> u8 {
         (self.vtable.get_priority)(self.ptr)
     }
 
-    /// See: [get_status](crate::task::Task::get_status())
+    /// See: [get_status](crate::tasklet::Tasklet::get_status())
     #[inline(always)]
     pub(crate) fn get_status(&self) -> TaskletStatus {
         (self.vtable.get_status)(self.ptr)
     }
 
-    /// See: [set_status](crate::task::Task::set_status())
+    /// See: [set_status](crate::tasklet::Tasklet::set_status())
     #[inline(always)]
     pub(crate) fn set_status(&self, status: TaskletStatus) {
         (self.vtable.set_status)(self.ptr, status)
     }
 
-    /// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
+    /// See: [get_last_execution_time](crate::tasklet::Tasklet::get_last_execution_time())
     #[inline(always)]
     pub(crate) fn get_last_execution_time(&self) -> TimerInstantU64<1_000_000> {
         (self.vtable.get_last_execution_time)(self.ptr)
     }
 
-    /// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
+    /// See: [set_last_execution_time](crate::tasklet::Tasklet::set_last_execution_time())
     #[inline(always)]
     pub(crate) fn set_last_execution_time(&self, time: TimerInstantU64<1_000_000>) {
         (self.vtable.set_last_execution_time)(self.ptr, time)
     }
 
-    /// See: [has_work](crate::task::Task::has_work())
+    /// See: [has_work](crate::tasklet::Tasklet::has_work())
     #[inline(always)]
     pub(crate) fn has_work(&self) -> bool {
         (self.vtable.has_work)(self.ptr)
     }
 
-    /// See: [is_active](crate::task::Task::is_active())
+    /// See: [is_active](crate::tasklet::Tasklet::is_active())
     #[inline(always)]
     pub(crate) fn is_active(&self) -> bool {
         (self.vtable.is_active)(self.ptr)
     }
 
-    /// See: [execute](crate::task::Task::execute())
+    /// See: [execute](crate::tasklet::Tasklet::execute())
     #[inline(always)]
     pub(crate) fn execute(&self) -> bool {
         (self.vtable.execute)(self.ptr)

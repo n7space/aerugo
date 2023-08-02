@@ -53,7 +53,7 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
 
 /// "Virtual" call to the `get_name` `Tasklet` function.
 ///
-/// See: [get_name](crate::task::Task::get_name())
+/// See: [get_name](crate::tasklet::Tasklet::get_name())
 #[inline(always)]
 fn get_name<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> &'static str {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -64,7 +64,7 @@ fn get_name<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> 
 
 /// "Virtual" call to the `get_priority` `Tasklet` function.
 ///
-/// See: [get_priority](crate::task::Task::get_priority())
+/// See: [get_priority](crate::tasklet::Tasklet::get_priority())
 #[inline(always)]
 fn get_priority<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> u8 {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -75,7 +75,7 @@ fn get_priority<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ())
 
 /// "Virtual" call to the `get_status` `Tasklet` function.
 ///
-/// See: [get_status](crate::task::Task::get_status())
+/// See: [get_status](crate::tasklet::Tasklet::get_status())
 #[inline(always)]
 fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> TaskletStatus {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -86,7 +86,7 @@ fn get_status<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -
 
 /// "Virtual" call to the `set_status` `Tasklet` function.
 ///
-/// See: [set_status](crate::task::Task::set_status())
+/// See: [set_status](crate::tasklet::Tasklet::set_status())
 #[inline(always)]
 fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
@@ -100,7 +100,7 @@ fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(
 
 /// "Virtual" call to the `get_last_execution_time` `Tasklet` function.
 ///
-/// See: [get_last_execution_time](crate::task::Task::get_last_execution_time())
+/// See: [get_last_execution_time](crate::tasklet::Tasklet::get_last_execution_time())
 #[inline(always)]
 fn get_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
@@ -113,7 +113,7 @@ fn get_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
 
 /// "Virtual" call to the `set_last_execution_time` `Tasklet` function.
 ///
-/// See: [set_last_execution_time](crate::task::Task::set_last_execution_time())
+/// See: [set_last_execution_time](crate::tasklet::Tasklet::set_last_execution_time())
 #[inline(always)]
 fn set_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
@@ -127,7 +127,7 @@ fn set_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
 
 /// "Virtual" call to the `has_work` `Tasklet` function.
 ///
-/// See: [has_work](crate::task::Task::has_work())
+/// See: [has_work](crate::tasklet::Tasklet::has_work())
 #[inline(always)]
 fn has_work<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -138,7 +138,7 @@ fn has_work<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> 
 
 /// "Virtual" call to the `is_active` `Tasklet` function.
 ///
-/// See: [is_active](crate::task::Task::is_active())
+/// See: [is_active](crate::tasklet::Tasklet::is_active())
 #[inline(always)]
 fn is_active<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
@@ -149,7 +149,7 @@ fn is_active<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) ->
 
 /// "Virtual" call to the `execute` `Tasklet` function.
 ///
-/// See: [execute](crate::task::Task::execute())
+/// See: [execute](crate::tasklet::Tasklet::execute())
 #[inline(always)]
 fn execute<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
