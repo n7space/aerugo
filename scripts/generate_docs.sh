@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-cargo doc --workspace --no-deps --document-private-items -F use-aerugo-cortex-m $@
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --document-private-items -F use-aerugo-cortex-m $@
