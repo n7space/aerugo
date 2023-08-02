@@ -38,16 +38,6 @@ impl<Instance> Timer<Instance>
 where
     Instance: TcMetadata,
 {
-    /// Returns a reference to Timer's registers.
-    ///
-    /// # Safety
-    /// This function dereferences a raw pointer.
-    /// It's safe to use, as long as there aren't multiple instances of [`Timer`] sharing the same registers,
-    /// and existing instances of [`Timer`] are created only with [`new`](Timer::new()) method  
-    fn registers_ref(&self) -> &RegisterBlock {
-        unsafe { &*Instance::REGISTERS }
-    }
-
     /// Creates a new timer instance from PAC timer structure.
     ///
     /// # Parameters
@@ -104,5 +94,15 @@ where
         }
 
         Ok(())
+    }
+
+    /// Returns a reference to Timer's registers.
+    ///
+    /// # Safety
+    /// This function dereferences a raw pointer.
+    /// It's safe to use, as long as there aren't multiple instances of [`Timer`] sharing the same registers,
+    /// and existing instances of [`Timer`] are created only with [`new`](Timer::new()) method  
+    fn registers_ref(&self) -> &RegisterBlock {
+        unsafe { &*Instance::REGISTERS }
     }
 }
