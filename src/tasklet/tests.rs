@@ -74,11 +74,11 @@ fn req_tasklet_execution_state() {
     // Execution status is managed by the executor.
     assert_eq!(tasklet.get_status(), TaskletStatus::Sleeping);
 
-    assert!(!tasklet.is_ready());
+    assert!(!tasklet.has_work());
     unsafe {
         MOCK_DATA_PROVIDER.set_data_ready(true);
     };
-    assert!(tasklet.is_ready());
+    assert!(tasklet.has_work());
 }
 
 #[test]

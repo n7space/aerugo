@@ -63,7 +63,7 @@ impl Executor {
     ) -> Result<bool, RuntimeError> {
         let tasklet_status = tasklet.get_status();
 
-        if tasklet_status == TaskletStatus::Sleeping {
+        if tasklet_status == TaskletStatus::Sleeping && tasklet.is_active() {
             self.add_tasklet_to_queue(tasklet.clone())?;
             Ok(true)
         } else {
@@ -81,7 +81,7 @@ impl Executor {
     /// `bool` indicating if tasklet was executed, `RuntimeError` otherwise.
     fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
-            if !tasklet.is_ready() {
+            if !tasklet.is_active() {
                 tasklet.set_status(TaskletStatus::Sleeping);
                 return Ok(false);
             }
@@ -107,7 +107,7 @@ impl Executor {
     /// # Return
     /// `()` if successful, `RuntimeError` otherwise.
     fn try_reschedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
-        if tasklet.is_ready() {
+        if tasklet.has_work() {
             self.add_tasklet_to_queue(tasklet)?;
         } else {
             tasklet.set_status(TaskletStatus::Sleeping);

@@ -133,19 +133,20 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         }
     }
 
-    /// Checks if this tasklet is ready for execution.
-    pub(crate) fn is_ready(&self) -> bool {
-        let condition_value = match self.condition_set.get() {
-            Some(condition_set) => condition_set.evaluate(),
-            None => true,
-        };
-
-        if !condition_value {
-            return false;
-        }
-
+    /// Checks if this tasklet has data waiting for processing.
+    pub(crate) fn has_work(&self) -> bool {
         match self.data_provider.get() {
             Some(data_provider) => data_provider.data_ready(),
+            None => false,
+        }
+    }
+
+    /// Check if this tasklet is active.
+    ///
+    /// Tasklet is not active if it's condition evaluates to `false`.
+    pub(crate) fn is_active(&self) -> bool {
+        match self.condition_set.get() {
+            Some(condition_set) => condition_set.evaluate(),
             None => true,
         }
     }

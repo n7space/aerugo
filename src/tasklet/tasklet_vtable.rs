@@ -23,8 +23,10 @@ pub(crate) struct TaskletVTable {
     pub(crate) get_last_execution_time: fn(*const ()) -> TimerInstantU64<1_000_000>,
     /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
     pub(crate) set_last_execution_time: fn(*const (), TimerInstantU64<1_000_000>),
-    /// Pointer to [is_ready](is_ready()) function.
-    pub(crate) is_ready: fn(*const ()) -> bool,
+    /// Pointer to [has_work](has_work()) function.
+    pub(crate) has_work: fn(*const ()) -> bool,
+    /// Pointer to [is_active](is_active()) function.
+    pub(crate) is_active: fn(*const ()) -> bool,
     /// Pointer to [execute](execute()) function.
     pub(crate) execute: fn(*const ()),
 }
@@ -43,7 +45,8 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
         set_status: set_status::<T, C, COND_COUNT>,
         get_last_execution_time: get_last_execution_time::<T, C, COND_COUNT>,
         set_last_execution_time: set_last_execution_time::<T, C, COND_COUNT>,
-        is_ready: is_ready::<T, C, COND_COUNT>,
+        has_work: has_work::<T, C, COND_COUNT>,
+        is_active: is_active::<T, C, COND_COUNT>,
         execute: execute::<T, C, COND_COUNT>,
     }
 }
@@ -122,15 +125,26 @@ fn set_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     tasklet.set_last_execution_time(time)
 }
 
-/// "Virtual" call to the `is_ready` `Tasklet` function.
+/// "Virtual" call to the `has_work` `Tasklet` function.
 ///
-/// See: [is_ready](crate::task::Task::is_ready())
+/// See: [has_work](crate::task::Task::has_work())
 #[inline(always)]
-fn is_ready<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
+fn has_work<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
-    tasklet.is_ready()
+    tasklet.has_work()
+}
+
+/// "Virtual" call to the `is_active` `Tasklet` function.
+///
+/// See: [is_active](crate::task::Task::is_active())
+#[inline(always)]
+fn is_active<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
+    tasklet.is_active()
 }
 
 /// "Virtual" call to the `execute` `Tasklet` function.
