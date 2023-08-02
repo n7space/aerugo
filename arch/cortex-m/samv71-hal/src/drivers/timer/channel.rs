@@ -160,6 +160,76 @@ where
         }
     }
 
+    /// Enable selected interrupts.
+    /// State of other interrupts will not be changed.
+    ///
+    /// # Parameters
+    /// * `interrupts` - Structure with interrupts to be enabled. All interrupts set
+    ///                  to `true` will be enabled.
+    pub fn enable_interrupts(&self, interrupts: ChannelInterrupts) {
+        self.registers_ref().ier.write(|w| {
+            w.covfs()
+                .variant(interrupts.counter_overflow)
+                .lovrs()
+                .variant(interrupts.load_overrun)
+                .cpas()
+                .variant(interrupts.ra_compare)
+                .cpbs()
+                .variant(interrupts.rb_compare)
+                .cpcs()
+                .variant(interrupts.rc_compare)
+                .ldras()
+                .variant(interrupts.ra_load)
+                .ldrbs()
+                .variant(interrupts.rb_load)
+                .etrgs()
+                .variant(interrupts.external_trigger)
+        });
+    }
+
+    /// Disable selected interrupts.
+    /// State of other interrupts will not be changed.
+    ///
+    /// # Parameters
+    /// * `interrupts` - Structure with interrupts to be disabled. All interrupts set
+    ///                  to `true` will be disabled.
+    pub fn disable_interrupts(&self, interrupts: ChannelInterrupts) {
+        self.registers_ref().idr.write(|w| {
+            w.covfs()
+                .variant(interrupts.counter_overflow)
+                .lovrs()
+                .variant(interrupts.load_overrun)
+                .cpas()
+                .variant(interrupts.ra_compare)
+                .cpbs()
+                .variant(interrupts.rb_compare)
+                .cpcs()
+                .variant(interrupts.rc_compare)
+                .ldras()
+                .variant(interrupts.ra_load)
+                .ldrbs()
+                .variant(interrupts.rb_load)
+                .etrgs()
+                .variant(interrupts.external_trigger)
+        });
+    }
+
+    /// Returns the status (enabled/disabled) of channel's interrupts.
+    pub fn interrupts_masks(&self) -> ChannelInterrupts {
+        let masks = self.registers_ref().imr.read();
+
+        ChannelInterrupts {
+            counter_overflow: masks.covfs().bit(),
+            load_overrun: masks.lovrs().bit(),
+            ra_compare: masks.cpas().bit(),
+            rb_compare: masks.cpbs().bit(),
+            rc_compare: masks.cpcs().bit(),
+            ra_load: masks.ldras().bit(),
+            rb_load: masks.ldrbs().bit(),
+            external_trigger: masks.etrgs().bit(),
+        }
+    }
+
     /// Returns a reference to Channel's registers.
     ///
     /// # Safety
