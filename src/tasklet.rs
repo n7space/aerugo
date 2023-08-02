@@ -152,17 +152,26 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     }
 
     /// Executes task.
-    pub(crate) fn execute(&self) {
-        let value = match self.data_provider.get() {
-            Some(dp) => dp.get_data(),
-            None => return,
-        };
+    ///
+    /// # Return
+    /// `true` if tasklet was executed, `false` otherwise
+    pub(crate) fn execute(&self) -> bool {
+        match self.data_provider.get() {
+            Some(dp) => {
+                let value = dp.get_data();
 
-        if let Some(val) = value {
-            // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
-            // be executed only once at a given time.
-            let context = unsafe { self.context.as_mut_ref() };
-            (self.step_fn)(val, context)
+                if let Some(val) = value {
+                    // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
+                    // be executed only once at a given time.
+                    let context = unsafe { self.context.as_mut_ref() };
+                    (self.step_fn)(val, context);
+
+                    true
+                } else {
+                    false
+                }
+            }
+            None => false,
         }
     }
 

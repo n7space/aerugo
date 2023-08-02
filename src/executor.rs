@@ -88,12 +88,14 @@ impl Executor {
 
             tasklet.set_status(TaskletStatus::Working);
 
-            tasklet.execute();
-            tasklet.set_last_execution_time(AERUGO.get_system_time());
+            let executed = tasklet.execute();
+            if executed {
+                tasklet.set_last_execution_time(AERUGO.get_system_time());
+            }
 
             self.try_reschedule_tasklet(tasklet)?;
 
-            Ok(true)
+            Ok(executed)
         } else {
             Ok(false)
         }

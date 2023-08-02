@@ -28,7 +28,7 @@ pub(crate) struct TaskletVTable {
     /// Pointer to [is_active](is_active()) function.
     pub(crate) is_active: fn(*const ()) -> bool,
     /// Pointer to [execute](execute()) function.
-    pub(crate) execute: fn(*const ()),
+    pub(crate) execute: fn(*const ()) -> bool,
 }
 
 /// Constructs `Tasklet` virtual table for given `T` and `C` types.
@@ -151,7 +151,7 @@ fn is_active<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) ->
 ///
 /// See: [execute](crate::task::Task::execute())
 #[inline(always)]
-fn execute<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) {
+fn execute<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };

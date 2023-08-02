@@ -94,7 +94,7 @@ impl TaskletPtr {
 
     /// See: [execute](crate::task::Task::execute())
     #[inline(always)]
-    pub(crate) fn execute(&self) {
+    pub(crate) fn execute(&self) -> bool {
         (self.vtable.execute)(self.ptr)
     }
 }
