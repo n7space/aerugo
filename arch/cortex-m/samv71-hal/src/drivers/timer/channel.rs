@@ -8,10 +8,15 @@ use super::TcMetadata;
 
 /// Structure representing a timer's channel.
 pub struct Channel<Timer, ID, State, Mode> {
+    /// Timer channel's registers.
     registers: *const TC_CHANNEL,
+    /// PhantomData for Timer type.
     _timer: PhantomData<Timer>,
+    /// PhantomData for ID type.
     _id: PhantomData<ID>,
+    /// PhantomData for State type.
     _state: PhantomData<State>,
+    /// PhantomData for Mode type.
     _mode: PhantomData<Mode>,
 }
 

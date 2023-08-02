@@ -22,13 +22,13 @@ use self::timer_error::TimerConfigurationError;
 /// # Generic parameters
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
 pub struct Timer<TimerMetadata> {
-    /// Tuple with available channels.
-    pub channels: (
-        Channel<TimerMetadata, Ch0, Disabled, NotConfigured>,
-        Channel<TimerMetadata, Ch1, Disabled, NotConfigured>,
-        Channel<TimerMetadata, Ch2, Disabled, NotConfigured>,
-    ),
-
+    /// Channel 0.
+    pub channel_0: Channel<TimerMetadata, Ch0, Disabled, NotConfigured>,
+    /// Channel 1.
+    pub channel_1: Channel<TimerMetadata, Ch1, Disabled, NotConfigured>,
+    /// Channel 2.
+    pub channel_2: Channel<TimerMetadata, Ch2, Disabled, NotConfigured>,
+    /// PhantomData for TC metadata.
     _tc_peripheral: PhantomData<TimerMetadata>,
 }
 
@@ -55,11 +55,10 @@ where
         let tc = unsafe { &*Instance::REGISTERS };
 
         Self {
-            channels: (
-                Channel::new(&tc.tc_channel0),
-                Channel::new(&tc.tc_channel1),
-                Channel::new(&tc.tc_channel2),
-            ),
+            channel_0: Channel::new(&tc.tc_channel0),
+            channel_1: Channel::new(&tc.tc_channel1),
+            channel_2: Channel::new(&tc.tc_channel2),
+
             _tc_peripheral: PhantomData,
         }
     }
