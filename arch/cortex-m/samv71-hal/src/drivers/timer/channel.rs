@@ -86,7 +86,53 @@ where
     State: ChannelState,
     Mode: ChannelMode,
 {
-    /// Returns current counter value read from channel's registers.
+    /// Sets the clock source used by channel.
+    ///
+    /// # Parameters
+    /// * `clock` - New clock source for current channel.
+    pub fn set_clock_source(&self, clock: ChannelClock) {
+        match clock {
+            // Timer peripheral clock setting is configured via different register
+            // than the rest of the clocks.
+            ChannelClock::TimerPeripheralClock => {
+                self.registers_ref()
+                    .emr
+                    .modify(|_, w| w.nodivclk().set_bit());
+            }
+            clock => {
+                // If an error happens here, it's a hard bug in HAL, there's no way for the user
+                // to handle this as it should be impossible to fail here. Hence, we panic.
+                let clock_id = clock.try_into().expect(
+                    "internal HAL error - invalid clock tried to be converted into clock ID",
+                );
+
+                // This field is the same in Capture and Waveform mode. Hence, it can be changed in either.
+                self.registers_ref()
+                    .cmr_waveform_mode()
+                    .modify(|_, w| w.tcclks().variant(clock_id))
+            }
+        }
+    }
+
+    /// Get currently used clock source.
+    pub fn clock_source(&self) -> ChannelClock {
+        let is_timer_peripheral_clock_used =
+            self.registers_ref().emr.read().nodivclk().bit_is_set();
+
+        // This setting overrides clock configuration from CMR register.
+        if is_timer_peripheral_clock_used {
+            return ChannelClock::TimerPeripheralClock;
+        }
+
+        self.registers_ref()
+            .cmr_waveform_mode()
+            .read()
+            .tcclks()
+            .variant()
+            .into()
+    }
+
+    /// Returns current counter value from channel's register.
     ///
     /// # Implementation notes
     /// CV register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
@@ -131,7 +177,7 @@ where
         self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
     }
 
-    /// Read channel's status register.
+    /// Read channel's status register, and clean interrupt status flags after that.
     ///
     /// # Safety
     /// **Reading status register will clear interrupt status flags**. If you are using interrupts,
@@ -140,7 +186,7 @@ where
     /// critical section has ended will not know about events that happened between critical section start and
     /// reading status register. Same scenario can happen in interrupt handlers, if timer interrupt has lower priority
     /// than currently handled interrupt.
-    pub fn read_status_and_clear_irq_flags(&self) -> ChannelStatus {
+    pub fn read_and_clear_status(&self) -> ChannelStatus {
         let sr = self.registers_ref().sr.read();
 
         ChannelStatus {

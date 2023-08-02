@@ -34,8 +34,9 @@ impl ExternalClock {
     /// Converts external clock source to numeric ID representing it's value
     /// in Timer's Block Mode configuration register.
     ///
-    /// To prevent accidental typos, returned values are taken directly from PAC.
-    /// This allows easy type erasure, while also retaining value safety.
+    /// To prevent accidental typos, returned values are taken directly from PAC
+    /// and converted to u8. This allows easy type erasure, while also retaining
+    /// value safety.
     ///
     /// # Parameters
     /// * `clock` - External clock source to apply for current clock.
@@ -43,7 +44,7 @@ impl ExternalClock {
     /// # Returns
     /// `Some(u8)` if conversion was successful, `None` if selected clock source
     /// cannot be connected to the external clock.
-    pub(super) fn source_id(self, clock: ExternalClockSource) -> Option<u8> {
+    pub(super) fn to_source_id(self, clock: ExternalClockSource) -> Option<u8> {
         match self {
             ExternalClock::XC0 => match clock {
                 ExternalClockSource::TCLKx => Some(TC0XC0SSELECT_A::TCLK0 as u8),

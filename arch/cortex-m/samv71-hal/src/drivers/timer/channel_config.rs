@@ -1,6 +1,6 @@
 //! Module containing channel configuration and status structures.
 
-use pac::tc0::tc_channel::cmr_capture_mode::TCCLKSSELECT_A;
+use pac::tc0::tc_channel::cmr_waveform_mode::TCCLKSSELECT_A as PacClockId;
 
 /// Structure representing available channel interrupts.
 #[derive(Debug, Eq, PartialEq)]
@@ -76,14 +76,14 @@ pub struct ChannelStatus {
 /// Enumeration listing available channel's clock sources.
 #[derive(Debug, Default, Eq, PartialEq)]
 pub enum ChannelClock {
-    /// PCK6 (or PCK7 for TC0 Ch0) clock signal from PMC
+    /// PCK6 (or PCK7 for TC0 Ch0, if configured in PMC) clock signal from PMC
     #[default]
     PmcPeripheralClock,
-    /// MCK divided by 8
+    /// Host clock divided by 8
     MckDividedBy8,
-    /// MCK divided by 32
+    /// Host clock divided by 32
     MckDividedBy32,
-    /// MCK divided by 128
+    /// Host clock divided by 128
     MckDividedBy128,
     /// Slow clock (SLCK)
     SlowClock,
@@ -93,33 +93,40 @@ pub enum ChannelClock {
     XC1,
     /// External clock 2
     XC2,
-    /// Timer peripheral clock
+    /// Timer peripheral clock (see PMC_PCR register in MCU manual)
     TimerPeripheralClock,
 }
 
-impl ChannelClock {
-    /// Converts channel clock source to numeric ID representing it's value
-    /// in Channel's mode configuration register.
-    ///
-    /// To prevent accidental typos, returned values are taken directly from PAC.
-    /// This allows easy type erasure, while also retaining value safety.
-    ///
-    /// Not all values from this enumeration are meant to be written into CMR,
-    /// hence an Option is returned.
-    ///
-    /// # Returns
-    /// `Some(u8)` if current clock ID can be represented as value in CMR, otherwise None.
-    pub(super) fn clock_id(self) -> Option<u8> {
-        match self {
-            ChannelClock::PmcPeripheralClock => Some(TCCLKSSELECT_A::TIMER_CLOCK1 as u8),
-            ChannelClock::MckDividedBy8 => Some(TCCLKSSELECT_A::TIMER_CLOCK2 as u8),
-            ChannelClock::MckDividedBy32 => Some(TCCLKSSELECT_A::TIMER_CLOCK3 as u8),
-            ChannelClock::MckDividedBy128 => Some(TCCLKSSELECT_A::TIMER_CLOCK4 as u8),
-            ChannelClock::SlowClock => Some(TCCLKSSELECT_A::TIMER_CLOCK5 as u8),
-            ChannelClock::XC0 => Some(TCCLKSSELECT_A::XC0 as u8),
-            ChannelClock::XC1 => Some(TCCLKSSELECT_A::XC1 as u8),
-            ChannelClock::XC2 => Some(TCCLKSSELECT_A::XC2 as u8),
-            ChannelClock::TimerPeripheralClock => None,
+impl From<PacClockId> for ChannelClock {
+    fn from(value: PacClockId) -> Self {
+        match value {
+            PacClockId::TIMER_CLOCK1 => ChannelClock::PmcPeripheralClock,
+            PacClockId::TIMER_CLOCK2 => ChannelClock::MckDividedBy8,
+            PacClockId::TIMER_CLOCK3 => ChannelClock::MckDividedBy32,
+            PacClockId::TIMER_CLOCK4 => ChannelClock::MckDividedBy128,
+            PacClockId::TIMER_CLOCK5 => ChannelClock::SlowClock,
+            PacClockId::XC0 => ChannelClock::XC0,
+            PacClockId::XC1 => ChannelClock::XC1,
+            PacClockId::XC2 => ChannelClock::XC2,
+        }
+    }
+}
+
+/// Not all values from ChannelClock can be represented as PAC Clock ID.
+impl TryFrom<ChannelClock> for PacClockId {
+    type Error = ();
+
+    fn try_from(value: ChannelClock) -> Result<Self, Self::Error> {
+        match value {
+            ChannelClock::PmcPeripheralClock => Ok(PacClockId::TIMER_CLOCK1),
+            ChannelClock::MckDividedBy8 => Ok(PacClockId::TIMER_CLOCK2),
+            ChannelClock::MckDividedBy32 => Ok(PacClockId::TIMER_CLOCK3),
+            ChannelClock::MckDividedBy128 => Ok(PacClockId::TIMER_CLOCK4),
+            ChannelClock::SlowClock => Ok(PacClockId::TIMER_CLOCK5),
+            ChannelClock::XC0 => Ok(PacClockId::XC0),
+            ChannelClock::XC1 => Ok(PacClockId::XC1),
+            ChannelClock::XC2 => Ok(PacClockId::XC2),
+            ChannelClock::TimerPeripheralClock => Err(()),
         }
     }
 }

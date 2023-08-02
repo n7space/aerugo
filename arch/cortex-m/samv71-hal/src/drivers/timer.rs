@@ -89,7 +89,7 @@ where
         source: ExternalClockSource,
     ) -> Result<(), TimerConfigurationError> {
         let reg = &self.registers_ref().bmr;
-        let clock_source_id = match clock.source_id(source) {
+        let clock_source_id = match clock.to_source_id(source) {
             Some(id) => id,
             None => return Err(TimerConfigurationError::InvalidClockSource),
         };
