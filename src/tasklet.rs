@@ -146,7 +146,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
 
         match self.data_provider.get() {
             Some(data_provider) => data_provider.data_ready(),
-            None => false,
+            None => true,
         }
     }
 
