@@ -16,7 +16,9 @@ use env_parser::read_env;
 use internal_cell::InternalCell;
 
 use crate::api::{InitApi, RuntimeApi, SystemApi};
-use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+use crate::boolean_condition::{
+    BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
+};
 use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
@@ -384,6 +386,71 @@ impl InitApi for Aerugo {
         _event: &EventHandle,
     ) -> Result<(), Self::Error> {
         todo!()
+    }
+
+    /// Subscribes tasklet to the boolean condition.
+    ///
+    /// Tasklet subscribes for a state changes in this condition. Changing the value of the
+    /// condition will wake up all subscribed tasklets and make them ready to be executed.
+    ///
+    /// Each tasklet can be subscribed to at maximum one data provider. Condition can have multiple
+    /// tasklet registered.
+    ///
+    /// # Generic Parameters
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Handle to the target condition.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{InitApi, BooleanConditionStorage, TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: bool, _: &mut ()) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<bool, (), 0> = TaskletStorage::new();
+    /// # static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// #
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanCondition");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///     let condition_handle = CONDITION_STORAGE.create_handle().expect("Failed to create Condition handle");
+    ///
+    ///     AERUGO
+    ///         .subscribe_tasklet_to_condition(&task_handle, &condition_handle)
+    ///         .expect("Failed to subscribe Task to Condition");
+    /// }
+    /// ```
+    fn subscribe_tasklet_to_condition<C, const COND_COUNT: usize>(
+        &'static self,
+        tasklet_handle: &TaskletHandle<bool, C, COND_COUNT>,
+        condition_handle: &BooleanConditionHandle,
+    ) -> Result<(), Self::Error> {
+        let tasklet = tasklet_handle.tasklet();
+        let condition = condition_handle.condition();
+
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe {
+            tasklet.subscribe(condition)?;
+            condition.register_tasklet(tasklet.ptr())?;
+        }
+
+        Ok(())
     }
 
     /// Subscribes tasklet to the cyclic execution.

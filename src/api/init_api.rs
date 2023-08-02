@@ -5,7 +5,9 @@
 //! # Safety
 //! Functions from this trait shouldn't be called after the system was started.
 
-use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+use crate::boolean_condition::{
+    BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
+};
 use crate::event::{EventHandle, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
@@ -132,8 +134,26 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// `()` if successful, `Self::Error` otherwise.
     fn subscribe_tasklet_to_event<T, C, const COND_COUNT: usize>(
         &'static self,
-        tasklet: &TaskletHandle<T, C, COND_COUNT>,
-        event: &EventHandle,
+        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
+        event_handle: &EventHandle,
+    ) -> Result<(), Self::Error>;
+
+    /// Subscribes tasklet to the boolean condition.
+    ///
+    /// # Generic Parameters
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Handle to the target condition.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    fn subscribe_tasklet_to_condition<C, const COND_COUNT: usize>(
+        &'static self,
+        tasklet_handle: &TaskletHandle<bool, C, COND_COUNT>,
+        condition_handle: &BooleanConditionHandle,
     ) -> Result<(), Self::Error>;
 
     /// Subscribes tasklet to the cyclic execution.
@@ -150,7 +170,7 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// `()` if successful, `Self::Error` otherwise.
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
-        tasklet: &TaskletHandle<(), C, COND_COUNT>,
+        tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
         period: Option<Self::Duration>,
     ) -> Result<(), Self::Error>;
 

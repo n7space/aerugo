@@ -14,6 +14,7 @@ use heapless::Vec;
 use crate::aerugo::{error::InitError, Aerugo, AERUGO};
 use crate::api::SystemApi;
 use crate::arch::Mutex;
+use crate::data_provider::DataProvider;
 use crate::internal_cell::InternalCell;
 use crate::tasklet::TaskletPtr;
 
@@ -70,7 +71,7 @@ impl BooleanCondition {
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
     /// This is safe to call before the system initialization.
-    unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
         match self.registered_tasklets.as_mut_ref().push(tasklet) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletListFull),
@@ -83,5 +84,15 @@ impl BooleanCondition {
         for t in unsafe { self.registered_tasklets.as_ref() } {
             AERUGO.wake_tasklet(t);
         }
+    }
+}
+
+impl DataProvider<bool> for BooleanCondition {
+    fn data_ready(&self) -> bool {
+        true
+    }
+
+    fn get_data(&self) -> Option<bool> {
+        self.value.lock(|v| Some(*v))
     }
 }
