@@ -79,3 +79,15 @@ jobs:
           targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: build examples
         run: ./scripts/build_examples.sh
+
+  docs:
+    name: Generate docs
+    runs-on: ubuntu-latest
+    needs: [rustfmt, clippy, build]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: thumbv7em-none-eabihf
+      - name: generate docs
+        run: ./scripts/generate_docs.sh
