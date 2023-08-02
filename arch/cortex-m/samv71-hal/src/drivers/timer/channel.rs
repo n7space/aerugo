@@ -1,7 +1,9 @@
 //! Module representing timer counter's channel
+
 use core::marker::PhantomData;
 use pac::tc0::tc_channel::TC_CHANNEL;
 
+use super::channel_config::*;
 use super::TcMetadata;
 
 /// Structure representing a timer's channel.
@@ -86,7 +88,7 @@ where
 {
     /// Returns current counter value read from channel's registers.
     ///
-    /// # Implementation note
+    /// # Implementation notes
     /// CV register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
     pub fn counter_value(&self) -> u16 {
@@ -95,7 +97,7 @@ where
 
     /// Returns current value of channel's `A` register.
     ///
-    /// # Implementation note
+    /// # Implementation notes
     /// RA register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
     pub fn ra(&self) -> u16 {
@@ -104,7 +106,7 @@ where
 
     /// Returns current value of channel's `B` register.
     ///
-    /// # Implementation note
+    /// # Implementation notes
     /// RB register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
     pub fn rb(&self) -> u16 {
@@ -113,7 +115,7 @@ where
 
     /// Returns current value of channel's `C` register.
     ///
-    /// # Implementation note
+    /// # Implementation notes
     /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// the returned value is casted to u16 to avoid confusion (or increase it, and make the user read MCU manual).
     pub fn rc(&self) -> u16 {
@@ -122,11 +124,40 @@ where
 
     /// Set the value of channel's `C` register.
     ///
-    /// # Implementation note
+    /// # Implementation notes
     /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
     pub fn set_rc(&self, rc: u16) {
         self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
+    }
+
+    /// Read channel's status register.
+    ///
+    /// # Safety
+    /// **Reading status register will clear interrupt status flags**. If you are using interrupts,
+    /// make sure to be careful with this function in critical sections - if a timer interrupt will happen
+    /// during critical section, and you'll read the status flag, the interrupt handler that will execute after
+    /// critical section has ended will not know about events that happened between critical section start and
+    /// reading status register. Same scenario can happen in interrupt handlers, if timer interrupt has lower priority
+    /// than currently handled interrupt.
+    pub fn read_status_and_clear_irq_flags(&self) -> ChannelStatus {
+        let sr = self.registers_ref().sr.read();
+
+        ChannelStatus {
+            interrupts: ChannelInterrupts {
+                counter_overflow: sr.covfs().bit(),
+                load_overrun: sr.lovrs().bit(),
+                ra_compare: sr.cpas().bit(),
+                rb_compare: sr.cpbs().bit(),
+                rc_compare: sr.cpcs().bit(),
+                ra_load: sr.ldras().bit(),
+                rb_load: sr.ldrbs().bit(),
+                external_trigger: sr.etrgs().bit(),
+            },
+            clock_enabled: sr.clksta().bit(),
+            tioa_state: sr.mtioa().bit(),
+            tiob_state: sr.mtiob().bit(),
+        }
     }
 
     /// Returns a reference to Channel's registers.
@@ -239,9 +270,6 @@ where
     }
 
     /// Triggers the channel via software, starting it.
-    ///
-    /// Channel instance does not store the state indicating whether the timer is running or not,
-    /// due to the fact that it can automatically stop without notifications, depending on configuration.
     pub fn trigger(&self) {
         self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
     }

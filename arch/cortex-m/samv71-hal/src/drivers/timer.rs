@@ -1,5 +1,6 @@
 //! Implementation of HAL Timer Counter driver.
 mod channel;
+mod channel_config;
 mod tc_metadata;
 mod timer_config;
 mod timer_error;
