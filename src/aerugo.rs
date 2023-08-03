@@ -513,6 +513,67 @@ impl InitApi for Aerugo {
         Ok(())
     }
 
+    /// Sets tasklet condition set.
+    ///
+    /// Tasklet can use a set of BooleanConditions as a execution condition. Before tasklet is
+    /// scheduled and then executed it's condition is checked to verify whether this tasklet is
+    /// active. Tasklet will be woken when value of any of the condition in the set changes.
+    ///
+    /// # Generic Parameters
+    /// * `T` - Type of the data.
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Set of conditions.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage, InitApi,
+    ///     TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: (), _: &mut ()) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<(), (), 2> = TaskletStorage::new();
+    /// # static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// # static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// #
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_X_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanConditionX");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_Y_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanConditionY");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///     let condition_x_handle = CONDITION_X_STORAGE
+    ///         .create_handle()
+    ///         .expect("Failed to create ConditionX handle");
+    ///     let condition_y_handle = CONDITION_Y_STORAGE
+    ///         .create_handle()
+    ///         .expect("Failed to create ConditionY handle");
+    ///
+    ///     let mut condition_set = BooleanConditionSet::<2>::new(BooleanConditionSetType::And);
+    ///     condition_set.add(&condition_x_handle);
+    ///     condition_set.add(&condition_y_handle);
+    ///
+    ///     AERUGO
+    ///         .set_tasklet_conditions(&task_handle, condition_set)
+    ///         .expect("Unable to set Task condition set");
+    /// }
     fn set_tasklet_conditions<T, C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
