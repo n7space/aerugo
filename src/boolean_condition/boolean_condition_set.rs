@@ -85,28 +85,12 @@ impl<const N: usize> BooleanConditionSet<N> {
 
     /// Evaluates value of this condition set for `and` type.
     fn evaluate_and(&self) -> bool {
-        for i in 0..N {
-            let condition = self.conditions[i];
-
-            if !condition.get_value() {
-                return false;
-            }
-        }
-
-        true
+        self.conditions.iter().all(|cond| cond.get_value())
     }
 
     /// Evaluates value of this condition set for `or` type.
     fn evaluate_or(&self) -> bool {
-        for i in 0..N {
-            let condition = self.conditions[i];
-
-            if condition.get_value() {
-                return true;
-            }
-        }
-
-        false
+        self.conditions.iter().any(|cond| cond.get_value())
     }
 }
 
