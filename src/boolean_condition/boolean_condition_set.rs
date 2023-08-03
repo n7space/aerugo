@@ -128,3 +128,118 @@ pub enum BooleanConditionSetError {
     /// Added condition to a full set.
     SetFull,
 }
+
+#[cfg(any(doc, test))]
+mod tests {
+    use super::*;
+
+    use crate::boolean_condition::BooleanConditionStorage;
+
+    /// @SRS{ROS-FUN-RTOS-1080}
+    #[cfg_attr(not(doc), test)]
+    fn evaluate_or_set_true() {
+        static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_X_STORAGE
+                .init(true)
+                .expect("ConditionX init error")
+        };
+        let condition_x_handle = CONDITION_X_STORAGE.create_handle().unwrap();
+
+        static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_Y_STORAGE
+                .init(false)
+                .expect("ConditionY init error")
+        };
+        let condition_y_handle = CONDITION_Y_STORAGE.create_handle().unwrap();
+
+        let condition_set = BooleanConditionSet::from_array(
+            [&condition_x_handle, &condition_y_handle],
+            BooleanConditionSetType::Or,
+        );
+
+        assert!(condition_set.evaluate());
+    }
+
+    /// @SRS{ROS-FUN-RTOS-1080}
+    #[cfg_attr(not(doc), test)]
+    fn evaluate_or_set_false() {
+        static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_X_STORAGE
+                .init(false)
+                .expect("ConditionX init error")
+        };
+        let condition_x_handle = CONDITION_X_STORAGE.create_handle().unwrap();
+
+        static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_Y_STORAGE
+                .init(false)
+                .expect("ConditionY init error")
+        };
+        let condition_y_handle = CONDITION_Y_STORAGE.create_handle().unwrap();
+
+        let condition_set = BooleanConditionSet::from_array(
+            [&condition_x_handle, &condition_y_handle],
+            BooleanConditionSetType::Or,
+        );
+
+        assert!(!condition_set.evaluate());
+    }
+
+    /// @SRS{ROS-FUN-RTOS-1090}
+    #[cfg_attr(not(doc), test)]
+    fn evaluate_and_set_true() {
+        static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_X_STORAGE
+                .init(true)
+                .expect("ConditionX init error")
+        };
+        let condition_x_handle = CONDITION_X_STORAGE.create_handle().unwrap();
+
+        static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_Y_STORAGE
+                .init(true)
+                .expect("ConditionY init error")
+        };
+        let condition_y_handle = CONDITION_Y_STORAGE.create_handle().unwrap();
+
+        let condition_set = BooleanConditionSet::from_array(
+            [&condition_x_handle, &condition_y_handle],
+            BooleanConditionSetType::And,
+        );
+
+        assert!(condition_set.evaluate());
+    }
+
+    /// @SRS{ROS-FUN-RTOS-1090}
+    #[cfg_attr(not(doc), test)]
+    fn evaluate_and_set_false() {
+        static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_X_STORAGE
+                .init(true)
+                .expect("ConditionX init error")
+        };
+        let condition_x_handle = CONDITION_X_STORAGE.create_handle().unwrap();
+
+        static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+        unsafe {
+            CONDITION_Y_STORAGE
+                .init(false)
+                .expect("ConditionY init error")
+        };
+        let condition_y_handle = CONDITION_Y_STORAGE.create_handle().unwrap();
+
+        let condition_set = BooleanConditionSet::from_array(
+            [&condition_x_handle, &condition_y_handle],
+            BooleanConditionSetType::And,
+        );
+
+        assert!(!condition_set.evaluate());
+    }
+}
