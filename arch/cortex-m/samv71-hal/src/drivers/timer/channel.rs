@@ -8,15 +8,13 @@ use super::waveform_config::WaveformModeConfig;
 use super::TcMetadata;
 
 /// Structure representing a timer's channel.
-pub struct Channel<Timer, ID, State, Mode> {
+pub struct Channel<Timer, ID, Mode> {
     /// Timer channel's registers.
     registers: *const TC_CHANNEL,
     /// PhantomData for Timer type.
     _timer: PhantomData<Timer>,
     /// PhantomData for ID type.
     _id: PhantomData<ID>,
-    /// PhantomData for State type.
-    _state: PhantomData<State>,
     /// PhantomData for Mode type.
     _mode: PhantomData<Mode>,
 }
@@ -61,37 +59,25 @@ impl ChannelId for Ch2 {
     const ID: usize = 2;
 }
 
-/// Trait representing channel's state
-pub trait ChannelState {}
-
-/// Empty structure representing timer's disabled state.
-pub struct Disabled;
-/// Empty structure representing timer's enabled state.
-pub struct Enabled;
-
-impl ChannelState for Disabled {}
-impl ChannelState for Enabled {}
-
 /// Trait representing channel's mode
 pub trait ChannelMode {}
 
 /// Empty structure representing not configured channel.
 pub struct NotConfigured;
 /// Empty structure representing channel in Waveform mode.
-pub struct WaveformMode;
+pub struct Waveform;
 /// Empty structure representing channel in Capture mode.
-pub struct CaptureMode;
+pub struct Capture;
 
 impl ChannelMode for NotConfigured {}
-impl ChannelMode for WaveformMode {}
-impl ChannelMode for CaptureMode {}
+impl ChannelMode for Waveform {}
+impl ChannelMode for Capture {}
 
-/// Channel implementation for all available states and modes
-impl<Timer, ID, State, Mode> Channel<Timer, ID, State, Mode>
+/// Channel implementation for all available modes.
+impl<Timer, ID, Mode> Channel<Timer, ID, Mode>
 where
     Timer: TcMetadata,
     ID: ChannelId,
-    State: ChannelState,
     Mode: ChannelMode,
 {
     /// Sets the clock source used by channel.
@@ -296,7 +282,7 @@ where
         unsafe { &*self.registers }
     }
 
-    /// Transforms the channel into a type with different state and/or mode.
+    /// Transforms the channel into a type with different mode.
     ///
     /// This is a helper function that allows to reduce state transition boilerplate to minimum.
     ///
@@ -306,11 +292,11 @@ where
     ///
     /// # Example
     /// ```no_run
-    /// fn disable(self) -> Channel<Timer, ID, Disabled, Mode> {
-    ///     // Do some logic to disable the timer here
+    /// fn waveform(self) -> Channel<Timer, ID, Waveform> {
+    ///     // Do some logic to configure the new mode here
     ///     // ...
     ///     
-    ///     // Return channel with `State` changed to `Disabled`
+    ///     // Return channel with `Mode` changed to `Waveform`
     ///     // All generic arguments are deduced from this function's return type.
     ///     Channel::transform(self)
     /// }
@@ -318,19 +304,18 @@ where
     ///
     /// # Parameters
     /// * `channel` - Channel to be transformed.
-    const fn transform<NewState, NewMode>(channel: Channel<Timer, ID, NewState, NewMode>) -> Self {
+    const fn transform<NewMode>(channel: Channel<Timer, ID, NewMode>) -> Self {
         Self {
             registers: channel.registers,
             _timer: PhantomData,
             _id: PhantomData,
-            _state: PhantomData,
             _mode: PhantomData,
         }
     }
 }
 
-/// Channel implementation for disabled and not configured channels (default state).
-impl<Timer, ID> Channel<Timer, ID, Disabled, NotConfigured>
+/// Channel implementation for not configured channels (default state).
+impl<Timer, ID> Channel<Timer, ID, NotConfigured>
 where
     Timer: TcMetadata,
     ID: ChannelId,
@@ -343,12 +328,11 @@ where
     /// # Safety
     /// This function should be called only by [`Timer`](super::Timer), not by the user.
     /// It's safe to use, as long as no duplicate channels (sharing the same registers) exist.
-    pub(super) fn new(channel: *const TC_CHANNEL) -> Channel<Timer, ID, Disabled, NotConfigured> {
+    pub(super) fn new(channel: *const TC_CHANNEL) -> Channel<Timer, ID, NotConfigured> {
         Self {
             registers: channel,
             _timer: PhantomData,
             _id: PhantomData,
-            _state: PhantomData,
             _mode: PhantomData,
         }
         .synced_with_hardware()
@@ -365,54 +349,22 @@ where
     }
 }
 
-/// Channel implementation for disabled channels.
-impl<Timer, ID, Mode> Channel<Timer, ID, Disabled, Mode>
+/// Channel implementation for channels in all modes.
+impl<Timer, ID, Mode> Channel<Timer, ID, Mode>
 where
     Timer: TcMetadata,
     ID: ChannelId,
     Mode: ChannelMode,
 {
-    /// Enables the channel.
-    ///
-    /// Consumes current instance and returns new one, with `Enabled` state.
-    pub fn enable(self) -> Channel<Timer, ID, Enabled, Mode> {
-        self.registers_ref().ccr.write(|w| w.clken().set_bit());
-        Channel::transform(self)
-    }
-
-    /// Change channel's mode to Waveform mode.
+    /// Changes channel's mode to Waveform mode.
     ///
     /// Consumes current instance and returns new one, in `Waveform` mode.
     ///
     /// # Parameters
     /// * `config` - Waveform mode configuration. Can be changed later.
-    pub fn into_waveform_channel(
-        self,
-        config: WaveformModeConfig,
-    ) -> Channel<Timer, ID, Disabled, WaveformMode> {
+    pub fn into_waveform_channel(self, config: WaveformModeConfig) -> Channel<Timer, ID, Waveform> {
         let transformed_channel = Channel::transform(self);
         transformed_channel.configure(config);
         transformed_channel
-    }
-}
-
-/// Channel implementation for enabled channels.
-impl<Timer, ID, Mode> Channel<Timer, ID, Enabled, Mode>
-where
-    Timer: TcMetadata,
-    ID: ChannelId,
-    Mode: ChannelMode,
-{
-    /// Disables the channel.
-    ///
-    /// Consumes current instance and returns new one, with `Disabled` state.
-    pub fn disable(self) -> Channel<Timer, ID, Disabled, Mode> {
-        self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
-        Channel::transform(self)
-    }
-
-    /// Triggers the channel via software, starting it.
-    pub fn trigger(&self) {
-        self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
     }
 }

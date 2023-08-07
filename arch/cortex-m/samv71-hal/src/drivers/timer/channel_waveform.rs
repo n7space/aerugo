@@ -7,16 +7,31 @@ use super::{
         ComparisonEffect, CountMode, ExternalEventConfig, OutputSignalEffects, RcCompareEffect,
         RcCompareEffectFlags, WaveformModeConfig,
     },
-    Channel, ChannelId, Disabled, TcMetadata, WaveformMode,
+    Channel, ChannelId, TcMetadata, Waveform,
 };
 
-/// Channel implementation for Waveform mode while disabled.
-impl<Timer, ID> Channel<Timer, ID, Disabled, WaveformMode>
+/// Channel implementation for Waveform channel.
+impl<Timer, ID> Channel<Timer, ID, Waveform>
 where
     Timer: TcMetadata,
     ID: ChannelId,
 {
-    /// Sets waveform mode configuration.
+    /// Enables the channel.
+    pub fn enable(self) {
+        self.registers_ref().ccr.write(|w| w.clken().set_bit());
+    }
+
+    /// Disables the channel.
+    pub fn disable(self) {
+        self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
+    }
+
+    /// Triggers the channel via software, starting it.
+    pub fn trigger(&self) {
+        self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
+    }
+
+    /// Sets waveform mode configuration. Does a single write to configuration register.
     pub fn configure(&self, config: WaveformModeConfig) {
         let rc_event_flags: RcCompareEffectFlags = config.rc_compare_effect.into();
 
@@ -185,6 +200,24 @@ where
                 .bswtrg()
                 .bits(effects.software_trigger.id())
         });
+    }
+
+    /// Sets the value of channel's `A` register. This register can be written only in Waveform mode.
+    ///
+    /// # Implementation notes
+    /// RA register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn set_ra(&self, ra: u16) {
+        self.registers_ref().ra.write(|w| w.ra().variant(ra as u32));
+    }
+
+    /// Sets the value of channel's `B` register. This register can be written only in Waveform mode.
+    ///
+    /// # Implementation notes
+    /// RB register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
+    /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
+    pub fn set_rb(&self, rb: u16) {
+        self.registers_ref().rb.write(|w| w.rb().variant(rb as u32));
     }
 
     /// Returns a reference to channel mode register.

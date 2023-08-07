@@ -24,11 +24,11 @@ use self::{
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
 pub struct Timer<TimerMetadata> {
     /// Channel 0.
-    pub channel_0: Option<Channel<TimerMetadata, Ch0, Disabled, NotConfigured>>,
+    pub channel_0: Option<Channel<TimerMetadata, Ch0, NotConfigured>>,
     /// Channel 1.
-    pub channel_1: Option<Channel<TimerMetadata, Ch1, Disabled, NotConfigured>>,
+    pub channel_1: Option<Channel<TimerMetadata, Ch1, NotConfigured>>,
     /// Channel 2.
-    pub channel_2: Option<Channel<TimerMetadata, Ch2, Disabled, NotConfigured>>,
+    pub channel_2: Option<Channel<TimerMetadata, Ch2, NotConfigured>>,
     /// PhantomData for TC metadata.
     _tc_peripheral: PhantomData<TimerMetadata>,
 }
