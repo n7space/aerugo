@@ -1,6 +1,7 @@
 //! Module with PAC TC metadata implementation.
 pub(super) use pac::tc0::RegisterBlock;
-use pac::{Interrupt, TC0, TC1, TC2, TC3};
+use pac::Interrupt;
+pub use pac::{TC0, TC1, TC2, TC3};
 
 /// Amount of channels per timer instance.
 const CHANNELS_COUNT_PER_TIMER: usize = 3;

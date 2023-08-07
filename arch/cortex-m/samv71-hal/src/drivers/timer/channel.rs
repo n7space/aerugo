@@ -19,6 +19,11 @@ pub struct Channel<Timer, ID, Mode> {
     _mode: PhantomData<Mode>,
 }
 
+/// Assuming that the user does not create an instance of channel by himself, and instead relies on
+/// instances provided by HAL, it's safe to share channel instances as there's only a single instance that can
+/// access hardware channel's registers at once, and it cannot be copied.
+unsafe impl<Timer, ID, Mode> Send for Channel<Timer, ID, Mode> {}
+
 /// Enumeration listing available channels.
 ///
 /// It's value-level equivalent of ChannelId trait.

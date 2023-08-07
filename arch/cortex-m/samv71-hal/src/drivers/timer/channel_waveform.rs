@@ -17,12 +17,12 @@ where
     ID: ChannelId,
 {
     /// Enables the channel.
-    pub fn enable(self) {
+    pub fn enable(&self) {
         self.registers_ref().ccr.write(|w| w.clken().set_bit());
     }
 
     /// Disables the channel.
-    pub fn disable(self) {
+    pub fn disable(&self) {
         self.registers_ref().ccr.write(|w| w.clkdis().set_bit());
     }
 
