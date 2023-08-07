@@ -132,7 +132,7 @@ where
     /// This function will panic if an unexpected value is read from timer's registers.
     /// If this happens, that means the PAC is broken and there's nothing that can be done on
     /// user side to avoid it, as that kind of situation should never happen on correctly working
-    /// hardware. See [`ComparisonEffect::from_id`](ComparisonEffect::from_id) for details about
+    /// hardware. See `ComparisonEffect::from_id`for details about
     /// value conversion.
     pub fn tioa_effects(&self) -> OutputSignalEffects {
         let reg = self.mode_register().read();
@@ -170,7 +170,7 @@ where
     /// This function will panic if an unexpected value is read from timer's registers.
     /// If this happens, that means the PAC is broken and there's nothing that can be done on
     /// user side to avoid it, as that kind of situation should never happen on correctly working
-    /// hardware. See [`ComparisonEffect::from_id`](ComparisonEffect::from_id) for details about
+    /// hardware. See `ComparisonEffect::from_id` for details about
     /// value conversion.
     pub fn tiob_effects(&self) -> OutputSignalEffects {
         let reg = self.mode_register().read();
