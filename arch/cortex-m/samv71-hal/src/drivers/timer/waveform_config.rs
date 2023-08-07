@@ -27,11 +27,7 @@ impl Default for WaveformModeConfig {
         Self {
             stop_clock_on_rc_compare: false,
             disable_clock_on_rc_compare: false,
-            external_event: ExternalEventConfig {
-                edge: EventEdge::None,
-                signal: ExternalEventSignal::TIOB,
-                enabled: false,
-            },
+            external_event: ExternalEventConfig::disabled(),
             mode: WaveformMode::Up,
             tioa_effects: OutputSignalEffects::none(),
             tiob_effects: OutputSignalEffects::none(),
@@ -51,6 +47,17 @@ pub struct ExternalEventConfig {
     pub signal: ExternalEventSignal,
     /// Do external event trigger resets the counter and starts the counter clock?
     pub enabled: bool,
+}
+
+impl ExternalEventConfig {
+    /// Returns disabled external event configuration.
+    pub fn disabled() -> Self {
+        ExternalEventConfig {
+            edge: EventEdge::None,
+            signal: ExternalEventSignal::TIOB,
+            enabled: false,
+        }
+    }
 }
 
 /// Structure representing event effects on channel's output signals (TIOA and TIOB)
