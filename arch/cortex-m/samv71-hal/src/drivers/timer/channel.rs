@@ -4,8 +4,8 @@ use core::marker::PhantomData;
 use pac::tc0::tc_channel::TC_CHANNEL;
 
 use super::channel_config::*;
+use super::waveform_config::WaveformModeConfig;
 use super::TcMetadata;
-use super::WaveformModeConfig;
 
 /// Structure representing a timer's channel.
 pub struct Channel<Timer, ID, State, Mode> {
