@@ -1,6 +1,7 @@
 //! Implementation of HAL Timer Counter driver.
 pub mod channel;
 pub mod channel_config;
+pub mod channel_waveform;
 mod tc_metadata;
 pub mod timer_config;
 pub mod timer_error;

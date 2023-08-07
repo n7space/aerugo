@@ -292,7 +292,7 @@ where
     /// This function dereferences a raw pointer.
     /// It's safe to use as long as Channel is created only using provided [`new`](Channel::new()) method via [`Timer`](super::Timer) instance,
     /// as it guarantees that the pointer will be valid.
-    fn registers_ref(&self) -> &TC_CHANNEL {
+    pub(super) fn registers_ref(&self) -> &TC_CHANNEL {
         unsafe { &*self.registers }
     }
 
@@ -414,48 +414,5 @@ where
     /// Triggers the channel via software, starting it.
     pub fn trigger(&self) {
         self.registers_ref().ccr.write(|w| w.swtrg().set_bit());
-    }
-}
-
-/// Channel implementation for Waveform mode while disabled.
-impl<Timer, ID> Channel<Timer, ID, Disabled, WaveformMode>
-where
-    Timer: TcMetadata,
-    ID: ChannelId,
-{
-    /// Sets waveform mode configuration.
-    pub fn configure(&self, config: WaveformModeConfig) {
-        self.registers_ref().cmr_waveform_mode().write(|w| {
-            w.cpcstop()
-                .variant(config.stop_clock_on_rc_compare)
-                .cpcdis()
-                .variant(config.disable_clock_on_rc_compare)
-                .eevtedg()
-                .variant(config.external_event.edge.into())
-                .eevt()
-                .variant(config.external_event.signal.into())
-                .enetrg()
-                .variant(config.external_event.enabled)
-                .wavsel()
-                .variant(config.mode.into())
-                .wave()
-                .set_bit()
-                .acpa()
-                .bits(config.tioa_effects.rx_comparison.id())
-                .acpc()
-                .bits(config.tioa_effects.rc_comparison.id())
-                .aeevt()
-                .bits(config.tioa_effects.external_event.id())
-                .aswtrg()
-                .bits(config.tioa_effects.software_trigger.id())
-                .bcpb()
-                .bits(config.tiob_effects.rx_comparison.id())
-                .bcpc()
-                .bits(config.tiob_effects.rc_comparison.id())
-                .beevt()
-                .bits(config.tiob_effects.external_event.id())
-                .bswtrg()
-                .bits(config.tiob_effects.software_trigger.id())
-        });
     }
 }
