@@ -71,7 +71,7 @@ where
     ///
     /// # Safety
     /// This function directly modifies the registers of a timer in an unsafe manner, but values put in these
-    /// registers come from PAC, so they should be valid.
+    /// registers come from PAC and are validated before using, so they should be valid.
     pub fn configure_external_clock_source(
         &self,
         clock: ExternalClock,

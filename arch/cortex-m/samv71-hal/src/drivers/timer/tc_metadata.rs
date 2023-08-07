@@ -8,6 +8,7 @@ const CHANNELS_COUNT_PER_TIMER: usize = 3;
 /// Trait for PAC timer counter instances.
 ///
 /// This trait erases the type of TC instance, so it can be used as generic argument for [`Timer`](super::Timer)
+/// instead of concrete timer counter type.
 pub trait TcMetadata {
     /// Pointer to Timer Counter's registers block.
     const REGISTERS: *const RegisterBlock;
