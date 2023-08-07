@@ -51,9 +51,9 @@ fn task_c(data: u8, context: &mut TaskCContext) {
     }
 }
 
-static TASK_A_STORAGE: TaskletStorage<(), TaskAContext> = TaskletStorage::new();
-static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext> = TaskletStorage::new();
-static TASK_C_STORAGE: TaskletStorage<u8, TaskCContext> = TaskletStorage::new();
+static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new();
+static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext, 0> = TaskletStorage::new();
+static TASK_C_STORAGE: TaskletStorage<u8, TaskCContext, 0> = TaskletStorage::new();
 
 static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 static QUEUE_Y: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();

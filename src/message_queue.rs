@@ -10,16 +10,14 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use heapless::Vec;
 
-use crate::aerugo::AERUGO;
 use crate::aerugo::{
     error::{InitError, RuntimeError},
-    Aerugo,
+    Aerugo, AERUGO,
 };
 use crate::api::SystemApi;
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::internal_cell::InternalCell;
-use crate::queue::Queue;
 use crate::tasklet::TaskletPtr;
 
 /// List of tasklets registered to a queue
@@ -46,16 +44,26 @@ impl<T, const N: usize> MessageQueue<T, N> {
             registered_tasklets: TaskletList::new().into(),
         }
     }
-}
 
-impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
-    unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+    /// Registers task to this queue.
+    ///
+    /// # Parameters
+    /// * `task` - Task to register.
+    ///
+    /// # Returns
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the list of registered tasklets.
+    /// This is safe to call before the system initialization.
+    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
         match self.registered_tasklets.as_mut_ref().push(tasklet) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletListFull),
         }
     }
 
+    /// Wakes tasklets registered to this queue.
     fn wake_tasklets(&self) {
         // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
         for t in unsafe { self.registered_tasklets.as_ref() } {
@@ -63,6 +71,13 @@ impl<T, const N: usize> Queue<T> for MessageQueue<T, N> {
         }
     }
 
+    /// Sends given data to this queue.
+    ///
+    /// # Parameters
+    /// * `data` - Data to send.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
     fn send_data(&self, data: T) -> Result<(), RuntimeError> {
         match self.data_queue.lock(|q| q.enqueue(data)) {
             Ok(_) => (),

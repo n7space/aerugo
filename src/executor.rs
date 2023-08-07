@@ -10,8 +10,7 @@ use heapless::binary_heap::{BinaryHeap, Max};
 use crate::aerugo::{error::RuntimeError, Aerugo, AERUGO};
 use crate::api::{RuntimeApi, SystemApi};
 use crate::arch::Mutex;
-use crate::task::TaskStatus;
-use crate::tasklet::TaskletPtr;
+use crate::tasklet::{TaskletPtr, TaskletStatus};
 
 /// Type for the tasklet execution queue
 type TaskletQueue<const N: usize> = BinaryHeap<TaskletPtr, Max, N>;
@@ -64,7 +63,7 @@ impl Executor {
     ) -> Result<bool, RuntimeError> {
         let tasklet_status = tasklet.get_status();
 
-        if tasklet_status == TaskStatus::Sleeping {
+        if tasklet_status == TaskletStatus::Sleeping && tasklet.is_active() {
             self.add_tasklet_to_queue(tasklet.clone())?;
             Ok(true)
         } else {
@@ -82,19 +81,21 @@ impl Executor {
     /// `bool` indicating if tasklet was executed, `RuntimeError` otherwise.
     fn execute_next_tasklet(&'static self) -> Result<bool, RuntimeError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
-            if !tasklet.is_ready() {
-                tasklet.set_status(TaskStatus::Sleeping);
+            if !tasklet.is_active() {
+                tasklet.set_status(TaskletStatus::Sleeping);
                 return Ok(false);
             }
 
-            tasklet.set_status(TaskStatus::Working);
+            tasklet.set_status(TaskletStatus::Working);
 
-            tasklet.execute();
-            tasklet.set_last_execution_time(AERUGO.get_system_time());
+            let executed = tasklet.execute();
+            if executed {
+                tasklet.set_last_execution_time(AERUGO.get_system_time());
+            }
 
             self.try_reschedule_tasklet(tasklet)?;
 
-            Ok(true)
+            Ok(executed)
         } else {
             Ok(false)
         }
@@ -108,10 +109,10 @@ impl Executor {
     /// # Return
     /// `()` if successful, `RuntimeError` otherwise.
     fn try_reschedule_tasklet(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
-        if tasklet.is_ready() {
+        if tasklet.has_work() {
             self.add_tasklet_to_queue(tasklet)?;
         } else {
-            tasklet.set_status(TaskStatus::Sleeping);
+            tasklet.set_status(TaskletStatus::Sleeping);
         }
 
         Ok(())
@@ -125,7 +126,7 @@ impl Executor {
     /// `()` if successful, `RuntimeError` otherwise.
     fn add_tasklet_to_queue(&'static self, tasklet: TaskletPtr) -> Result<(), RuntimeError> {
         self.tasklet_queue.lock(|q| {
-            tasklet.set_status(TaskStatus::Waiting);
+            tasklet.set_status(TaskletStatus::Waiting);
 
             match q.push(tasklet) {
                 Ok(_) => Ok(()),

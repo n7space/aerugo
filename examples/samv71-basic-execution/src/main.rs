@@ -23,7 +23,7 @@ fn dummy_task(_: (), context: &mut DummyTaskContext) {
     }
 }
 
-static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext> = TaskletStorage::new();
+static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
 
 #[entry]
 fn main() -> ! {

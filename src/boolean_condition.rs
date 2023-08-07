@@ -1,44 +1,98 @@
 //! Boolean condition.
 
 mod boolean_condition_handle;
+mod boolean_condition_set;
 mod boolean_condition_storage;
 
 pub use self::boolean_condition_handle::BooleanConditionHandle;
+pub use self::boolean_condition_set::BooleanConditionSet;
+pub use self::boolean_condition_set::BooleanConditionSetType;
 pub use self::boolean_condition_storage::BooleanConditionStorage;
 
-/// Boolean condition.
-pub(crate) struct BooleanCondition {}
+use heapless::Vec;
 
-/// Set of boolean conditions.
-pub struct BooleanConditionSet {
-    /// Type of the set.
-    _set_type: BooleanConditionSetType,
+use crate::aerugo::{error::InitError, Aerugo, AERUGO};
+use crate::api::SystemApi;
+use crate::arch::Mutex;
+use crate::data_provider::DataProvider;
+use crate::internal_cell::InternalCell;
+use crate::tasklet::TaskletPtr;
+
+/// List of tasklets registered to a condition
+type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
+
+/// Boolean condition.
+#[repr(C)]
+pub(crate) struct BooleanCondition {
+    /// Condition value.
+    value: Mutex<bool>,
+    /// Tasklets registered to this queue.
+    registered_tasklets: InternalCell<TaskletList>,
 }
 
-impl BooleanConditionSet {
-    /// Creates new condition set.
-    ///
-    /// # Parameters
-    /// * `set_type` - Type of the condition set.
-    pub const fn new(set_type: BooleanConditionSetType) -> Self {
-        BooleanConditionSet {
-            _set_type: set_type,
+impl BooleanCondition {
+    /// Creates new `BooleanCondition`
+    pub(crate) fn new(value: bool) -> Self {
+        BooleanCondition {
+            value: Mutex::new(value),
+            registered_tasklets: TaskletList::new().into(),
         }
     }
 
-    /// Add a condition to the set.
+    /// Gets value of the condition.
+    pub fn get_value(&self) -> bool {
+        self.value.lock(|v| *v)
+    }
+
+    /// Sets value of the condition.
+    pub fn set_value(&self, value: bool) {
+        let value_changed = self.value.lock(|v| {
+            if *v != value {
+                *v = value;
+                true
+            } else {
+                false
+            }
+        });
+
+        if value_changed {
+            self.wake_tasklets();
+        }
+    }
+
+    /// Registers tasklet to this condition
     ///
-    /// # Parameters
-    /// * `_handle` - Handle to the condition.
-    pub fn add(&mut self, _handle: BooleanConditionHandle) {
-        todo!();
+    /// # Parameter
+    /// * `tasklet` - Tasklet to register
+    ///
+    /// # Return
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the list of registered tasklets.
+    /// This is safe to call before the system initialization.
+    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+        match self.registered_tasklets.as_mut_ref().push(tasklet) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletListFull),
+        }
+    }
+
+    /// Wakes tasklets registered to this condition.
+    fn wake_tasklets(&self) {
+        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
+        for t in unsafe { self.registered_tasklets.as_ref() } {
+            AERUGO.wake_tasklet(t);
+        }
     }
 }
 
-/// Type of the boolean condition set
-pub enum BooleanConditionSetType {
-    /// All conditions in the set has to be true.
-    And,
-    /// At least one condition in the set has to be true.
-    Or,
+impl DataProvider<bool> for BooleanCondition {
+    fn data_ready(&self) -> bool {
+        true
+    }
+
+    fn get_data(&self) -> Option<bool> {
+        self.value.lock(|v| Some(*v))
+    }
 }

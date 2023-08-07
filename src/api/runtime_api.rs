@@ -7,7 +7,7 @@ use core::ops::{Add, Sub};
 use bare_metal::CriticalSection;
 
 use crate::execution_monitoring::ExecutionStats;
-use crate::task::TaskId;
+use crate::tasklet::TaskletId;
 
 /// System runtime API.
 pub trait RuntimeApi: ErrorType {
@@ -31,7 +31,7 @@ pub trait RuntimeApi: ErrorType {
     fn set_system_time_offset(&'static self, offset: Self::Duration);
 
     /// Returns an iterator to the list with IDs of registered tasklets.
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskId>;
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
 
     /// Returns execution statistics for given tasklet.
     ///
@@ -40,7 +40,7 @@ pub trait RuntimeApi: ErrorType {
     ///
     /// # Return
     /// Execution statistics for this tasklet.
-    fn get_execution_statistics(&'static self, task_id: TaskId) -> ExecutionStats;
+    fn get_execution_statistics(&'static self, task_id: TaskletId) -> ExecutionStats;
 
     /// Enters critical section
     fn enter_critical();

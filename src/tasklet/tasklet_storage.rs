@@ -5,16 +5,18 @@
 
 use super::Tasklet;
 
+use core::cell::OnceCell;
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
 
 use crate::aerugo::InitError;
+use crate::boolean_condition::BooleanConditionSet;
 use crate::internal_cell::InternalCell;
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
 
 /// Type of the tasklet buffer storage.
-pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>() }>;
+pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), (), 0>>() }>;
 
 /// Structure containing memory for Tasklet creation.
 ///
@@ -27,24 +29,28 @@ pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), ()>>(
 /// # Generic Parameters
 /// * `T` - Type that is processed by the tasklet.
 /// * `C` - Type of tasklet context data.
-pub struct TaskletStorage<T, C> {
+/// * `COND_COUNT` - Number of tasklet conditions.
+pub struct TaskletStorage<T, C, const COND_COUNT: usize> {
     /// Marks whether this storage is initialized.
     initialized: InternalCell<bool>,
     /// Buffer for the tasklet structure.
     tasklet_buffer: InternalCell<TaskletBuffer>,
-    /// Buffer for the context data.
+    /// Storage for the context data.
     tasklet_context: InternalCell<MaybeUninit<C>>,
+    /// Storage for the tasklet conditions.
+    tasklet_conditions: InternalCell<OnceCell<BooleanConditionSet<COND_COUNT>>>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
 }
 
-impl<T: 'static, C: 'static> TaskletStorage<T, C> {
+impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_COUNT> {
     /// Creates new storage.
     pub const fn new() -> Self {
         TaskletStorage {
             initialized: InternalCell::new(false),
             tasklet_buffer: InternalCell::new(TaskletBuffer::new()),
             tasklet_context: InternalCell::new(MaybeUninit::uninit()),
+            tasklet_conditions: InternalCell::new(OnceCell::new()),
             _data_type_marker: PhantomData,
         }
     }
@@ -60,7 +66,7 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
     ///
     /// # Return
     /// `handle` if this storage has been initialized.
-    pub fn create_handle(&'static self) -> Option<TaskletHandle<T, C>> {
+    pub fn create_handle(&'static self) -> Option<TaskletHandle<T, C, COND_COUNT>> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // the `init` function.
         match unsafe { *self.initialized.as_ref() } {
@@ -97,13 +103,17 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
         *tasklet_context = MaybeUninit::new(context);
 
         // SAFETY: This is safe, because `tasklet_context` was just initialized.
-        let tasklet = Tasklet::<T, C>::new(config, step_fn, unsafe {
-            tasklet_context.assume_init_mut()
-        });
+        let tasklet = Tasklet::<T, C, COND_COUNT>::new(
+            config,
+            step_fn,
+            unsafe { tasklet_context.assume_init_mut() },
+            self.tasklet_conditions.as_mut_ref(),
+        );
 
         // This is safe, because `tasklet_buffer` doesn't contain any value yet, and it's size is
         // guaranteed to be large enough to store tasklet structure.
-        let tasklet_buffer = self.tasklet_buffer.as_mut_ref().as_mut_ptr() as *mut Tasklet<T, C>;
+        let tasklet_buffer =
+            self.tasklet_buffer.as_mut_ref().as_mut_ptr() as *mut Tasklet<T, C, COND_COUNT>;
         unsafe {
             core::ptr::write(tasklet_buffer, tasklet);
         }
@@ -118,8 +128,8 @@ impl<T: 'static, C: 'static> TaskletStorage<T, C> {
     /// # Safety
     /// This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn tasklet(&'static self) -> &'static Tasklet<T, C> {
-        &*(self.tasklet_buffer.as_ref().as_ptr() as *const Tasklet<T, C>)
+    unsafe fn tasklet(&'static self) -> &'static Tasklet<T, C, COND_COUNT> {
+        &*(self.tasklet_buffer.as_ref().as_ptr() as *const Tasklet<T, C, COND_COUNT>)
     }
 }
 
@@ -129,14 +139,14 @@ mod tests {
 
     #[test]
     fn create() {
-        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
         assert!(!STORAGE.is_initialized());
     }
 
     #[test]
     fn initialize() {
-        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
         let init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_ok());
@@ -145,10 +155,11 @@ mod tests {
 
     #[test]
     fn fail_double_initialization() {
-        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
         let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_ok());
+
         init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
         assert!(init_result.is_err());
         assert_eq!(
@@ -159,7 +170,7 @@ mod tests {
 
     #[test]
     fn create_handle() {
-        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
         let _ = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
 
@@ -169,7 +180,7 @@ mod tests {
 
     #[test]
     fn fail_create_handle_uninitialized() {
-        static STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_none());

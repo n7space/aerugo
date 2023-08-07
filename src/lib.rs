@@ -19,14 +19,14 @@ mod event;
 mod execution_monitoring;
 mod executor;
 mod message_queue;
-mod queue;
-mod task;
 mod tasklet;
 mod time_manager;
 
 pub use self::aerugo::{Aerugo, AERUGO};
 pub use self::api::InitApi;
-pub use self::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+pub use self::boolean_condition::{
+    BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,
+};
 pub use self::event::EventStorage;
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};

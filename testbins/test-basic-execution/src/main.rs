@@ -28,8 +28,8 @@ fn task_b(_: (), context: &mut TaskBContext) {
     }
 }
 
-static TASK_A_STORAGE: TaskletStorage<(), TaskAContext> = TaskletStorage::new();
-static TASK_B_STORAGE: TaskletStorage<(), TaskBContext> = TaskletStorage::new();
+static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new();
+static TASK_B_STORAGE: TaskletStorage<(), TaskBContext, 0> = TaskletStorage::new();
 
 fn main() -> ! {
     AERUGO.initialize(SystemHardwareConfig::default());

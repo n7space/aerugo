@@ -16,16 +16,16 @@ use env_parser::read_env;
 use internal_cell::InternalCell;
 
 use crate::api::{InitApi, RuntimeApi, SystemApi};
-use crate::boolean_condition::{BooleanConditionSet, BooleanConditionStorage};
+use crate::boolean_condition::{
+    BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
+};
 use crate::data_receiver::DataReceiver;
 use crate::event::{EventHandle, EventStorage};
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
-use crate::queue::Queue;
-use crate::task::TaskId;
-use crate::tasklet::{StepFn, TaskletHandle, TaskletPtr, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
 
 /// Core system.
@@ -113,6 +113,7 @@ impl InitApi for Aerugo {
     /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
     ///
     /// # Parameters
     /// * `config` - Tasklet creation configuration.
@@ -134,7 +135,7 @@ impl InitApi for Aerugo {
     ///
     /// fn task(_: u8, _: &mut TaskCtx) {}
     ///
-    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx> = TaskletStorage::new();
+    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
     /// fn main() {
     ///     let task_config = TaskletConfig::default();
@@ -148,11 +149,11 @@ impl InitApi for Aerugo {
     ///     # assert!(task_handle.is_some())
     /// }
     /// ```
-    fn create_tasklet<T, C: Default>(
+    fn create_tasklet<T, C: Default, const COND_COUNT: usize>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
-        storage: &'static TaskletStorage<T, C>,
+        storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) -> Result<(), Self::Error> {
         // SAFETY: This is safe, as long as this function is called only during system initialization.
         unsafe { storage.init(config, step_fn, C::default()) }
@@ -166,6 +167,7 @@ impl InitApi for Aerugo {
     /// # Generic Parameters
     /// * `T` - Type of the data processed by the tasklet.
     /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
     ///
     /// # Parameters
     /// * `config` - Tasklet creation configuration.
@@ -189,7 +191,7 @@ impl InitApi for Aerugo {
     ///
     /// fn task(_: u8, _: &mut TaskCtx) {}
     ///
-    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx> = TaskletStorage::new();
+    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
     /// fn main() {
     ///     let task_config = TaskletConfig::default();
@@ -204,12 +206,12 @@ impl InitApi for Aerugo {
     ///     # assert!(task_handle.is_some())
     /// }
     /// ```
-    fn create_tasklet_with_context<T, C>(
+    fn create_tasklet_with_context<T, C, const COND_COUNT: usize>(
         &'static self,
         config: Self::TaskConfig,
         step_fn: StepFn<T, C>,
         context: C,
-        storage: &'static TaskletStorage<T, C>,
+        storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) -> Result<(), Self::Error> {
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { storage.init(config, step_fn, context) }
@@ -222,7 +224,7 @@ impl InitApi for Aerugo {
     ///
     /// # Generic Parameters
     /// * `T` - Type of the data stored in the queue.
-    /// * `N` - Size of the queue.
+    /// * `QUEUE_SIZE` - Size of the queue.
     ///
     /// # Parameters
     /// * `storage` - Static memory storage where the queue should be allocated.
@@ -250,9 +252,9 @@ impl InitApi for Aerugo {
     ///     # assert!(queue_handle.is_some())
     /// }
     /// ```
-    fn create_message_queue<T, const N: usize>(
+    fn create_message_queue<T, const QUEUE_SIZE: usize>(
         &'static self,
-        storage: &'static MessageQueueStorage<T, N>,
+        storage: &'static MessageQueueStorage<T, QUEUE_SIZE>,
     ) -> Result<(), Self::Error> {
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { storage.init() }
@@ -262,11 +264,43 @@ impl InitApi for Aerugo {
         todo!()
     }
 
+    /// Creates new boolean condition in the system.
+    ///
+    /// Condition is created in the passed `storage` memory. Storage has to be static to keep the
+    /// stored condition for the whole duration of system life
+    ///
+    /// # Parameters
+    /// * `storage` - Static memory storage where the condition should be allocated.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because it initializes the
+    /// passed storage which is safe only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{InitApi, BooleanConditionStorage, AERUGO};
+    /// static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    ///
+    /// fn main() {
+    ///     AERUGO.create_boolean_condition(&CONDITION_STORAGE, true);
+    ///     #
+    ///     # assert!(CONDITION_STORAGE.is_initialized());
+    ///
+    ///     // Do something with the condition via handle.
+    ///     let condition_handle = CONDITION_STORAGE.create_handle();
+    ///     #
+    ///     # assert!(condition_handle.is_some())
+    /// }
+    /// ```
     fn create_boolean_condition(
         &'static self,
-        _storage: &'static BooleanConditionStorage,
+        storage: &'static BooleanConditionStorage,
+        value: bool,
     ) -> Result<(), Self::Error> {
-        todo!()
+        unsafe { storage.init(value) }
     }
 
     /// Subscribes a tasklet to a queue.
@@ -285,7 +319,8 @@ impl InitApi for Aerugo {
     /// # Generic Parameters
     /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
-    /// * `N` - Size of the queue.
+    /// * `COND_COUNT` - Number of tasklet conditions.
+    /// * `QUEUE_SIZE` - Size of the queue.
     ///
     /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
@@ -304,7 +339,7 @@ impl InitApi for Aerugo {
     /// #
     /// # fn task(_: u8, _: &mut ()) {}
     /// #
-    /// # static TASK_STORAGE: TaskletStorage<u8, ()> = TaskletStorage::new();
+    /// # static TASK_STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
     /// # static QUEUE_STORAGE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
     /// #
     /// fn main() {
@@ -323,10 +358,15 @@ impl InitApi for Aerugo {
     ///         .expect("Failed to subscribe Task to Queue");
     /// }
     /// ```
-    fn subscribe_tasklet_to_queue<T: Default, C, const N: usize>(
+    fn subscribe_tasklet_to_queue<
+        T: Default,
+        C,
+        const COND_COUNT: usize,
+        const QUEUE_SIZE: usize,
+    >(
         &'static self,
-        tasklet_handle: &TaskletHandle<T, C>,
-        queue_handle: &MessageQueueHandle<T, N>,
+        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
+        queue_handle: &MessageQueueHandle<T, QUEUE_SIZE>,
     ) -> Result<(), Self::Error> {
         let tasklet = tasklet_handle.tasklet();
         let queue = queue_handle.queue();
@@ -340,20 +380,77 @@ impl InitApi for Aerugo {
         Ok(())
     }
 
-    fn subscribe_tasklet_to_event<T, C>(
+    fn subscribe_tasklet_to_event<T, C, const COND_COUNT: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C>,
+        _tasklet: &TaskletHandle<T, C, COND_COUNT>,
         _event: &EventHandle,
     ) -> Result<(), Self::Error> {
         todo!()
     }
 
-    fn subscribe_tasklet_to_conditions<T, C>(
+    /// Subscribes tasklet to the boolean condition.
+    ///
+    /// Tasklet subscribes for a state changes in this condition. Changing the value of the
+    /// condition will wake up all subscribed tasklets and make them ready to be executed.
+    ///
+    /// Each tasklet can be subscribed to at maximum one data provider. Condition can have multiple
+    /// tasklet registered.
+    ///
+    /// # Generic Parameters
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Handle to the target condition.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{InitApi, BooleanConditionStorage, TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: bool, _: &mut ()) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<bool, (), 0> = TaskletStorage::new();
+    /// # static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// #
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanCondition");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///     let condition_handle = CONDITION_STORAGE.create_handle().expect("Failed to create Condition handle");
+    ///
+    ///     AERUGO
+    ///         .subscribe_tasklet_to_condition(&task_handle, &condition_handle)
+    ///         .expect("Failed to subscribe Task to Condition");
+    /// }
+    /// ```
+    fn subscribe_tasklet_to_condition<C, const COND_COUNT: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C>,
-        _conditions: BooleanConditionSet,
+        tasklet_handle: &TaskletHandle<bool, C, COND_COUNT>,
+        condition_handle: &BooleanConditionHandle,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let tasklet = tasklet_handle.tasklet();
+        let condition = condition_handle.condition();
+
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe {
+            tasklet.subscribe(condition)?;
+            condition.register_tasklet(tasklet.ptr())?;
+        }
+
+        Ok(())
     }
 
     /// Subscribes tasklet to the cyclic execution.
@@ -367,6 +464,7 @@ impl InitApi for Aerugo {
     ///
     /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
     ///
     /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
@@ -385,7 +483,7 @@ impl InitApi for Aerugo {
     /// #
     /// # fn task(_: (), _: &mut ()) {}
     /// #
-    /// # static TASK_STORAGE: TaskletStorage<(), ()> = TaskletStorage::new();
+    /// # static TASK_STORAGE: TaskletStorage<(), (), 0> = TaskletStorage::new();
     /// #
     /// fn main() {
     ///     # let task_config = TaskletConfig::default();
@@ -399,9 +497,9 @@ impl InitApi for Aerugo {
     ///         .expect("Failed to subscribe Task to cyclic execution");
     /// }
     /// ```
-    fn subscribe_tasklet_to_cyclic<C>(
+    fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
-        tasklet_handle: &TaskletHandle<(), C>,
+        tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
         period: Option<Self::Duration>,
     ) -> Result<(), Self::Error> {
         let tasklet = tasklet_handle.tasklet();
@@ -410,6 +508,83 @@ impl InitApi for Aerugo {
         unsafe {
             let cyclic_execution = TIME_MANAGER.create_cyclic_execution(tasklet.ptr(), period)?;
             tasklet.subscribe(cyclic_execution)?;
+        }
+
+        Ok(())
+    }
+
+    /// Sets tasklet condition set.
+    ///
+    /// Tasklet can use a set of BooleanConditions as a execution condition. Before tasklet is
+    /// scheduled and then executed it's condition is checked to verify whether this tasklet is
+    /// active. Tasklet will be woken when value of any of the condition in the set changes.
+    ///
+    /// # Generic Parameters
+    /// * `T` - Type of the data.
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `condition` - Set of conditions.
+    ///
+    /// # Return
+    /// `()` if successful, `Self::Error` otherwise.
+    ///
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage, InitApi,
+    ///     TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: (), _: &mut ()) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<(), (), 2> = TaskletStorage::new();
+    /// # static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// # static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+    /// #
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_X_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanConditionX");
+    ///     # AERUGO
+    ///     #   .create_boolean_condition(&CONDITION_Y_STORAGE, true)
+    ///     #   .expect("Unable to create BooleanConditionY");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///     let condition_x_handle = CONDITION_X_STORAGE
+    ///         .create_handle()
+    ///         .expect("Failed to create ConditionX handle");
+    ///     let condition_y_handle = CONDITION_Y_STORAGE
+    ///         .create_handle()
+    ///         .expect("Failed to create ConditionY handle");
+    ///
+    ///     let mut condition_set = BooleanConditionSet::<2>::new(BooleanConditionSetType::And);
+    ///     condition_set.add(&condition_x_handle);
+    ///     condition_set.add(&condition_y_handle);
+    ///
+    ///     AERUGO
+    ///         .set_tasklet_conditions(&task_handle, condition_set)
+    ///         .expect("Unable to set Task condition set");
+    /// }
+    fn set_tasklet_conditions<T, C, const COND_COUNT: usize>(
+        &'static self,
+        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
+        condition_set: BooleanConditionSet<COND_COUNT>,
+    ) -> Result<(), Self::Error> {
+        let tasklet = tasklet_handle.tasklet();
+
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe {
+            condition_set.register_tasklet(tasklet.ptr())?;
+            tasklet.set_condition_set(condition_set)?;
         }
 
         Ok(())
@@ -436,11 +611,11 @@ impl RuntimeApi for Aerugo {
         todo!()
     }
 
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskId> {
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskId) -> ExecutionStats {
+    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
         todo!()
     }
 
