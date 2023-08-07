@@ -15,6 +15,9 @@ cortex-m = "0.7.7"
 bare-metal = "0.2.4"
 fugit = "0.3.6"
 samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }
-embedded-hal = { version = "0.2.7", features = ["unproven"] }
+embedded-hal = "0.2.7"
 aerugo-cortex-m = { version = "0.1.0", path = "../aerugo-cortex-m" }
 internal-cell = { version = "0.0.1", path = "../../../utils/internal_cell" }
+
+[features]
+rt = ["samv71q21-pac/rt"]

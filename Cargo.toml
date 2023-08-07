@@ -61,6 +61,7 @@ assert_cmd = "2.0"
 [features]
 use-aerugo-cortex-m = ["aerugo-cortex-m", "samv71-hal"]
 use-aerugo-x86 = ["aerugo-x86", "x86-hal"]
+rt = ["samv71-hal?/rt"]
 
 [profile.release]
 codegen-units = 1
