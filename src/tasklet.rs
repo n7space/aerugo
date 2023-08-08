@@ -26,7 +26,7 @@ pub use self::tasklet_storage::TaskletStorage;
 
 use core::cell::OnceCell;
 
-use crate::aerugo::error::InitError;
+use crate::api::InitError;
 use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;

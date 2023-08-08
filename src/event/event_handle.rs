@@ -2,7 +2,7 @@
 //!
 //! This module contains event handle implementation, which is used to reference a event in the system.
 
-use crate::aerugo::error::RuntimeError;
+use crate::api::RuntimeError;
 use crate::event::Event;
 use crate::time::MillisDurationU32;
 

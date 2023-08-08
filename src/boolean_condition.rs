@@ -11,8 +11,8 @@ pub use self::boolean_condition_storage::BooleanConditionStorage;
 
 use heapless::Vec;
 
-use crate::aerugo::{error::InitError, Aerugo, AERUGO};
-use crate::api::SystemApi;
+use crate::aerugo::{Aerugo, AERUGO};
+use crate::api::{InitError, SystemApi};
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::internal_cell::InternalCell;

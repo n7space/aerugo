@@ -5,18 +5,16 @@
 //! # Safety
 //! Functions from this trait shouldn't be called after the system was started.
 
+use crate::api::InitError;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::event::{EventHandle, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
-use crate::tasklet::{StepFn, TaskletHandle, TaskletStorage};
+use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 
 /// System initialization API
-pub trait InitApi: ErrorType + TaskConfigType {
-    /// Type for a duration of time.
-    type Duration;
-
+pub trait InitApi {
     /// Creates new tasklet in the system.
     ///
     /// # Generic Parameters
@@ -30,13 +28,13 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn create_tasklet<T, C: Default, const COND_COUNT: usize>(
         &'static self,
-        config: Self::TaskConfig,
+        config: TaskletConfig,
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Creates new tasklet in the system with initialized context data.
     ///
@@ -52,14 +50,14 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn create_tasklet_with_context<T, C, const COND_COUNT: usize>(
         &'static self,
-        config: Self::TaskConfig,
+        config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: C,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Creates new message queue in the system.
     ///
@@ -71,11 +69,11 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the queue should be allocated.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn create_message_queue<T, const QUEUE_SIZE: usize>(
         &'static self,
         storage: &'static MessageQueueStorage<T, QUEUE_SIZE>,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Creates new event in the system.
     ///
@@ -83,8 +81,8 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the event should be allocated.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
-    fn create_event(&'static self, storage: &'static EventStorage) -> Result<(), Self::Error>;
+    /// `()` if successful, `InitError` otherwise.
+    fn create_event(&'static self, storage: &'static EventStorage) -> Result<(), InitError>;
 
     /// Creates new boolean condition in the system.
     ///
@@ -92,12 +90,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `storage` - Static memory storage where the condition should be allocated.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn create_boolean_condition(
         &'static self,
         storage: &'static BooleanConditionStorage,
         value: bool,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Subscribes tasklet to the queue.
     ///
@@ -112,12 +110,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `queue` - Handle to the target queue.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn subscribe_tasklet_to_queue<T: Default, C, const COND_COUNT: usize, const QUEUE_SIZE: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         queue_handle: &MessageQueueHandle<T, QUEUE_SIZE>,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Subscribes tasklet to the event.
     ///
@@ -131,12 +129,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `event` - Target event ID.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn subscribe_tasklet_to_event<T, C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         event_handle: &EventHandle,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Subscribes tasklet to the boolean condition.
     ///
@@ -149,12 +147,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `condition` - Handle to the target condition.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn subscribe_tasklet_to_condition<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<bool, C, COND_COUNT>,
         condition_handle: &BooleanConditionHandle,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), InitError>;
 
     /// Subscribes tasklet to the cyclic execution.
     ///
@@ -167,12 +165,12 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `period` - Time period of the execution.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
-        period: Option<Self::Duration>,
-    ) -> Result<(), Self::Error>;
+        period: Option<crate::time::MillisDurationU32>,
+    ) -> Result<(), InitError>;
 
     /// Sets tasklet condition set.
     ///
@@ -186,32 +184,10 @@ pub trait InitApi: ErrorType + TaskConfigType {
     /// * `condition` - Set of conditions.
     ///
     /// # Return
-    /// `()` if successful, `Self::Error` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     fn set_tasklet_conditions<T, C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         condition_set: BooleanConditionSet<COND_COUNT>,
-    ) -> Result<(), Self::Error>;
-}
-
-/// Initialization error
-pub trait Error: core::fmt::Debug {}
-
-/// Initialization error type trait
-pub trait ErrorType {
-    /// Error type
-    type Error: Error;
-}
-
-impl<T: ErrorType> ErrorType for &mut T {
-    type Error = T::Error;
-}
-
-/// Configuration used for creating tasklets
-pub trait TaskConfig: Default {}
-
-/// Task configuration type trait
-pub trait TaskConfigType {
-    /// Task configuration type
-    type TaskConfig: TaskConfig;
+    ) -> Result<(), InitError>;
 }

@@ -9,7 +9,8 @@ use self::cyclic_execution::CyclicExecution;
 
 use heapless::Vec;
 
-use crate::aerugo::{Aerugo, InitError};
+use crate::aerugo::Aerugo;
+use crate::api::InitError;
 use crate::internal_cell::InternalCell;
 use crate::tasklet::TaskletPtr;
 use crate::time::MillisDurationU32;

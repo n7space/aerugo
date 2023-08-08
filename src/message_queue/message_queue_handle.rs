@@ -3,7 +3,7 @@
 //! This module contains queue handle implementation, which is used to reference a queue in the
 //! system.
 
-use crate::aerugo::error::RuntimeError;
+use crate::api::RuntimeError;
 use crate::message_queue::MessageQueue;
 
 /// Message queue handle.

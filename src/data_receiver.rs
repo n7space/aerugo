@@ -3,7 +3,7 @@
 //! This module contains a trait for a data receiver. Currently only [Tasklet](crate::tasklet::Tasklet)
 //! is such a receiver.
 
-use crate::aerugo::error::InitError;
+use crate::api::InitError;
 use crate::data_provider::DataProvider;
 
 /// Trait with data receiver functionality.

@@ -10,7 +10,7 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
 
-use crate::aerugo::InitError;
+use crate::api::InitError;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::internal_cell::InternalCell;
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
