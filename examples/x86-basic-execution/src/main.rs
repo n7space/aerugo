@@ -1,6 +1,6 @@
 use aerugo::{
-    log, time::MillisDurationU32, InitApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
-    AERUGO,
+    log, time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage, AERUGO,
 };
 
 #[derive(Default)]
@@ -8,7 +8,7 @@ struct TaskAContext {
     acc: u8,
 }
 
-fn task_a(_: (), context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     log!("TaskA: {}", context.acc);
 }
@@ -18,7 +18,7 @@ struct TaskBContext {
     acc: u16,
 }
 
-fn task_b(_: (), context: &mut TaskBContext) {
+fn task_b(_: (), context: &mut TaskBContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(2);
     log!("TaskB: {}", context.acc);
 }

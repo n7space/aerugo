@@ -122,11 +122,11 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// #[derive(Default)]
     /// struct TaskCtx;
     ///
-    /// fn task(_: u8, _: &mut TaskCtx) {}
+    /// fn task(_: u8, _: &mut TaskCtx, _: &dyn RuntimeApi) {}
     ///
     /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
@@ -177,12 +177,12 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// struct TaskCtx {
     ///     value: u8,
     /// }
     ///
-    /// fn task(_: u8, _: &mut TaskCtx) {}
+    /// fn task(_: u8, _: &mut TaskCtx, _: &dyn RuntimeApi) {}
     ///
     /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
@@ -328,9 +328,9 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, MessageQueueStorage, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{InitApi, MessageQueueStorage, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// #
-    /// # fn task(_: u8, _: &mut ()) {}
+    /// # fn task(_: u8, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
     /// # static TASK_STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
     /// # static QUEUE_STORAGE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
@@ -406,9 +406,9 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, BooleanConditionStorage, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{InitApi, BooleanConditionStorage, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// #
-    /// # fn task(_: bool, _: &mut ()) {}
+    /// # fn task(_: bool, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
     /// # static TASK_STORAGE: TaskletStorage<bool, (), 0> = TaskletStorage::new();
     /// # static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
@@ -472,9 +472,9 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// #
-    /// # fn task(_: (), _: &mut ()) {}
+    /// # fn task(_: (), _: &mut (), _: &dyn RuntimeApi) {}
     /// #
     /// # static TASK_STORAGE: TaskletStorage<(), (), 0> = TaskletStorage::new();
     /// #
@@ -532,9 +532,9 @@ impl InitApi for Aerugo {
     /// # Example
     /// ```
     /// # use aerugo::{BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage, InitApi,
-    ///     TaskletConfig, TaskletStorage, AERUGO};
+    ///     RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
     /// #
-    /// # fn task(_: (), _: &mut ()) {}
+    /// # fn task(_: (), _: &mut (), _: &dyn RuntimeApi) {}
     /// #
     /// # static TASK_STORAGE: TaskletStorage<(), (), 2> = TaskletStorage::new();
     /// # static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();

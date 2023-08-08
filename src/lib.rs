@@ -23,7 +23,7 @@ mod tasklet;
 mod time_manager;
 
 pub use self::aerugo::{Aerugo, AERUGO};
-pub use self::api::InitApi;
+pub use self::api::{InitApi, RuntimeApi};
 pub use self::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,
 };

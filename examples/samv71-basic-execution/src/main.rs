@@ -6,7 +6,8 @@ extern crate cortex_m_rt as rt;
 extern crate panic_semihosting;
 
 use aerugo::{
-    time::MillisDurationU32, InitApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage, AERUGO,
 };
 use cortex_m_semihosting::hprintln;
 use rt::entry;
@@ -16,7 +17,7 @@ struct DummyTaskContext {
     acc: u16,
 }
 
-fn dummy_task(_: (), context: &mut DummyTaskContext) {
+fn dummy_task(_: (), context: &mut DummyTaskContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     if context.acc % 250 == 0 {
         hprintln!("I'm running!");

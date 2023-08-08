@@ -1,6 +1,6 @@
 use aerugo::{
-    log, InitApi, MessageQueueHandle, MessageQueueStorage, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    log, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 
 struct TaskAContext {
@@ -17,7 +17,7 @@ struct TaskCContext {
     cnt: u8,
 }
 
-fn task_a(_: (), context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     context.cnt += 1;
 
     if context.cnt <= 3 {
@@ -37,12 +37,12 @@ fn task_a(_: (), context: &mut TaskAContext) {
         .expect("Unable to send data from TaskA to QueueY");
 }
 
-fn task_b(data: u8, context: &mut TaskBContext) {
+fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
     context.cnt += data;
     log!("TaskB: {}", context.cnt);
 }
 
-fn task_c(data: u8, context: &mut TaskCContext) {
+fn task_c(data: u8, context: &mut TaskCContext, _: &dyn RuntimeApi) {
     context.cnt += data;
     log!("TaskC: {}", context.cnt);
 

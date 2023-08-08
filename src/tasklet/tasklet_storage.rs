@@ -148,7 +148,7 @@ mod tests {
     fn initialize() {
         static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
-        let init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
+        let init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
     }
@@ -157,10 +157,10 @@ mod tests {
     fn fail_double_initialization() {
         static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
-        let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
+        let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
         assert!(init_result.is_ok());
 
-        init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
+        init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
         assert!(init_result.is_err());
         assert_eq!(
             init_result.err().unwrap(),
@@ -172,7 +172,7 @@ mod tests {
     fn create_handle() {
         static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
 
-        let _ = unsafe { STORAGE.init(TaskletConfig::default(), |_, _| {}, ()) };
+        let _ = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

@@ -31,10 +31,14 @@ pub trait RuntimeApi {
     fn get_execution_statistics(&'static self, task_id: TaskletId) -> ExecutionStats;
 
     /// Enters critical section
-    fn enter_critical();
+    fn enter_critical()
+    where
+        Self: Sized;
 
     /// Exits critical section
-    fn exit_critical();
+    fn exit_critical()
+    where
+        Self: Sized;
 
     /// Executes closure `f` in an interrupt-free context.
     ///
@@ -49,5 +53,6 @@ pub trait RuntimeApi {
     /// Closure result.
     fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R;
+        F: FnOnce(&CriticalSection) -> R,
+        Self: Sized;
 }

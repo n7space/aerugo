@@ -1,11 +1,13 @@
-use aerugo::{log, InitApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO};
+use aerugo::{
+    log, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+};
 
 #[derive(Default)]
 struct TaskAContext {
     cnt: u8,
 }
 
-fn task_a(_: (), context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     if context.cnt < 2 {
         log!("TaskA");
         context.cnt += 1;
@@ -19,7 +21,7 @@ struct TaskBContext {
     cnt: u8,
 }
 
-fn task_b(_: (), context: &mut TaskBContext) {
+fn task_b(_: (), context: &mut TaskBContext, _: &dyn RuntimeApi) {
     if context.cnt < 2 {
         log!("TaskB");
         context.cnt += 1;
