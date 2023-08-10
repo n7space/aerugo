@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "calldwell"
+version = "0.1.0"
+description = "Simple test framework for embedded applications"
+authors = ["Wojciech Olech <wojciech.olech@n7space.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pygdbmi = "^0.11.0.0"
+paramiko = "^3.3.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+mypy = "^1.4.1"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+types-paramiko = "^3.3.0.0"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
