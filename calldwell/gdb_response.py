@@ -73,18 +73,10 @@ class GDBResponse:
         """Checks if any of the provided responses is similar to current one"""
         return any(self.is_similar(response) for response in responses)
 
-    def unescaped_payload(self, strip_whitespace: bool = True) -> str:
-        """If payload is a string, it probably contains escaped special characters.
-        Use this function to get unescaped version of payload string.
-
-        `strip_whitespace` controls whether returned string should be stripped
-        out of whitespace at it's beginning and end, or not. By default, returned strings
-        are stripped.
-        """
-        payload = str(self.payload).replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
-        if strip_whitespace:
-            return payload.strip()
-        return payload
+    def unescaped_payload(self) -> str:
+        """Returns unescaped version of payload string.
+        Currently fixes newlines, tabs and `"`"""
+        return str(self.payload).replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
 
     @staticmethod
     def with_message(type: Type, message: str) -> GDBResponse:
@@ -108,7 +100,7 @@ class GDBResponsesList:
     """
 
     def __init__(self, responses: List[GDBResponse]) -> None:
-        """Initialize the list with responses received from GDB"""
+        """Initializes the list with responses received from GDB"""
         self._items = responses
 
     def of_type(self, response_type: GDBResponse.Type) -> GDBResponsesList:
@@ -147,7 +139,7 @@ class GDBResponsesList:
                        produce human-readable string.
         """
         if unescape:
-            return [response.unescaped_payload(strip_whitespace=False) for response in self]
+            return [response.unescaped_payload() for response in self]
         return [str(response.payload) for response in self]
 
     def payload_string(self, separator: str = "", unescape: bool = True) -> str:
@@ -162,32 +154,34 @@ class GDBResponsesList:
         return separator.join(self.payload_string_list(unescape)).strip()
 
     def extend(self, other: GDBResponsesList):
-        """Add items from different response list to current one."""
+        """Adds items from different response list to current one."""
         self._items.extend(other._items)
 
     def contains_any(self, responses: Iterable[GDBResponse]) -> bool:
-        """Returns `True` if any of the provided responses is on the list. `False` otherwise."""
+        """Returns `True` if any of the provided responses is on the list. `False` otherwise.
+        To see how the items are compared, see `GDBResponse.is_similar()`."""
         return any(response.is_any_similar(self) for response in responses)
 
     def contains_all(self, responses: Iterable[GDBResponse]) -> bool:
-        """Returns `True` if all of the provided responses are on the list. `False` otherwise."""
+        """Returns `True` if all of the provided responses are on the list. `False` otherwise.
+        To see how the items are compared, see `GDBResponse.is_similar()`."""
         return all(response.is_any_similar(self) for response in responses)
 
     def __contains__(self, expected: GDBResponse) -> bool:
-        """Returns `True` if any item in response list is similar to expected response.
+        """Returns `True` if any response on the list is similar to provided one.
         To see how the items are compared, see `GDBResponse.is_similar()`."""
         return any(response.is_similar(expected) for response in self)
 
     def __len__(self):
-        """Return amount of elements on the list"""
+        """Returns amount of elements on the list"""
         return len(self._items)
 
     def __getitem__(self, key: int) -> GDBResponse:
-        """Return a specific element of the list by it's index"""
+        """Returns a specific element of the list by it's index"""
         return self._items[key]
 
     def __iter__(self) -> Iterator[GDBResponse]:
-        """Return an iterator over the elements on the list"""
+        """Returns an iterator over the elements on the list"""
         return self._items.__iter__()
 
     def __str__(self) -> str:
