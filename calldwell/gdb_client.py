@@ -1,8 +1,8 @@
 import logging
-from typing import Optional
+from typing import List, Optional
 
 from gdb_interface import GDBInterface
-from gdb_responses import GDBResponsesList
+from gdb_responses import GDBResponsesList, ProgramSymbol
 
 
 class GDBClient:
@@ -185,11 +185,24 @@ class GDBClient:
         if timeout is None:
             timeout = self._timeout
 
-        while not self._interface.program_state().is_stopped_by_breakpoint():
+        while not self._interface.program_state().stopped_by_breakpoint():
             if not self._interface.program_state().is_running:
                 return False
             self._interface.get_responses(timeout, self._should_log_responses)
         return True
+
+    def finish_function_execution(self, force: bool = False):
+        """Finishes current function execution.
+        Does nothing if program is running, unless `force` is `True`."""
+        if not force and self._interface.program_state().is_running:
+            self._logger.warning(
+                "Cannot finish function execution because program is already running!"
+            )
+            return
+
+        self._interface.execute("finish")
+        while not self._interface.program_state().function_finished_execution():
+            self._get_responses()
 
     def setup_rtt(self, address: int, section_size: int, section_id: str) -> bool:
         """Configures RTT via `monitor rtt setup`.
@@ -224,6 +237,42 @@ class GDBClient:
         """
         self._interface.execute(f"monitor rtt server start {server_port} {rtt_channel}")
         return self._wait_for_command_response("RTT server started!", "Couldn't start RTT server!")
+
+    def get_variables(self, name_regex: str) -> Optional[List[ProgramSymbol]]:
+        """Queries GDB about variable with name specified by provided regular expression.
+        Returns a list with all found occurrences, or `None` of request fails.
+        """
+        self._interface.execute(f"info variables {name_regex}")
+        responses = self._wait_for_done_or_error()
+        if responses.contains_error():
+            self._logger.error(f"Failed to fetch info about variable with pattern '{name_regex}'!")
+            return None
+
+        return responses.to_symbols_list()
+
+    def get_variable(self, name_regex: str) -> Optional[ProgramSymbol]:
+        """Queries GDB about variable with name specified by provided regular expression.
+
+        Variable name is a regular expression.
+        Returns `None` if no variables are found.
+
+        If multiple variables are found, info about first one found is returned, and a warning is logged.
+        """
+        found_symbols = self.get_variables(name_regex)
+        if found_symbols is None:
+            return None
+
+        if len(found_symbols) == 0:
+            self._logger.info(f"No variable with pattern '{name_regex}' found!")
+            return None
+
+        if len(found_symbols) > 1:
+            self._logger.warning(
+                f"{len(found_symbols)} symbols with pattern '{name_regex}' found!"
+                f"Returning first one ({str(found_symbols[0])})."
+            )
+
+        return found_symbols[0]
 
     def _get_responses(self) -> GDBResponsesList:
         """Private function. Do not use.

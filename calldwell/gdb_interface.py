@@ -29,9 +29,9 @@ class GDBInterface:
             address: int
             function: str
 
-            def address_string(self, address_bytes: int = 4) -> str:
+            def address_string(self, address_size: int = 4) -> str:
                 """Returns address as hex string. Assumes 32-bit addresses by default."""
-                stringified_address = f"{self.address:X}".zfill(address_bytes * 2)
+                stringified_address = f"{self.address:X}".zfill(address_size * 2)
                 return f"0x{stringified_address}"
 
             def __str__(self) -> str:
@@ -42,9 +42,17 @@ class GDBInterface:
         program_frame: Optional[ProgramFrame]
         """Program frame is updated and valid only when program is stopped."""
 
-        def is_stopped_by_breakpoint(self) -> bool:
-            """Returns `True` if program is currently stopped by breakpoint."""
-            return self.is_running is False and self.last_stop_reason == "breakpoint-hit"
+        def stopped_by(self, reason: str) -> bool:
+            """Returns `True` if program is currently stopped by specified reason."""
+            return self.is_running is False and self.last_stop_reason == reason
+
+        def stopped_by_breakpoint(self) -> bool:
+            """Shorthand for `is_stopped_by("breakpoint")"""
+            return self.stopped_by("breakpoint")
+
+        def function_finished_execution(self) -> bool:
+            """Shorthand for `is_stopped_by("function-finished")"""
+            return self.stopped_by("function-finished")
 
         @staticmethod
         def default() -> GDBInterface.ProgramState:

@@ -6,6 +6,20 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 
 
 @dataclass
+class ProgramSymbol:
+    name: str
+    address: int
+
+    def address_string(self, address_size: int = 4) -> str:
+        """Returns address as hex string. Assumes 32-bit addresses by default."""
+        stringified_address = f"{self.address:X}".zfill(address_size * 2)
+        return f"0x{stringified_address}"
+
+    def __str__(self) -> str:
+        return f"{self.name} @ {self.address_string()}"
+
+
+@dataclass
 class GDBResponse:
     """Structure representing GDB response."""
 
@@ -181,6 +195,24 @@ class GDBResponsesList:
     def contains_error(self) -> bool:
         """Returns `True` if any of the stored responses is a result with `error` message."""
         return GDBResponse.with_message(GDBResponse.Type.RESULT, "error") in self
+
+    def to_symbols_list(self) -> List[ProgramSymbol]:
+        """Looks for symbols in stored responses and returns them.
+        Symbols are assumed to be stored in `console` output, in `address symbol_name` format,
+        one per response."""
+        found_symbols: List[ProgramSymbol] = list()
+        for response in self.console():
+            # Symbols are separated with double space
+            split_payload = response.unescaped_payload().strip().split("  ")
+            if len(split_payload) == 2:
+                try:
+                    symbol_address = int(split_payload[0], 16)
+                    symbol_name = split_payload[1]
+                    found_symbols.append(ProgramSymbol(name=symbol_name, address=symbol_address))
+                except ValueError:
+                    # Ignore ValueError, as it means that this is not a symbol.
+                    continue
+        return found_symbols
 
     def __contains__(self, expected: GDBResponse) -> bool:
         """Returns `True` if any response on the list is similar to provided one.
