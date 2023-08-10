@@ -78,12 +78,16 @@ class GDBResponse:
         Currently fixes newlines, tabs and `"`"""
         return str(self.payload).replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
 
+    def payload_is_json(self) -> bool:
+        """Returns `True` if payload is a JSON object, `False` otherwise"""
+        return isinstance(self.payload, dict)
+
     def payload_json(self) -> Dict[str, Any]:
         """Returns payload as a JSON (or rather dict with string keys).
         Raises an exception if payload is not actually a dictionary."""
-        if not isinstance(self.payload, dict):
+        if not self.payload_is_json():
             raise ValueError("Payload is not a dictionary!")
-        return self.payload
+        return self.payload  # type: ignore
 
     @staticmethod
     def with_message(type: Type, message: str) -> GDBResponse:
@@ -106,7 +110,7 @@ class GDBResponsesList:
     or concatenating the console messages into singular string.
     """
 
-    def __init__(self, responses: List[GDBResponse]) -> None:
+    def __init__(self, responses: List[GDBResponse]):
         """Initializes the list with responses received from GDB"""
         self._items = responses
 

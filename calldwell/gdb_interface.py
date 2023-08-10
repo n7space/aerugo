@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from pygdbmi.gdbcontroller import GdbController
 
-from gdb_response import GDBResponse, GDBResponsesList
+from gdb_responses import GDBResponse, GDBResponsesList
 
 
 class GDBInterface:
@@ -59,7 +59,7 @@ class GDBInterface:
         default_timeout: float,
         log_execution: bool = True,
         log_responses: bool = True,
-    ) -> None:
+    ):
         """Initialize a GDB client.
 
         # Parameters
@@ -356,6 +356,11 @@ class GDBInterface:
                 log_message += f" {response.message} -> {response.unescaped_payload().strip()}"
             elif response.type == GDBResponse.Type.RESULT:
                 log_message += f" {response.message}"
+                if response.payload_is_json():
+                    additional_message = response.payload_json().get(
+                        "msg", response.unescaped_payload().strip()
+                    )
+                    log_message += f" ({additional_message})"
             else:
                 if response.message is not None:
                     log_message += f" [msg: {response.message}]"

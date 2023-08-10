@@ -2,11 +2,12 @@ import logging
 from typing import Optional
 
 from gdb_interface import GDBInterface
-from gdb_response import GDBResponsesList
+from gdb_responses import GDBResponsesList
 
 
 class GDBClient:
-    """Convenience class for managing GDB client. Provides high-level functionality."""
+    """Class acting as GDB front-end. Provides high-level functionality.
+    Made with OpenOCD in mind, but should *mostly* work with other backends."""
 
     DEFAULT_TIMEOUT = 10.0
     """Default GDB operation timeout, in seconds"""
@@ -16,7 +17,7 @@ class GDBClient:
         gdb_executable: str = "gdb",
         default_timeout: Optional[float] = None,
         log_responses: bool = True,
-    ) -> None:
+    ):
         """Initialize GDB Client. Creates and initializes a GDBInterface instance internally.
 
         # Parameters
@@ -162,19 +163,67 @@ class GDBClient:
         self._interface.execute(f"-break-insert {arguments} {location}")
         return self._wait_for_command_response("Breakpoint inserted!", "Cannot insert breakpoint!")
 
+    def set_regex_breakpoint(self, pattern: str) -> bool:
+        """Set a breakpoint at location specified by regular expression.
+        Uses `rbreak` GDB command. Cannot specify hardware/temporary breakpoint via this
+        function - if you need that, you must use `set_breakpoint`. All breakpoints set via
+        this functions are permanent and must be deleted manually."""
+        self._interface.execute(f"rbreak {pattern}")
+        return self._wait_for_command_response(
+            "Regex breakpoint inserted!", "Cannot insert breakpoint!"
+        )
+
     def wait_for_breakpoint_hit(self, timeout: Optional[float] = None) -> bool:
         """Waits until a breakpoint is hit.
         Returns `True` if stopped by breakpoint, `False` if stopped by other means.
         Raises a `pygdbmi.constants.GdbTimeoutError` on timeout.
 
         # Parameters
-        * `timeout` - Time, in seconds, to wait for the breakpoint.
+        * `timeout` - Time, in seconds, to wait for the breakpoint. If `None`, default timeout
+                      will be used instead.
         """
+        if timeout is None:
+            timeout = self._timeout
+
         while not self._interface.program_state().is_stopped_by_breakpoint():
             if not self._interface.program_state().is_running:
                 return False
             self._interface.get_responses(timeout, self._should_log_responses)
         return True
+
+    def setup_rtt(self, address: int, section_size: int, section_id: str) -> bool:
+        """Configures RTT via `monitor rtt setup`.
+        This function is OpenOCD-specific.
+        Returns `True` if RTT was setup successfully, `False` otherwise.
+
+        # Parameters
+        * `address` - Address of RTT section in MCU memory
+        * `section_size` - Expected RTT section size
+        * `section_id` - RTT section ID
+        """
+        self._interface.execute(
+            f'monitor rtt setup 0x{address:08X} 0x{section_size:X} "{section_id}"'
+        )
+        return self._wait_for_command_response("RTT set up!", "RTT setup failed!")
+
+    def start_rtt(self) -> bool:
+        """Starts RTT. RTT must be configured via `setup_rtt` before calling this.
+        Returns `True` if RTT section has been found successfully, `False` otherwise."""
+        self._interface.execute("monitor rtt start")
+        return self._wait_for_command_response(
+            "RTT started!", "Couldn't start RTT, check section configuration!"
+        )
+
+    def start_rtt_server(self, server_port: int, rtt_channel: int):
+        """Creates a TCP socket for specified RTT channel.
+        Returns `True` if server was started successfully, `False` otherwise.
+
+        # Parameters
+        * `server_port` - TCP port of the listening socket
+        * `rtt_channel` - RTT channel to be forwarded
+        """
+        self._interface.execute(f"monitor rtt server start {server_port} {rtt_channel}")
+        return self._wait_for_command_response("RTT server started!", "Couldn't start RTT server!")
 
     def _get_responses(self) -> GDBResponsesList:
         """Private function. Do not use.
