@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 
 
 @dataclass
@@ -49,7 +49,7 @@ class GDBResponse:
     GDBResponses for comparison."""
 
     def is_similar(self, other: GDBResponse) -> bool:
-        """Check if another response is 'similar' to current one.
+        """Checks if another response is 'similar' to current one.
         Similarity criteria are:
         - Both responses must have the same type to be similar, AND
         - If `other` response has message, then current one must have the same message
@@ -68,6 +68,10 @@ class GDBResponse:
             return False
 
         return True
+
+    def is_any_similar(self, responses: Iterable[GDBResponse]) -> bool:
+        """Checks if any of the provided responses is similar to current one"""
+        return any(self.is_similar(response) for response in responses)
 
     def unescaped_payload(self, strip_whitespace: bool = True) -> str:
         """If payload is a string, it probably contains escaped special characters.
@@ -105,7 +109,7 @@ class GDBResponsesList:
 
     def __init__(self, responses: List[GDBResponse]) -> None:
         """Initialize the list with responses received from GDB"""
-        self.items = responses
+        self._items = responses
 
     def of_type(self, response_type: GDBResponse.Type) -> GDBResponsesList:
         """Return all the responses on the list that have specified type"""
@@ -139,15 +143,12 @@ class GDBResponsesList:
         """Returns a list of stringified payloads from all responses.
 
         # Parameters
-        * `escape` - If `True`, escaped characters in payloads will be unescaped to
-                     produce human-readable string.
+        * `unescape` - If `True`, escaped characters in payloads will be unescaped to
+                       produce human-readable string.
         """
         if unescape:
-            payloads = [response.unescaped_payload(strip_whitespace=False) for response in self]
-        else:
-            payloads = [str(response.payload) for response in self]
-
-        return payloads
+            return [response.unescaped_payload(strip_whitespace=False) for response in self]
+        return [str(response.payload) for response in self]
 
     def payload_string(self, separator: str = "", unescape: bool = True) -> str:
         """Returns a single stringified payload from all responses. Returned string is stripped
@@ -158,12 +159,19 @@ class GDBResponsesList:
         * `escape` [bool] - If `True`, escaped characters in payloads will be unescaped to
                             produce human-readable string.
         """
-
         return separator.join(self.payload_string_list(unescape)).strip()
 
     def extend(self, other: GDBResponsesList):
         """Add items from different response list to current one."""
-        self.items.extend(other.items)
+        self._items.extend(other._items)
+
+    def contains_any(self, responses: Iterable[GDBResponse]) -> bool:
+        """Returns `True` if any of the provided responses is on the list. `False` otherwise."""
+        return any(response.is_any_similar(self) for response in responses)
+
+    def contains_all(self, responses: Iterable[GDBResponse]) -> bool:
+        """Returns `True` if all of the provided responses are on the list. `False` otherwise."""
+        return all(response.is_any_similar(self) for response in responses)
 
     def __contains__(self, expected: GDBResponse) -> bool:
         """Returns `True` if any item in response list is similar to expected response.
@@ -172,15 +180,15 @@ class GDBResponsesList:
 
     def __len__(self):
         """Return amount of elements on the list"""
-        return len(self.items)
+        return len(self._items)
 
     def __getitem__(self, key: int) -> GDBResponse:
         """Return a specific element of the list by it's index"""
-        return self.items[key]
+        return self._items[key]
 
     def __iter__(self) -> Iterator[GDBResponse]:
         """Return an iterator over the elements on the list"""
-        return self.items.__iter__()
+        return self._items.__iter__()
 
     def __str__(self) -> str:
         return "\n".join([f"[{i}] {response}" for i, response in enumerate(self)])
