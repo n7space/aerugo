@@ -45,29 +45,14 @@ class GDBInterface:
             + self._parse_init_message()
         )
 
+    def is_program_running(self) -> bool:
+        """Returns the state of currently debugged program State is tracked via notifications."""
+        return self._is_program_running
+
     def interrupt(self):
         """Send SIGINT to GDB process, in order to interrupt it
         (and, for example, pause execution)"""
         self._controller.gdb_process.send_signal(signal.SIGINT)  # type: ignore
-
-    def breakpoint(
-        self,
-        location: str,
-        temporary: bool = True,
-        timeout: Optional[float] = None,
-        log_execution: Optional[bool] = None,
-    ) -> GDBResponsesList:
-        """Create a breakpoint at specified location.
-
-        # Parameters
-        * `location` - Location of the breakpoint.
-        * `temporary` - If `True`, breakpoint will be deleted after first hit.
-        * `timeout` - Timeout for this command, overrides default one if provided.
-        * `log_execution` - If provided, will override `self.log_execution`.
-        """
-        arguments = "-t -h" if temporary else "-h"
-        self.execute(f"-break-insert {arguments} {location}")
-        return self.wait_for_done(timeout, log_execution)
 
     def execute(
         self,
@@ -119,7 +104,6 @@ class GDBInterface:
         if log_responses is None:
             log_responses = self._should_log_responses
 
-        # line split for 100-character mark
         raw_responses: List[Dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
             timeout
         )
@@ -346,4 +330,8 @@ class GDBInterface:
         notifications."""
         for notification in responses.notifications():
             if notification.message == "stopped":
+                self._logger.info("Program is stopped.")
                 self._is_program_running = False
+            elif notification.message == "running":
+                self._logger.info("Program is running.")
+                self._is_program_running = True
