@@ -125,25 +125,25 @@ class GDBClient:
             self.logger.info(f"Program stopped on {break_on}, ready to continue!")
 
     def _get_responses(self) -> GDBResponsesList:
-        """Helper function for calling `get_responses` with default arguments.
-        Not to be used outside of this class."""
+        """Private function. Do not use.
+        Helper function for calling `get_responses` with default arguments."""
         return self.interface.get_responses(timeout=self.timeout, log_responses=self.log_responses)
 
     def _wait_for_done(self) -> GDBResponsesList:
-        """Helper function for calling `wait_for_done` with default arguments.
-        Not to be used outside of this class."""
+        """Private function. Do not use.
+        Helper function for calling `wait_for_done` with default arguments."""
         return self.interface.wait_for_done(timeout=self.timeout, log_responses=self.log_responses)
 
     def _wait_for_running(self) -> GDBResponsesList:
-        """Helper function for calling `wait_for_stopped` with default arguments.
-        Not to be used outside of this class."""
+        """Private function. Do not use.
+        Helper function for calling `wait_for_stopped` with default arguments."""
         return self.interface.wait_for_running(
             timeout=self.timeout, log_responses=self.log_responses
         )
 
     def _wait_for_stopped(self) -> GDBResponsesList:
-        """Helper function for calling `wait_for_stopped` with default arguments.
-        Not to be used outside of this class."""
+        """Private function. Do not use.
+        Helper function for calling `wait_for_stopped` with default arguments."""
         return self.interface.wait_for_stopped(
             timeout=self.timeout, log_responses=self.log_responses
         )

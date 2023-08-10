@@ -206,15 +206,17 @@ class GDBInterface:
         return self.wait_for_notification("stopped", timeout, log_responses)
 
     def _parse_init_message(self) -> str:
-        """Parses init message received from GDB after creating it's instance, and returns
-        it as a string"""
+        """Private function. Do not use.
+        Parses init message received from GDB after creating it's instance, and returns it
+        as a string"""
         return self.get_responses(log_responses=False).console().payload_string()
 
     def _log_responses(
         self,
         responses: GDBResponsesList,
     ):
-        """Private function. Logs the response in appropriate way, depending on it's type.
+        """Private function. Do not use.
+        Logs the response in appropriate way, depending on it's type.
 
         # Remarks
         Will do nothing if logging GDB responses is disabled.
@@ -240,3 +242,9 @@ class GDBInterface:
                 if response.payload is not None:
                     log_message += f" {response.unescaped_payload()}"
             self.logger.info(log_message)
+
+    def _handle_notifications(self, responses: GDBResponsesList):
+        """Private function. Do not use.
+        Looks through responses on the list and changes this object's state according to received
+        notifications."""
+        pass
