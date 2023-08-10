@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import logging
 import signal
 from typing import Any, Dict, List, Optional
@@ -8,10 +9,13 @@ from gdb_response import GDBResponse, GDBResponsesList
 
 
 class GDBInterface:
-    """Convenience class for GDB-related functionality.
+    """Class for controlling GDB and performing low-level GDB operations.
     Manages GDB instance, performs preliminary GDB message parsing, and provides
     functional interface for common GDB actions.
-    Also tracks notifications and watches the state of debugged program."""
+    Also tracks notifications and watches the state of debugged program.
+
+    Names prefixed with '_' are private, and should never be used in user code.
+    """
 
     def __init__(
         self,
@@ -28,14 +32,14 @@ class GDBInterface:
         * `log_execution` - If `True`, all executed commands will be logged.
         * `log_responses` - If `True`, all responses to commands will be logged.
         """
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.controller = GdbController(command=[gdb_executable, "--interpreter=mi2"])
-        self.default_timeout = default_timeout
-        self.log_execution = log_execution
-        self.log_responses = log_responses
-        self.program_running = False
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self._controller = GdbController(command=[gdb_executable, "--interpreter=mi2"])
+        self._default_timeout = default_timeout
+        self._should_log_execution = log_execution
+        self._should_log_responses = log_responses
+        self._is_program_running = False
 
-        self.logger.info(
+        self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
             f"of {default_timeout}s, received following startup message:\n"
             + self._parse_init_message()
@@ -44,7 +48,7 @@ class GDBInterface:
     def interrupt(self):
         """Send SIGINT to GDB process, in order to interrupt it
         (and, for example, pause execution)"""
-        self.controller.gdb_process.send_signal(signal.SIGINT)  # type: ignore
+        self._controller.gdb_process.send_signal(signal.SIGINT)  # type: ignore
 
     def breakpoint(
         self,
@@ -53,8 +57,7 @@ class GDBInterface:
         timeout: Optional[float] = None,
         log_execution: Optional[bool] = None,
     ) -> GDBResponsesList:
-        """Create a breakpoint in specified location.
-        Blocks until breakpoint is created.
+        """Create a breakpoint at specified location.
 
         # Parameters
         * `location` - Location of the breakpoint.
@@ -82,15 +85,15 @@ class GDBInterface:
         * `log_execution` - If provided, will override `self.log_execution`.
         """
         if timeout is None:
-            timeout = self.default_timeout
+            timeout = self._default_timeout
 
         if log_execution is None:
-            log_execution = self.log_execution
+            log_execution = self._should_log_execution
 
-        if self.log_execution:
-            self.logger.info(f"Executing '{command}' (timeout = {timeout}s)")
+        if self._should_log_execution:
+            self._logger.info(f"Executing '{command}' (timeout = {timeout}s)")
 
-        self.controller.write(  # type: ignore
+        self._controller.write(  # type: ignore
             command,
             timeout_sec=timeout,
             raise_error_on_timeout=True,
@@ -111,13 +114,13 @@ class GDBInterface:
         * `log_responses` - If provided, will override `self.log_responses`.
         """
         if timeout is None:
-            timeout = self.default_timeout
+            timeout = self._default_timeout
 
         if log_responses is None:
-            log_responses = self.log_responses
+            log_responses = self._should_log_responses
 
         # line split for 100-character mark
-        raw_responses: List[Dict[str, Any]] = self.controller.get_gdb_response(  # type: ignore
+        raw_responses: List[Dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
             timeout
         )
 
@@ -137,39 +140,118 @@ class GDBInterface:
         if log_responses:
             self._log_responses(responses)
 
+        self._handle_notifications(responses)
+
         return responses
 
     def wait_for_response(
         self,
-        expected: GDBResponse,
+        expected_response: GDBResponse,
         timeout: Optional[float] = None,
         log_responses: Optional[bool] = None,
     ) -> GDBResponsesList:
         """Block until an expected response is received from GDB.
-        Returns list of all received responses.
 
         # Remarks
         Responses are compared using `GDBResponse.is_similar()` function.
 
         # Parameters
-        * `expected` - Content of the expected response.
+        * `expected_response` - Response to wait for.
         * `timeout` - If provided, overrides default timeout.
         * `log_responses` - If provided, will override `self.log_responses`.
         """
-        responses = self.get_responses(timeout, log_responses)
-        while expected not in responses:
-            responses.extend(self.get_responses(timeout, log_responses))
-        return responses
+        received_responses = self.get_responses(timeout, log_responses)
+
+        while expected_response not in received_responses:
+            received_responses.extend(self.get_responses(timeout, log_responses))
+
+        return received_responses
+
+    def wait_for_any_response(
+        self,
+        expected_responses: Iterable[GDBResponse],
+        timeout: Optional[float] = None,
+        log_responses: Optional[bool] = None,
+    ) -> GDBResponsesList:
+        """Block until any response from the list is received from GDB.
+
+        # Remarks
+        Responses are compared using `GDBResponse.is_similar()` function.
+
+        # Parameters
+        * `expected_responses` - Responses to wait for. Receiving a response matching any that's
+                                 on the list will unblock.
+        * `timeout` - If provided, overrides default timeout.
+        * `log_responses` - If provided, will override `self.log_responses`.
+        """
+        received_responses = self.get_responses(timeout, log_responses)
+
+        while not received_responses.contains_any(expected_responses):
+            received_responses.extend(self.get_responses(timeout, log_responses))
+
+        return received_responses
+
+    def wait_for_all_responses(
+        self,
+        expected_responses: Iterable[GDBResponse],
+        timeout: Optional[float] = None,
+        log_responses: Optional[bool] = None,
+    ) -> GDBResponsesList:
+        """Block until all responses from the list are received from GDB.
+
+        # Remarks
+        Responses are compared using `GDBResponse.is_similar()` function.
+
+        # Parameters
+        * `expected_responses` - Responses to wait for. All responses from this list must match
+                                 received responses to unblock.
+        * `timeout` - If provided, overrides default timeout.
+        * `log_responses` - If provided, will override `self.log_responses`.
+        """
+        received_responses = self.get_responses(timeout, log_responses)
+
+        while not received_responses.contains_all(expected_responses):
+            received_responses.extend(self.get_responses(timeout, log_responses))
+
+        return received_responses
 
     def wait_for_result(
-        self, message: str, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self,
+        message: str,
+        timeout: Optional[float] = None,
+        log_responses: Optional[bool] = None,
     ) -> GDBResponsesList:
         """Blocks until a `result` response with specified message is received.
         Returns list of all received responses.
-        See `wait_for_response` for details."""
+
+        # Parameters
+        * `message` - Message to wait for.
+        * `timeout` - If provided, overrides default timeout.
+        * `log_responses` - If provided, will override `self.log_responses`.
+        """
         return self.wait_for_response(
             GDBResponse.with_message(GDBResponse.Type.RESULT, message), timeout, log_responses
         )
+
+    def wait_for_any_result(
+        self,
+        messages: Iterable[str],
+        timeout: Optional[float] = None,
+        log_responses: Optional[bool] = None,
+    ) -> GDBResponsesList:
+        """Blocks until a `result` response with message matching any of the provided ones
+        is received.
+        Returns list of all received responses.
+
+        # Parameters
+        * `messages` - List of messages to wait for. Matching any of them will unblock.
+        * `timeout` - If provided, overrides default timeout.
+        * `log_responses` - If provided, will override `self.log_responses`.
+        """
+        expected_responses = [
+            GDBResponse.with_message(GDBResponse.Type.RESULT, message) for message in messages
+        ]
+        return self.wait_for_any_response(expected_responses, timeout, log_responses)
 
     def wait_for_notification(
         self, message: str, timeout: Optional[float] = None, log_responses: Optional[bool] = None
@@ -188,6 +270,23 @@ class GDBInterface:
         Returns list of all received responses.
         See `wait_for_response` for details."""
         return self.wait_for_result("done", timeout, log_responses)
+
+    def wait_for_error(
+        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+    ) -> GDBResponsesList:
+        """Blocks until a `{type: result, message: error}` response is received.
+        Returns list of all received responses.
+        See `wait_for_response` for details."""
+        return self.wait_for_result("error", timeout, log_responses)
+
+    def wait_for_done_or_error(
+        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+    ) -> GDBResponsesList:
+        """Blocks until a `{type: result, message: done}` or `{type: result, message: error}'
+        response is received.
+        Returns list of all received responses.
+        See `wait_for_response` for details."""
+        return self.wait_for_any_result(["done", "error"], timeout, log_responses)
 
     def wait_for_running(
         self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
@@ -223,28 +322,28 @@ class GDBInterface:
 
         # Parameters
         * `responses` - List of responses to be logged.
-        * `separator` - Character (or a string) inserter between each response's payload.
-                        If you want to log each payload separately, you can set it
-                        to `\\n` for example.
+        * `separator` - Character (or a string) inserted between each response's payload.
         """
-        if not self.log_responses:
+        if not self._should_log_responses:
             return
 
         for response in responses:
             log_message: str = f"[Response <{response.type.value}>]:"
             if response.type == GDBResponse.Type.NOTIFY:
-                log_message += f" {response.message} -> {response.unescaped_payload()}"
+                log_message += f" {response.message} -> {response.unescaped_payload().strip()}"
             elif response.type == GDBResponse.Type.RESULT:
                 log_message += f" {response.message}"
             else:
                 if response.message is not None:
                     log_message += f" [msg: {response.message}]"
                 if response.payload is not None:
-                    log_message += f" {response.unescaped_payload()}"
-            self.logger.info(log_message)
+                    log_message += f" {response.unescaped_payload().strip()}"
+            self._logger.info(log_message)
 
     def _handle_notifications(self, responses: GDBResponsesList):
         """Private function. Do not use.
         Looks through responses on the list and changes this object's state according to received
         notifications."""
-        pass
+        for notification in responses.notifications():
+            if notification.message == "stopped":
+                self._is_program_running = False

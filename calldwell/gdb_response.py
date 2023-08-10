@@ -160,12 +160,16 @@ class GDBResponsesList:
     def contains_any(self, responses: Iterable[GDBResponse]) -> bool:
         """Returns `True` if any of the provided responses is on the list. `False` otherwise.
         To see how the items are compared, see `GDBResponse.is_similar()`."""
-        return any(response.is_any_similar(self) for response in responses)
+        return any(response.is_any_similar(responses) for response in self)
 
     def contains_all(self, responses: Iterable[GDBResponse]) -> bool:
         """Returns `True` if all of the provided responses are on the list. `False` otherwise.
         To see how the items are compared, see `GDBResponse.is_similar()`."""
-        return all(response.is_any_similar(self) for response in responses)
+        return all(response.is_any_similar(responses) for response in self)
+
+    def contains_error(self) -> bool:
+        """Returns `True` if any of the stored responses is a result with `error` message."""
+        return GDBResponse.with_message(GDBResponse.Type.RESULT, "error") in self
 
     def __contains__(self, expected: GDBResponse) -> bool:
         """Returns `True` if any response on the list is similar to provided one.
