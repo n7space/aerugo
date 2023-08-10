@@ -1,6 +1,9 @@
-from collections.abc import Iterable
+from __future__ import annotations
+
 import logging
 import signal
+from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from pygdbmi.gdbcontroller import GdbController
@@ -16,6 +19,17 @@ class GDBInterface:
 
     Names prefixed with '_' are private, and should never be used in user code.
     """
+
+    @dataclass
+    class ProgramState:
+        """Container for everything related to program state."""
+
+        is_running: bool
+
+        @staticmethod
+        def default() -> GDBInterface.ProgramState:
+            """Create a new instance of ProgramState with default values."""
+            return GDBInterface.ProgramState(is_running=False)
 
     def __init__(
         self,
@@ -37,7 +51,7 @@ class GDBInterface:
         self._default_timeout = default_timeout
         self._should_log_execution = log_execution
         self._should_log_responses = log_responses
-        self._is_program_running = False
+        self._program_state = GDBInterface.ProgramState.default()
 
         self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
@@ -45,9 +59,12 @@ class GDBInterface:
             + self._parse_init_message()
         )
 
-    def is_program_running(self) -> bool:
-        """Returns the state of currently debugged program State is tracked via notifications."""
-        return self._is_program_running
+        self.execute(f"set remotetimeout {int(self._default_timeout)}")
+        self.wait_for_done(self._default_timeout, self._should_log_responses)
+
+    def program_state(self) -> GDBInterface.ProgramState:
+        """Returns the state of currently debugged program. State is tracked via notifications."""
+        return self._program_state
 
     def interrupt(self):
         """Send SIGINT to GDB process, in order to interrupt it
@@ -331,7 +348,7 @@ class GDBInterface:
         for notification in responses.notifications():
             if notification.message == "stopped":
                 self._logger.info("Program is stopped.")
-                self._is_program_running = False
+                self._program_state.is_running = False
             elif notification.message == "running":
                 self._logger.info("Program is running.")
-                self._is_program_running = True
+                self._program_state.is_running = True

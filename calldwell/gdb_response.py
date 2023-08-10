@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 class GDBResponse:
     """Structure representing GDB response."""
 
-    Payload = Union[Dict[Any, Any], List[Any], str]
+    Payload = Union[Dict[str, Any], List[Any], str]
 
     class Type(Enum):
         RESULT = "result"
@@ -77,6 +77,13 @@ class GDBResponse:
         """Returns unescaped version of payload string.
         Currently fixes newlines, tabs and `"`"""
         return str(self.payload).replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
+
+    def payload_json(self) -> Dict[str, Any]:
+        """Returns payload as a JSON (or rather dict with string keys).
+        Raises an exception if payload is not actually a dictionary."""
+        if not isinstance(self.payload, dict):
+            raise ValueError("Payload is not a dictionary!")
+        return self.payload
 
     @staticmethod
     def with_message(type: Type, message: str) -> GDBResponse:

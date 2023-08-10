@@ -97,7 +97,7 @@ class GDBClient:
     def pause_program(self, force: bool = False):
         """Stops the execution of debugged program immediately.
         Does nothing if program is already stopped, unless `force` is `True`."""
-        if not force and not self._interface.is_program_running():
+        if not force and not self._interface.program_state().is_running:
             self._logger.warning("Cannot stop execution of already stopped program!")
             return
 
@@ -109,7 +109,7 @@ class GDBClient:
     def continue_program(self, force: bool = False):
         """Continues the execution of debugged program.
         Does nothing if program is already running, unless `force` is `True."""
-        if not force and self._interface.is_program_running():
+        if not force and self._interface.program_state().is_running:
             self._logger.warning("Cannot continue execution of already running program!")
             return
 
@@ -120,7 +120,8 @@ class GDBClient:
 
     def start_program(self, break_on: Optional[str] = "main"):
         """Reset the target and start execution of loaded program.
-        Program must be loaded first with `load_executable()`.
+        Program must be loaded with `load_executable()`, or
+        selected with `select_executable()`.
 
         # Parameters
         * `break_on` - Name of the function on which the program will stop.
