@@ -45,7 +45,7 @@ class GDBResponse:
     type: Type
     """Response's type, always present."""
     stream: Optional[Stream]
-    """Response's stream, always present but left as Optional to allow creating
+    """Response's stream, always present in GDB responses, but left as `Optional` to allow creating
     GDBResponses for comparison."""
 
     def is_similar(self, other: GDBResponse) -> bool:
@@ -71,7 +71,12 @@ class GDBResponse:
 
     def unescaped_payload(self, strip_whitespace: bool = True) -> str:
         """If payload is a string, it probably contains escaped special characters.
-        Use this function to get unescaped version of payload string."""
+        Use this function to get unescaped version of payload string.
+
+        `strip_whitespace` controls whether returned string should be stripped
+        out of whitespace at it's beginning and end, or not. By default, returned strings
+        are stripped.
+        """
         payload = str(self.payload).replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
         if strip_whitespace:
             return payload.strip()

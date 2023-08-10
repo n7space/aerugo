@@ -229,7 +229,7 @@ class GDBInterface:
             return
 
         for response in responses:
-            log_message = f"[Response <{response.type.value}>]:"
+            log_message: str = f"[Response <{response.type.value}>]:"
             if response.type == GDBResponse.Type.NOTIFY:
                 log_message += f" {response.message} -> {response.unescaped_payload()}"
             elif response.type == GDBResponse.Type.RESULT:
