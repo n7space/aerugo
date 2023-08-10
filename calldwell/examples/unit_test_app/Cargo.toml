@@ -12,3 +12,4 @@ rtt-target = "0.4.0"
 [profile.release]
 codegen-units = 1
 lto = true
+debug = true

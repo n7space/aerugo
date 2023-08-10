@@ -13,7 +13,8 @@ use rtt_target::{rprint, rprintln, rtt_init_default, set_print_channel, DownChan
 
 static STDIN: Mutex<RefCell<Option<DownChannel>>> = Mutex::new(RefCell::new(None));
 
-fn init_test() {
+#[inline(never)]
+fn init_tests() {
     irq::free(|cs| {
         let rtt = rtt_init_default!();
         set_print_channel(rtt.up.0);
@@ -31,7 +32,7 @@ fn read_stdin(buffer: &mut [u8]) -> usize {
 
 #[entry]
 fn main() -> ! {
-    init_test();
+    init_tests();
     let mut input_received = false;
 
     rprintln!("Hello from RTT!");
