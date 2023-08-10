@@ -24,12 +24,34 @@ class GDBInterface:
     class ProgramState:
         """Container for everything related to program state."""
 
+        @dataclass
+        class ProgramFrame:
+            address: int
+            function: str
+
+            def address_string(self, address_bytes: int = 4) -> str:
+                """Returns address as hex string. Assumes 32-bit addresses by default."""
+                stringified_address = f"{self.address:X}".zfill(address_bytes * 2)
+                return f"0x{stringified_address}"
+
+            def __str__(self) -> str:
+                return f"{self.function} @ {self.address_string()}"
+
         is_running: bool
+        last_stop_reason: Optional[str]
+        program_frame: Optional[ProgramFrame]
+        """Program frame is updated and valid only when program is stopped."""
+
+        def is_stopped_by_breakpoint(self) -> bool:
+            """Returns `True` if program is currently stopped by breakpoint."""
+            return self.is_running is False and self.last_stop_reason == "breakpoint-hit"
 
         @staticmethod
         def default() -> GDBInterface.ProgramState:
             """Create a new instance of ProgramState with default values."""
-            return GDBInterface.ProgramState(is_running=False)
+            return GDBInterface.ProgramState(
+                is_running=False, last_stop_reason=None, program_frame=None
+            )
 
     def __init__(
         self,
@@ -347,8 +369,20 @@ class GDBInterface:
         notifications."""
         for notification in responses.notifications():
             if notification.message == "stopped":
-                self._logger.info("Program is stopped.")
                 self._program_state.is_running = False
+
+                payload = notification.payload_json()
+                current_program_frame = GDBInterface.ProgramState.ProgramFrame(
+                    address=int(payload["frame"]["addr"], 16), function=payload["frame"]["func"]
+                )
+                stop_reason = payload.get("reason", None)
+
+                self._program_state.last_stop_reason = stop_reason
+                self._program_state.program_frame = current_program_frame
+
+                self._logger.info(
+                    f"Program has stopped at {current_program_frame}, reason: {stop_reason}"
+                )
             elif notification.message == "running":
-                self._logger.info("Program is running.")
                 self._program_state.is_running = True
+                self._logger.info("Program is running.")

@@ -29,7 +29,7 @@ class GDBClient:
             default_timeout = self.DEFAULT_TIMEOUT
 
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._log_responses = log_responses
+        self._should_log_responses = log_responses
         self._interface = GDBInterface(gdb_executable, default_timeout)
         self._timeout = default_timeout
 
@@ -133,23 +133,26 @@ class GDBClient:
         self._logger.info("Starting program from it's entry point...")
         self.restart_platform()
         if break_on is not None:
-            self.breakpoint(break_on)
-            self._logger.info(f"Init breakpoint placed on {break_on}")
+            self.set_breakpoint(break_on)
+            self._logger.info(f"Init breakpoint placed on '{break_on}'")
         self._interface.execute("-exec-run")
         self._wait_for_running()
         self._logger.info("Program is running!")
 
         if break_on is not None:
             self._logger.info("Waiting for breakpoint...")
-            self._wait_for_stopped()
-            self._logger.info(f"Program stopped on {break_on}, ready to continue!")
+            self.wait_for_breakpoint_hit()
+            self._logger.info(
+                f"Program stopped on '{str(self._interface.program_state().program_frame)}'"
+                ", ready to continue!"
+            )
 
-    def breakpoint(
+    def set_breakpoint(
         self,
         location: str,
         temporary: bool = True,
     ) -> bool:
-        """Create a breakpoint at specified location.
+        """Set a breakpoint at specified location.
 
         # Parameters
         * `location` - Location of the breakpoint.
@@ -159,32 +162,46 @@ class GDBClient:
         self._interface.execute(f"-break-insert {arguments} {location}")
         return self._wait_for_command_response("Breakpoint inserted!", "Cannot insert breakpoint!")
 
+    def wait_for_breakpoint_hit(self, timeout: Optional[float] = None) -> bool:
+        """Waits until a breakpoint is hit.
+        Returns `True` if stopped by breakpoint, `False` if stopped by other means.
+        Raises a `pygdbmi.constants.GdbTimeoutError` on timeout.
+
+        # Parameters
+        * `timeout` - Time, in seconds, to wait for the breakpoint.
+        """
+        while not self._interface.program_state().is_stopped_by_breakpoint():
+            if not self._interface.program_state().is_running:
+                return False
+            self._interface.get_responses(timeout, self._should_log_responses)
+        return True
+
     def _get_responses(self) -> GDBResponsesList:
         """Private function. Do not use.
         Helper function for calling `get_responses` with default arguments."""
         return self._interface.get_responses(
-            timeout=self._timeout, log_responses=self._log_responses
+            timeout=self._timeout, log_responses=self._should_log_responses
         )
 
     def _wait_for_running(self) -> GDBResponsesList:
         """Private function. Do not use.
         Helper function for calling `wait_for_running` with default arguments."""
         return self._interface.wait_for_running(
-            timeout=self._timeout, log_responses=self._log_responses
+            timeout=self._timeout, log_responses=self._should_log_responses
         )
 
     def _wait_for_stopped(self) -> GDBResponsesList:
         """Private function. Do not use.
         Helper function for calling `wait_for_stopped` with default arguments."""
         return self._interface.wait_for_stopped(
-            timeout=self._timeout, log_responses=self._log_responses
+            timeout=self._timeout, log_responses=self._should_log_responses
         )
 
     def _wait_for_done_or_error(self) -> GDBResponsesList:
         """Private function. Do not use.
         Helper function for calling `wait_for_done_or_error` with default arguments."""
         return self._interface.wait_for_done_or_error(
-            timeout=self._timeout, log_responses=self._log_responses
+            timeout=self._timeout, log_responses=self._should_log_responses
         )
 
     def _wait_for_command_response(self, success_message: str, error_message: str) -> bool:
