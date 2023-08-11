@@ -29,6 +29,9 @@ pub trait RuntimeApi {
     /// `()` if successful, `RuntimeError` otherwise.
     fn cancel_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
 
+    /// Clears event queue.
+    fn clear_event_queue(&'static self);
+
     /// Gets current system time timestamp.
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000>;
 

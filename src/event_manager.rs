@@ -125,4 +125,12 @@ impl EventManager {
             None => Err(RuntimeError::EventNotFound(event_id)),
         }
     }
+
+    /// Clears event queue
+    pub(crate) fn clear(&'static self) {
+        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
+        for event_set in unsafe { self.event_sets.as_ref() } {
+            event_set.clear();
+        }
+    }
 }
