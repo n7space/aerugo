@@ -48,9 +48,14 @@ class GDBInterface:
             + self._parse_init_message()
         )
 
-        self.execute(f"set remotetimeout {int(self._default_timeout)}")
+        self.execute(
+            f"set remotetimeout {int(self._default_timeout)}",
+            self._default_timeout,
+            self._should_log_execution,
+        )
         self.wait_for_done(self._default_timeout, self._should_log_responses)
 
+    @property
     def program_state(self) -> ProgramState:
         """Returns the state of currently debugged program. State is tracked via notifications."""
         return self._program_state
@@ -388,8 +393,8 @@ class ProgramState:
         return self.is_running is False and self.last_stop_reason == reason
 
     def stopped_by_breakpoint(self) -> bool:
-        """Shorthand for `is_stopped_by("breakpoint")"""
-        return self.stopped_by("breakpoint")
+        """Shorthand for `is_stopped_by("breakpoint-hit")"""
+        return self.stopped_by("breakpoint-hit")
 
     def function_finished_execution(self) -> bool:
         """Shorthand for `is_stopped_by("function-finished")"""
