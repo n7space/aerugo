@@ -707,6 +707,10 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.emit(event_id)
     }
 
+    fn cancel_event(&'static self, event_id: EventId) -> Result<(), RuntimeError> {
+        EVENT_MANAGER.cancel(event_id)
+    }
+
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000> {
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.

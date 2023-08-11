@@ -106,11 +106,23 @@ impl EventManager {
     /// # Return
     /// `()` if successful, `RuntimeError` otherwise.
     pub(crate) fn emit(&'static self, event_id: EventId) -> Result<(), RuntimeError> {
-        let event = match self.get_event(event_id) {
-            Some(event) => event,
-            None => return Err(RuntimeError::EventNotFound(event_id)),
-        };
+        match self.get_event(event_id) {
+            Some(event) => event.emit(),
+            None => Err(RuntimeError::EventNotFound(event_id)),
+        }
+    }
 
-        event.emit()
+    /// Cancels event with the given ID.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to emit.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
+    pub(crate) fn cancel(&'static self, event_id: EventId) -> Result<(), RuntimeError> {
+        match self.get_event(event_id) {
+            Some(event) => event.cancel(),
+            None => Err(RuntimeError::EventNotFound(event_id)),
+        }
     }
 }

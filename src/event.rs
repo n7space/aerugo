@@ -70,6 +70,20 @@ impl Event {
 
         Ok(())
     }
+
+    /// Cancels this event.
+    ///
+    /// This sets the value of this event to `false` in each event set.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise
+    pub(crate) fn cancel(&self) -> Result<(), RuntimeError> {
+        for event_set in unsafe { self.sets.as_ref() } {
+            event_set.deactivate_event(self.event_id)?;
+        }
+
+        Ok(())
+    }
 }
 
 /// System event ID.

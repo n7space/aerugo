@@ -11,7 +11,7 @@ use crate::tasklet::TaskletId;
 
 /// System runtime API.
 pub trait RuntimeApi {
-    /// Emits event of given id.
+    /// Emits event of given ID.
     ///
     /// # Parameters
     /// * `event_id` - ID of event to emit.
@@ -19,6 +19,15 @@ pub trait RuntimeApi {
     /// # Return
     /// `()` if successful, `RuntimeError` otherwise.
     fn emit_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
+
+    /// Cancels event of given ID.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to cancel.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
+    fn cancel_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
 
     /// Gets current system time timestamp.
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000>;
