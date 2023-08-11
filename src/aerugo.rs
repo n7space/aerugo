@@ -282,9 +282,9 @@ impl InitApi for Aerugo {
     ///     MyEvent,
     /// }
     ///
-    /// impl Into<EventId> for Events {
-    ///     fn into(self) -> EventId {
-    ///         match self {
+    /// impl From<Events> for EventId {
+    ///     fn from(value: Events) -> Self {
+    ///         match value {
     ///             Events::MyEvent => 42,
     ///         }
     ///     }
@@ -459,9 +459,9 @@ impl InitApi for Aerugo {
     /// enum Events {
     ///     MyEvent,
     /// }
-    /// impl Into<EventId> for Events {
-    ///     fn into(self) -> EventId {
-    ///         match self {
+    /// impl From<Events> for EventId {
+    ///     fn from(value: Events) -> Self {
+    ///         match value {
     ///             Events::MyEvent => 1,
     ///         }
     ///     }

@@ -1,0 +1,8 @@
+[package]
+authors = ["Filip Demski <glamhoth@protonmail.com>"]
+edition = "2021"
+name = "x86-events"
+version = "0.1.0"
+
+[dependencies]
+aerugo = { version = "0.1.0", path = "../..", features = ["use-aerugo-x86"] }
