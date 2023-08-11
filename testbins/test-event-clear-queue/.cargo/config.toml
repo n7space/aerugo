@@ -1,0 +1,6 @@
+[build]
+target = "x86_64-unknown-linux-gnu"
+
+[env]
+AERUGO_TASKLET_COUNT = { value = "4" }
+AERUGO_EVENT_COUNT = { value = "2" }
