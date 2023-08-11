@@ -25,6 +25,17 @@ class GDBResponse:
 
     Payload = Union[Dict[str, Any], List[Any], str]
 
+    message: Optional[str]
+    """Message is usually a human-readable string."""
+    payload: Optional[Payload]
+    """Payload can be either a string, list or a dict."""
+    token: Optional[Any]
+    type: Type
+    """Response's type, always present."""
+    stream: Optional[Stream]
+    """Response's stream, always present in GDB responses, but left as `Optional` to allow creating
+    GDBResponses for comparison."""
+
     class Type(Enum):
         RESULT = "result"
         NOTIFY = "notify"
@@ -50,17 +61,6 @@ class GDBResponse:
 
         def __repr__(self) -> str:
             return str(self)
-
-    message: Optional[str]
-    """Message is usually a human-readable string."""
-    payload: Optional[Payload]
-    """Payload can be either a string, list or a dict."""
-    token: Optional[Any]
-    type: Type
-    """Response's type, always present."""
-    stream: Optional[Stream]
-    """Response's stream, always present in GDB responses, but left as `Optional` to allow creating
-    GDBResponses for comparison."""
 
     def is_similar(self, other: GDBResponse) -> bool:
         """Checks if another response is 'similar' to current one.
@@ -198,7 +198,7 @@ class GDBResponsesList:
 
     def to_symbols_list(self) -> List[ProgramSymbol]:
         """Looks for symbols in stored responses and returns them.
-        Symbols are assumed to be stored in `console` output, in `address symbol_name` format,
+        Symbols are assumed to be stored in `console` output, in `address  symbol_name` format,
         one per response."""
         found_symbols: List[ProgramSymbol] = list()
         for response in self.console():
@@ -210,7 +210,7 @@ class GDBResponsesList:
                     symbol_name = split_payload[1]
                     found_symbols.append(ProgramSymbol(name=symbol_name, address=symbol_address))
                 except ValueError:
-                    # Ignore ValueError, as it means that this is not a symbol.
+                    # Ignore ValueError, as it means that this is simply not a symbol.
                     continue
         return found_symbols
 

@@ -20,47 +20,6 @@ class GDBInterface:
     Names prefixed with '_' are private, and should never be used in user code.
     """
 
-    @dataclass
-    class ProgramState:
-        """Container for everything related to program state."""
-
-        @dataclass
-        class ProgramFrame:
-            address: int
-            function: str
-
-            def address_string(self, address_size: int = 4) -> str:
-                """Returns address as hex string. Assumes 32-bit addresses by default."""
-                stringified_address = f"{self.address:X}".zfill(address_size * 2)
-                return f"0x{stringified_address}"
-
-            def __str__(self) -> str:
-                return f"{self.function} @ {self.address_string()}"
-
-        is_running: bool
-        last_stop_reason: Optional[str]
-        program_frame: Optional[ProgramFrame]
-        """Program frame is updated and valid only when program is stopped."""
-
-        def stopped_by(self, reason: str) -> bool:
-            """Returns `True` if program is currently stopped by specified reason."""
-            return self.is_running is False and self.last_stop_reason == reason
-
-        def stopped_by_breakpoint(self) -> bool:
-            """Shorthand for `is_stopped_by("breakpoint")"""
-            return self.stopped_by("breakpoint")
-
-        def function_finished_execution(self) -> bool:
-            """Shorthand for `is_stopped_by("function-finished")"""
-            return self.stopped_by("function-finished")
-
-        @staticmethod
-        def default() -> GDBInterface.ProgramState:
-            """Create a new instance of ProgramState with default values."""
-            return GDBInterface.ProgramState(
-                is_running=False, last_stop_reason=None, program_frame=None
-            )
-
     def __init__(
         self,
         gdb_executable: str,
@@ -81,7 +40,7 @@ class GDBInterface:
         self._default_timeout = default_timeout
         self._should_log_execution = log_execution
         self._should_log_responses = log_responses
-        self._program_state = GDBInterface.ProgramState.default()
+        self._program_state = ProgramState.default()
 
         self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
@@ -92,7 +51,7 @@ class GDBInterface:
         self.execute(f"set remotetimeout {int(self._default_timeout)}")
         self.wait_for_done(self._default_timeout, self._should_log_responses)
 
-    def program_state(self) -> GDBInterface.ProgramState:
+    def program_state(self) -> ProgramState:
         """Returns the state of currently debugged program. State is tracked via notifications."""
         return self._program_state
 
@@ -385,7 +344,7 @@ class GDBInterface:
                 self._program_state.is_running = False
 
                 payload = notification.payload_json()
-                current_program_frame = GDBInterface.ProgramState.ProgramFrame(
+                current_program_frame = ProgramFrame(
                     address=int(payload["frame"]["addr"], 16), function=payload["frame"]["func"]
                 )
                 stop_reason = payload.get("reason", None)
@@ -399,3 +358,44 @@ class GDBInterface:
             elif notification.message == "running":
                 self._program_state.is_running = True
                 self._logger.info("Program is running.")
+
+
+@dataclass
+class ProgramFrame:
+    address: int
+    function: str
+
+    def address_string(self, address_size: int = 4) -> str:
+        """Returns address as hex string. Assumes 32-bit addresses by default."""
+        stringified_address = f"{self.address:X}".zfill(address_size * 2)
+        return f"0x{stringified_address}"
+
+    def __str__(self) -> str:
+        return f"{self.function} @ {self.address_string()}"
+
+
+@dataclass
+class ProgramState:
+    """Container for everything related to program state."""
+
+    is_running: bool
+    last_stop_reason: Optional[str]
+    program_frame: Optional[ProgramFrame]
+    """Program frame is updated and valid only when program is stopped."""
+
+    def stopped_by(self, reason: str) -> bool:
+        """Returns `True` if program is currently stopped by specified reason."""
+        return self.is_running is False and self.last_stop_reason == reason
+
+    def stopped_by_breakpoint(self) -> bool:
+        """Shorthand for `is_stopped_by("breakpoint")"""
+        return self.stopped_by("breakpoint")
+
+    def function_finished_execution(self) -> bool:
+        """Shorthand for `is_stopped_by("function-finished")"""
+        return self.stopped_by("function-finished")
+
+    @staticmethod
+    def default() -> ProgramState:
+        """Create a new instance of ProgramState with default values."""
+        return ProgramState(is_running=False, last_stop_reason=None, program_frame=None)

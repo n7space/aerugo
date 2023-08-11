@@ -256,7 +256,8 @@ class GDBClient:
         Variable name is a regular expression.
         Returns `None` if no variables are found.
 
-        If multiple variables are found, info about first one found is returned, and a warning is logged.
+        If multiple variables are found, info about first one found is returned,
+        and a warning is logged.
         """
         found_symbols = self.get_variables(name_regex)
         if found_symbols is None:
