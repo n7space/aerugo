@@ -9,6 +9,7 @@ members = [
     "utils/env-parser",
     "utils/env-parser-tests",
     "utils/internal_cell",
+    "calldwell/calldwell-rs",
 ]
 exclude = ["examples", "testbins", "calldwell/examples"]
 
