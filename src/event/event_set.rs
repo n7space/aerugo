@@ -10,12 +10,12 @@ use crate::event::EventId;
 use crate::event_manager::EventManager;
 use crate::tasklet::TaskletPtr;
 
-/// Stores information about event value in given set.
+/// Stores information about event state in given set.
 struct EventState {
     /// ID of the event.
     pub event_id: EventId,
-    /// Value of the event.
-    pub value: bool,
+    /// Whether event is active
+    pub active: bool,
 }
 
 /// Type for list of event states in a set.
@@ -24,7 +24,7 @@ type EventStateList = Vec<EventState, { EventManager::EVENT_COUNT }>;
 /// Event set.
 ///
 /// Event set is used as a data provider for the Tasklet. It keeps track to which events is given
-/// tasklet subscribed to and what are values of those events.
+/// tasklet subscribed to and which events are active.
 pub(crate) struct EventSet {
     /// Tasklet assigned to this set.
     tasklet: TaskletPtr,
@@ -55,7 +55,7 @@ impl EventSet {
     pub(crate) unsafe fn add_event(&self, event_id: EventId) -> Result<(), InitError> {
         let event_state = EventState {
             event_id,
-            value: false,
+            active: false,
         };
 
         self.event_states
@@ -65,53 +65,68 @@ impl EventSet {
             })
     }
 
-    /// Sets value of given event.
+    /// Activates event
     ///
     /// # Parameters
-    /// * `event_id` - Event ID to change value of.
-    /// * `value` - New value.
+    /// * `event_id` - Event ID to activate.
     ///
     /// # Return
     /// `()` if successful, `RuntimeError` otherwise.
-    pub(crate) fn set_event_value(
-        &self,
-        event_id: EventId,
-        value: bool,
-    ) -> Result<(), RuntimeError> {
+    pub(crate) fn activate_event(&self, event_id: EventId) -> Result<(), RuntimeError> {
         self.event_states.lock(|event_states| {
             match event_states
                 .iter_mut()
                 .find(|event_state| event_state.event_id == event_id)
             {
-                Some(event_state) => event_state.value = value,
+                Some(event_state) => event_state.active = true,
                 None => return Err(RuntimeError::EventNotFound(event_id)),
             };
 
             Ok(())
         })?;
 
-        if value {
-            AERUGO.wake_tasklet(&self.tasklet);
-        }
+        AERUGO.wake_tasklet(&self.tasklet);
 
         Ok(())
+    }
+
+    /// Deactivates event
+    ///
+    /// # Parameters
+    /// * `event_id` - Event ID to deactivate.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
+    #[allow(dead_code)]
+    pub(crate) fn deactivate_event(&self, event_id: EventId) -> Result<(), RuntimeError> {
+        self.event_states.lock(|event_states| {
+            match event_states
+                .iter_mut()
+                .find(|event_state| event_state.event_id == event_id)
+            {
+                Some(event_state) => event_state.active = false,
+                None => return Err(RuntimeError::EventNotFound(event_id)),
+            };
+
+            Ok(())
+        })
     }
 }
 
 impl DataProvider<EventId> for EventSet {
     fn data_ready(&self) -> bool {
         self.event_states
-            .lock(|event_states| event_states.iter().any(|event_state| event_state.value))
+            .lock(|event_states| event_states.iter().any(|event_state| event_state.active))
     }
 
     fn get_data(&self) -> Option<EventId> {
         self.event_states.lock(|event_states| {
             match event_states
                 .iter_mut()
-                .find(|event_state| event_state.value)
+                .find(|event_state| event_state.active)
             {
                 Some(event_state) => {
-                    event_state.value = false;
+                    event_state.active = false;
                     Some(event_state.event_id)
                 }
                 None => None,

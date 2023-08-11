@@ -65,7 +65,7 @@ impl Event {
     /// `()` if successful, `RuntimeError` otherwise
     pub(crate) fn emit(&self) -> Result<(), RuntimeError> {
         for event_set in unsafe { self.sets.as_ref() } {
-            event_set.set_event_value(self.event_id, true)?;
+            event_set.activate_event(self.event_id)?;
         }
 
         Ok(())
