@@ -8,7 +8,7 @@ use crate::event::{EventId, EventSet};
 
 /// Helper struct to subscribe tasklet to particular events.
 ///
-/// This is only created with [subscribe_tasklet_to_events](crate::aerugo::Aerugo::subscribe_tasklet_to_events)
+/// This is only created with [subscribe_tasklet_to_events](crate::api::InitApi::subscribe_tasklet_to_events)
 /// and should not be moved or used anywhere outside of the system initialization.
 ///
 /// # Safety
