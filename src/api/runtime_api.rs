@@ -4,11 +4,22 @@
 
 use bare_metal::CriticalSection;
 
+use crate::api::RuntimeError;
+use crate::event::EventId;
 use crate::execution_monitoring::ExecutionStats;
 use crate::tasklet::TaskletId;
 
 /// System runtime API.
 pub trait RuntimeApi {
+    /// Emits event of given id.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to emit.
+    ///
+    /// # Return
+    /// `()` if successful, `RuntimeError` otherwise.
+    fn emit_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
+
     /// Gets current system time timestamp.
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000>;
 

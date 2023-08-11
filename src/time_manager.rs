@@ -47,6 +47,10 @@ impl TimeManager {
     ///
     /// # Return
     /// Reference to the cyclic execution data if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the list of cyclic executions.
+    /// This is safe to call before the system initialization.
     pub(crate) unsafe fn create_cyclic_execution(
         &'static self,
         tasklet: TaskletPtr,

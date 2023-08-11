@@ -9,7 +9,7 @@ use crate::api::InitError;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
-use crate::event::{EventHandle, EventStorage};
+use crate::event::{EventEnabler, EventId};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 
@@ -78,11 +78,11 @@ pub trait InitApi {
     /// Creates new event in the system.
     ///
     /// # Parameters
-    /// * `storage` - Static memory storage where the event should be allocated.
+    /// * `event_id` - Identifier of this event.
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
-    fn create_event(&'static self, storage: &'static EventStorage) -> Result<(), InitError>;
+    fn create_event(&'static self, event_id: EventId) -> Result<(), InitError>;
 
     /// Creates new boolean condition in the system.
     ///
@@ -120,21 +120,18 @@ pub trait InitApi {
     /// Subscribes tasklet to the event.
     ///
     /// # Generic Parameters
-    /// * `T` - Type of the data.
     /// * `C` - Type of the structure with tasklet context data.
     /// * `COND_COUNT` - Number of tasklet conditions.
     ///
     /// # Parameters
-    /// * `tasklet` - Handle to the target tasklet.
-    /// * `event` - Target event ID.
+    /// * `tasklet_handle` - Handle to the target tasklet.
     ///
     /// # Return
-    /// `()` if successful, `InitError` otherwise.
-    fn subscribe_tasklet_to_event<T, C, const COND_COUNT: usize>(
+    /// `EventEnabler` if successful, `InitError` otherwise.
+    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize>(
         &'static self,
-        tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
-        event_handle: &EventHandle,
-    ) -> Result<(), InitError>;
+        tasklet_handle: &TaskletHandle<EventId, C, COND_COUNT>,
+    ) -> Result<EventEnabler, InitError>;
 
     /// Subscribes tasklet to the boolean condition.
     ///

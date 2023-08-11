@@ -15,7 +15,8 @@ use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::data_receiver::DataReceiver;
-use crate::event::{EventHandle, EventStorage};
+use crate::event::{Event, EventEnabler, EventId};
+use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{user_peripherals::UserPeripherals, Hal};
@@ -33,6 +34,11 @@ pub static AERUGO: Aerugo = Aerugo::new();
 /// Singleton instance of the scheduler. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
 /// structure, which exposes some functionality via it's API.
 static EXECUTOR: Executor = Executor::new();
+/// Event manager.
+///
+/// Singleton instance of the event manager. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
+/// structure.
+static EVENT_MANAGER: EventManager = EventManager::new();
 /// Time manager.
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
@@ -169,7 +175,7 @@ impl InitApi for Aerugo {
     /// * `storage` - Static memory storage where the tasklet should be allocated.
     ///
     /// # Return
-    /// `Error` in case of an error, `Ok(())` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     ///
     /// # Safety
     /// This function shouldn't be called after the system was started, because it initializes the
@@ -223,7 +229,7 @@ impl InitApi for Aerugo {
     /// * `storage` - Static memory storage where the queue should be allocated.
     ///
     /// # Return
-    /// `Error` in case of an error, `Ok(())` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     ///
     /// # Safety
     /// This function shouldn't be called after the system was started, because it initializes the
@@ -253,8 +259,48 @@ impl InitApi for Aerugo {
         unsafe { storage.init() }
     }
 
-    fn create_event(&'static self, _storage: &'static EventStorage) -> Result<(), InitError> {
-        todo!()
+    /// Creates new event in the system.
+    ///
+    /// Events are created in EventManager and are identifier by the user-provided ID value. ID has
+    /// to be unique across the events in the system.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of the new event.
+    ///
+    /// # Return
+    /// `()` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because it modifies event
+    /// list which is safe only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{EventId, InitApi, AERUGO};
+    ///
+    /// enum Events {
+    ///     MyEvent,
+    /// }
+    ///
+    /// impl Into<EventId> for Events {
+    ///     fn into(self) -> EventId {
+    ///         match self {
+    ///             Events::MyEvent => 42,
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// fn main() {
+    ///     AERUGO.create_event(Events::MyEvent.into());
+    /// }
+    /// ```
+    fn create_event(&'static self, event_id: EventId) -> Result<(), InitError> {
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe {
+            EVENT_MANAGER.create_event(event_id)?;
+        }
+
+        Ok(())
     }
 
     /// Creates new boolean condition in the system.
@@ -320,7 +366,7 @@ impl InitApi for Aerugo {
     /// * `queue` - Handle to the target queue.
     ///
     /// # Return
-    /// `Error` in case of an error, `Ok(())` otherwise.
+    /// `()` if successful, `InitError` otherwise.
     ///
     /// # Safety
     /// This function shouldn't be called after the system was started, because subscription is safe
@@ -373,12 +419,82 @@ impl InitApi for Aerugo {
         Ok(())
     }
 
-    fn subscribe_tasklet_to_event<T, C, const COND_COUNT: usize>(
+    /// Subscribes a tasklet to events.
+    ///
+    /// Tasklet subscribes for emited events. After subscription specific events has to be enabled
+    /// for this tasklet using [EventEnabler](crate::event::EventEnabler) returned from this
+    /// function. Emiting an event will wake up all tasklet for which it is enabled and make them
+    /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
+    /// event. On each execution tasklet will handle one event, receiving it's ID in step function.
+    ///
+    /// Each tasklet can be subscribed to at maximum one data provider. Each event can be active
+    /// for multiple tasklets.
+    ///
+    /// Strong typing is enforced, tasklet can only be subscribed to events if it processes
+    /// [EventId](crate::event::EventId) type.
+    ///
+    /// # Generic Parameters
+    /// * `C` - Type of the structure with tasklet context data.
+    /// * `COND_COUNT` - Number of tasklet conditions.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Handle to the target tasklet.
+    /// * `queue` - Handle to the target queue.
+    ///
+    /// # Return
+    /// `EventEnabler` if successful, `InitError` otherwise.
+    ///
+    /// # Safety
+    /// This function shouldn't be called after the system was started, because subscription is safe
+    /// only before that.
+    ///
+    /// # Example
+    /// ```
+    /// # use aerugo::{EventId, InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// #
+    /// # fn task(_: EventId, _: &mut (), _: &dyn RuntimeApi) {}
+    /// #
+    /// # static TASK_STORAGE: TaskletStorage<EventId, (), 0> = TaskletStorage::new();
+    /// #
+    /// enum Events {
+    ///     MyEvent,
+    /// }
+    /// impl Into<EventId> for Events {
+    ///     fn into(self) -> EventId {
+    ///         match self {
+    ///             Events::MyEvent => 1,
+    ///         }
+    ///     }
+    /// }
+    /// fn main() {
+    ///     # let task_config = TaskletConfig::default();
+    ///     # AERUGO
+    ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
+    ///     #   .expect("Unable to create Tasklet");
+    ///     # AERUGO
+    ///     #   .create_event(Events::MyEvent.into())
+    ///     #   .expect("Unable to create MyEvent");
+    ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///
+    ///     AERUGO
+    ///         .subscribe_tasklet_to_events(&task_handle)
+    ///         .expect("Failed to subscribe Task to events")
+    ///         .enable(Events::MyEvent.into())
+    ///         .expect("Failed to subscribe Task to MyEvent");
+    /// }
+    /// ```
+    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize>(
         &'static self,
-        _tasklet: &TaskletHandle<T, C, COND_COUNT>,
-        _event: &EventHandle,
-    ) -> Result<(), InitError> {
-        todo!()
+        tasklet_handle: &TaskletHandle<EventId, C, COND_COUNT>,
+    ) -> Result<EventEnabler, InitError> {
+        let tasklet = tasklet_handle.tasklet();
+
+        let event_set = unsafe { EVENT_MANAGER.create_event_set(tasklet.ptr())? };
+        // SAFETY: This is safe as long as this function is called only during system initialization.
+        unsafe { tasklet.subscribe(event_set)? };
+
+        let event_subscriber = EventEnabler::new(event_set);
+        Ok(event_subscriber)
     }
 
     /// Subscribes tasklet to the boolean condition.
@@ -388,6 +504,8 @@ impl InitApi for Aerugo {
     ///
     /// Each tasklet can be subscribed to at maximum one data provider. Condition can have multiple
     /// tasklet registered.
+    ///
+    /// Strong typing is enforced, tasklet can only be subscribed to events if it processes bool type.
     ///
     /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
@@ -585,6 +703,10 @@ impl InitApi for Aerugo {
 }
 
 impl RuntimeApi for Aerugo {
+    fn emit_event(&'static self, event_id: EventId) -> Result<(), RuntimeError> {
+        EVENT_MANAGER.emit(event_id)
+    }
+
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000> {
         // SAFETY: This is safe, because it's a single-core environment,
         // and no other references to Hal should exist during this call.
@@ -626,6 +748,10 @@ impl RuntimeApi for Aerugo {
 }
 
 impl SystemApi for Aerugo {
+    fn get_event(&'static self, event_id: EventId) -> Option<&'static Event> {
+        EVENT_MANAGER.get_event(event_id)
+    }
+
     fn wake_tasklet(&'static self, tasklet: &TaskletPtr) {
         EXECUTOR
             .schedule_tasklet(tasklet)
