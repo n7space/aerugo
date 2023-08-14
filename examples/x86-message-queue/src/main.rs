@@ -1,5 +1,5 @@
 use aerugo::{
-    log, time::MillisDurationU32, InitApi, MessageQueueHandle, MessageQueueStorage,
+    log, time::MillisDurationU32, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
     SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 
@@ -12,7 +12,7 @@ struct TaskBContext {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_a(data: u8, context: &mut TaskAContext) {
+fn task_a(data: u8, context: &mut TaskAContext, _: &dyn RuntimeApi) {
     log!("TaskA: {}", data);
     context
         .queue_handle
@@ -21,7 +21,7 @@ fn task_a(data: u8, context: &mut TaskAContext) {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_b(data: u8, context: &mut TaskBContext) {
+fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
     log!("TaskB: {}", data);
     context
         .queue_handle

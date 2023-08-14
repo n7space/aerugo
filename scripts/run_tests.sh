@@ -3,10 +3,12 @@
 set -euo pipefail
 
 aerugo_x86() {
-    export AERUGO_TASKLET_COUNT=3
+    export AERUGO_TASKLET_COUNT=5
+    export AERUGO_EVENT_COUNT=3
 
     cargo test --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu --package aerugo
 
+    export -n AERUGO_EVENT_COUNT
     export -n AERUGO_TASKLET_COUNT
 }
 

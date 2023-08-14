@@ -7,7 +7,7 @@ use super::BooleanCondition;
 
 use heapless::Vec;
 
-use crate::aerugo::InitError;
+use crate::api::InitError;
 use crate::boolean_condition::BooleanConditionHandle;
 use crate::internal_cell::InternalCell;
 

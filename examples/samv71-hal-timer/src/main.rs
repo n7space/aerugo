@@ -14,7 +14,7 @@ use cortex_m::interrupt::Mutex;
 use panic_semihosting as _;
 
 use aerugo::{
-    hal::drivers::timer::Timer, time::MillisDurationU32, InitApi, SystemHardwareConfig,
+    hal::drivers::timer::Timer, time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig,
     TaskletConfig, TaskletStorage, AERUGO,
 };
 use cortex_m_semihosting::hprintln;
@@ -28,7 +28,7 @@ struct DummyTaskContext {
     acc: u16,
 }
 
-fn dummy_task(_: (), context: &mut DummyTaskContext) {
+fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     if context.acc % 1000 == 0 {
         hprintln!("I'm running!");

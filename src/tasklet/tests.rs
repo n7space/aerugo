@@ -63,7 +63,7 @@ fn req_tasklet_execution_state() {
     };
     let tasklet: Tasklet<(), (), 0> = Tasklet::new(
         tasklet_config,
-        |_, _| {},
+        |_, _, _| {},
         unsafe { &mut TASKLET_CONTEXT },
         &MOCK_CONDITION_SET.storage,
     );

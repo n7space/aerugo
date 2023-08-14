@@ -1,7 +1,7 @@
 use aerugo::{
     log, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, InitApi,
-    MessageQueueHandle, MessageQueueStorage, SystemHardwareConfig, TaskletConfig, TaskletStorage,
-    AERUGO,
+    MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage, AERUGO,
 };
 
 struct TaskAContext {
@@ -18,7 +18,7 @@ struct TaskBContext {
 struct TaskCContext {}
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_a(_: (), context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     log!("TaskA");
 
     context
@@ -28,7 +28,7 @@ fn task_a(_: (), context: &mut TaskAContext) {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_b(data: u8, context: &mut TaskBContext) {
+fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
     log!("TaskB: {}", data);
 
     context.counter += 1;
@@ -40,7 +40,7 @@ fn task_b(data: u8, context: &mut TaskBContext) {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_c(data: bool, _: &mut TaskCContext) {
+fn task_c(data: bool, _: &mut TaskCContext, _: &dyn RuntimeApi) {
     log!("TaskC");
 
     if data {

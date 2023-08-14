@@ -2,7 +2,7 @@
 
 use heapless::Vec;
 
-use crate::aerugo::error::InitError;
+use crate::api::InitError;
 use crate::boolean_condition::{BooleanCondition, BooleanConditionHandle};
 use crate::tasklet::TaskletPtr;
 

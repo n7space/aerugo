@@ -1,6 +1,6 @@
 use aerugo::{
-    log, InitApi, MessageQueueHandle, MessageQueueStorage, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    log, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 
 struct TaskAContext {
@@ -16,14 +16,14 @@ struct TaskCContext {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_a(_: (), context: &mut TaskAContext) {
+fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     context
         .queue_handle
         .send_data(1)
         .expect("Unable to send data from TaskA");
 }
 
-fn task_b(data: u8, context: &mut TaskBContext) {
+fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
     context.cnt += data;
     log!("TaskB: {}", context.cnt);
 
@@ -32,7 +32,7 @@ fn task_b(data: u8, context: &mut TaskBContext) {
     }
 }
 
-fn task_c(data: u8, context: &mut TaskCContext) {
+fn task_c(data: u8, context: &mut TaskCContext, _: &dyn RuntimeApi) {
     context.cnt += data;
     log!("TaskC: {}", context.cnt);
 

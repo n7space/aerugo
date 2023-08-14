@@ -26,7 +26,8 @@ pub use self::tasklet_storage::TaskletStorage;
 
 use core::cell::OnceCell;
 
-use crate::aerugo::error::InitError;
+use crate::aerugo::AERUGO;
+use crate::api::{InitError, RuntimeApi};
 use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
@@ -35,7 +36,7 @@ use crate::internal_cell::InternalCell;
 use crate::time::TimerInstantU64;
 
 /// Type of function that is executed by the tasklet in its step.
-pub(crate) type StepFn<T, C> = fn(T, &mut C);
+pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);
 
 /// Tasklet unique ID.
 pub struct TaskletId(u32);
@@ -164,7 +165,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
                     // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
                     // be executed only once at a given time.
                     let context = unsafe { self.context.as_mut_ref() };
-                    (self.step_fn)(val, context);
+                    (self.step_fn)(val, context, &AERUGO);
 
                     true
                 } else {

@@ -1,20 +1,11 @@
 //! Configuration for creating tasklets.
 
-use crate::aerugo::Aerugo;
-use crate::api::init_api;
-
 /// Configuration for tasklets.
 pub struct TaskletConfig {
     /// Name of the tasklet.
     pub name: &'static str,
     /// Priority of the tasklet.
     pub priority: u8,
-}
-
-impl init_api::TaskConfig for TaskletConfig {}
-
-impl init_api::TaskConfigType for Aerugo {
-    type TaskConfig = TaskletConfig;
 }
 
 impl Default for TaskletConfig {

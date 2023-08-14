@@ -7,7 +7,7 @@ use super::MessageQueue;
 
 use heapless::Vec;
 
-use crate::aerugo::InitError;
+use crate::api::InitError;
 use crate::internal_cell::InternalCell;
 use crate::message_queue::MessageQueueHandle;
 
