@@ -24,6 +24,7 @@ jobs:
           targets: x86_64-unknown-linux-gnu
       - name: run format
         run: ./scripts/check_fmt.sh
+        shell: bash
 
   clippy:
     name: Clippy
@@ -36,6 +37,7 @@ jobs:
           targets: x86_64-unknown-linux-gnu
       - name: check code
         run: ./scripts/check_code.sh
+        shell: bash
 
   build:
     name: Build
@@ -67,6 +69,7 @@ jobs:
           targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: run tests
         run: ./scripts/run_tests.sh
+        shell: bash
 
   examples:
     name: Build examples
@@ -79,6 +82,7 @@ jobs:
           targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: build examples
         run: ./scripts/build_examples.sh
+        shell: bash
 
   docs:
     name: Generate docs
@@ -91,3 +95,4 @@ jobs:
           targets: thumbv7em-none-eabihf
       - name: generate docs
         run: ./scripts/generate_docs.sh
+        shell: bash

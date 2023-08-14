@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 aerugo_x86_debug() {
     cargo build --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu --package aerugo
 }

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 aerugo_x86() {
     export AERUGO_TASKLET_COUNT=3
 
