@@ -1,4 +1,4 @@
-use core::{fmt::Write, slice};
+use core::slice;
 
 use rtt_target::{DownChannel, UpChannel};
 
@@ -33,6 +33,14 @@ pub enum ReceptionError {
 pub struct UpStream {
     /// Stream's channel
     channel: UpChannel,
+}
+
+/// Structure representing an UpStream writer that utilizes
+/// Drop trait to automatically end Stream when it's going out
+/// of scope. Should never be constructed manually by the user.
+pub struct UpStreamWriter<'a> {
+    /// Reference to stream's channel
+    channel: &'a mut UpChannel,
 }
 
 impl DownStream {
@@ -70,15 +78,12 @@ impl DownStream {
     /// a valid end-of-stream marker will eventually come.
     ///
     /// # Parameters
-    /// * `buffer` - Buffer for received data. Can be any type that converts into `&mut [u8]`
+    /// * `buffer` - Byte buffer for received data.
     ///
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn finish_reception<'a>(
-        &mut self,
-        buffer: impl Into<&'a mut [u8]>,
-    ) -> Result<usize, ReceptionError> {
+    pub fn finish_reception(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
         let buffer: &mut [u8] = buffer.into();
         let mut received_bytes: usize = 0;
         let mut received_byte: u8 = 0;
@@ -122,18 +127,22 @@ impl DownStream {
     /// start marker is received.
     ///
     /// # Parameters
-    /// * `buffer` - Buffer for received data.
+    /// * `buffer` - Byte buffer for received data.
     ///
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn receive<'a>(
-        &mut self,
-        buffer: impl Into<&'a mut [u8]>,
-    ) -> Result<usize, ReceptionError> {
+    pub fn receive(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
         self.wait_for_start_marker();
         self.finish_reception(buffer)
     }
+}
+
+/// Transmits a stream marker via RTT channel.
+#[inline(always)]
+fn transmit_stream_marker(channel: &mut UpChannel, marker: StreamMarker) {
+    let marker_byte = marker as u8;
+    channel.write(slice::from_ref(&marker_byte));
 }
 
 impl UpStream {
@@ -142,17 +151,43 @@ impl UpStream {
         Self { channel }
     }
 
-    /// Transmits a stream marker via RTT channel.
-    #[inline(always)]
-    fn transmit_stream_marker(&mut self, marker: StreamMarker) {
-        let marker_byte = marker as u8;
-        self.channel.write(slice::from_ref(&marker_byte));
+    /// Transmits data via Calldwell stream.
+    ///
+    /// This function allows for single buffer transmission.
+    /// If you want to transmit multiple chunks of data in a single stream,
+    /// see [`UpStream::get_writer`] function.
+    pub fn transmit<'a>(&mut self, data: impl Into<&'a [u8]>) -> usize {
+        transmit_stream_marker(&mut self.channel, StreamMarker::Start);
+        let transmitted_bytes = self.channel.write(data.into());
+        transmit_stream_marker(&mut self.channel, StreamMarker::End);
+        transmitted_bytes
     }
 
-    /// Transmits data via Calldwell stream.
-    pub fn transmit<'a>(&mut self, data: impl Into<&'a [u8]>) {
-        self.transmit_stream_marker(StreamMarker::Start);
-        self.channel.write(data.into());
-        self.transmit_stream_marker(StreamMarker::End);
+    /// Creates an [`UpStreamWriter`] instance, and returns it.
+    /// You can use it to write multiple chunks of data in a single stream.
+    pub fn get_writer(&mut self) -> UpStreamWriter {
+        UpStreamWriter::new(&mut self.channel)
+    }
+}
+
+impl<'a> UpStreamWriter<'a> {
+    /// Creates a new instance of [`UpStreamWriter`].
+    pub(super) fn new(channel_ref: &'a mut UpChannel) -> Self {
+        transmit_stream_marker(channel_ref, StreamMarker::Start);
+        return UpStreamWriter {
+            channel: channel_ref,
+        };
+    }
+
+    /// Transmits a chunk of data via opened stream.
+    pub fn transmit<'b>(&mut self, data: impl Into<&'b [u8]>) -> usize {
+        self.channel.write(data.into())
+    }
+}
+
+impl<'a> Drop for UpStreamWriter<'a> {
+    /// Ends the stream
+    fn drop(&mut self) {
+        transmit_stream_marker(self.channel, StreamMarker::End);
     }
 }
