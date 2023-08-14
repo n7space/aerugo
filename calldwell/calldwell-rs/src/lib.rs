@@ -13,12 +13,12 @@ use core::cell::RefCell;
 
 use critical_section::Mutex;
 use rtt_target::rtt_init;
-use streams::{DownStream, Idle, UpStream};
+use streams::{DownStream, UpStream};
 
 /// RTT channel acting as standard input.
 static RTT_IN: Mutex<RefCell<Option<DownStream>>> = Mutex::new(RefCell::new(None));
 /// RTT channel acting as standard output.
-static RTT_OUT: Mutex<RefCell<Option<UpStream<Idle>>>> = Mutex::new(RefCell::new(None));
+static RTT_OUT: Mutex<RefCell<Option<UpStream>>> = Mutex::new(RefCell::new(None));
 
 /// Initializes Calldwell's I/O. Call as soon as possible in the program,
 /// to make Calldwell's RTT facilities available.
