@@ -1,13 +1,13 @@
-use core::slice;
+use core::{fmt::Write, slice};
 
 use rtt_target::{DownChannel, UpChannel};
 
 /// Enumeration representing stream markers
-enum StreamMarkers {
+enum StreamMarker {
     /// Start of stream
     Start = 0xDD,
     /// End of stream
-    End = 0xDE,
+    End = 0xEE,
 }
 
 /// Structure representing a streaming DownChannel.
@@ -54,7 +54,7 @@ impl DownStream {
     fn wait_for_start_marker(&mut self) {
         let mut received_byte: u8 = 0; // assuming start marker's value is not 0
 
-        while received_byte != (StreamMarkers::Start as u8) {
+        while received_byte != (StreamMarker::Start as u8) {
             self.receive_byte(&mut received_byte);
         }
     }
@@ -70,12 +70,16 @@ impl DownStream {
     /// a valid end-of-stream marker will eventually come.
     ///
     /// # Parameters
-    /// * `buffer` - Buffer for received data.
+    /// * `buffer` - Buffer for received data. Can be any type that converts into `&mut [u8]`
     ///
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn finish_reception(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
+    pub fn finish_reception<'a>(
+        &mut self,
+        buffer: impl Into<&'a mut [u8]>,
+    ) -> Result<usize, ReceptionError> {
+        let buffer: &mut [u8] = buffer.into();
         let mut received_bytes: usize = 0;
         let mut received_byte: u8 = 0;
 
@@ -87,11 +91,11 @@ impl DownStream {
             // Might be a bit slower, as additional copy is performed, but we don't care for now.
             if self.receive_byte(&mut received_byte) {
                 // Double start marker detected
-                if received_byte == (StreamMarkers::Start as u8) {
+                if received_byte == (StreamMarker::Start as u8) {
                     return Err(ReceptionError::UnexpectedStreamStartMarker);
                 }
 
-                if received_byte == (StreamMarkers::End as u8) {
+                if received_byte == (StreamMarker::End as u8) {
                     return Ok(received_bytes);
                 }
 
@@ -123,7 +127,10 @@ impl DownStream {
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn receive(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
+    pub fn receive<'a>(
+        &mut self,
+        buffer: impl Into<&'a mut [u8]>,
+    ) -> Result<usize, ReceptionError> {
         self.wait_for_start_marker();
         self.finish_reception(buffer)
     }
@@ -133,5 +140,18 @@ impl UpStream {
     /// Creates new idle stream from channel.
     pub(super) fn new(channel: UpChannel) -> Self {
         Self { channel }
+    }
+
+    /// Transmits a stream marker via RTT channel.
+    fn transmit_stream_marker(&mut self, marker: StreamMarker) {
+        let marker_byte = marker as u8;
+        self.channel.write(slice::from_ref(&marker_byte));
+    }
+
+    /// Transmits data via Calldwell stream.
+    pub fn transmit<'a>(&mut self, data: impl Into<&'a [u8]>) {
+        self.transmit_stream_marker(StreamMarker::Start);
+        self.channel.write(data.into());
+        self.transmit_stream_marker(StreamMarker::End);
     }
 }
