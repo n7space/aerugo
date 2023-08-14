@@ -143,6 +143,7 @@ impl UpStream {
     }
 
     /// Transmits a stream marker via RTT channel.
+    #[inline(always)]
     fn transmit_stream_marker(&mut self, marker: StreamMarker) {
         let marker_byte = marker as u8;
         self.channel.write(slice::from_ref(&marker_byte));
