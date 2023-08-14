@@ -5,36 +5,88 @@ use pac::tc0::tc_channel::cmr_waveform_mode::{
 };
 
 /// Structure representing waveform mode configuration.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct WaveformModeConfig {
-    /// Stop counter clock when counter reaches RC.
-    pub stop_clock_on_rc_compare: bool,
-    /// Disable counter clock when counter reaches RC.
-    pub disable_clock_on_rc_compare: bool,
+    /// RC Compare event effect on timer's counter state.
+    pub rc_compare_effect: RcCompareEffect,
     /// External event configuration
     pub external_event: ExternalEventConfig,
     /// Waveform mode selection.
-    pub mode: WaveformMode,
+    pub mode: CountMode,
     /// Event effects for output A.
     pub tioa_effects: OutputSignalEffects,
     /// Event effects for output B.
     pub tiob_effects: OutputSignalEffects,
 }
 
-impl Default for WaveformModeConfig {
-    /// Creates a default (per datasheet) config for Waveform mode
-    fn default() -> Self {
-        Self {
-            stop_clock_on_rc_compare: false,
-            disable_clock_on_rc_compare: false,
-            external_event: ExternalEventConfig {
-                edge: EventEdge::None,
-                signal: ExternalEventSignal::TIOB,
-                enabled: false,
+/// Enumeration representing RC compare event effect on channel's counter state.
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+pub enum RcCompareEffect {
+    /// RC Compare event has no effect on channel's counter state.
+    /// Default per datasheet.
+    #[default]
+    None,
+    /// RC Compare event stops channel's counter.
+    CounterStops,
+    /// RC Compare event disables channel's counter.
+    CounterDisables,
+    /// RC Compare event stops and disables channel's counter.
+    CounterStopsAndDisables,
+}
+
+/// Intermediate helper struct used for explicit conversions between enum value and it's flags in TC registers.
+/// To be used internally by HAL, not by the end user.
+pub(super) struct RcCompareEffectFlags {
+    /// Indicates that RC Compare stops the counter.
+    pub stops: bool,
+    /// Indicates that RC Compare disables the counter.
+    pub disables: bool,
+}
+
+/// Helper conversion trait, used to parse the enum value into TC register flags.
+impl From<RcCompareEffect> for RcCompareEffectFlags {
+    fn from(value: RcCompareEffect) -> Self {
+        match value {
+            RcCompareEffect::None => Self {
+                stops: false,
+                disables: false,
             },
-            mode: WaveformMode::Up,
-            tioa_effects: OutputSignalEffects::none(),
-            tiob_effects: OutputSignalEffects::none(),
+            RcCompareEffect::CounterStops => Self {
+                stops: true,
+                disables: false,
+            },
+            RcCompareEffect::CounterDisables => Self {
+                stops: false,
+                disables: true,
+            },
+            RcCompareEffect::CounterStopsAndDisables => Self {
+                stops: true,
+                disables: true,
+            },
+        }
+    }
+}
+
+/// Helper conversion trait, used to parse data from TC registers into enum value.
+impl From<RcCompareEffectFlags> for RcCompareEffect {
+    fn from(value: RcCompareEffectFlags) -> Self {
+        match value {
+            RcCompareEffectFlags {
+                stops: false,
+                disables: false,
+            } => RcCompareEffect::None,
+            RcCompareEffectFlags {
+                stops: true,
+                disables: false,
+            } => RcCompareEffect::CounterStops,
+            RcCompareEffectFlags {
+                stops: false,
+                disables: true,
+            } => RcCompareEffect::CounterDisables,
+            RcCompareEffectFlags {
+                stops: true,
+                disables: true,
+            } => RcCompareEffect::CounterStopsAndDisables,
         }
     }
 }
@@ -43,7 +95,7 @@ impl Default for WaveformModeConfig {
 ///
 /// Note: The selected external event only controls the TIOAx output and TIOBx
 /// if not used as input (trigger event input, or other input).
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct ExternalEventConfig {
     /// External event signal edge.
     pub edge: EventEdge,
@@ -53,8 +105,19 @@ pub struct ExternalEventConfig {
     pub enabled: bool,
 }
 
+impl ExternalEventConfig {
+    /// Returns disabled external event configuration.
+    pub fn disabled() -> Self {
+        ExternalEventConfig {
+            edge: EventEdge::None,
+            signal: ExternalEventSignal::TIOB,
+            enabled: false,
+        }
+    }
+}
+
 /// Structure representing event effects on channel's output signals (TIOA and TIOB)
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct OutputSignalEffects {
     /// RA/RB comparison effect (RA for TIOA, RB for TIOB).
     pub rx_comparison: ComparisonEffect,
@@ -84,9 +147,11 @@ impl OutputSignalEffects {
 }
 
 /// Enumeration listing event signal edges.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub enum EventEdge {
     /// None
+    /// Default per datasheet for all scenarios.
+    #[default]
     None,
     /// Rising edge
     Rising,
@@ -119,12 +184,14 @@ impl From<EventEdge> for EEVTEDGSELECT_A {
 }
 
 /// Enumeration listing available external event signals.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub enum ExternalEventSignal {
     /// Timer Output B (TIOB becomes input)
     ///
     /// Note: if TIOB is chosen as the external event signal, it is configured
     /// as an input and no longer generates waveforms, and subsequently, no interrupts.
+    /// Default per datasheet.
+    #[default]
     TIOB,
     /// External clock 0 (TIOB becomes output)
     XC0,
@@ -157,9 +224,11 @@ impl From<ExternalEventSignal> for EEVTSELECT_A {
 }
 
 /// Enumeration listing available waveform counting modes.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum WaveformMode {
+#[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
+pub enum CountMode {
     /// Counter counts "up" until it's triggered or overflows, then it's reset to 0.
+    /// Default per datasheet.
+    #[default]
     Up,
     /// Counters counts "up" until it's triggered or overflows,
     /// then it counts "down" until it's triggered or reaches 0,
@@ -171,32 +240,34 @@ pub enum WaveformMode {
     UpDownToRc,
 }
 
-impl From<WAVSELSELECT_A> for WaveformMode {
+impl From<WAVSELSELECT_A> for CountMode {
     fn from(value: WAVSELSELECT_A) -> Self {
         match value {
-            WAVSELSELECT_A::UP => WaveformMode::Up,
-            WAVSELSELECT_A::UPDOWN => WaveformMode::UpDown,
-            WAVSELSELECT_A::UP_RC => WaveformMode::UpToRc,
-            WAVSELSELECT_A::UPDOWN_RC => WaveformMode::UpDownToRc,
+            WAVSELSELECT_A::UP => CountMode::Up,
+            WAVSELSELECT_A::UPDOWN => CountMode::UpDown,
+            WAVSELSELECT_A::UP_RC => CountMode::UpToRc,
+            WAVSELSELECT_A::UPDOWN_RC => CountMode::UpDownToRc,
         }
     }
 }
 
-impl From<WaveformMode> for WAVSELSELECT_A {
-    fn from(value: WaveformMode) -> Self {
+impl From<CountMode> for WAVSELSELECT_A {
+    fn from(value: CountMode) -> Self {
         match value {
-            WaveformMode::Up => WAVSELSELECT_A::UP,
-            WaveformMode::UpDown => WAVSELSELECT_A::UPDOWN,
-            WaveformMode::UpToRc => WAVSELSELECT_A::UP_RC,
-            WaveformMode::UpDownToRc => WAVSELSELECT_A::UPDOWN_RC,
+            CountMode::Up => WAVSELSELECT_A::UP,
+            CountMode::UpDown => WAVSELSELECT_A::UPDOWN,
+            CountMode::UpToRc => WAVSELSELECT_A::UP_RC,
+            CountMode::UpDownToRc => WAVSELSELECT_A::UPDOWN_RC,
         }
     }
 }
 
 /// Enumeration listing possible comparison effects.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
 pub enum ComparisonEffect {
     /// Comparison has no effect on signal.
+    /// Default per datasheet.
+    #[default]
     None,
     /// Comparison sets the signal.
     Set,
@@ -223,6 +294,29 @@ impl ComparisonEffect {
             ComparisonEffect::Set => ACPASELECT_A::SET as u8,
             ComparisonEffect::Clear => ACPASELECT_A::CLEAR as u8,
             ComparisonEffect::Toggle => ACPASELECT_A::TOGGLE as u8,
+        }
+    }
+
+    /// Converts comparison effect's ID from TC registers into a ComparisonEffect
+    /// instance.
+    ///
+    /// To prevent accidental typos, values are taken directly from PAC, and
+    /// converted to u8. This allows easy type erasure, while also retaining
+    /// value safety.
+    ///
+    /// # Returns
+    /// A [`ComparisonEffect`], or [`None`] if an invalid ID is provided.
+    pub(super) fn from_id(id: u8) -> Option<Self> {
+        if id == (ACPASELECT_A::NONE as u8) {
+            Some(ComparisonEffect::None)
+        } else if id == (ACPASELECT_A::SET as u8) {
+            Some(ComparisonEffect::Set)
+        } else if id == (ACPASELECT_A::CLEAR as u8) {
+            Some(ComparisonEffect::Clear)
+        } else if id == (ACPASELECT_A::TOGGLE as u8) {
+            Some(ComparisonEffect::Toggle)
+        } else {
+            None
         }
     }
 }

@@ -1,23 +1,22 @@
 //! Implementation of HAL Timer Counter driver.
 pub mod channel;
 pub mod channel_config;
+pub mod channel_waveform;
 mod tc_metadata;
 pub mod timer_config;
 pub mod timer_error;
 pub mod waveform_config;
 
-use channel::*;
-use tc_metadata::*;
-
-pub use channel::Channel;
-pub use channel_config::*;
-pub use timer_config::*;
+pub use channel::*;
+pub use tc_metadata::*;
 pub use timer_error::*;
-pub use waveform_config::*;
 
 use core::marker::PhantomData;
 
-use self::timer_error::TimerConfigurationError;
+use self::{
+    timer_config::{ExternalClock, ExternalClockSource},
+    timer_error::TimerConfigurationError,
+};
 
 /// Structure representing a Timer instance.
 ///
@@ -25,11 +24,11 @@ use self::timer_error::TimerConfigurationError;
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
 pub struct Timer<TimerMetadata> {
     /// Channel 0.
-    pub channel_0: Option<Channel<TimerMetadata, Ch0, Disabled, NotConfigured>>,
+    pub channel_0: Option<Channel<TimerMetadata, Ch0, NotConfigured>>,
     /// Channel 1.
-    pub channel_1: Option<Channel<TimerMetadata, Ch1, Disabled, NotConfigured>>,
+    pub channel_1: Option<Channel<TimerMetadata, Ch1, NotConfigured>>,
     /// Channel 2.
-    pub channel_2: Option<Channel<TimerMetadata, Ch2, Disabled, NotConfigured>>,
+    pub channel_2: Option<Channel<TimerMetadata, Ch2, NotConfigured>>,
     /// PhantomData for TC metadata.
     _tc_peripheral: PhantomData<TimerMetadata>,
 }
@@ -73,7 +72,7 @@ where
     ///
     /// # Safety
     /// This function directly modifies the registers of a timer in an unsafe manner, but values put in these
-    /// registers come from PAC, so they should be valid.
+    /// registers come from PAC and are validated before using, so they should be valid.
     pub fn configure_external_clock_source(
         &self,
         clock: ExternalClock,
