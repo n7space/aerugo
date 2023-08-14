@@ -126,7 +126,7 @@ where
             .modify(|_, w| w.wavsel().variant(mode.into()));
     }
 
-    /// Sets TIOA event/trigger effects.
+    /// Returns TIOA event/trigger effects.
     ///
     /// # Safety
     /// This function will panic if an unexpected value is read from timer's registers.
@@ -150,7 +150,7 @@ where
         }
     }
 
-    /// Returns TIOA event/trigger effects.
+    /// Sets TIOA event/trigger effects.
     pub fn set_tioa_effects(&self, effects: OutputSignalEffects) {
         self.mode_register().modify(|_, w| {
             w.acpa()
@@ -164,7 +164,7 @@ where
         });
     }
 
-    /// Sets TIOB event/trigger effects.
+    /// Returns TIOB event/trigger effects.
     ///
     /// # Safety
     /// This function will panic if an unexpected value is read from timer's registers.
@@ -188,7 +188,7 @@ where
         }
     }
 
-    /// Returns TIOB event/trigger effects.
+    /// Sets TIOB event/trigger effects.
     pub fn set_tiob_effects(&self, effects: OutputSignalEffects) {
         self.mode_register().modify(|_, w| {
             w.bcpb()
