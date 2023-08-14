@@ -46,7 +46,7 @@ fn dummy_task(_: (), context: &mut DummyTaskContext) {
     }
 }
 
-static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext> = TaskletStorage::new();
+static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
 
 fn init_timer(timer: &mut Timer<TC1>) {
     let ch0 = timer
