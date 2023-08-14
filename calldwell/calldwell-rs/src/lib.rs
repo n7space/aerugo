@@ -16,9 +16,9 @@ use rtt_target::rtt_init;
 use streams::{DownStream, Idle, UpStream};
 
 /// RTT channel acting as standard input.
-static CALLDWELL_RTT_IN: Mutex<RefCell<Option<DownStream<Idle>>>> = Mutex::new(RefCell::new(None));
+static RTT_IN: Mutex<RefCell<Option<DownStream>>> = Mutex::new(RefCell::new(None));
 /// RTT channel acting as standard output.
-static CALLDWELL_RTT_OUT: Mutex<RefCell<Option<UpStream<Idle>>>> = Mutex::new(RefCell::new(None));
+static RTT_OUT: Mutex<RefCell<Option<UpStream<Idle>>>> = Mutex::new(RefCell::new(None));
 
 /// Initializes Calldwell's I/O. Call as soon as possible in the program,
 /// to make Calldwell's RTT facilities available.
@@ -44,7 +44,7 @@ pub fn initialize() {
 
         let rtt_in = DownStream::new(channels.down.0);
         let rtt_out = UpStream::new(channels.up.0);
-        CALLDWELL_RTT_IN.borrow(cs).replace(Some(rtt_in));
-        CALLDWELL_RTT_OUT.borrow(cs).replace(Some(rtt_out));
+        RTT_IN.borrow(cs).replace(Some(rtt_in));
+        RTT_OUT.borrow(cs).replace(Some(rtt_out));
     });
 }
