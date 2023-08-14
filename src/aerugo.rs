@@ -421,7 +421,7 @@ impl InitApi for Aerugo {
 
     /// Subscribes a tasklet to events.
     ///
-    /// Tasklet subscribes for emited events. After subscription specific events has to be enabled
+    /// Tasklet subscribes for emited events. After subscription, specific events have to be enabled
     /// for this tasklet using [EventEnabler](crate::event::EventEnabler) returned from this
     /// function. Emiting an event will wake up all tasklet for which it is enabled and make them
     /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
