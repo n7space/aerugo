@@ -1,16 +1,16 @@
-/// @SRS{ROS-FUN-RTOS-20}
+/// @SRS{ROS-FUN-RTOS-020}
 ///
 /// Design Analisys is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_tasklet_persistent_context_data() {}
 
-/// @SRS{ROS-FUN-RTOS-30}
+/// @SRS{ROS-FUN-RTOS-030}
 ///
 /// Design Analisys is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_tasklet_user_data_safe_access() {}
 
-/// @SRS{ROS-FUN-RTOS-40}
+/// @SRS{ROS-FUN-RTOS-040}
 ///
 /// Design Analisys is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]

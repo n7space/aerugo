@@ -1,7 +1,7 @@
 use assert_cmd::Command;
 use test_binary::build_test_binary;
 
-/// @SRS{ROS-FUN-RTOS-10}
+/// @SRS{ROS-FUN-RTOS-010}
 /// @SRS{ROS-FUN-RTOS-2010}
 /// @SRS{ROS-FUN-RTOS-2020}
 /// @SRS{ROS-FUN-RTOS-2030}
