@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 if [ $# -eq 0 ]
 then
     for d in examples/*/; do
