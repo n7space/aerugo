@@ -19,6 +19,7 @@ pub mod user_peripherals;
 
 pub use self::hal::Hal;
 pub use embedded_hal;
+pub use pac::PMC;
 
 #[cfg(feature = "rt")]
 pub use pac::interrupt;

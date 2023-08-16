@@ -72,6 +72,7 @@ impl Hal {
             timer_counter1: Some(mcu_peripherals.TC1),
             timer_counter2: Some(mcu_peripherals.TC2),
             timer_counter3: Some(mcu_peripherals.TC3),
+            pmc: Some(mcu_peripherals.PMC),
         };
 
         (user_peripherals, system_peripherals)
