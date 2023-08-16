@@ -62,6 +62,7 @@ impl Hal {
     /// guarantee safety if multiple instances of peripherals are used in the system.
     fn create_peripherals() -> (UserPeripherals, SystemPeripherals) {
         let mcu_peripherals = unsafe { pac::Peripherals::steal() };
+        let core_peripherals = unsafe { pac::CorePeripherals::steal() };
 
         let system_peripherals = SystemPeripherals {
             watchdog: Watchdog::new(mcu_peripherals.WDT),
@@ -73,6 +74,7 @@ impl Hal {
             timer_counter2: Some(mcu_peripherals.TC2),
             timer_counter3: Some(mcu_peripherals.TC3),
             pmc: Some(mcu_peripherals.PMC),
+            nvic: Some(core_peripherals.NVIC),
         };
 
         (user_peripherals, system_peripherals)

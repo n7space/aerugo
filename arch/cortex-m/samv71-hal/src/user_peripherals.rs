@@ -15,4 +15,6 @@ pub struct UserPeripherals {
     pub timer_counter3: Option<pac::TC3>,
     /// PMC
     pub pmc: Option<pac::PMC>,
+    /// NVIC
+    pub nvic: Option<pac::NVIC>,
 }
