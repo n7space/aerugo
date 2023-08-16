@@ -1,3 +1,9 @@
+/// @SRS{ROS-BSP-010}
+///
+/// Design Analisys is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_provide_rtos() {}
+
 /// @SRS{ROS-FUN-RTOS-020}
 ///
 /// Design Analisys is described in N7S-ROS-SVSR-001, chapter 6.2.
