@@ -5,7 +5,7 @@ use test_binary::build_test_binary;
 /// @SRS{ROS-FUN-RTOS-130}
 /// @SRS{ROS-FUN-RTOS-3010}
 /// @SRS{ROS-FUN-RTOS-3020}
-/// @SRS{ROS-FUN-RTOS-3050}
+/// @SRS{ROS-FUN-RTOS-3060}
 /// @SRS{ROS-FUN-RTOS-3070}
 /// @SRS[ROS-FUN-RTOS-3080]
 /// @SRS{ROS-FUN-RTOS-3090}
