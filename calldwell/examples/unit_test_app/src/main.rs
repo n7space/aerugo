@@ -1,65 +1,61 @@
 #![no_std]
 #![no_main]
 
+extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate panic_rtt_target;
 extern crate rtt_target;
 
-use core::{cell::RefCell, str::from_utf8};
-use cortex_m::{asm::nop, interrupt as irq, interrupt::Mutex};
+use core::str::from_utf8;
+
+use calldwell::{with_rtt_in, with_rtt_out};
+use core::fmt::Write;
+use cortex_m::asm;
 use cortex_m_rt::entry;
-use rtt_target::{rprint, rprintln, rtt_init_default, set_print_channel, DownChannel};
-
-static STDIN: Mutex<RefCell<Option<DownChannel>>> = Mutex::new(RefCell::new(None));
-
-#[inline(never)]
-fn init_tests() {
-    irq::free(|cs| {
-        let rtt = rtt_init_default!();
-        set_print_channel(rtt.up.0);
-        STDIN.borrow(cs).replace(Some(rtt.down.0));
-    });
-}
-
-fn read_stdin(buffer: &mut [u8]) -> usize {
-    irq::free(|cs| {
-        let mut stream_ref = STDIN.borrow(cs).borrow_mut();
-        let stream = stream_ref.as_mut().unwrap();
-        stream.read(buffer)
-    })
-}
 
 #[entry]
 fn main() -> ! {
-    init_tests();
-    let mut input_received = false;
+    let mut input_buffer: [u8; 128] = [0; 128];
+    calldwell::initialize();
 
-    rprintln!("Hello from RTT!");
+    with_rtt_out(|o, _| o.write_str("Hello from SAMV71!"));
 
-    while !input_received {
-        let mut buffer: [u8; 32] = [0; 32];
-        let received = read_stdin(&mut buffer);
-        if received > 0 {
-            rprintln!(
-                "Received '{}'",
-                from_utf8(&buffer).expect("Invalid string received!")
-            );
-            input_received = true;
-        }
+    let read_bytes = with_rtt_in(|i, _| i.read(&mut input_buffer));
+
+    match read_bytes {
+        Ok(amount) => with_rtt_out(|o, _| {
+            write!(
+                o.writer(),
+                "Received {} bytes: {}",
+                amount,
+                from_utf8(&input_buffer[..amount]).expect("Invalid string received!")
+            )
+            .unwrap();
+        }),
+        Err(e) => with_rtt_out(|o, _| {
+            write!(
+                o.writer(),
+                "Error occurred while receiving message: {:?}",
+                e
+            )
+            .unwrap();
+        }),
     }
 
-    rprintln!("Running unit tests...");
+    with_rtt_out(|o, _| o.write_str("Running tests..."));
 
     for i in 0..10 {
-        rprint!("Test {}: ", i);
+        with_rtt_out(|o, _| write!(o.writer(), "Starting test #{}", i).unwrap());
+
         for _ in 0..100000 {
-            nop();
+            asm::nop();
         }
-        rprintln!("DONE!");
+
+        with_rtt_out(|o, _| write!(o.writer(), "Test #{} finished!", i).unwrap());
     }
 
-    rprintln!("All tests executed!");
+    with_rtt_out(|o, _| o.write_str("All tests done!"));
 
     loop {}
 }
