@@ -1,4 +1,4 @@
-/// @SRS{ROS-BSP-010}
+/// @SRS{ROS-FUN-BSP-010}
 ///
 /// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
