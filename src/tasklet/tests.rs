@@ -44,10 +44,10 @@ impl<const N: usize> MockConditionSet<N> {
     }
 }
 
-/// @SRS{ROS-FUN-RTOS-50}
-/// @SRS{ROS-FUN-RTOS-60}
-/// @SRS{ROS-FUN-RTOS-70}
-/// @SRS{ROS-FUN-RTOS-80}
+/// @SRS{ROS-FUN-RTOS-050}
+/// @SRS{ROS-FUN-RTOS-060}
+/// @SRS{ROS-FUN-RTOS-070}
+/// @SRS{ROS-FUN-RTOS-080}
 #[cfg_attr(not(doc), test)]
 fn req_tasklet_execution_state() {
     static mut MOCK_DATA_PROVIDER: MockDataProvider = MockDataProvider::new();

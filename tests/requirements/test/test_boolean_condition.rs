@@ -1,8 +1,10 @@
 use assert_cmd::Command;
 use test_binary::build_test_binary;
 
-/// @SRS{ROS-FUN-RTOS-10}
+/// @SRS{ROS-FUN-RTOS-010}
+/// @SRS{ROS-FUN-RTOS-130}
 /// @SRS{ROS-FUN-RTOS-1010}
+/// @SRS{ROS-FUN-RTOS-1020}
 /// @SRS{ROS-FUN-RTOS-1030}
 /// @SRS{ROS-FUN-RTOS-1060}
 /// @SRS{ROS-FUN-RTOS-1090}
@@ -18,13 +20,13 @@ fn req_test_boolean_condition() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskA
+            r#"TaskA: true, false
 TaskB: 1
-TaskA
+TaskA: true, false
 TaskB: 1
-TaskA
+TaskA: true, false
 TaskB: 1
-TaskC
+TaskC: false, true
 "#,
         );
 }

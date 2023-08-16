@@ -6,6 +6,8 @@ use aerugo::{
 
 struct TaskAContext {
     queue_handle: MessageQueueHandle<u8, 10>,
+    enable_condition_handle: BooleanConditionHandle,
+    done_condition_handle: BooleanConditionHandle,
 }
 
 struct TaskBContext {
@@ -14,12 +16,17 @@ struct TaskBContext {
     done_condition_handle: BooleanConditionHandle,
 }
 
-#[derive(Default)]
-struct TaskCContext {}
+struct TaskCContext {
+    enable_condition_handle: BooleanConditionHandle,
+    done_condition_handle: BooleanConditionHandle,
+}
 
 #[allow(clippy::needless_pass_by_ref_mut)]
 fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
-    log!("TaskA");
+    let enable_status = context.enable_condition_handle.get_value();
+    let done_status = context.done_condition_handle.get_value();
+
+    log!("TaskA: {}, {}", enable_status, done_status);
 
     context
         .queue_handle
@@ -40,8 +47,11 @@ fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-fn task_c(data: bool, _: &mut TaskCContext, _: &dyn RuntimeApi) {
-    log!("TaskC");
+fn task_c(data: bool, context: &mut TaskCContext, _: &dyn RuntimeApi) {
+    let enable_status = context.enable_condition_handle.get_value();
+    let done_status = context.done_condition_handle.get_value();
+
+    log!("TaskC: {}, {}", enable_status, done_status);
 
     if data {
         std::process::exit(0)
@@ -97,9 +107,15 @@ fn main() -> ! {
 
     let task_a_context = TaskAContext {
         queue_handle: queue_x_handle,
+        enable_condition_handle,
+        done_condition_handle,
     };
     let task_b_context = TaskBContext {
         counter: 0,
+        enable_condition_handle,
+        done_condition_handle,
+    };
+    let task_c_context = TaskCContext {
         enable_condition_handle,
         done_condition_handle,
     };
@@ -111,7 +127,7 @@ fn main() -> ! {
         .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
     AERUGO
-        .create_tasklet(task_c_config, task_c, &TASK_C_STORAGE)
+        .create_tasklet_with_context(task_c_config, task_c, task_c_context, &TASK_C_STORAGE)
         .expect("Unable to create TaskC");
 
     let task_a_handle = TASK_A_STORAGE

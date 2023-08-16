@@ -1,11 +1,13 @@
 use assert_cmd::Command;
 use test_binary::build_test_binary;
 
-/// @SRS{ROS-FUN-RTOS-10}
+/// @SRS{ROS-FUN-RTOS-010}
+/// @SRS{ROS-FUN-RTOS-130}
 /// @SRS{ROS-FUN-RTOS-2010}
 /// @SRS{ROS-FUN-RTOS-2020}
 /// @SRS{ROS-FUN-RTOS-2030}
 /// @SRS{ROS-FUN-RTOS-2060}
+/// @SRS{ROS-FUN-RTOS-2070}
 #[cfg_attr(not(doc), test)]
 fn req_test_message_queue() {
     let test_bin_path =

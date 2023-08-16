@@ -135,9 +135,10 @@ mod tests {
 
     use crate::boolean_condition::BooleanConditionStorage;
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1080}
     #[cfg_attr(not(doc), test)]
-    fn evaluate_or_set_true() {
+    fn req_evaluate_or_set_true() {
         static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
         unsafe {
             CONDITION_X_STORAGE
@@ -162,9 +163,10 @@ mod tests {
         assert!(condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1080}
     #[cfg_attr(not(doc), test)]
-    fn evaluate_or_set_false() {
+    fn req_evaluate_or_set_false() {
         static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
         unsafe {
             CONDITION_X_STORAGE
@@ -189,9 +191,10 @@ mod tests {
         assert!(!condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1090}
     #[cfg_attr(not(doc), test)]
-    fn evaluate_and_set_true() {
+    fn req_evaluate_and_set_true() {
         static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
         unsafe {
             CONDITION_X_STORAGE
@@ -216,9 +219,10 @@ mod tests {
         assert!(condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1090}
     #[cfg_attr(not(doc), test)]
-    fn evaluate_and_set_false() {
+    fn req_evaluate_and_set_false() {
         static CONDITION_X_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
         unsafe {
             CONDITION_X_STORAGE
