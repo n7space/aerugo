@@ -2,6 +2,7 @@ use assert_cmd::Command;
 use test_binary::build_test_binary;
 
 /// @SRS{ROS-FUN-RTOS-010}
+/// @SRS{ROS-FUN-RTOS-130}
 /// @SRS{ROS-FUN-RTOS-3010}
 /// @SRS{ROS-FUN-RTOS-3020}
 /// @SRS{ROS-FUN-RTOS-3070}

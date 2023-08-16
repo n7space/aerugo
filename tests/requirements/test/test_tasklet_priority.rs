@@ -5,6 +5,7 @@ use test_binary::build_test_binary;
 /// @SRS{ROS-FUN-RTOS-090}
 /// @SRS{ROS-FUN-RTOS-100}
 /// @SRS{ROS-FUN-RTOS-110}
+/// @SRS{ROS-FUN-RTOS-130}
 #[cfg_attr(not(doc), test)]
 fn req_test_tasklet_priority() {
     let test_bin_path =
