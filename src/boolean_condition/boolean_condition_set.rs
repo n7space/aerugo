@@ -135,6 +135,7 @@ mod tests {
 
     use crate::boolean_condition::BooleanConditionStorage;
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1080}
     #[cfg_attr(not(doc), test)]
     fn req_evaluate_or_set_true() {
@@ -162,6 +163,7 @@ mod tests {
         assert!(condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1080}
     #[cfg_attr(not(doc), test)]
     fn req_evaluate_or_set_false() {
@@ -189,6 +191,7 @@ mod tests {
         assert!(!condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1090}
     #[cfg_attr(not(doc), test)]
     fn req_evaluate_and_set_true() {
@@ -216,6 +219,7 @@ mod tests {
         assert!(condition_set.evaluate());
     }
 
+    /// @SRS{ROS-FUN-RTOS-1070}
     /// @SRS{ROS-FUN-RTOS-1090}
     #[cfg_attr(not(doc), test)]
     fn req_evaluate_and_set_false() {
