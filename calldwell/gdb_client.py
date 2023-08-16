@@ -1,8 +1,8 @@
 import logging
 from typing import List, Optional
 
-from gdb_interface import GDBInterface
-from gdb_responses import GDBResponsesList, ProgramSymbol
+from .gdb_interface import GDBInterface
+from .gdb_responses import GDBResponsesList, ProgramSymbol
 
 
 class GDBClient:
@@ -216,6 +216,36 @@ class GDBClient:
             f"Program stopped by breakpoint at {str(self._interface.program_state.program_frame)}!"
         )
         return True
+
+    def wait_for_stopped(self, timeout: Optional[float] = None) -> str:
+        """Waits until program is stopped.
+        Returns the reason of stopping.
+
+        # Parameters
+        * `timeout` - Time, in seconds, to wait for program stop. If `None`, default timeout
+                      will be used instead.
+        """
+        self._logger.info("Waiting for program to be stopped...")
+        while self._interface.program_state.is_running:
+            self._interface.get_responses(timeout, self._should_log_responses)
+
+        self._logger.info(
+            f"Program stopped because of '{self._interface.program_state.last_stop_reason}'"
+        )
+        return str(self._interface.program_state.last_stop_reason)
+
+    def wait_for_reset(self, timeout: Optional[float] = None):
+        """Waits until program is reset. Useful for detecting watchdog underflow.
+
+        # Parameters
+        * `timeout` - Time, in seconds, to wait for program stop. If `None`, default timeout
+                      will be used instead.
+        """
+        self._logger.info("Waiting for MCU to be reset...")
+        while not self._interface.program_state.was_reset:
+            self._interface.get_responses(timeout, self._should_log_responses)
+
+        self._logger.info("Reset detected!")
 
     def finish_function_execution(self, force: bool = False):
         """Finishes current function execution.

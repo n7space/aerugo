@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from pygdbmi.gdbcontroller import GdbController
 
-from gdb_responses import GDBResponse, GDBResponsesList
+from .gdb_responses import GDBResponse, GDBResponsesList
 
 
 class GDBInterface:
@@ -40,7 +40,7 @@ class GDBInterface:
         self._default_timeout = default_timeout
         self._should_log_execution = log_execution
         self._should_log_responses = log_responses
-        self._program_state = ProgramState.default()
+        self._program_state = ProgramState()
 
         self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
@@ -135,7 +135,7 @@ class GDBInterface:
         if log_responses:
             self._log_responses(responses)
 
-        self._handle_notifications(responses)
+        self._handle_async_events(responses)
 
         return responses
 
@@ -340,10 +340,10 @@ class GDBInterface:
                     log_message += f" {response.unescaped_payload().strip()}"
             self._logger.info(log_message)
 
-    def _handle_notifications(self, responses: GDBResponsesList):
+    def _handle_async_events(self, responses: GDBResponsesList):
         """Private function. Do not use.
         Looks through responses on the list and changes this object's state according to received
-        notifications."""
+        messages."""
         for notification in responses.notifications():
             if notification.message == "stopped":
                 self._program_state.is_running = False
@@ -364,6 +364,11 @@ class GDBInterface:
                 self._program_state.is_running = True
                 self._logger.info("Program is running.")
 
+        for message in responses.target():
+            if "external reset detected" in message.unescaped_payload():
+                self._program_state.was_reset = True
+                self._logger.info("External reset detected!")
+
 
 @dataclass
 class ProgramFrame:
@@ -383,10 +388,11 @@ class ProgramFrame:
 class ProgramState:
     """Container for everything related to program state."""
 
-    is_running: bool
-    last_stop_reason: Optional[str]
-    program_frame: Optional[ProgramFrame]
+    is_running: bool = False
+    last_stop_reason: Optional[str] = None
+    program_frame: Optional[ProgramFrame] = None
     """Program frame is updated and valid only when program is stopped."""
+    was_reset: bool = False
 
     def stopped_by(self, reason: str) -> bool:
         """Returns `True` if program is currently stopped by specified reason."""
@@ -399,8 +405,3 @@ class ProgramState:
     def function_finished_execution(self) -> bool:
         """Shorthand for `is_stopped_by("function-finished")"""
         return self.stopped_by("function-finished")
-
-    @staticmethod
-    def default() -> ProgramState:
-        """Create a new instance of ProgramState with default values."""
-        return ProgramState(is_running=False, last_stop_reason=None, program_frame=None)
