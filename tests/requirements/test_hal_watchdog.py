@@ -1,6 +1,6 @@
 import os
 
-# import logging
+import logging
 from typing import Tuple
 from calldwell.gdb_client import GDBClient
 from calldwell.ssh_client import SSHClient
@@ -77,11 +77,11 @@ def main():
 
     # Default watchdog timeout is 16s. Watchdog in this test is set to 3s, but timeout must be
     # few seconds higher to compensate for communication delays and MCU clock inaccuracies.
-    gdb.wait_for_reset(timeout=5)
+    gdb.wait_for_reset(timeout=10)
 
     finish_test(ssh)
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     main()

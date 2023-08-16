@@ -22,7 +22,9 @@ def init_test() -> Tuple[GDBClient, RTTClient, SSHClient]:
     ssh.execute("./setup_debugging_sam_clean.sh")
 
     gdb = GDBClient(GDB_EXECUTABLE, log_responses=False, log_execution=False)
-    gdb.connect_to_remote(f"{BOARD_HOSTNAME}:{BOARD_GDB_PORT}")
+    if not gdb.connect_to_remote(f"{BOARD_HOSTNAME}:{BOARD_GDB_PORT}"):
+        print(f"Could not connect to board @ {BOARD_HOSTNAME:{BOARD_GDB_PORT}}")
+        exit(1)
     gdb.start_rtt_server(int(BOARD_RTT_PORT), 0)
 
     rtt = RTTClient(BOARD_HOSTNAME, port=int(BOARD_RTT_PORT))
