@@ -53,7 +53,7 @@ pub fn initialize() {
 /// Creates a critical section, and passes it to the functor as argument
 /// along with the stream.
 ///
-/// # Generic arguments
+/// # Generic Parameters
 /// * `F` - Functor type, must accept two arguments: `&mut DownStream` and `CriticalSection`.
 ///         Can return a value of any type.
 /// * `T` - Type of value returned from functor `f`.
@@ -81,7 +81,7 @@ where
 /// Creates a critical section, and passes it to the functor as argument
 /// along with the stream.
 ///
-/// # Generic arguments
+/// # Generic Parameters
 /// * `F` - Functor type, must accept two arguments: `&mut UpStream` and `CriticalSection`.
 ///         Can return a value of any type.
 /// * `T` - Type of value returned from functor `f`.
@@ -109,7 +109,7 @@ where
 /// Creates a critical section, and passes it to the functor as argument
 /// along with the stream.
 ///
-/// # Generic arguments
+/// # Generic Parameters
 /// * `F` - Functor type, must accept three arguments: `&mut DownStream`, `&mut UpStream` and `CriticalSection`.
 ///         Can return a value of any type.
 /// * `T` - Type of value returned from functor `f`.

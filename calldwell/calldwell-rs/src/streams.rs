@@ -30,7 +30,7 @@ pub enum ReceptionError {
 /// Structure representing a streaming UpChannel.
 /// Should never be constructed manually by the user.
 ///
-/// # Generic arguments
+/// # Generic Parameters
 /// * `State` - Current state of the stream.
 pub struct UpStream {
     /// Stream's channel

@@ -302,7 +302,7 @@ where
     ///     // ...
     ///     
     ///     // Return channel with `Mode` changed to `Waveform`
-    ///     // All generic arguments are deduced from this function's return type.
+    ///     // All generic parameters are deduced from this function's return type.
     ///     Channel::transform(self)
     /// }
     /// ```
