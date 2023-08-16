@@ -7,6 +7,7 @@ use test_binary::build_test_binary;
 /// @SRS{ROS-FUN-RTOS-2020}
 /// @SRS{ROS-FUN-RTOS-2030}
 /// @SRS{ROS-FUN-RTOS-2060}
+/// @SRS{ROS-FUN-RTOS-2070}
 #[cfg_attr(not(doc), test)]
 fn req_test_message_queue() {
     let test_bin_path =
