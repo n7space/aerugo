@@ -9,6 +9,7 @@ use core::cell::RefCell;
 use aerugo::hal::drivers::timer::{
     channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Waveform, TC1,
 };
+use aerugo::hal::PMC;
 use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
 use panic_semihosting as _;
@@ -47,6 +48,11 @@ fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi)
 }
 
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
+
+fn init_pmc(pmc: PMC) {
+    // Enable TC1 CH0 clock
+    pmc.pcer0.write(|w| w.pid26().set_bit());
+}
 
 fn init_timer(timer: &mut Timer<TC1>) {
     let ch0 = timer
@@ -109,7 +115,9 @@ fn main() -> ! {
         .expect("peripherals already taken");
 
     let mut timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
-    // TODO when PMC driver is done: actually enable timer clock so it starts correctly.
+    // TODO: Change this to use proper PMC driver when it's done
+    let pmc = peripherals.pmc.expect("PMC already used");
+    init_pmc(pmc);
     init_timer(&mut timer);
 
     init_tasks();

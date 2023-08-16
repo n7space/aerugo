@@ -1,7 +1,7 @@
 import os
 
 import logging
-from typing import Tuple
+from typing import List, Tuple
 from calldwell.gdb_client import GDBClient
 from calldwell.ssh_client import SSHClient
 from calldwell.rtt_client import RTTClient
@@ -13,7 +13,7 @@ BOARD_GDB_PORT = str(os.environ.get("AERUGO_BOARD_GDB_PORT"))
 BOARD_RTT_PORT = str(os.environ.get("AERUGO_BOARD_RTT_PORT"))
 GDB_EXECUTABLE = "arm-none-eabi-gdb"
 TEST_BINARY_PATH = (
-    "./testbins/test-hal-watchdog/target/thumbv7em-none-eabihf/debug/test-hal-watchdog"
+    "./testbins/test-hal-timer/target/thumbv7em-none-eabihf/debug/test-hal-timer"
 )
 
 
@@ -22,7 +22,9 @@ def init_test() -> Tuple[GDBClient, RTTClient, SSHClient]:
     ssh.execute("./setup_debugging_sam_clean.sh")
 
     gdb = GDBClient(GDB_EXECUTABLE, log_responses=False, log_execution=False)
-    gdb.connect_to_remote(f"{BOARD_HOSTNAME}:{BOARD_GDB_PORT}")
+    if not gdb.connect_to_remote(f"{BOARD_HOSTNAME}:{BOARD_GDB_PORT}"):
+        print(f"Could not connect to board @ {BOARD_HOSTNAME:{BOARD_GDB_PORT}}")
+        exit(1)
     gdb.start_rtt_server(int(BOARD_RTT_PORT), 0)
 
     rtt = RTTClient(BOARD_HOSTNAME, port=int(BOARD_RTT_PORT))
@@ -56,28 +58,44 @@ def finish_test(ssh: SSHClient):
     ssh.close()
 
 
+def average_difference(values: List[int]) -> float:
+    diffs = [j - i for i, j in zip(values[:-1], values[1:])]
+    return sum(diffs) / len(diffs)
+
+
 def main():
-    gdb, rtt, ssh = init_test()
+    _, rtt, ssh = init_test()
 
-    expected_messages = [
-        "short task started",
-        "short task ended",
-        "long task started",
-    ]
+    # Timer should be running by default, and program should output
+    # it's overflows via RTT.
 
-    for message in expected_messages:
-        received_message = rtt.receive_stream().decode()
-        print(received_message)
-        if received_message != message:
-            print(
-                f"TEST FAILED: UNEXPECTED MESSAGE RECEIVED (expecting {message}, got {received_message})"
-            )
-            finish_test(ssh)
-            exit(2)
+    # First 10 messages should contain fast-changing timer IRQ count
+    fast_irq_counts: List[int] = list()
+    for _ in range(10):
+        fast_irq_counts.append(int(rtt.receive_stream().decode()))
+    avg_diffs_fast = average_difference(fast_irq_counts)
 
-    # Default watchdog timeout is 16s. Watchdog in this test is set to 3s, but timeout must be
-    # few seconds higher to compensate for communication delays and MCU clock inaccuracies.
-    gdb.wait_for_reset(timeout=10)
+    # After 10 messages, tasklet should disable the timer, so incoming IRQ counts
+    # should not change
+    stopped_irq_counts: List[int] = list()
+    for _ in range(10):
+        stopped_irq_counts.append(int(rtt.receive_stream().decode()))
+    avg_diffs_stopped = average_difference(stopped_irq_counts)
+
+    # After another 10 messages, tasklet should switch timer's source to slower one
+    # and enable it, returning IRQ count that's changing slower
+    slow_irq_counts: List[int] = list()
+    for _ in range(10):
+        slow_irq_counts.append(int(rtt.receive_stream().decode()))
+
+    avg_diffs_slow = average_difference(slow_irq_counts)
+
+    if avg_diffs_fast <= avg_diffs_slow:
+        print("TEST FAILED, FASTER CLOCK IS IN FACT SLOWER")
+        exit(2)
+
+    if avg_diffs_stopped != 0:
+        print("TEST FAILED, CLOCK DID NOT STOP")
 
     finish_test(ssh)
 

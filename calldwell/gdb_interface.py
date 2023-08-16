@@ -357,6 +357,10 @@ class GDBInterface:
                 self._program_state.last_stop_reason = stop_reason
                 self._program_state.program_frame = current_program_frame
 
+                if stop_reason == "signal-received":
+                    # temporary fix for not detecting watchdog reset
+                    self.program_state.was_reset = True
+
                 self._logger.info(
                     f"Program has stopped at {current_program_frame}, reason: {stop_reason}"
                 )

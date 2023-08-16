@@ -1,0 +1,6 @@
+/* Linker script for SAMV71Q21 */
+MEMORY
+{
+    FLASH (rx) : ORIGIN = 0x00400000, LENGTH = 0x00200000
+    RAM (rwx) : ORIGIN = 0x20400000, LENGTH = 0x00060000
+}
