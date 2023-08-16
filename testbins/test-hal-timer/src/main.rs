@@ -21,16 +21,6 @@ use core::{cell::RefCell, fmt::Write, ops::AddAssign};
 use cortex_m::interrupt::{free as irq_free, Mutex};
 use rt::entry;
 
-// Test scenario:
-// - Configure Timer to use non-default clock source
-// - Enable timer's interrupt, and count it's overflows
-// - Enable and start timer's clock
-// - Check if IRQ count is increasing via tasklet
-// - Stop and disable the timer
-// - Check if IRQ count stopped increasing via tasklet
-// - Change timer's clock source, enable and start it
-// - Check if IRQ rate changed compared to previous check
-
 static TIMER_CHANNEL: Mutex<RefCell<Option<Channel<TC1, Ch0, Waveform>>>> =
     Mutex::new(RefCell::new(None));
 static TIMER_IRQ_COUNT: Mutex<RefCell<u32>> = Mutex::new(RefCell::new(0));

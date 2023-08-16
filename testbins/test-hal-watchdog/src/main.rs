@@ -16,12 +16,6 @@ use core::fmt::Write;
 use cortex_m::asm;
 use rt::entry;
 
-// Test scenario:
-// - Configure Aerugo with watchdog that will reset the MCU after 3 seconds
-// - Execute a task that will run shorter than 3 seconds and send a message to host
-// - Execute a task that will run longer than 3 seconds
-// - Validate that MCU has rebooted
-
 #[derive(Default)]
 struct ShortTaskContext {
     acc: u16,

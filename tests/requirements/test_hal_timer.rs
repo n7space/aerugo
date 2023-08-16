@@ -1,5 +1,14 @@
 use assert_cmd::Command;
-// use test_binary::build_test_binary;
+
+// Test scenario:
+// - Configure Timer to use non-default clock source
+// - Enable timer's interrupt, and count it's overflows
+// - Enable and start timer's clock
+// - Check if IRQ count is increasing
+// - Stop and disable the timer
+// - Check if IRQ count stopped increasing
+// - Change timer's clock source, enable and start it
+// - Check if IRQ rate changed compared to previous check
 
 /// @SRS{ROS-FUN-BSP-TIC-020}
 /// @SRS{ROS-FUN-BSP-TIC-030}

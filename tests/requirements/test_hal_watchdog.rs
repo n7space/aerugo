@@ -1,5 +1,10 @@
 use assert_cmd::Command;
-// use test_binary::build_test_binary;
+
+// Test scenario:
+// - Configure Aerugo with watchdog that will reset the MCU after 3 seconds
+// - Execute a task that will run shorter than 3 seconds and send a message to host
+// - Execute a task that will run longer than 3 seconds
+// - Validate that MCU has rebooted
 
 /// @SRS{ROS-FUN-BSP-WDT-020}
 /// @SRS{ROS-FUN-BSP-WDT-030}
