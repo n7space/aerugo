@@ -1,8 +1,9 @@
-use core::slice;
+use core::{fmt::Write, slice};
 
 use rtt_target::{DownChannel, UpChannel};
 
 /// Enumeration representing stream markers
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum StreamMarker {
     /// Start of stream
     Start = 0xDD,
@@ -18,6 +19,7 @@ pub struct DownStream {
 }
 
 /// Enumeration representing DownStream errors.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReceptionError {
     /// Provided buffer is too small for received data.
     BufferTooSmall,
@@ -36,8 +38,9 @@ pub struct UpStream {
 }
 
 /// Structure representing an UpStream writer that utilizes
-/// Drop trait to automatically end Stream when it's going out
+/// Drop trait to automatically end stream when it's going out
 /// of scope. Should never be constructed manually by the user.
+/// See [`UpStream::get_writer`] method.
 pub struct UpStreamWriter<'a> {
     /// Reference to stream's channel
     channel: &'a mut UpChannel,
@@ -54,7 +57,7 @@ impl DownStream {
     /// # Returns
     /// `true` if data was copied to buffer, `false` otherwise.
     #[inline(always)]
-    fn receive_byte(&mut self, buffer: &mut u8) -> bool {
+    fn read_byte(&mut self, buffer: &mut u8) -> bool {
         self.channel.read(slice::from_mut(buffer)) > 0
     }
 
@@ -63,7 +66,7 @@ impl DownStream {
         let mut received_byte: u8 = 0; // assuming start marker's value is not 0
 
         while received_byte != (StreamMarker::Start as u8) {
-            self.receive_byte(&mut received_byte);
+            self.read_byte(&mut received_byte);
         }
     }
 
@@ -83,7 +86,7 @@ impl DownStream {
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn finish_reception(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
+    pub fn finish_reading(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
         let buffer: &mut [u8] = buffer.into();
         let mut received_bytes: usize = 0;
         let mut received_byte: u8 = 0;
@@ -94,7 +97,7 @@ impl DownStream {
             // Read into temporary buffer to avoid reducing user's buffer effective capacity by 1 byte.
             // Otherwise, last byte would be wasted on end marker.
             // Might be a bit slower, as additional copy is performed, but we don't care for now.
-            if self.receive_byte(&mut received_byte) {
+            if self.read_byte(&mut received_byte) {
                 // Double start marker detected
                 if received_byte == (StreamMarker::Start as u8) {
                     return Err(ReceptionError::UnexpectedStreamStartMarker);
@@ -132,15 +135,15 @@ impl DownStream {
     /// # Returns
     /// `Ok(usize)` with length of received data, or `ReceptionError` if communication error has happened,
     /// or the buffer was too small to contain received data.
-    pub fn receive(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
+    pub fn read(&mut self, buffer: &mut [u8]) -> Result<usize, ReceptionError> {
         self.wait_for_start_marker();
-        self.finish_reception(buffer)
+        self.finish_reading(buffer)
     }
 }
 
 /// Transmits a stream marker via RTT channel.
 #[inline(always)]
-fn transmit_stream_marker(channel: &mut UpChannel, marker: StreamMarker) {
+fn write_stream_marker(channel: &mut UpChannel, marker: StreamMarker) {
     let marker_byte = marker as u8;
     channel.write(slice::from_ref(&marker_byte));
 }
@@ -151,21 +154,42 @@ impl UpStream {
         Self { channel }
     }
 
-    /// Transmits data via Calldwell stream.
+    /// Transmits bytes via Calldwell stream.
+    ///
+    /// # Safety
+    /// All characters except stream markers are valid.
+    /// If `data` contains a stream marker by accident, the message
+    /// will be invalid and may not be received correctly by test host.
     ///
     /// This function allows for single buffer transmission.
     /// If you want to transmit multiple chunks of data in a single stream,
     /// see [`UpStream::get_writer`] function.
-    pub fn transmit<'a>(&mut self, data: impl Into<&'a [u8]>) -> usize {
-        transmit_stream_marker(&mut self.channel, StreamMarker::Start);
+    pub fn write_bytes<'a>(&mut self, data: impl Into<&'a [u8]>) -> usize {
+        write_stream_marker(&mut self.channel, StreamMarker::Start);
         let transmitted_bytes = self.channel.write(data.into());
-        transmit_stream_marker(&mut self.channel, StreamMarker::End);
+        write_stream_marker(&mut self.channel, StreamMarker::End);
         transmitted_bytes
+    }
+
+    /// Transmits string via Calldwell stream.
+    ///
+    /// # Safety
+    /// All characters except stream markers are valid.
+    /// If `data` contains a stream marker by accident, the message
+    /// will be invalid and may not be received correctly by test host.
+    /// Note that `&str` is an UTF-8 string, so using any non-ASCII characters
+    /// might result in having stream markers in transmitted data by accident.
+    ///
+    /// This function allows for single buffer transmission.
+    /// If you want to transmit multiple chunks of data in a single stream,
+    /// see [`UpStream::get_writer`] function.
+    pub fn write_str<'a>(&mut self, data: impl Into<&'a str>) -> usize {
+        self.write_bytes(data.into().as_bytes())
     }
 
     /// Creates an [`UpStreamWriter`] instance, and returns it.
     /// You can use it to write multiple chunks of data in a single stream.
-    pub fn get_writer(&mut self) -> UpStreamWriter {
+    pub fn writer(&mut self) -> UpStreamWriter {
         UpStreamWriter::new(&mut self.channel)
     }
 }
@@ -173,14 +197,19 @@ impl UpStream {
 impl<'a> UpStreamWriter<'a> {
     /// Creates a new instance of [`UpStreamWriter`].
     pub(super) fn new(channel_ref: &'a mut UpChannel) -> Self {
-        transmit_stream_marker(channel_ref, StreamMarker::Start);
+        write_stream_marker(channel_ref, StreamMarker::Start);
         return UpStreamWriter {
             channel: channel_ref,
         };
     }
 
-    /// Transmits a chunk of data via opened stream.
-    pub fn transmit<'b>(&mut self, data: impl Into<&'b [u8]>) -> usize {
+    /// Transmits a chunk of data via opened Calldwell stream.
+    ///
+    /// # Safety
+    /// All characters except stream markers are valid.
+    /// If `data` contains a stream marker by accident, the message
+    /// will be invalid and may not be received correctly by test host.
+    pub fn write_bytes<'b>(&mut self, data: impl Into<&'b [u8]>) -> usize {
         self.channel.write(data.into())
     }
 }
@@ -188,6 +217,21 @@ impl<'a> UpStreamWriter<'a> {
 impl<'a> Drop for UpStreamWriter<'a> {
     /// Ends the stream
     fn drop(&mut self) {
-        transmit_stream_marker(self.channel, StreamMarker::End);
+        write_stream_marker(self.channel, StreamMarker::End);
+    }
+}
+
+impl<'a> Write for UpStreamWriter<'a> {
+    fn write_char(&mut self, c: char) -> core::fmt::Result {
+        self.write_str(c.encode_utf8(&mut [0; 4]))
+    }
+
+    fn write_fmt(mut self: &mut Self, args: core::fmt::Arguments<'_>) -> core::fmt::Result {
+        core::fmt::write(&mut self, args)
+    }
+
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        self.write_bytes(s.as_bytes());
+        Ok(())
     }
 }
