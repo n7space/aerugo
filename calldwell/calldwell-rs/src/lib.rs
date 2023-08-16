@@ -4,7 +4,7 @@
 
 #![cfg(all(target_arch = "arm", target_os = "none"))]
 #![deny(missing_docs)]
-// #![deny(warnings)]
+#![deny(warnings)]
 #![no_std]
 
 mod streams;
