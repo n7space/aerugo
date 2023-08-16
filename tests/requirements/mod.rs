@@ -6,3 +6,4 @@ mod test_events;
 mod test_message_queue;
 mod test_tasklet_priority;
 mod test_tasklet_priority_multiple_queues;
+mod test_watchdog;
