@@ -9,8 +9,9 @@ members = [
     "utils/env-parser",
     "utils/env-parser-tests",
     "utils/internal_cell",
+    "calldwell/calldwell-rs",
 ]
-exclude = ["examples", "testbins"]
+exclude = ["examples", "testbins", "calldwell/examples"]
 
 [workspace.package]
 version = "0.1.0"

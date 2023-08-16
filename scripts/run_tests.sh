@@ -12,6 +12,18 @@ aerugo_x86() {
     export -n AERUGO_TASKLET_COUNT
 }
 
+aerugo_v71() {
+    export AERUGO_TASKLET_COUNT=5
+    export AERUGO_EVENT_COUNT=3
+
+    # Temporary measure for not running V71 tests on CI until we fix building them, and add support
+    # for them to our Github Actions
+    cargo test --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu --package aerugo -- --ignored
+
+    export -n AERUGO_EVENT_COUNT
+    export -n AERUGO_TASKLET_COUNT
+}
+
 env_parser() {
     export ENV_PARSER_TEST_INTEGER_OVERRIDE=42
     export ENV_PARSER_TEST_INTEGER_DIFFERENT_NAME=314

@@ -1,0 +1,14 @@
+[package]
+name = "calldwell"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "Library providing software testing utilities. Part of Calldwell testing framework."
+
+[dependencies]
+critical-section = "1.1.2"
+rtt-target = "0.4.0"

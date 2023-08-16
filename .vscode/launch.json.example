@@ -13,13 +13,15 @@
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
-            "servertype": "external", // Change this is your devboard is not remotely accessible
+            "servertype": "external", // Change this is your devboard is locally accessible
             "device": "samv71q21",
             "gdbTarget": "PUT IP:PORT OF REMOTE OPENOCD INSTANCE HERE",
             "svdPath": "${workspaceFolder}/arch/cortex-m/samv71q21-pac/ATSAMV71Q21B.svd",
             "postLaunchCommands": [
+                "set remotetimeout 10",
                 "set print asm-demangle on",
-                "monitor arm semihosting enable",
+                "monitor rtt setup 0x20400000 0x400 \"SEGGER RTT\"",
+                "monitor rtt server start 7897 0",
             ],
         },
     ]
