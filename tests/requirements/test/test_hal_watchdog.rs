@@ -15,7 +15,7 @@ fn req_test_hal_watchdog() {
     // build_test_binary("test-hal-watchdog", "testbins").expect("error building test binary");
 
     Command::new("python")
-        .arg("tests/requirements/test_hal_watchdog.py")
+        .arg("tests/requirements/test/test_hal_watchdog.py")
         .timeout(std::time::Duration::from_secs(60))
         .assert()
         .success()
