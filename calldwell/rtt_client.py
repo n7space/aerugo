@@ -2,8 +2,8 @@
 abstraction over Calldwell streams/messages."""
 
 import socket
-from typing import Optional
 from enum import IntEnum
+from typing import Optional
 
 
 class RTTClient:
@@ -15,7 +15,7 @@ class RTTClient:
         Start = 0xDD
         End = 0xEE
 
-    def __init__(self, host: str, port: int, default_chunk_size: int = 1024):
+    def __init__(self, host: str, port: int, default_chunk_size: int = 1024) -> None:
         """Create instance of RTT client. Connects to RTT server via TCP socket.
 
         # Parameters
@@ -28,7 +28,7 @@ class RTTClient:
         self._default_chunk_size = default_chunk_size
         self._data_buffer = bytearray()
 
-    def close(self):
+    def close(self) -> None:
         """Closes the RTT connection gracefully."""
         self._socket.shutdown(socket.SHUT_RDWR)
         self._socket.close()
@@ -68,10 +68,10 @@ class RTTClient:
 
         return bytes(stream_data)
 
-    def _transmit_stream_marker(self, marker: StreamMarker):
+    def _transmit_stream_marker(self, marker: StreamMarker) -> None:
         self._transmit(marker.to_bytes(length=1, signed=False))
 
-    def _receive(self, chunk_size: Optional[int] = None):
+    def _receive(self, chunk_size: Optional[int] = None) -> None:
         """Receives raw data from RTT target to internal buffer"""
         if chunk_size is None:
             chunk_size = self._default_chunk_size
@@ -79,6 +79,6 @@ class RTTClient:
         received_bytes = self._socket.recv(chunk_size)
         self._data_buffer.extend(received_bytes)
 
-    def _transmit(self, data: bytes):
+    def _transmit(self, data: bytes) -> None:
         """Transmits raw data to RTT target."""
         self._socket.send(data)
