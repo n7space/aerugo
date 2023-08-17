@@ -1,2 +1,10 @@
 [flake8]
 max-line-length = 100
+select = E,F,W,C9,N8
+max-complexity = 10
+show-source = True
+statistics = True
+
+# W503 - line break before binary operator
+# E203 - whitespace before : (breaks on slices with non-trival expressions)
+extend-ignore = W503,E203
