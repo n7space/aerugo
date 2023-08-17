@@ -1,3 +1,6 @@
+"""Module containing high-level GDB types and functions.
+This is probably what you're looking for, if you want to manage GDB."""
+
 import logging
 from typing import List, Optional
 

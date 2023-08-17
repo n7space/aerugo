@@ -1,3 +1,7 @@
+"""Module containing low-level GDB types and functions.
+These are usually managed by high-level counterparts, like GDBClient
+from `gdb_client` module. Don't use, unless you know what you're doing."""
+
 from __future__ import annotations
 
 import logging

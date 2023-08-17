@@ -1,3 +1,5 @@
+"""Module containing classes for SSH management."""
+
 from dataclasses import dataclass
 from typing import Dict, Optional
 
@@ -58,7 +60,9 @@ class SSHClient:
         """
         self.sftp.put(local_source_path, remote_destination_path, confirm=True)
 
-    def download_file_from_remote(self, remote_source_path: str, local_destination_path: str) -> None:
+    def download_file_from_remote(
+        self, remote_source_path: str, local_destination_path: str
+    ) -> None:
         """Downloads a file from remote to local machine. Will raise an exception on failure.
 
         # Parameters

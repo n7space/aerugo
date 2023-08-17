@@ -1,3 +1,6 @@
+"""Module containing GDB data objects. Instead of relying directly on `pygdbmi` output,
+it's parsed by `GDBInterface` to proper, strongly typed objects from this module."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

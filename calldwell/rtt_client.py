@@ -1,3 +1,6 @@
+"""Module containing RTT-related classes, which also provide an easy-to-use layer of
+abstraction over Calldwell streams/messages."""
+
 import socket
 from typing import Optional
 from enum import IntEnum
