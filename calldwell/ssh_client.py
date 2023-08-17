@@ -8,7 +8,7 @@ from paramiko.channel import ChannelFile, ChannelStderrFile, ChannelStdinFile
 class SSHClient:
     """Convenience class for all SSH-related functionality."""
 
-    def __init__(self, host: str, login: str, password: str, port: int = 22):
+    def __init__(self, host: str, login: str, password: str, port: int = 22) -> None:
         """Connects with SSH server. After connecting, your working dir will be set to home dir of
         logged in user (if it has one).
 
@@ -18,10 +18,10 @@ class SSHClient:
         * `password` - user password
         * `port` - SSH port, default: 22
         """
-        self.client = paramiko.SSHClient()
+        self.client: paramiko.SSHClient = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.connect(hostname=host, port=port, username=login, password=password)
-        self.sftp = self.client.open_sftp()
+        self.sftp: paramiko.SFTPClient = self.client.open_sftp()
 
     @dataclass
     class CommandChannels:
@@ -49,7 +49,7 @@ class SSHClient:
         )
         return self.CommandChannels(stdin, stdout, stderr)
 
-    def upload_file_to_remote(self, local_source_path: str, remote_destination_path: str):
+    def upload_file_to_remote(self, local_source_path: str, remote_destination_path: str) -> None:
         """Sends a file from local machine to remote. Will raise an exception on failure.
 
         # Parameters
@@ -58,7 +58,7 @@ class SSHClient:
         """
         self.sftp.put(local_source_path, remote_destination_path, confirm=True)
 
-    def download_file_from_remote(self, remote_source_path: str, local_destination_path: str):
+    def download_file_from_remote(self, remote_source_path: str, local_destination_path: str) -> None:
         """Downloads a file from remote to local machine. Will raise an exception on failure.
 
         # Parameters
@@ -67,7 +67,7 @@ class SSHClient:
         """
         self.sftp.get(remote_source_path, local_destination_path)
 
-    def close(self):
+    def close(self) -> None:
         """Close the connection. Better do that manually after finishing up with SSH, to prevent
         halting the program."""
         self.client.close()

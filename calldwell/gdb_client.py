@@ -18,7 +18,7 @@ class GDBClient:
         default_timeout: Optional[float] = None,
         log_responses: bool = True,
         log_execution: bool = True,
-    ):
+    ) -> None:
         """Initialize GDB Client. Creates and initializes a GDBInterface instance internally.
 
         # Parameters
@@ -103,7 +103,7 @@ class GDBClient:
             "Platform restarted", "Restarting the platform has failed!"
         )
 
-    def pause_program(self, force: bool = False):
+    def pause_program(self, force: bool = False) -> None:
         """Stops the execution of debugged program immediately.
         Does nothing if program is already stopped, unless `force` is `True`.
         Will raise timeout exception on failure."""
@@ -116,7 +116,7 @@ class GDBClient:
         self._wait_for_stopped()
         self._logger.info("Execution paused!")
 
-    def continue_program(self, force: bool = False):
+    def continue_program(self, force: bool = False) -> None:
         """Continues the execution of debugged program.
         Does nothing if program is already running, unless `force` is `True.
         Will raise timeout exception on failure."""
@@ -234,7 +234,7 @@ class GDBClient:
         )
         return str(self._interface.program_state.last_stop_reason)
 
-    def wait_for_reset(self, timeout: Optional[float] = None):
+    def wait_for_reset(self, timeout: Optional[float] = None) -> None:
         """Waits until program is reset. Useful for detecting watchdog underflow.
 
         # Parameters
@@ -247,7 +247,7 @@ class GDBClient:
 
         self._logger.info("Reset detected!")
 
-    def finish_function_execution(self, force: bool = False):
+    def finish_function_execution(self, force: bool = False) -> None:
         """Finishes current function execution.
         Does nothing if program is running, unless `force` is `True`."""
         if not force and self._interface.program_state.is_running:
@@ -289,7 +289,7 @@ class GDBClient:
             "RTT started!", "Couldn't start RTT, check section configuration!"
         )
 
-    def start_rtt_server(self, server_port: int, rtt_port: int):
+    def start_rtt_server(self, server_port: int, rtt_port: int) -> bool:
         """Creates a TCP socket for specified RTT channel.
         Returns `True` if server was started successfully, `False` otherwise.
 

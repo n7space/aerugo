@@ -39,7 +39,7 @@ class RTTClient:
 
         return stream_data
 
-    def transmit_stream(self, data: bytes):
+    def transmit_stream(self, data: bytes) -> None:
         """Transmits data via Calldwell stream to RTT target"""
         self._transmit_stream_marker(RTTClient.StreamMarker.Start)
         self._transmit(data)

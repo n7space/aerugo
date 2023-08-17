@@ -26,7 +26,7 @@ class GDBInterface:
         default_timeout: float,
         log_execution: bool = True,
         log_responses: bool = True,
-    ):
+    ) -> None:
         """Initialize a GDB client.
 
         # Parameters
@@ -60,7 +60,7 @@ class GDBInterface:
         """Returns the state of currently debugged program. State is tracked via notifications."""
         return self._program_state
 
-    def interrupt(self):
+    def interrupt(self) -> None:
         """Send SIGINT to GDB process, in order to interrupt it
         (and, for example, pause execution)"""
         self._controller.gdb_process.send_signal(signal.SIGINT)  # type: ignore
@@ -70,7 +70,7 @@ class GDBInterface:
         command: str,
         timeout: Optional[float] = None,
         log_execution: Optional[bool] = None,
-    ):
+    ) -> None:
         """Executes a GDB command. Does not fetch any response, use `get_responses` to do it
         manually, or one of `execute_and_*` functions to block until an expected response is
         received.
