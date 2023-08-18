@@ -31,7 +31,7 @@ pub fn start_test_session() {
 
     with_rtt_out(|o, _| o.write_str("calldwell-rs started"));
 
-    let mut input_buffer: [u8; 16] = [0; 16];
+    let mut input_buffer: [u8; 32] = [0; 32];
     let read_bytes = with_rtt_in(|i, _| i.read(&mut input_buffer));
 
     with_rtt_out(|o, _| match read_bytes {
