@@ -7,9 +7,9 @@ from .rtt_client import RTTClient
 
 RTT_SECTION_SYMBOL_NAME = "_SEGGER_RTT"
 """Section name of RTT symbol. Hard-coded in `rtt_target` library."""
-RTT_SECTION_SEARCHED_MEMORY_LENGTH = 0x400
+RTT_SECTION_SEARCHED_MEMORY_LENGTH = 0x800
 """This constant defines the amount of bytes OpenOCD will search, looking for RTT section.
-This might as well be an overkill, but it works."""
+Current value might as well be an overkill, but it works."""
 RTT_SECTION_ID = "SEGGER RTT"
 """RTT section ID"""
 CALLDWELL_INIT_FUNCTION_NAME = "calldwell::initialize"

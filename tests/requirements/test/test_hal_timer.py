@@ -40,11 +40,11 @@ def main():
     avg_diffs_slow = average_difference(slow_irq_counts)
 
     if avg_diffs_fast <= avg_diffs_slow:
-        print("TEST FAILED, FASTER CLOCK IS IN FACT SLOWER")
+        print("TEST FAILED: FASTER CLOCK IS IN FACT SLOWER")
         exit(2)
 
     if avg_diffs_stopped != 0:
-        print("TEST FAILED, CLOCK DID NOT STOP")
+        print("TEST FAILED: CLOCK DID NOT STOP")
 
     finish_test(ssh)
 
