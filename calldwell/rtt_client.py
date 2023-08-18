@@ -69,7 +69,8 @@ class RTTClient:
         return bytes(stream_data)
 
     def _transmit_stream_marker(self, marker: StreamMarker) -> None:
-        self._transmit(marker.to_bytes(length=1, signed=False))
+        # byteorder doesn't matter, but mypy asks for it
+        self._transmit(marker.to_bytes(length=1, signed=False, byteorder="big"))
 
     def _receive(self, chunk_size: Optional[int] = None) -> None:
         """Receives raw data from RTT target to internal buffer"""
