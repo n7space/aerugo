@@ -9,8 +9,10 @@
 
 mod streams;
 
-use core::cell::RefCell;
+use core::panic;
+use core::{cell::RefCell, str::from_utf8};
 
+use core::fmt::Write;
 use critical_section::{CriticalSection, Mutex};
 use rtt_target::rtt_init;
 use streams::{DownStream, UpStream};
@@ -20,12 +22,40 @@ static RTT_IN: Mutex<RefCell<Option<DownStream>>> = Mutex::new(RefCell::new(None
 /// RTT channel acting as standard output.
 static RTT_OUT: Mutex<RefCell<Option<UpStream>>> = Mutex::new(RefCell::new(None));
 
-/// Initializes Calldwell's I/O. Call as soon as possible in the program,
-/// to make Calldwell's RTT facilities available.
+/// Initializes Calldwell's test framework and connects to test host via RTT.
+/// Should be called as soon as possible in the program.
+///
+/// Will panic on error caused by miscommunication with test host.
+pub fn start_test_session() {
+    initialize();
+
+    with_rtt_out(|o, _| o.write_str("calldwell-rs started"));
+
+    let mut input_buffer: [u8; 16] = [0; 16];
+    let read_bytes = with_rtt_in(|i, _| i.read(&mut input_buffer));
+
+    with_rtt_out(|o, _| match read_bytes {
+        Ok(amount) => write!(
+            o.writer(),
+            "{}:{}",
+            amount,
+            from_utf8(&input_buffer[..amount])
+                .expect("invalid string received from test host during handshake")
+        )
+        .unwrap(),
+        Err(e) => {
+            write!(o.writer(), "{:?}", e).unwrap();
+            panic!("a ReceptionError occurred while handshaking with test host")
+        }
+    });
+}
+
+/// Initializes Calldwell's I/O. Calldwell host should hook to this function and
+/// wait until it finishes before starting RTT communication facilities.
 ///
 /// This function runs in a critical section.
 #[inline(never)]
-pub fn initialize() {
+fn initialize() {
     critical_section::with(|cs| {
         let channels = rtt_init! {
             up: {
