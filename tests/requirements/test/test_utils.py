@@ -12,8 +12,15 @@ BOARD_GDB_PORT = int(str(os.environ.get("AERUGO_BOARD_GDB_PORT")))
 BOARD_RTT_PORT = int(str(os.environ.get("AERUGO_BOARD_RTT_PORT")))
 GDB_EXECUTABLE = "arm-none-eabi-gdb"
 
+MCU_INIT_MESSAGE = "calldwell-rs started"
+HOST_HANDSHAKE_MESSAGE = "host handshake requested"
+EXPECTED_MCU_HANDSHAKE_MESSAGE = (
+    f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE_MESSAGE}"
+)
+
 
 def init_test(test_binary_path: str) -> Tuple[GDBClient, RTTClient, SSHClient]:
+    """Creates SSH connection to target board, initializes Calldwell"""
     ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
     ssh.execute("./setup_debugging_sam_clean.sh")
 
@@ -33,12 +40,21 @@ def init_test(test_binary_path: str) -> Tuple[GDBClient, RTTClient, SSHClient]:
 
     gdb.continue_program()
 
-    init_message = rtt.receive_stream().decode()
-    if init_message != "mcu ready":
-        print("TEST FAILED: MCU DID NOT SEND READINESS MESSAGE")
+    init_message = rtt.receive_string()
+    if init_message != MCU_INIT_MESSAGE:
+        print(
+            f"TEST FAILED: MCU SENT INVALID INIT MESSAGE (got: {init_message}, expected: {MCU_INIT_MESSAGE})"
+        )
         exit(2)
 
-    rtt.transmit_stream("ok".encode())
+    rtt.transmit_string(HOST_HANDSHAKE_MESSAGE)
+
+    response = rtt.receive_string()
+    if response != EXPECTED_MCU_HANDSHAKE_MESSAGE:
+        print(
+            f"TEST FAILED: MCU SENT INVALID HANDSHAKE MESSAGE (got: {response}, expected: {EXPECTED_MCU_HANDSHAKE_MESSAGE})"
+        )
+        exit(3)
 
     return gdb, rtt, ssh
 

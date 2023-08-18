@@ -16,7 +16,7 @@ def main():
     ]
 
     for message in expected_messages:
-        received_message = rtt.receive_stream().decode()
+        received_message = rtt.receive_bytes().decode()
         print(received_message)
         if received_message != message:
             print(
