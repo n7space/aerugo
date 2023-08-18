@@ -33,7 +33,7 @@ class RTTClient:
         self._socket.shutdown(socket.SHUT_RDWR)
         self._socket.close()
 
-    def receive_stream(self) -> bytes:
+    def receive_bytes(self) -> bytes:
         """Receives data via Calldwell stream from RTT target"""
         stream_data = self._extract_stream_data_from_recv_buffer()
         while stream_data is None:
@@ -42,11 +42,19 @@ class RTTClient:
 
         return stream_data
 
-    def transmit_stream(self, data: bytes) -> None:
+    def transmit_bytes(self, data: bytes) -> None:
         """Transmits data via Calldwell stream to RTT target"""
         self._transmit_stream_marker(RTTClient.StreamMarker.Start)
         self._transmit(data)
         self._transmit_stream_marker(RTTClient.StreamMarker.End)
+
+    def receive_string(self) -> str:
+        """Receives an UTF-8 string via Calldwell stream from RTT target"""
+        return self.receive_bytes().decode("utf-8")
+
+    def transmit_string(self, message: str) -> None:
+        """Transmits an UTF-8 string via Calldwell stream to RTT target"""
+        self.transmit_bytes(message.encode("utf-8"))
 
     def _extract_stream_data_from_recv_buffer(self) -> Optional[bytes]:
         """Looks for valid Calldwell stream in reception buffer, and returns it's data if found"""
