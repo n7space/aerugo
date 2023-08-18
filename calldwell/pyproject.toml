@@ -24,6 +24,11 @@ profile = "black"
 [tool.black]
 line-length = 100
 
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+show_error_codes = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
