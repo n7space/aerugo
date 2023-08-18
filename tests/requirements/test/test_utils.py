@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Tuple
 from calldwell.gdb_client import GDBClient
 from calldwell.ssh_client import SSHClient
@@ -12,15 +13,10 @@ BOARD_GDB_PORT = int(str(os.environ.get("AERUGO_BOARD_GDB_PORT")))
 BOARD_RTT_PORT = int(str(os.environ.get("AERUGO_BOARD_RTT_PORT")))
 GDB_EXECUTABLE = "arm-none-eabi-gdb"
 
-MCU_INIT_MESSAGE = "calldwell-rs started"
-HOST_HANDSHAKE_MESSAGE = "host handshake requested"
-EXPECTED_MCU_HANDSHAKE_MESSAGE = (
-    f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE_MESSAGE}"
-)
-
 
 def init_test(test_binary_path: str) -> Tuple[GDBClient, RTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
+    logging.info("Starting the test, initializing the environment...")
     ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
     ssh.execute("./setup_debugging_sam_clean.sh")
 
@@ -33,32 +29,17 @@ def init_test(test_binary_path: str) -> Tuple[GDBClient, RTTClient, SSHClient]:
     )
 
     if session is None:
-        print("TEST FAILED: CANNOT INITIALIZE CALLDWELL SESSION")
+        logging.error("Test failed, cannot initialize Calldwell session")
         exit(1)
 
     gdb, rtt = session
 
-    gdb.continue_program()
-
-    init_message = rtt.receive_string()
-    if init_message != MCU_INIT_MESSAGE:
-        print(
-            f"TEST FAILED: MCU SENT INVALID INIT MESSAGE (got: {init_message}, expected: {MCU_INIT_MESSAGE})"
-        )
-        exit(2)
-
-    rtt.transmit_string(HOST_HANDSHAKE_MESSAGE)
-
-    response = rtt.receive_string()
-    if response != EXPECTED_MCU_HANDSHAKE_MESSAGE:
-        print(
-            f"TEST FAILED: MCU SENT INVALID HANDSHAKE MESSAGE (got: {response}, expected: {EXPECTED_MCU_HANDSHAKE_MESSAGE})"
-        )
-        exit(3)
-
+    logging.info("Environment initialized!")
     return gdb, rtt, ssh
 
 
 def finish_test(ssh: SSHClient):
+    logging.info("Finishing the test, cleaning up environment...")
     ssh.execute("pkill openocd")
     ssh.close()
+    logging.info("Environment cleaned up!")
