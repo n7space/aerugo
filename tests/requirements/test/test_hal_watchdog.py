@@ -1,5 +1,5 @@
 import logging
-from test_utils import *
+from test_utils import init_test, finish_test
 
 TEST_BINARY_PATH = (
     "./testbins/test-hal-watchdog/target/thumbv7em-none-eabihf/debug/test-hal-watchdog"
@@ -20,7 +20,8 @@ def main():
         print(received_message)
         if received_message != message:
             print(
-                f"TEST FAILED: UNEXPECTED MESSAGE RECEIVED (expecting {message}, got {received_message})"
+                "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
+                f"(expecting {message}, got {received_message})"
             )
             finish_test(ssh)
             exit(2)
