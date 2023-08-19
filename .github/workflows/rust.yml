@@ -57,6 +57,15 @@ jobs:
           targets: ${{ matrix.TARGET }}
       - name: cargo build
         run: cargo build -p aerugo --features ${{ matrix.FEATURES }}
+
+  build-hal-tests:
+    name: Build HAL integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: thumbv7em-none-eabihf
       - name: cargo build (HAL tests)
         run: ./scripts/build_hal_tests.sh
         shell: bash
