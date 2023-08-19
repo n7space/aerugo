@@ -57,6 +57,9 @@ jobs:
           targets: ${{ matrix.TARGET }}
       - name: cargo build
         run: cargo build -p aerugo --features ${{ matrix.FEATURES }}
+      - name: cargo build (HAL tests)
+        run: ./scripts/build_hal_tests.sh
+        shell: bash
 
   tests:
     name: Run tests
