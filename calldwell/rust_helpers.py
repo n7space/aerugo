@@ -1,6 +1,5 @@
 """Module containing some boilerplate, common to all tests that use `calldwell-rs` library."""
 import logging
-
 from typing import Any, Callable, Optional, Tuple
 
 from .gdb_client import GDBClient
@@ -104,7 +103,8 @@ def init_remote_calldwell_rs_session(
 
     if not gdb.setup_rtt(rtt_symbol.address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
         logging.error(
-            f"Could not setup RTT for section @ {rtt_symbol.address} (searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
+            f"Could not setup RTT for section @ {rtt_symbol.address} "
+            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
         )
         return None
 
@@ -144,7 +144,8 @@ def _perform_handshake(rtt: RTTClient) -> bool:
 
     if init_message != EXPECTED_MCU_INIT_MESSAGE:
         logging.error(
-            f"Received unexpected MCU init message (got '{init_message}', expected '{EXPECTED_MCU_INIT_MESSAGE}')"
+            "Received unexpected MCU init message "
+            f"(got '{init_message}', expected '{EXPECTED_MCU_INIT_MESSAGE}')"
         )
         return False
 
@@ -153,7 +154,8 @@ def _perform_handshake(rtt: RTTClient) -> bool:
 
     if response != EXPECTED_MCU_HANDSHAKE_MESSAGE:
         logging.error(
-            f"MCU responded with invalid handshake message (got '{response}', expected '{EXPECTED_MCU_HANDSHAKE_MESSAGE}')"
+            "MCU responded with invalid handshake message "
+            f"(got '{response}', expected '{EXPECTED_MCU_HANDSHAKE_MESSAGE}')"
         )
         return False
 
