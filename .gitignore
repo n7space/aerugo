@@ -14,3 +14,5 @@ docs-test/
 !.vscode/tasks.json
 !.vscode/extensions.json
 .vscode/
+
+__pycache__

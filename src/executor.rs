@@ -20,7 +20,7 @@ type TaskletQueue<const N: usize> = BinaryHeap<TaskletPtr, Max, N>;
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 /// It should be used as a singleton (crate::aerugo::EXECUTOR) and shouldn't be directly accessed
 /// by any other part of the system. It's functionality shall be exposed for rest of the system
-/// via system API in [Aerugo](crate::aerugo::Aerugo).
+/// via system API in [Aerugo].
 pub(crate) struct Executor {
     /// Tasklet queue.
     tasklet_queue: Mutex<TaskletQueue<{ Aerugo::TASKLET_COUNT }>>,

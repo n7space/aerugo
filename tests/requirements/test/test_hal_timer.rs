@@ -23,7 +23,7 @@ fn req_test_hal_timer() {
     // build_test_binary("test-hal-timer", "testbins").expect("error building test binary");
 
     Command::new("python")
-        .arg("tests/requirements/test_hal_timer.py")
+        .arg("tests/requirements/test/test_hal_timer.py")
         .timeout(std::time::Duration::from_secs(60))
         .assert()
         .success()

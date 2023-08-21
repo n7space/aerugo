@@ -18,7 +18,7 @@ aerugo_v71() {
 
     # Temporary measure for not running V71 tests on CI until we fix building them, and add support
     # for them to our Github Actions
-    cargo test --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu --package aerugo -- --ignored
+    cargo test --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu --package aerugo -- --ignored --test-threads=1
 
     export -n AERUGO_EVENT_COUNT
     export -n AERUGO_TASKLET_COUNT

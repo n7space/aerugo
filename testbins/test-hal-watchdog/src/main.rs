@@ -12,7 +12,6 @@ use aerugo::{
     TaskletStorage, AERUGO,
 };
 use calldwell::with_rtt_out;
-use core::fmt::Write;
 use cortex_m::asm;
 use rt::entry;
 
@@ -101,8 +100,7 @@ fn initialize_tasks() {
 
 #[entry]
 fn main() -> ! {
-    calldwell::initialize();
-    wait_for_host();
+    calldwell::start_test_session();
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),
@@ -111,22 +109,4 @@ fn main() -> ! {
     initialize_tasks();
 
     AERUGO.start();
-}
-
-fn wait_for_host() {
-    let mut input_buffer: [u8; 128] = [0; 128];
-
-    calldwell::with_rtt_out(|w, _| w.write_str("mcu ready"));
-    let response_length = calldwell::with_rtt_in(|r, _| r.read(&mut input_buffer));
-
-    if let Err(e) = response_length {
-        calldwell::with_rtt_out(|w, _| {
-            write!(
-                w.writer(),
-                "an error occurred while receiving response from host: {:?}",
-                e
-            )
-            .expect("Unable to send data via RTT")
-        });
-    }
 }

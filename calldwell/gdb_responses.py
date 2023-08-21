@@ -1,3 +1,6 @@
+"""Module containing GDB data objects. Instead of relying directly on `pygdbmi` output,
+it's parsed by `GDBInterface` to proper, strongly typed objects from this module."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -124,7 +127,7 @@ class GDBResponsesList:
     or concatenating the console messages into singular string.
     """
 
-    def __init__(self, responses: List[GDBResponse]):
+    def __init__(self, responses: List[GDBResponse]) -> None:
         """Initializes the list with responses received from GDB"""
         self._items = responses
 
@@ -178,7 +181,7 @@ class GDBResponsesList:
         """
         return separator.join(self.payload_string_list(unescape)).strip()
 
-    def extend(self, other: GDBResponsesList):
+    def extend(self, other: GDBResponsesList) -> None:
         """Adds items from different response list to current one."""
         self._items.extend(other._items)
 
@@ -219,7 +222,7 @@ class GDBResponsesList:
         To see how the items are compared, see `GDBResponse.is_similar()`."""
         return any(response.is_similar(expected) for response in self)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Returns amount of elements on the list"""
         return len(self._items)
 
