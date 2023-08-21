@@ -12,7 +12,6 @@ use aerugo::{
     TaskletConfig, TaskletStorage, AERUGO,
 };
 
-use cortex_m::asm;
 use rtt::{rprint, rprintln};
 use runtime::entry;
 
@@ -76,10 +75,6 @@ struct DoneContext {}
 
 fn done(_: bool, _: &mut DoneContext, _: &'static dyn RuntimeApi) {
     rprint!("Done!\n");
-
-    loop {
-        asm::nop();
-    }
 }
 
 static PRODUCER_STORAGE: TaskletStorage<(), ProducerContext, 1> = TaskletStorage::new();
@@ -203,7 +198,7 @@ fn main() -> ! {
 
     let done_config = TaskletConfig {
         name: "Done",
-        priority: 4,
+        ..Default::default()
     };
 
     AERUGO
