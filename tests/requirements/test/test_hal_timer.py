@@ -21,21 +21,21 @@ def main():
     # First 10 messages should contain fast-changing timer IRQ count
     fast_irq_counts: List[int] = list()
     for _ in range(10):
-        fast_irq_counts.append(int(rtt.receive_bytes().decode()))
+        fast_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_fast = average_difference(fast_irq_counts)
 
     # After 10 messages, tasklet should disable the timer, so incoming IRQ counts
     # should not change
     stopped_irq_counts: List[int] = list()
     for _ in range(10):
-        stopped_irq_counts.append(int(rtt.receive_bytes().decode()))
+        stopped_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_stopped = average_difference(stopped_irq_counts)
 
     # After another 10 messages, tasklet should switch timer's source to slower one
     # and enable it, returning IRQ count that's changing slower
     slow_irq_counts: List[int] = list()
     for _ in range(10):
-        slow_irq_counts.append(int(rtt.receive_bytes().decode()))
+        slow_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
 
     avg_diffs_slow = average_difference(slow_irq_counts)
 

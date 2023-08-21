@@ -3,7 +3,7 @@ import logging
 from typing import Tuple
 from calldwell.gdb_client import GDBClient
 from calldwell.ssh_client import SSHClient
-from calldwell.rtt_client import RTTClient
+from calldwell.rtt_client import CalldwellRTTClient
 from calldwell.rust_helpers import init_remote_calldwell_rs_session
 
 BOARD_LOGIN = str(os.environ.get("AERUGO_BOARD_LOGIN"))
@@ -14,7 +14,7 @@ BOARD_RTT_PORT = int(str(os.environ.get("AERUGO_BOARD_RTT_PORT")))
 GDB_EXECUTABLE = "arm-none-eabi-gdb"
 
 
-def init_test(test_binary_path: str) -> Tuple[GDBClient, RTTClient, SSHClient]:
+def init_test(test_binary_path: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
     logging.info("Starting the test, initializing the environment...")
     ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
