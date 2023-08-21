@@ -61,6 +61,7 @@ jobs:
   build-hal-tests:
     name: Build HAL integration tests
     runs-on: ubuntu-latest
+    needs: [rustfmt, clippy, build]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
