@@ -5,7 +5,7 @@ use pac::tc0::tc_channel::cmr_waveform_mode::{
 };
 
 /// Structure representing waveform mode configuration.
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 pub struct WaveformModeConfig {
     /// RC Compare event effect on timer's counter state.
     pub rc_compare_effect: RcCompareEffect,
