@@ -7,4 +7,6 @@ pub enum HalError {
     HalAlreadyCreated,
     /// Error indicating that HAL has already been configured.
     HalAlreadyConfigured,
+    /// Error indicating that the requested operation was called before HAL initialization.
+    HalNotInitializedYet,
 }
