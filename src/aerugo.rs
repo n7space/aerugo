@@ -31,17 +31,17 @@ pub static AERUGO: Aerugo = Aerugo::new();
 
 /// System scheduler.
 ///
-/// Singleton instance of the scheduler. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
+/// Singleton instance of the scheduler. Used directly only by the [Aerugo]
 /// structure, which exposes some functionality via it's API.
 static EXECUTOR: Executor = Executor::new();
 /// Event manager.
 ///
-/// Singleton instance of the event manager. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
+/// Singleton instance of the event manager. Used directly only by the [Aerugo]
 /// structure.
 static EVENT_MANAGER: EventManager = EventManager::new();
 /// Time manager.
 ///
-/// Singleton instance of the time manager. Used directly only by the [Aerugo](crate::aerugo::Aerugo)
+/// Singleton instance of the time manager. Used directly only by the [Aerugo]
 /// structure.
 static TIME_MANAGER: TimeManager = TimeManager::new();
 
@@ -422,7 +422,7 @@ impl InitApi for Aerugo {
     /// Subscribes a tasklet to events.
     ///
     /// Tasklet subscribes for emited events. After subscription, specific events have to be enabled
-    /// for this tasklet using [EventEnabler](crate::event::EventEnabler) returned from this
+    /// for this tasklet using [EventEnabler] returned from this
     /// function. Emiting an event will wake up all tasklet for which it is enabled and make them
     /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
     /// event. On each execution tasklet will handle one event, receiving it's ID in step function.
@@ -431,7 +431,7 @@ impl InitApi for Aerugo {
     /// for multiple tasklets.
     ///
     /// Strong typing is enforced, tasklet can only be subscribed to events if it processes
-    /// [EventId](crate::event::EventId) type.
+    /// [EventId] type.
     ///
     /// # Generic Parameters
     /// * `C` - Type of the structure with tasklet context data.
