@@ -89,7 +89,7 @@ impl BooleanCondition {
 
 impl DataProvider<bool> for BooleanCondition {
     fn data_ready(&self) -> bool {
-        true
+        false
     }
 
     fn get_data(&self) -> Option<bool> {
