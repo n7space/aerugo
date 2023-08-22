@@ -229,7 +229,9 @@ class GDBInterface:
         * `log_responses` - If provided, will override `self.log_responses`.
         """
         return self.wait_for_response(
-            GDBResponse.with_message(GDBResponse.Type.RESULT, message), timeout, log_responses
+            GDBResponse.with_message(GDBResponse.Type.RESULT, message),
+            timeout,
+            log_responses,
         )
 
     def wait_for_any_result(
@@ -253,13 +255,18 @@ class GDBInterface:
         return self.wait_for_any_response(expected_responses, timeout, log_responses)
 
     def wait_for_notification(
-        self, message: str, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self,
+        message: str,
+        timeout: Optional[float] = None,
+        log_responses: Optional[bool] = None,
     ) -> GDBResponsesList:
         """Blocks until a `notify` response with specified message is received.
         Returns list of all received responses.
         See `wait_for_response` for details."""
         return self.wait_for_response(
-            GDBResponse.with_message(GDBResponse.Type.NOTIFY, message), timeout, log_responses
+            GDBResponse.with_message(GDBResponse.Type.NOTIFY, message),
+            timeout,
+            log_responses,
         )
 
     def wait_for_done(
@@ -354,7 +361,8 @@ class GDBInterface:
 
                 payload = notification.payload_json()
                 current_program_frame = ProgramFrame(
-                    address=int(payload["frame"]["addr"], 16), function=payload["frame"]["func"]
+                    address=int(payload["frame"]["addr"], 16),
+                    function=payload["frame"]["func"],
                 )
                 stop_reason = payload.get("reason", None)
 
