@@ -1,4 +1,5 @@
 # aerugo
+
 Safety-critical applications oriented Real-Time Operating System written in Rust.
 
 This project is developed as part of the European Space Agency activity
@@ -17,12 +18,15 @@ finite amount of time.
 
 The repository structure is as follows:
 
-- `aerugo-hal` - Traits for HAL used in the system.
-- `arch` - Code specific for given architecture.
-- `examples` - Examples of system usage.
-- `scripts` - Handy scripts for automating some of the work.
-- `src` - Code of the core system.
-- `utils` - Code of additional utils.
+* `aerugo-hal` - Traits for HAL used in the system.
+* `arch` - Code specific for given architecture.
+* `calldwell` - Our embedded testing framework.
+* `examples` - Examples of system usage.
+* `scripts` - Handy scripts for automating some of the work.
+* `src` - Code of the core system.
+* `testbins` - Test binaries
+* `tests` - Test scripts
+* `utils` - Code of additional utils.
 
 ## Building
 
@@ -48,10 +52,61 @@ or for specific package run for example: \
 
 Tests can also be run using `cargo test` with `--features` and `--target` flags.
 
+### Running SAMV71 tests
+
+Tests for SAMV71 are ignored by default, to prevent running them with CI, as they require additional environment setup and access to development board.
+All tests are configured to be ran on remote machine that has the development board connected to it via OpenOCD-supported debugger probe.
+
+#### Preparing the environment
+
+To run SAMV71 tests, you have to set these environmental variables first:
+
+* `AERUGO_BOARD_LOGIN` - SSH login of remote debugging setup
+* `AERUGO_BOARD_PASSWORD` - SSH password of remote debugging setup
+* `AERUGO_BOARD_HOSTNAME` - Hostname or IP address of remote debugging setup
+* `AERUGO_BOARD_GDB_PORT` - TCP port of the GDB server that will be started on remote debugging setup
+* `AERUGO_BOARD_RTT_PORT` - TCP port for RTT server
+
+All tests require at least Python 3.9. Use [`pyproject.toml`](./calldwell/pyproject.toml) provided in [`calldwell`](./calldwell/) directory to create virtual environment (Poetry is recommended, but any virtualenv manager that can understand `pyproject.toml` will do fine).
+
+When using Poetry, go to `calldwell` directory and run `poetry shell`. **When running this command for the first time, you should also run `poetry install` to install required dependencies in virtual environment!**
+
+#### Running the tests
+
+**All commands from this section should be ran from project's root directory (the one with this README)!**
+
+**Before running the test, make sure to build it, either by running [`./scripts/build_hal_tests.sh`](./scripts/build_hal_tests.sh), or invoking `cargo build` in test's project directory (in [`testbins`](./testbins/))!**
+
+You can either run each test manually, by invoking `./tests/requirements/test/test_*.py` script via virtualenv shell.
+
+```sh
+python ./tests/requirements/test/test_hal_watchdog.py
+```
+
+Or you can run them all at once, via `./scripts/run_tests.sh aerugo_v71` command.
+
 ## Examples
 
 The `examples` directory contains examples of system usage. Each of the example is a separate project and can
 be build and run with a simple `cargo run`.
+
+### Running SAMV71 examples
+
+SAMV71 examples are using RTT to communicate - hence, you won't see any output if you'll run them with GDB manually, without setting up RTT server and client correctly.
+However, a helper script is provided that makes running the examples very quick and easy.
+
+**Follow the steps from [Preparing the environment](#preparing-the-environment) section, if you haven't done that already, before continuing.**
+
+**All commands from this section should be ran from project's root directory (the one with this README)!**
+
+To run an example, simply run [`./scripts/run_v71_example.py`](./scripts/run_v71_example.py) script via virtualenv shell, providing the name of the example as an argument.
+For example:
+
+```sh
+python ./scripts/run_v71_example.py samv71-fizz-buzz
+```
+
+This script will automatically build and run the example, provided that it's name is valid and it can be successfully built. By default, the example is built in release mode with debugging symbols.
 
 ## Name
 
@@ -62,7 +117,8 @@ aerugo (*noun*)
 ## License
 
 All source code is licensed under either of
-- Apache License, Version 2.0 (see ([LICENSE-APACHE](LICENSE-APACHE)) or
+
+* Apache License, Version 2.0 (see ([LICENSE-APACHE](LICENSE-APACHE)) or
 [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)).
-- MIT License (see ([LICENSE-MIT](LICENSE-MIT)) or
+* MIT License (see ([LICENSE-MIT](LICENSE-MIT)) or
 [https://creativecommons.org/licenses/by-sa/4.0/legalcode](https://creativecommons.org/licenses/by-sa/4.0/legalcode)).
