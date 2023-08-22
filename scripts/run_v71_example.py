@@ -1,6 +1,4 @@
 import logging
-import shutil
-import subprocess
 import sys
 from enum import IntEnum
 from pathlib import Path
@@ -13,6 +11,7 @@ from tests.requirements.test.test_utils import (
     BOARD_PASSWORD,
     BOARD_RTT_PORT,
     GDB_EXECUTABLE,
+    build_cargo_app,
 )
 
 from calldwell.gdb_client import GDBClient
@@ -27,7 +26,6 @@ from calldwell.ssh_client import SSHClient
 # This script should be run from project's root dir, not from `scripts/`!
 EXAMPLES_DIR_PATH = Path("./examples")
 RTT_INIT_FUNCTION_NAME = "init_rtt"
-TARGET_NAME = "thumbv7em-none-eabihf"
 
 
 class ExitReason(IntEnum):
@@ -61,24 +59,6 @@ def get_args() -> str:
 
 def get_example_path(example_name: str) -> Path:
     return EXAMPLES_DIR_PATH / example_name
-
-
-def build_example(example_path: Path, release_build: bool = True):
-    cargo = shutil.which("cargo")
-    if cargo is None:
-        print(f"Error: Cargo not found! Cannot build anything, exiting...")
-        exit(ExitReason.CARGO_NOT_FOUND)
-
-    build_command = [cargo, "build"]
-    if release_build:
-        build_command.append("--release")
-
-    subprocess.run(
-        build_command,
-        cwd=example_path,
-        text=True,
-        check=True,
-    )
 
 
 def start_gdb() -> Tuple[GDBClient, SSHClient]:
@@ -168,9 +148,11 @@ def main():
         )
         exit(ExitReason.INVALID_EXAMPLE_PATH)
 
-    program_path = example_path / "target" / TARGET_NAME / "release" / example_name
+    program_path = build_cargo_app(example_path, release_build=True)
+    if program_path is None:
+        print(f"Error: Cargo executable not found!")
+        exit(ExitReason.CARGO_NOT_FOUND)
 
-    build_example(example_path)
     gdb, ssh = start_gdb()
     load_and_start_program(gdb, program_path)
     wait_for_rtt_init(gdb, example_name)

@@ -3,3 +3,4 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 poetry.lock
+.python-version

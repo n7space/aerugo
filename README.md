@@ -67,23 +67,25 @@ To run SAMV71 tests, you have to set these environmental variables first:
 * `AERUGO_BOARD_GDB_PORT` - TCP port of the GDB server that will be started on remote debugging setup
 * `AERUGO_BOARD_RTT_PORT` - TCP port for RTT server
 
-All tests require at least Python 3.9. Use [`pyproject.toml`](./calldwell/pyproject.toml) provided in [`calldwell`](./calldwell/) directory to create virtual environment (Poetry is recommended, but any virtualenv manager that can understand `pyproject.toml` will do fine).
+Both Calldwell, and all helper scripts, are guaranteed to be backwards-compatible with Python 3.9, however, they should also work fine with Python 3.10 and 3.11.
+
+Use [`pyproject.toml`](./calldwell/pyproject.toml) provided in [`calldwell`](./calldwell/) directory to create virtual environment (Poetry is recommended, but any virtualenv manager that can understand `pyproject.toml` will do fine).
 
 When using Poetry, go to `calldwell` directory and run `poetry shell`. **When running this command for the first time, you should also run `poetry install` to install required dependencies in virtual environment!**
 
 #### Running the tests
 
 **All commands from this section should be ran from project's root directory (the one with this README)!**
-
-**Before running the test, make sure to build it, either by running [`./scripts/build_hal_tests.sh`](./scripts/build_hal_tests.sh), or invoking `cargo build` in test's project directory (in [`testbins`](./testbins/))!**
-
-You can either run each test manually, by invoking `./tests/requirements/test/test_*.py` script via virtualenv shell.
+You can either run each test manually, by invoking `./tests/requirements/test/test_*.py` script via virtualenv shell. Test script will automatically build the test, if needed.
 
 ```sh
 python ./tests/requirements/test/test_hal_watchdog.py
 ```
 
 Or you can run them all at once, via `./scripts/run_tests.sh aerugo_v71` command.
+
+**Warning: If running test via `cargo` for the first time, be aware that their build time will be contained in test execution time, which can potentially cause a timeout. It's recommended to build (or run) all test binaries manually for the first time.**
+Test binaries can be built either by running [`./scripts/build_hal_tests.sh`](./scripts/build_hal_tests.sh), or by invoking `cargo build` in test's project directory (in [`testbins`](./testbins/))!
 
 ## Examples
 

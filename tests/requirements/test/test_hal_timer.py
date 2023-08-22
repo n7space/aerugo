@@ -3,9 +3,7 @@ from typing import List
 
 from test_utils import finish_test, init_test
 
-TEST_BINARY_PATH = (
-    "./testbins/test-hal-timer/target/thumbv7em-none-eabihf/debug/test-hal-timer"
-)
+TEST_NAME = "test-hal-timer"
 
 
 def average_difference(values: List[int]) -> float:
@@ -14,7 +12,7 @@ def average_difference(values: List[int]) -> float:
 
 
 def main():
-    _, rtt, ssh = init_test(TEST_BINARY_PATH)
+    _, rtt, ssh = init_test(TEST_NAME)
 
     # Timer should be running by default, and program should output
     # it's overflow count via RTT.
@@ -24,6 +22,7 @@ def main():
     for _ in range(10):
         fast_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_fast = average_difference(fast_irq_counts)
+    print(f"Average differences (fast clock): {avg_diffs_fast:.03f}")
 
     # After 10 messages, tasklet should disable the timer, so incoming IRQ counts
     # should not change
@@ -31,6 +30,7 @@ def main():
     for _ in range(10):
         stopped_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_stopped = average_difference(stopped_irq_counts)
+    print(f"Average differences (clock stopped): {avg_diffs_stopped:.03f}")
 
     # After another 10 messages, tasklet should switch timer's source to slower one
     # and enable it, returning IRQ count that's changing slower
@@ -39,6 +39,7 @@ def main():
         slow_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
 
     avg_diffs_slow = average_difference(slow_irq_counts)
+    print(f"Average differences (slow clock): {avg_diffs_slow:.03f}")
 
     if avg_diffs_fast <= avg_diffs_slow:
         print("TEST FAILED: FASTER CLOCK IS IN FACT SLOWER")

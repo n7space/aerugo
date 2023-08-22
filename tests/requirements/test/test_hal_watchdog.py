@@ -2,13 +2,11 @@ import logging
 
 from test_utils import finish_test, init_test
 
-TEST_BINARY_PATH = (
-    "./testbins/test-hal-watchdog/target/thumbv7em-none-eabihf/debug/test-hal-watchdog"
-)
+TEST_NAME = "test-hal-watchdog"
 
 
 def main():
-    gdb, rtt, ssh = init_test(TEST_BINARY_PATH)
+    gdb, rtt, ssh = init_test(TEST_NAME)
 
     expected_messages = [
         "short task started",
