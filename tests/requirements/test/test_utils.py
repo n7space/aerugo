@@ -1,10 +1,11 @@
-import os
 import logging
+import os
 from typing import Tuple
+
 from calldwell.gdb_client import GDBClient
-from calldwell.ssh_client import SSHClient
 from calldwell.rtt_client import CalldwellRTTClient
 from calldwell.rust_helpers import init_remote_calldwell_rs_session
+from calldwell.ssh_client import SSHClient
 
 BOARD_LOGIN = str(os.environ.get("AERUGO_BOARD_LOGIN"))
 BOARD_PASSWORD = str(os.environ.get("AERUGO_BOARD_PASSWORD"))

@@ -1,5 +1,6 @@
 import logging
-from test_utils import init_test, finish_test
+
+from test_utils import finish_test, init_test
 
 TEST_BINARY_PATH = (
     "./testbins/test-hal-watchdog/target/thumbv7em-none-eabihf/debug/test-hal-watchdog"
