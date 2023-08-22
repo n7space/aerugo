@@ -21,8 +21,10 @@ struct DummyTaskContext {
 fn dummy_task(_: (), context: &mut DummyTaskContext, api: &'static dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     if context.acc % 300 == 0 {
-        let time = api.get_system_time().duration_since_epoch().to_secs();
-        rprintln!("Current time is {}s", time);
+        let time = api.get_system_time().duration_since_epoch();
+        let time_seconds = time.to_secs();
+        let time_millis = time.to_millis() % 1000;
+        rprintln!("Current time is {}s {}ms", time_seconds, time_millis);
     }
 }
 
@@ -30,7 +32,7 @@ static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStor
 
 #[entry]
 fn main() -> ! {
-    rtt::rtt_init_print!();
+    init_rtt();
 
     rprintln!("Hello, world! Initializing Aerugo...");
 
@@ -67,4 +69,9 @@ fn main() -> ! {
     rprintln!("Starting the system!");
 
     AERUGO.start();
+}
+
+#[inline(never)]
+fn init_rtt() {
+    rtt::rtt_init_print!();
 }

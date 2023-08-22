@@ -19,5 +19,6 @@ panic-rtt-target = { version = "0.1.2", features = ["cortex-m"] }
 rtt-target = "0.4.0"
 
 [profile.release]
-debug = true
+codegen-units = 1
 lto = true
+debug = true

@@ -3,14 +3,15 @@
 
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
+extern crate panic_rtt_target;
+extern crate rtt_target as rtt;
 
 use aerugo::{
     time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage, AERUGO,
 };
-use cortex_m_semihosting::hprintln;
 use rt::entry;
+use rtt::rprintln;
 
 #[derive(Default)]
 struct DummyTaskContext {
@@ -20,7 +21,7 @@ struct DummyTaskContext {
 fn dummy_task(_: (), context: &mut DummyTaskContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     if context.acc % 250 == 0 {
-        hprintln!("I'm running!");
+        rprintln!("I'm running!");
     }
 }
 
@@ -28,13 +29,15 @@ static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStor
 
 #[entry]
 fn main() -> ! {
-    hprintln!("Hello, world! Initializing Aerugo...");
+    init_rtt();
+
+    rprintln!("Hello, world! Initializing Aerugo...");
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(5),
     });
 
-    hprintln!("Creating tasks...");
+    rprintln!("Creating tasks...");
     let dummy_task_config = TaskletConfig {
         name: "DummyTask",
         ..Default::default()
@@ -54,13 +57,18 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create handle to dummy task!");
 
-    hprintln!("Subscribing tasks...");
+    rprintln!("Subscribing tasks...");
 
     AERUGO
         .subscribe_tasklet_to_cyclic(&dummy_task_handle, None)
         .expect("Unable to subscribe dummy task to cyclic execution!");
 
-    hprintln!("Starting the system!");
+    rprintln!("Starting the system!");
 
     AERUGO.start();
+}
+
+#[inline(never)]
+fn init_rtt() {
+    rtt::rtt_init_print!();
 }
