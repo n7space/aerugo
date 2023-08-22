@@ -1,9 +1,9 @@
 import logging
 import os
-from typing import Optional, Tuple
+import shutil
 import subprocess
 from pathlib import Path
-import shutil
+from typing import Optional, Tuple
 
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import CalldwellRTTClient
