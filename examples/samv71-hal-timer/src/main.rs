@@ -3,6 +3,8 @@
 
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
+extern crate panic_rtt_target;
+extern crate rtt_target as rtt;
 
 use core::cell::RefCell;
 
@@ -12,14 +14,13 @@ use aerugo::hal::drivers::timer::{
 use aerugo::hal::PMC;
 use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
-use panic_semihosting as _;
 
 use aerugo::{
     hal::drivers::timer::Timer, time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig,
     TaskletConfig, TaskletStorage, AERUGO,
 };
-use cortex_m_semihosting::hprintln;
 use rt::entry;
+use rtt::rprintln;
 
 static TIMER_CHANNEL: Mutex<RefCell<Option<Channel<TC1, Ch0, Waveform>>>> =
     Mutex::new(RefCell::new(None));
@@ -32,7 +33,7 @@ struct DummyTaskContext {
 fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
     if context.acc % 1000 == 0 {
-        hprintln!("I'm running!");
+        rprintln!("I'm running!");
 
         irq_free(|cs| {
             // This is safe, because TIMER_CHANNEL is set before the scheduler starts.
@@ -42,7 +43,7 @@ fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi)
                 .as_ref()
                 .unwrap()
                 .counter_value();
-            hprintln!("TC1 CH0: {}", timer_value);
+            rprintln!("TC1 CH0: {}", timer_value);
         })
     }
 }
@@ -65,7 +66,7 @@ fn init_timer(timer: &mut Timer<TC1>) {
     ch0.trigger();
 
     let status = ch0.read_and_clear_status().clock_enabled;
-    hprintln!("Clock is {}", if status { "enabled" } else { "disabled" });
+    rprintln!("Clock is {}", if status { "enabled" } else { "disabled" });
 
     irq_free(|cs| {
         TIMER_CHANNEL.borrow(cs).replace(Some(ch0));
@@ -73,7 +74,7 @@ fn init_timer(timer: &mut Timer<TC1>) {
 }
 
 fn init_tasks() {
-    hprintln!("Creating tasks...");
+    rprintln!("Creating tasks...");
     let dummy_task_config = TaskletConfig {
         name: "DummyTask",
         ..Default::default()
@@ -93,7 +94,7 @@ fn init_tasks() {
         .create_handle()
         .expect("Unable to create handle to dummy task!");
 
-    hprintln!("Subscribing tasks...");
+    rprintln!("Subscribing tasks...");
 
     AERUGO
         .subscribe_tasklet_to_cyclic(&dummy_task_handle, None)
@@ -102,13 +103,15 @@ fn init_tasks() {
 
 #[entry]
 fn main() -> ! {
-    hprintln!("Hello, world! Initializing Aerugo...");
+    init_rtt();
+
+    rprintln!("Hello, world! Initializing Aerugo...");
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(5),
     });
 
-    hprintln!("Doing stuff with timers...");
+    rprintln!("Doing stuff with timers...");
     let peripherals = AERUGO
         .peripherals()
         .expect("peripherals are not initialized")
@@ -122,6 +125,11 @@ fn main() -> ! {
 
     init_tasks();
 
-    hprintln!("Starting the system!");
+    rprintln!("Starting the system!");
     AERUGO.start();
+}
+
+#[inline(never)]
+fn init_rtt() {
+    rtt::rtt_init_print!();
 }

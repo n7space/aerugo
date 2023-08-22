@@ -116,7 +116,7 @@ impl From<EventId> for FizzBuzzEvents {
 
 #[entry]
 fn main() -> ! {
-    rtt::rtt_init_print!();
+    init_rtt();
 
     rprintln!("Hello, world! Initializing Aerugo...");
 
@@ -254,4 +254,9 @@ fn main() -> ! {
         .expect("Unable to subscribe Done to GenerateNumbersCondition");
 
     AERUGO.start();
+}
+
+#[inline(never)]
+fn init_rtt() {
+    rtt::rtt_init_print!();
 }

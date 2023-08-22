@@ -10,7 +10,12 @@ version = "0.1.0"
 aerugo = { version = "0.1.0", path = "../..", features = [
     "use-aerugo-cortex-m",
 ] }
-cortex-m = "0.7.7"
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.3"
-cortex-m-semihosting = "0.5.0"
-panic-semihosting = "0.6.0"
+panic-rtt-target = { version = "0.1.2", features = ["cortex-m"] }
+rtt-target = "0.4.0"
+
+[profile.release]
+codegen-units = 1
+lto = true
+debug = true
