@@ -31,7 +31,6 @@ use crate::api::{InitError, RuntimeApi};
 use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
-use crate::data_receiver::DataReceiver;
 use crate::internal_cell::InternalCell;
 use crate::time::TimerInstantU64;
 
@@ -134,6 +133,23 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         }
     }
 
+    /// Subscribes itself to the given data provider.
+    ///
+    /// # Parameters
+    /// * `data_provider` - Data provider.
+    ///
+    /// # Return
+    /// `InitError` in case of an error, `Ok(())` otherwise.
+    pub(crate) unsafe fn subscribe(
+        &self,
+        data_provider: &'static dyn DataProvider<T>,
+    ) -> Result<(), InitError> {
+        match self.data_provider.set(data_provider) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(InitError::TaskletAlreadySubscribed),
+        }
+    }
+
     /// Checks if this tasklet has data waiting for processing.
     pub(crate) fn has_work(&self) -> bool {
         match self.data_provider.get() {
@@ -179,18 +195,6 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Creates pointer to this tasklet.
     pub(crate) fn ptr(&'static self) -> TaskletPtr {
         TaskletPtr::new::<T, C, COND_COUNT>(self)
-    }
-}
-
-impl<T, C, const COND_COUNT: usize> DataReceiver<T> for Tasklet<T, C, COND_COUNT> {
-    unsafe fn subscribe(
-        &self,
-        data_provider: &'static dyn DataProvider<T>,
-    ) -> Result<(), InitError> {
-        match self.data_provider.set(data_provider) {
-            Ok(_) => Ok(()),
-            Err(_) => Err(InitError::TaskletAlreadySubscribed),
-        }
     }
 }
 
