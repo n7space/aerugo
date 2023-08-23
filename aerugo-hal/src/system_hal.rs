@@ -22,19 +22,23 @@ pub trait SystemHal {
     /// Type for system HAL error.
     type Error;
 
+    /// Creates global HAL instance. Since there can only be a single instance of HAL, this function
+    /// should initialize it's global state and prepare the environment for hardware configuration.
+    fn create() -> Result<(), Self::Error>;
+
     /// Configure system hardware.
     ///
     /// Implementation should initialize and configure all core system peripherals.
     ///
     /// # Parameters
     /// * `config` - System hardware configuration.
-    fn configure_hardware(&mut self, config: SystemHardwareConfig) -> Result<(), Self::Error>;
+    fn configure_hardware(config: SystemHardwareConfig) -> Result<(), Self::Error>;
 
     /// Gets current system time timestamp.
-    fn get_system_time(&self) -> Self::Instant;
+    fn get_system_time() -> Self::Instant;
 
     /// Feeds the system watchdog.
-    fn feed_watchdog(&mut self);
+    fn feed_watchdog();
 
     /// Enters critical section
     fn enter_critical();

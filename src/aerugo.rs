@@ -8,7 +8,6 @@
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use env_parser::read_env;
-use internal_cell::InternalCell;
 
 use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
 use crate::boolean_condition::{
@@ -50,10 +49,7 @@ static TIME_MANAGER: TimeManager = TimeManager::new();
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 /// It should be used as a [singleton](crate::aerugo::AERUGO) that acts as a system API,
 /// both for user and for the internal system parts.
-pub struct Aerugo {
-    /// Hardware Access/Abstraction Layer.
-    hal: InternalCell<Option<Hal>>,
-}
+pub struct Aerugo {}
 
 impl Aerugo {
     /// Maximum number of tasklets registered in the system.
@@ -65,31 +61,14 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        Aerugo {
-            hal: InternalCell::new(None),
-        }
+        Aerugo {}
     }
 
     /// Initialize the system runtime and hardware.
-    pub fn initialize(&'static self, config: SystemHardwareConfig) {
-        let mut hal = Hal::new().expect("Cannot initialize HAL more than once!");
-        hal.configure_hardware(config)
-            .expect("Cannot re-configure hardware!");
-
-        // SAFETY: This is safe, because it's a single-core environment,
-        // and no other references to Hal container should exist during this call.
-        let hal_container = unsafe { self.hal.as_mut_ref() };
-        hal_container.replace(hal);
-    }
-
-    /// Returns PAC peripherals. Can be called successfully only once, as peripherals are moved out of system.
-    pub fn peripherals(&'static self) -> Result<Option<UserPeripherals>, RuntimeError> {
-        // SAFETY: This is safe, because it's a single-core environment,
-        // and no other references to Hal should exist during this call.
-        match unsafe { self.hal.as_mut_ref() } {
-            None => Err(RuntimeError::SystemNotInitialized),
-            Some(hal) => Ok(hal.user_peripherals()),
-        }
+    pub fn initialize(&'static self, config: SystemHardwareConfig) -> UserPeripherals {
+        Hal::create().expect("HAL initialization failed");
+        Hal::configure_hardware(config).expect("Hardware configuration failed");
+        Hal::create_user_peripherals().expect("Cannot create user peripherals instance")
     }
 
     /// Starts the system.
@@ -716,15 +695,7 @@ impl RuntimeApi for Aerugo {
     }
 
     fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000> {
-        // SAFETY: This is safe, because it's a single-core environment,
-        // and no other references to Hal should exist during this call.
-        unsafe {
-            self.hal
-                .as_ref()
-                .as_ref()
-                .expect("Tried to use HAL before Aerugo initialization!")
-                .get_system_time()
-        }
+        Hal::get_system_time()
     }
 
     fn set_system_time_offset(&'static self, _offset: crate::time::TimerDurationU64<1_000_000>) {
@@ -767,15 +738,7 @@ impl SystemApi for Aerugo {
     }
 
     fn update(&'static self) {
-        // SAFETY: This code is executed in Aerugo-managed loop on single-core system,
-        // therefore no other mutable references should exist to HAL during this call.
-        let hal = unsafe {
-            self.hal
-                .as_mut_ref()
-                .as_mut()
-                .expect("HAL should be initialized before starting the system!")
-        };
+        Hal::feed_watchdog();
         TIME_MANAGER.wake_tasklets();
-        hal.feed_watchdog();
     }
 }

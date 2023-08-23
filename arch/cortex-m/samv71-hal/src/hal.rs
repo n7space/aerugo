@@ -1,6 +1,5 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_cortex_m::Mutex;
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
@@ -20,88 +19,85 @@ use crate::user_peripherals::UserPeripherals;
 use internal_cell::InternalCell;
 use pac::{self, PMC, TC0};
 
-/// This lock will prevent from creating HAL instance twice in the system.
-/// Since HAL manages the access to peripherals, creating and using multiple
-/// instances of it could be unsafe.
-static HAL_CREATION_LOCK: Mutex<bool> = Mutex::new(false);
+/// Global system peripherals instance, used internally by HAL.
+///
+/// # Safety
+/// Mutex is not used here, because it would imply a critical section at every access to HAL.
+/// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
+static HAL_SYSTEM_PERIPHERALS: InternalCell<Option<SystemPeripherals>> = InternalCell::new(None);
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
-pub struct Hal {
-    /// User-accessible peripherals.
-    user_peripherals: Option<UserPeripherals>,
-    /// System peripherals.
-    system_peripherals: InternalCell<SystemPeripherals>,
-}
+pub struct Hal {}
 
 impl Hal {
-    /// Frequency for the time types (TODO)
+    /// Frequency of system timer.
     const TIMER_FREQ: u32 = 1_000_000;
 
-    /// Create new HAL instance from PAC peripherals.
+    /// Create system peripherals of HAL.
+    ///
+    /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
+    /// containing peripherals used by [`SystemHal`] API implementation.
+    ///
+    /// Some of these peripherals will be accessible only during HAL initialization
+    /// (between [`Hal::create`] and [`SystemHal::configure_hardware`] calls).
     ///
     /// # Safety
-    /// This function is safe to call only once.
-    /// Subsequent calls will return an error, indicating that HAL instance has already been created.
-    ///
-    /// # Return
-    /// `Hal` if it's first call during the program lifetime, [`HalError::HalAlreadyCreated`] otherwise.
-    pub fn new() -> Result<Self, HalError> {
-        HAL_CREATION_LOCK.lock(|lock| {
-            if *lock {
-                return Err(HalError::HalAlreadyCreated);
-            }
-
-            *lock = true;
-            Ok(())
-        })?;
-
-        let (user_peripherals, system_peripherals) = Hal::create_peripherals();
-        Ok(Hal {
-            user_peripherals: Some(user_peripherals),
-            system_peripherals: InternalCell::new(system_peripherals),
-        })
-    }
-
-    /// Create peripherals for HAL
-    ///
-    /// # Safety
-    /// This function should be only called once inside `new`.
+    /// This function should be only called once inside [`Hal::create`].
     /// Subsequent calls will return valid peripherals, but it's not possible to
     /// guarantee safety if multiple instances of peripherals are used in the system.
-    fn create_peripherals() -> (UserPeripherals, SystemPeripherals) {
+    fn create_system_peripherals() -> SystemPeripherals {
         let mcu_peripherals = unsafe { pac::Peripherals::steal() };
-        let core_peripherals = unsafe { pac::CorePeripherals::steal() };
 
-        let system_peripherals = SystemPeripherals {
+        SystemPeripherals {
             watchdog: Watchdog::new(mcu_peripherals.WDT),
             timer: Timer::new(mcu_peripherals.TC0),
             timer_ch0: None,
             timer_ch1: None,
             timer_ch2: None,
             pmc: Some(mcu_peripherals.PMC),
-        };
-
-        let user_peripherals = UserPeripherals {
-            chip_id: Some(mcu_peripherals.CHIPID),
-            timer_counter1: Some(mcu_peripherals.TC1),
-            timer_counter2: Some(mcu_peripherals.TC2),
-            timer_counter3: Some(mcu_peripherals.TC3),
-            pmc: None,
-            nvic: Some(core_peripherals.NVIC),
-        };
-
-        (user_peripherals, system_peripherals)
+        }
     }
 
-    /// Returns PAC peripherals for the user
+    /// Creates user peripherals instance.
+    ///
+    /// This function steals PAC peripherals and returns a [`UserPeripherals`] structure
+    /// containing all peripherals that are available to user via HAL drivers.
+    ///
+    /// Some of these peripherals are taken from [`SystemPeripherals`] structure, hence
+    /// this function should not be called before finishing HAL initialization (via
+    /// [`SystemHal::configure_hardware] function).
+    ///
+    /// This function executes in critical section, as it modifies [`HAL_SYSTEM_PERIPHERALS`].
     ///
     /// # Safety
-    /// Can be called successfully only once. Subsequent calls will return None.
+    /// This function can be called successfully only once, after HAL initialization.
+    /// If called before that, or multiple times, it will return [`None`], as some of
+    /// the required peripherals will be missing.
     ///
-    /// # Return
-    /// [`UserPeripherals`] on first call, `None` on subsequent calls.
-    pub fn user_peripherals(&mut self) -> Option<UserPeripherals> {
-        self.user_peripherals.take()
+    /// # Returns
+    /// [`Some(UserPeripherals)`] if called for the first time after HAL initialization,
+    /// [`None`] otherwise.
+    pub fn create_user_peripherals() -> Option<UserPeripherals> {
+        Hal::execute_critical(|_| {
+            if let Some(system_peripherals) = unsafe { HAL_SYSTEM_PERIPHERALS.as_mut_ref() } {
+                let mcu_peripherals = unsafe { pac::Peripherals::steal() };
+                let core_peripherals = unsafe { pac::CorePeripherals::steal() };
+
+                // Check if PMC is available, return `None` if it's not.
+                system_peripherals.pmc.as_ref()?;
+
+                Some(UserPeripherals {
+                    chip_id: Some(mcu_peripherals.CHIPID),
+                    timer_counter1: Some(mcu_peripherals.TC1),
+                    timer_counter2: Some(mcu_peripherals.TC2),
+                    timer_counter3: Some(mcu_peripherals.TC3),
+                    pmc: system_peripherals.pmc.take(),
+                    nvic: Some(core_peripherals.NVIC),
+                })
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -110,49 +106,103 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    fn configure_hardware(&mut self, config: SystemHardwareConfig) -> Result<(), HalError> {
-        // SAFETY: This is safe, because this is a single-core system,
-        // and no other references to system peripherals should exist.
-        let peripherals = unsafe { self.system_peripherals.as_mut_ref() };
+    /// Initialize global HAL instance using PAC peripherals.
+    ///
+    /// Calling this function begins HAL initialization process. This process must be finished
+    /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
+    /// be called, as they will most likely fail.
+    ///
+    /// This function executes in critical section, as it modifies [`HAL_SYSTEM_PERIPHERALS`].
+    ///
+    /// # Safety
+    /// This function is safe to call only once.
+    /// Subsequent calls will return an error, indicating that HAL instance has already been created.
+    ///
+    /// # Return
+    /// `()` on success, [`HalError::HalAlreadyCreated`] if called more than once.
+    fn create() -> Result<(), HalError> {
+        Hal::execute_critical(|_| {
+            // SAFETY:
+            // This function can be successfully called only once, and we're in critical section,
+            // so there's no possible way that this memory will accessed somewhere else until this
+            // section is finished.
+            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+            if is_hal_created {
+                return Err(HalError::HalAlreadyCreated);
+            }
 
-        match peripherals.watchdog.configure(WatchdogConfig {
-            duration: config.watchdog_timeout,
-            ..Default::default()
-        }) {
-            Ok(()) => {}
-            Err(_) => return Err(HalError::HalAlreadyConfigured),
-        };
+            unsafe {
+                HAL_SYSTEM_PERIPHERALS
+                    .as_mut_ref()
+                    .replace(Hal::create_system_peripherals())
+            };
 
-        if let Some(pmc) = peripherals.pmc.take() {
-            let (ch0, ch1, ch2) = configure_timer_for_hal(&mut peripherals.timer, &pmc);
+            Ok(())
+        })
+    }
+
+    fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
+        Hal::execute_critical(|_| {
+            // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
+            // of single-core MCU and no other references to peripherals should exist at this time.
+            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+            if !is_hal_created {
+                return Err(HalError::HalNotCreated);
+            }
+
+            // SAFETY: Mutable access to system peripherals is safe, as we're in critical section
+            // of single-core MCU and no other references to peripherals should exist at this time.
+            // We also checked that peripherals exist, so it should realistically never panic.
+            let peripherals = unsafe {
+                HAL_SYSTEM_PERIPHERALS
+                    .as_mut_ref()
+                    .as_mut()
+                    .expect("HAL is not initialized")
+            };
+
+            if peripherals.pmc.is_none() {
+                // If PMC is not available, it means that system has already been initialized,
+                // so this function cannot proceed.
+                return Err(HalError::SystemAlreadyInitialized);
+            }
+            // This should realistically never panic, as we checked the existence of PMC earlier.
+            let pmc = peripherals
+                .pmc
+                .as_ref()
+                .expect("PMC is missing from system peripherals");
+
+            // Configure watchdog
+            match peripherals.watchdog.configure(WatchdogConfig {
+                duration: config.watchdog_timeout,
+                ..Default::default()
+            }) {
+                Ok(()) => {}
+                Err(_) => return Err(HalError::SystemAlreadyInitialized),
+            };
+
+            // Configure system timer
+            let (ch0, ch1, ch2) = configure_timer(&mut peripherals.timer, pmc);
 
             peripherals.timer_ch0.replace(ch0);
             peripherals.timer_ch1.replace(ch1);
             peripherals.timer_ch2.replace(ch2);
 
-            if let Some(user_peripherals) = self.user_peripherals.as_mut() {
-                user_peripherals.pmc.replace(pmc);
-            } else {
-                // That should never happen, as both system and user peripherals are created at
-                // the same time, but to prevent hard-to-detect issues in the future, this will
-                // throw an error anyway.
-                return Err(HalError::HalNotInitializedYet);
-            }
-        } else {
-            // If PMC is not there, it means that the system has already been initialized.
-            return Err(HalError::HalAlreadyConfigured);
-        }
+            // Start system timer
+            peripherals.timer.trigger_all_channels();
 
-        // Start system timer
-        peripherals.timer.trigger_all_channels();
-
-        Ok(())
+            Ok(())
+        })
     }
 
-    fn get_system_time(&self) -> Self::Instant {
-        // SAFETY: This is safe, because this is a single-core system,
-        // and no other references to system peripherals should exist.
-        let peripherals = unsafe { self.system_peripherals.as_ref() };
+    fn get_system_time() -> Self::Instant {
+        // SAFETY: This is safe, because this is a single-core system, and no other references to
+        // system peripherals should exist during this call.
+        let peripherals = unsafe {
+            HAL_SYSTEM_PERIPHERALS
+                .as_ref()
+                .as_ref()
+                .expect("HAL cannot be accessed before initialization")
+        };
 
         let ch0 = peripherals
             .timer_ch0
@@ -167,18 +217,23 @@ impl SystemHal for Hal {
             .as_ref()
             .expect("get_system_time called before HAL initialization");
 
-        let time_ch0 = ch0.counter_value();
-        let time_ch1 = ch1.counter_value();
         let time_ch2 = ch2.counter_value();
+        let time_ch1 = ch1.counter_value();
+        let time_ch0 = ch0.counter_value();
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
         crate::time::TimerInstantU64::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
     }
 
-    fn feed_watchdog(&mut self) {
-        // SAFETY: This is safe, because this is a single-core system,
-        // and no other references to system peripherals should exist.
-        let peripherals = unsafe { self.system_peripherals.as_mut_ref() };
+    fn feed_watchdog() {
+        // SAFETY: This is safe, because this is a single-core system, and no other references to
+        // system peripherals should exist during this call.
+        let peripherals = unsafe {
+            HAL_SYSTEM_PERIPHERALS
+                .as_mut_ref()
+                .as_mut()
+                .expect("HAL cannot be accessed before initialization")
+        };
 
         peripherals.watchdog.feed();
     }
@@ -220,8 +275,8 @@ type Tc0Channels = (
 /// # Parameters
 /// * `timer` - HAL Timer instance
 /// * `pmc` - PAC PMC instance
-fn configure_timer_for_hal(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
-    configure_pmc_for_timer(pmc);
+fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
+    configure_timer_pmc(pmc);
 
     // If any of the configurations is not available, user cannot do anything about it and it
     // certainly should not pass any tests, so just hard fault it.
@@ -274,7 +329,7 @@ fn configure_timer_for_hal(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
 /// PCK6 uses MAINCK clock source (which is 12MHz by default), and divides it by 12 to get
 /// 1MHz input clock, used by the timer to achieve 1ns resolution.
 ///
-fn configure_pmc_for_timer(pmc: &PMC) {
+fn configure_timer_pmc(pmc: &PMC) {
     // Configure PCK6 for 1MHz TC0 output
     // Source: MAINCK (12MHz by default)
     // Divider: /6 (TODO: is there a hidden /2 prescaler somewhere?)

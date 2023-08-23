@@ -8,35 +8,21 @@ use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
 
 use crate::error::HalError;
-use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
 
 /// Time when system was started
 static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
 
 /// HAL implementation for x86.
-pub struct Hal {
-    /// Hardware peripherals.
-    user_peripherals: Option<UserPeripherals>,
-    /// System peripherals.
-    _system_peripherals: Option<SystemPeripherals>,
-}
+pub struct Hal {}
 
 impl Hal {
     /// Frequency for the time types (TODO)
     const TIMER_FREQ: u32 = 1_000_000;
 
-    /// Create new HAL instance.
-    pub fn new() -> Result<Self, HalError> {
-        Ok(Hal {
-            user_peripherals: Some(UserPeripherals::default()),
-            _system_peripherals: Some(SystemPeripherals::default()),
-        })
-    }
-
-    /// Returns PAC peripherals for the user. Can be called successfully only once.
-    pub fn user_peripherals(&mut self) -> Option<UserPeripherals> {
-        self.user_peripherals.take()
+    /// Returns empty UserPeripherals struct, as x86 does not provide any.
+    pub fn create_user_peripherals() -> Option<UserPeripherals> {
+        Some(UserPeripherals {})
     }
 }
 
@@ -45,12 +31,17 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    fn configure_hardware(&mut self, _config: SystemHardwareConfig) -> Result<(), HalError> {
+    fn create() -> Result<(), Self::Error> {
+        // There's nothing to create on x86
+        Ok(())
+    }
+
+    fn configure_hardware(_config: SystemHardwareConfig) -> Result<(), HalError> {
         // There is no hardware to configure on x86
         Ok(())
     }
 
-    fn get_system_time(&self) -> Self::Instant {
+    fn get_system_time() -> Self::Instant {
         Self::Instant::from_ticks(
             TIME_START
                 .elapsed()
@@ -61,7 +52,7 @@ impl SystemHal for Hal {
         )
     }
 
-    fn feed_watchdog(&mut self) {
+    fn feed_watchdog() {
         // There is no watchdog for x86 target.
     }
 
