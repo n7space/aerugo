@@ -153,7 +153,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Checks if this tasklet has data waiting for processing.
     pub(crate) fn has_work(&self) -> bool {
         match self.data_provider.get() {
-            Some(data_provider) => data_provider.data_ready(),
+            Some(data_provider) => data_provider.data_waiting(),
             None => false,
         }
     }

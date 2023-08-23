@@ -88,11 +88,19 @@ impl BooleanCondition {
 }
 
 impl DataProvider<bool> for BooleanCondition {
-    fn data_ready(&self) -> bool {
-        false
-    }
-
+    /// Returns state of the condition.
+    ///
+    /// # Return
+    /// Always returns `Some(bool)`.
     fn get_data(&self) -> Option<bool> {
         self.value.lock(|v| Some(*v))
+    }
+
+    /// Returns false, as there is no waiting data in the condition.
+    ///
+    /// Condition has it's state that can be accessed, but's it is not considered 'waiting' for the
+    /// scheduling purposes.
+    fn data_waiting(&self) -> bool {
+        false
     }
 }

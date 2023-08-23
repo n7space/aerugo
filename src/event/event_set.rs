@@ -155,14 +155,10 @@ impl EventSet {
 }
 
 impl DataProvider<EventId> for EventSet {
-    fn data_ready(&self) -> bool {
-        self.event_states.lock(|event_states| {
-            event_states
-                .iter()
-                .any(|event_state| event_state.is_active())
-        })
-    }
-
+    /// Returns ID of the event active in this set.
+    ///
+    /// # Return
+    /// `Some(EventId)` if there is any event active, `None` otherwise.
     fn get_data(&self) -> Option<EventId> {
         self.event_states.lock(|event_states| {
             match event_states
@@ -175,6 +171,15 @@ impl DataProvider<EventId> for EventSet {
                 }
                 None => None,
             }
+        })
+    }
+
+    /// Checks if any event in this set is active.
+    fn data_waiting(&self) -> bool {
+        self.event_states.lock(|event_states| {
+            event_states
+                .iter()
+                .any(|event_state| event_state.is_active())
         })
     }
 }

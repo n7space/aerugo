@@ -29,14 +29,16 @@ impl CyclicExecution {
 }
 
 impl DataProvider<()> for CyclicExecution {
-    fn data_ready(&self) -> bool {
+    /// Returns `Some()`.
+    fn get_data(&self) -> Option<()> {
+        Some(())
+    }
+
+    fn data_waiting(&self) -> bool {
+        // TODO: This will be changed when period is implemented
         match self.period {
             Some(_) => todo!(),
             None => true,
         }
-    }
-
-    fn get_data(&self) -> Option<()> {
-        Some(())
     }
 }
