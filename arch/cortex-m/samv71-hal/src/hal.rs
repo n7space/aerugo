@@ -63,11 +63,11 @@ impl Hal {
     /// This function steals PAC peripherals and returns a [`UserPeripherals`] structure
     /// containing all peripherals that are available to user via HAL drivers.
     ///
-    /// Some of these peripherals are taken from [`SystemPeripherals`] structure, hence
+    /// Some of these peripherals are taken from SystemPeripherals structure, hence
     /// this function should not be called before finishing HAL initialization (via
     /// [`SystemHal::configure_hardware] function).
     ///
-    /// This function executes in critical section, as it modifies [`HAL_SYSTEM_PERIPHERALS`].
+    /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
     /// # Safety
     /// This function can be called successfully only once, after HAL initialization.
@@ -112,7 +112,7 @@ impl SystemHal for Hal {
     /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
     /// be called, as they will most likely fail.
     ///
-    /// This function executes in critical section, as it modifies [`HAL_SYSTEM_PERIPHERALS`].
+    /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
     /// # Safety
     /// This function is safe to call only once.
