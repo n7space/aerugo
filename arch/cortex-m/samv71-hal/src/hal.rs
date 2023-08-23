@@ -141,6 +141,19 @@ impl SystemHal for Hal {
         })
     }
 
+    /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
+    ///
+    /// Calling this function finishes HAL initialization process. It should be called as soon as possible
+    /// after creating HAL instance via [`SystemHal::create`].
+    ///
+    /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
+    ///
+    /// # Safety
+    /// This function is safe to call only once.
+    /// Subsequent calls will return an error, indicating that HAL instance has already been initialized.
+    ///
+    /// # Return
+    /// `()` on success, [`HalError`] if HAL is either not created yet, or were already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
         Hal::execute_critical(|_| {
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
