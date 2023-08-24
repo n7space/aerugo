@@ -296,7 +296,7 @@ where
     /// that we really want to change the type of an object.
     ///
     /// # Example
-    /// ```no_run
+    /// ```ignore
     /// fn waveform(self) -> Channel<Timer, ID, Waveform> {
     ///     // Do some logic to configure the new mode here
     ///     // ...
