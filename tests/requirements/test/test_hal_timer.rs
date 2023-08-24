@@ -1,5 +1,3 @@
-use assert_cmd::Command;
-
 // Test scenario:
 // - Configure Timer to use non-default clock source
 // - Enable timer's interrupt, and count it's overflows
@@ -17,11 +15,9 @@ use assert_cmd::Command;
 /// @SRS{ROS-FUN-BSP-TIC-060}
 /// @SRS{ROS-FUN-BSP-TIC-070}
 #[cfg_attr(not(doc), test)]
-#[ignore]
+#[cfg(feature = "test-aerugo-cortex-m")]
 fn req_test_hal_timer() {
-    // TODO: Fix building the binary
-    // build_test_binary("test-hal-timer", "testbins").expect("error building test binary");
-
+    // The script will build test binary
     Command::new("python")
         .arg("tests/requirements/test/test_hal_timer.py")
         .timeout(std::time::Duration::from_secs(60))
