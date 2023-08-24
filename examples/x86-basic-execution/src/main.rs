@@ -1,6 +1,5 @@
 use aerugo::{
-    log, time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    log, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 
 #[derive(Default)]
@@ -27,9 +26,7 @@ static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new
 static TASK_B_STORAGE: TaskletStorage<(), TaskBContext, 0> = TaskletStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(5),
-    });
+    AERUGO.initialize(SystemHardwareConfig::default());
 
     let task_a_config = TaskletConfig {
         name: "TaskA",

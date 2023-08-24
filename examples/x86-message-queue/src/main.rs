@@ -1,6 +1,6 @@
 use aerugo::{
-    log, time::MillisDurationU32, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
-    SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    log, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 
 struct TaskAContext {
@@ -35,9 +35,7 @@ static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext, 0> = TaskletStorage::new
 static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(5),
-    });
+    AERUGO.initialize(SystemHardwareConfig::default());
 
     AERUGO
         .create_message_queue(&QUEUE_X)

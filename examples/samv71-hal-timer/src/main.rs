@@ -109,6 +109,7 @@ fn main() -> ! {
 
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(5),
+        ..Default::default()
     });
 
     rprintln!("Doing stuff with timers...");
