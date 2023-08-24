@@ -152,14 +152,9 @@ fn get_irq_count() -> u32 {
 fn main() -> ! {
     calldwell::start_test_session();
 
-    AERUGO.initialize(SystemHardwareConfig {
+    let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),
     });
-
-    let peripherals = AERUGO
-        .peripherals()
-        .expect("HAL was not initialized!")
-        .expect("Peripherals already taken!");
 
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
 

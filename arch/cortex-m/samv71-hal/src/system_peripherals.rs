@@ -8,7 +8,8 @@ use crate::drivers::{
 };
 
 /// System peripherals structure. These peripherals are represented as HAL drivers.
-/// They are initialized on system init, and used directly by HAL to provide core functionality.
+/// Some of these peripherals are available only during HAL initialization
+/// (between `SystemHal::initialize` and `SystemHal::configure_hardware` calls).
 pub struct SystemPeripherals {
     /// Watchdog instance.
     pub watchdog: Watchdog,

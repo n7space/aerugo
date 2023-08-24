@@ -107,16 +107,11 @@ fn main() -> ! {
 
     rprintln!("Hello, world! Initializing Aerugo...");
 
-    AERUGO.initialize(SystemHardwareConfig {
+    let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(5),
     });
 
     rprintln!("Doing stuff with timers...");
-    let peripherals = AERUGO
-        .peripherals()
-        .expect("peripherals are not initialized")
-        .expect("peripherals already taken");
-
     let mut timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
     // TODO: Change this to use proper PMC driver when it's done
     let pmc = peripherals.pmc.expect("PMC already used");

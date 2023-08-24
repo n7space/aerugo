@@ -28,13 +28,13 @@ pub trait SystemHal {
     ///
     /// # Parameters
     /// * `config` - System hardware configuration.
-    fn configure_hardware(&mut self, config: SystemHardwareConfig) -> Result<(), Self::Error>;
+    fn configure_hardware(config: SystemHardwareConfig) -> Result<(), Self::Error>;
 
     /// Gets current system time timestamp.
-    fn get_system_time(&self) -> Self::Instant;
+    fn get_system_time() -> Self::Instant;
 
     /// Feeds the system watchdog.
-    fn feed_watchdog(&mut self);
+    fn feed_watchdog();
 
     /// Enters critical section
     fn enter_critical();
