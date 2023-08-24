@@ -75,6 +75,37 @@ impl Hal {
         })
     }
 
+    /// Initializes global HAL instance using PAC peripherals.
+    ///
+    /// Calling this function begins HAL initialization process. This process must be finished
+    /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
+    /// be called, as they will most likely fail.
+    ///
+    /// # Safety
+    /// This function is safe to call only once. It should be called in critical section.
+    /// Subsequent calls will return an error, indicating that HAL instance has already been created.
+    ///
+    /// # Return
+    /// `()` on success, [`HalError::HalAlreadyInitialized`] if called more than once.
+    fn initialize() -> Result<(), HalError> {
+        // SAFETY:
+        // This function can be successfully called only once, and we're in critical section,
+        // so there's no possible way that this memory will accessed somewhere else until this
+        // section is finished.
+        let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+        if is_hal_created {
+            return Err(HalError::HalAlreadyInitialized);
+        }
+
+        unsafe {
+            HAL_SYSTEM_PERIPHERALS
+                .as_mut_ref()
+                .replace(Hal::create_system_peripherals())
+        };
+
+        Ok(())
+    }
+
     /// Creates system peripherals of HAL.
     ///
     /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
@@ -106,45 +137,8 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    /// Initializes global HAL instance using PAC peripherals.
-    ///
-    /// Calling this function begins HAL initialization process. This process must be finished
-    /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
-    /// be called, as they will most likely fail.
-    ///
-    /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
-    ///
-    /// # Safety
-    /// This function is safe to call only once.
-    /// Subsequent calls will return an error, indicating that HAL instance has already been created.
-    ///
-    /// # Return
-    /// `()` on success, [`HalError::HalAlreadyInitialized`] if called more than once.
-    fn initialize() -> Result<(), HalError> {
-        Hal::execute_critical(|_| {
-            // SAFETY:
-            // This function can be successfully called only once, and we're in critical section,
-            // so there's no possible way that this memory will accessed somewhere else until this
-            // section is finished.
-            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
-            if is_hal_created {
-                return Err(HalError::HalAlreadyInitialized);
-            }
-
-            unsafe {
-                HAL_SYSTEM_PERIPHERALS
-                    .as_mut_ref()
-                    .replace(Hal::create_system_peripherals())
-            };
-
-            Ok(())
-        })
-    }
-
     /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
-    ///
-    /// Calling this function finishes HAL initialization process. It should be called as soon as possible
-    /// after creating HAL instance via [`SystemHal::initialize`].
+    /// It also initializes the HAL.
     ///
     /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
@@ -153,9 +147,11 @@ impl SystemHal for Hal {
     /// Subsequent calls will return an error, indicating that HAL instance has already been initialized.
     ///
     /// # Return
-    /// `()` on success, [`HalError`] if HAL is either not created yet, or were already initialized.
+    /// `()` on success, [`HalError`] if HAL was already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
         Hal::execute_critical(|_| {
+            Hal::initialize()?;
+
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
             // of single-core MCU and no other references to peripherals should exist at this time.
             let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };

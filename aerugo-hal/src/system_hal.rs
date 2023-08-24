@@ -22,10 +22,6 @@ pub trait SystemHal {
     /// Type for system HAL error.
     type Error;
 
-    /// Creates global HAL instance. Since there can only be a single instance of HAL, this function
-    /// should initialize it's global state and prepare the environment for hardware configuration.
-    fn initialize() -> Result<(), Self::Error>;
-
     /// Configure system hardware.
     ///
     /// Implementation should initialize and configure all core system peripherals.

@@ -31,11 +31,6 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    fn initialize() -> Result<(), Self::Error> {
-        // There's nothing to create on x86
-        Ok(())
-    }
-
     fn configure_hardware(_config: SystemHardwareConfig) -> Result<(), HalError> {
         // There is no hardware to configure on x86
         Ok(())
