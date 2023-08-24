@@ -154,6 +154,7 @@ fn main() -> ! {
 
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),
+        ..Default::default()
     });
 
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
