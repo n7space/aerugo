@@ -88,12 +88,19 @@ impl<T, const N: usize> MessageQueue<T, N> {
 }
 
 impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
-    fn data_ready(&self) -> bool {
-        self.data_queue.lock(|q| !q.is_empty())
-    }
-
+    /// Returns elements from this queue.
+    ///
+    /// Deqeueues next element.
+    ///
+    /// # Return
+    /// `Some(T)` if there was data available, `None` otherwise.
     fn get_data(&self) -> Option<T> {
         self.data_queue.lock(|q| q.dequeue())
+    }
+
+    /// Checks if there is any data in the queue.
+    fn data_waiting(&self) -> bool {
+        self.data_queue.lock(|q| !q.is_empty())
     }
 }
 

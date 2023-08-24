@@ -14,7 +14,6 @@ mod aerugo;
 mod api;
 mod boolean_condition;
 mod data_provider;
-mod data_receiver;
 mod event;
 mod event_manager;
 mod execution_monitoring;

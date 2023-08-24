@@ -14,7 +14,6 @@ use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
-use crate::data_receiver::DataReceiver;
 use crate::event::{Event, EventEnabler, EventId};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;

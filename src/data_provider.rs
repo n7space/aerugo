@@ -7,20 +7,17 @@
 /// Trait with data provider functionality.
 ///
 /// Data provider is a structure that provides some kind of data to the
-/// [data receiver](crate::data_receiver::DataReceiver).
+/// [Tasklet](crate::tasklet::Tasklet)
 ///
 /// # Generic Parameters
 /// * `T` - Type of the provided data.
 pub(crate) trait DataProvider<T> {
-    /// Checks whether there is data available for reading.
-    ///
-    /// # Return
-    /// `true` if there is data available, `false` otherwise.
-    fn data_ready(&self) -> bool;
-
     /// Provides data.
     ///
     /// # Return
     /// `Some(T)` if there was data available, `None` otherwise.
     fn get_data(&self) -> Option<T>;
+
+    /// Checks if there is data waiting for being handled.
+    fn data_waiting(&self) -> bool;
 }

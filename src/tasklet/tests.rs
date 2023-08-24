@@ -3,26 +3,28 @@ use super::*;
 use crate::boolean_condition::BooleanConditionSetType;
 
 struct MockDataProvider {
-    data_ready: bool,
+    data_waiting: bool,
 }
 
 impl MockDataProvider {
     const fn new() -> Self {
-        MockDataProvider { data_ready: false }
+        MockDataProvider {
+            data_waiting: false,
+        }
     }
 
-    fn set_data_ready(&mut self, data_ready: bool) {
-        self.data_ready = data_ready
+    fn set_data_waiting(&mut self, data_waiting: bool) {
+        self.data_waiting = data_waiting
     }
 }
 
 impl DataProvider<()> for MockDataProvider {
-    fn data_ready(&self) -> bool {
-        self.data_ready
+    fn data_waiting(&self) -> bool {
+        self.data_waiting
     }
 
     fn get_data(&self) -> Option<()> {
-        if self.data_ready {
+        if self.data_waiting {
             Some(())
         } else {
             None
@@ -76,7 +78,7 @@ fn req_tasklet_execution_state() {
 
     assert!(!tasklet.has_work());
     unsafe {
-        MOCK_DATA_PROVIDER.set_data_ready(true);
+        MOCK_DATA_PROVIDER.set_data_waiting(true);
     };
     assert!(tasklet.has_work());
 }
