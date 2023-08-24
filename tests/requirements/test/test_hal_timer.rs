@@ -17,6 +17,8 @@
 #[cfg_attr(not(doc), test)]
 #[cfg(feature = "test-aerugo-cortex-m")]
 fn req_test_hal_timer() {
+    use assert_cmd::Command;
+
     // The script will build test binary
     Command::new("python")
         .arg("tests/requirements/test/test_hal_timer.py")
