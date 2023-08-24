@@ -7,7 +7,7 @@
 /// Trait with data provider functionality.
 ///
 /// Data provider is a structure that provides some kind of data to the
-/// [data receiver](crate::data_receiver::DataReceiver).
+/// [Tasklet](crate::tasklet::Tasklet)
 ///
 /// # Generic Parameters
 /// * `T` - Type of the provided data.
