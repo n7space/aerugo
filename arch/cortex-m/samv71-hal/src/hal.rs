@@ -146,7 +146,7 @@ impl SystemHal for Hal {
     /// # Return
     /// `()` on success, [`HalError`] if HAL was already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
-        Hal::execute_critical(|_| {
+        let result = Hal::execute_critical(|_| {
             Hal::initialize()?;
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
