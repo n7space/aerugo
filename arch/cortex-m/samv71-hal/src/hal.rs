@@ -120,7 +120,7 @@ impl SystemHal for Hal {
     ///
     /// # Return
     /// `()` on success, [`HalError::HalAlreadyCreated`] if called more than once.
-    fn create() -> Result<(), HalError> {
+    fn initialize() -> Result<(), HalError> {
         Hal::execute_critical(|_| {
             // SAFETY:
             // This function can be successfully called only once, and we're in critical section,

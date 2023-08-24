@@ -66,7 +66,7 @@ impl Aerugo {
 
     /// Initialize the system runtime and hardware.
     pub fn initialize(&'static self, config: SystemHardwareConfig) -> UserPeripherals {
-        Hal::create().expect("HAL initialization failed");
+        Hal::initialize().expect("HAL initialization failed");
         Hal::configure_hardware(config).expect("Hardware configuration failed");
         Hal::create_user_peripherals().expect("Cannot create user peripherals instance")
     }

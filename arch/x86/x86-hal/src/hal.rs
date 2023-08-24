@@ -31,7 +31,7 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    fn create() -> Result<(), Self::Error> {
+    fn initialize() -> Result<(), Self::Error> {
         // There's nothing to create on x86
         Ok(())
     }
