@@ -33,31 +33,6 @@ impl Hal {
     /// Frequency of system timer.
     const TIMER_FREQ: u32 = 1_000_000;
 
-    /// Create system peripherals of HAL.
-    ///
-    /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
-    /// containing peripherals used by [`SystemHal`] API implementation.
-    ///
-    /// Some of these peripherals will be accessible only during HAL initialization
-    /// (between [`Hal::create`] and [`SystemHal::configure_hardware`] calls).
-    ///
-    /// # Safety
-    /// This function should be only called once inside [`Hal::create`].
-    /// Subsequent calls will return valid peripherals, but it's not possible to
-    /// guarantee safety if multiple instances of peripherals are used in the system.
-    fn create_system_peripherals() -> SystemPeripherals {
-        let mcu_peripherals = unsafe { pac::Peripherals::steal() };
-
-        SystemPeripherals {
-            watchdog: Watchdog::new(mcu_peripherals.WDT),
-            timer: Timer::new(mcu_peripherals.TC0),
-            timer_ch0: None,
-            timer_ch1: None,
-            timer_ch2: None,
-            pmc: Some(mcu_peripherals.PMC),
-        }
-    }
-
     /// Creates user peripherals instance.
     ///
     /// This function steals PAC peripherals and returns a [`UserPeripherals`] structure
@@ -98,6 +73,31 @@ impl Hal {
                 None
             }
         })
+    }
+
+    /// Create system peripherals of HAL.
+    ///
+    /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
+    /// containing peripherals used by [`SystemHal`] API implementation.
+    ///
+    /// Some of these peripherals will be accessible only during HAL initialization
+    /// (between [`Hal::create`] and [`SystemHal::configure_hardware`] calls).
+    ///
+    /// # Safety
+    /// This function should be only called once inside [`Hal::create`].
+    /// Subsequent calls will return valid peripherals, but it's not possible to
+    /// guarantee safety if multiple instances of peripherals are used in the system.
+    fn create_system_peripherals() -> SystemPeripherals {
+        let mcu_peripherals = unsafe { pac::Peripherals::steal() };
+
+        SystemPeripherals {
+            watchdog: Watchdog::new(mcu_peripherals.WDT),
+            timer: Timer::new(mcu_peripherals.TC0),
+            timer_ch0: None,
+            timer_ch1: None,
+            timer_ch2: None,
+            pmc: Some(mcu_peripherals.PMC),
+        }
     }
 }
 
