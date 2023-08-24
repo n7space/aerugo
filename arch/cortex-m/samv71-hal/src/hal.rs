@@ -128,7 +128,7 @@ impl SystemHal for Hal {
             // section is finished.
             let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
             if is_hal_created {
-                return Err(HalError::HalAlreadyCreated);
+                return Err(HalError::HalAlreadyInitialized);
             }
 
             unsafe {
@@ -160,7 +160,7 @@ impl SystemHal for Hal {
             // of single-core MCU and no other references to peripherals should exist at this time.
             let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
             if !is_hal_created {
-                return Err(HalError::HalNotCreated);
+                return Err(HalError::HalNotInitialized);
             }
 
             // SAFETY: Mutable access to system peripherals is safe, as we're in critical section
@@ -176,7 +176,7 @@ impl SystemHal for Hal {
             if peripherals.pmc.is_none() {
                 // If PMC is not available, it means that system has already been initialized,
                 // so this function cannot proceed.
-                return Err(HalError::SystemAlreadyInitialized);
+                return Err(HalError::HardwareAlreadyInitialized);
             }
             // This should realistically never panic, as we checked the existence of PMC earlier.
             let pmc = peripherals
@@ -190,7 +190,7 @@ impl SystemHal for Hal {
                 ..Default::default()
             }) {
                 Ok(()) => {}
-                Err(_) => return Err(HalError::SystemAlreadyInitialized),
+                Err(_) => return Err(HalError::HardwareAlreadyInitialized),
             };
 
             // Configure system timer
