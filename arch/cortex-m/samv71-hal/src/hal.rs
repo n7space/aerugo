@@ -111,11 +111,8 @@ impl Hal {
     /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
     /// containing peripherals used by [`SystemHal`] API implementation.
     ///
-    /// Some of these peripherals will be accessible only during HAL initialization
-    /// (between [`SystemHal::initialize`] and [`SystemHal::configure_hardware`] calls).
-    ///
     /// # Safety
-    /// This function should be only called once inside [`SystemHal::initialize`].
+    /// This function should be only called once inside [`Hal::initialize`].
     /// Subsequent calls will return valid peripherals, but it's not possible to
     /// guarantee safety if multiple instances of peripherals are used in the system.
     fn create_system_peripherals() -> SystemPeripherals {
