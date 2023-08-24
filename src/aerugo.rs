@@ -73,10 +73,12 @@ impl Aerugo {
     /// Starts the system.
     ///
     /// This starts an executor that never returns, executing ready tasklets in a loop.
+    /// It also enables global interrupts.
     ///
     /// # Safety
     /// This shouldn't be called more than once.
     pub fn start(&'static self) -> ! {
+        Hal::exit_critical();
         EXECUTOR.run_scheduler()
     }
 }

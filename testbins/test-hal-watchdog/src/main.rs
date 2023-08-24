@@ -104,6 +104,7 @@ fn main() -> ! {
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),
+        ..Default::default()
     });
 
     initialize_tasks();

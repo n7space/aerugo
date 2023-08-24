@@ -146,7 +146,7 @@ impl SystemHal for Hal {
     /// # Return
     /// `()` on success, [`HalError`] if HAL was already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
-        Hal::execute_critical(|_| {
+        let result = Hal::execute_critical(|_| {
             Hal::initialize()?;
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
@@ -197,7 +197,13 @@ impl SystemHal for Hal {
             peripherals.timer.trigger_all_channels();
 
             Ok(())
-        })
+        });
+
+        if config.disable_interrupts_during_setup {
+            Hal::enter_critical();
+        }
+
+        result
     }
 
     fn get_system_time() -> Self::Instant {
@@ -244,10 +250,15 @@ impl SystemHal for Hal {
         peripherals.watchdog.feed();
     }
 
+    /// Enters critical section by disabling global interrupts.
     fn enter_critical() {
         cortex_m::interrupt::disable();
     }
 
+    /// Exits critical section by enabling global interrupts.
+    ///
+    /// # Safety
+    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>SystemHal::execute_critical</code>)</div>
     fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }
