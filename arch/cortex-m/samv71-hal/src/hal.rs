@@ -27,7 +27,7 @@ use pac::{self, PMC, TC0};
 static HAL_SYSTEM_PERIPHERALS: InternalCell<Option<SystemPeripherals>> = InternalCell::new(None);
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
-pub struct Hal {}
+pub struct Hal;
 
 impl Hal {
     /// Frequency of system timer.
