@@ -197,7 +197,13 @@ impl SystemHal for Hal {
             peripherals.timer.trigger_all_channels();
 
             Ok(())
-        })
+        });
+
+        if config.disable_interrupts_during_setup {
+            Hal::enter_critical();
+        }
+
+        result
     }
 
     fn get_system_time() -> Self::Instant {
@@ -244,10 +250,15 @@ impl SystemHal for Hal {
         peripherals.watchdog.feed();
     }
 
+    /// Enters critical section by disabling global interrupts.
     fn enter_critical() {
         cortex_m::interrupt::disable();
     }
 
+    /// Exits critical section by enabling global interrupts.
+    ///
+    /// # Safety:
+    /// This function should never be called in critical sections created with [`SystemHal::execute_critical`]
     fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }
