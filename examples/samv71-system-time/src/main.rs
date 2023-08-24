@@ -2,7 +2,7 @@
 #![no_main]
 
 extern crate cortex_m;
-extern crate cortex_m_rt as runtime;
+extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 extern crate rtt_target as rtt;
 
@@ -10,8 +10,8 @@ use aerugo::{
     time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage, AERUGO,
 };
+use rt::entry;
 use rtt::rprintln;
-use runtime::entry;
 
 #[derive(Default)]
 struct DummyTaskContext {

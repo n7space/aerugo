@@ -2,7 +2,7 @@
 #![no_main]
 
 extern crate cortex_m;
-extern crate cortex_m_rt as runtime;
+extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 extern crate rtt_target as rtt;
 
@@ -12,8 +12,8 @@ use aerugo::{
     TaskletConfig, TaskletStorage, AERUGO,
 };
 
+use rt::entry;
 use rtt::{rprint, rprintln};
-use runtime::entry;
 
 struct ProducerContext {
     acc: u8,

@@ -4,7 +4,6 @@
 extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt;
-extern crate panic_rtt_target;
 extern crate rtt_target;
 
 use calldwell::with_rtt_out;
