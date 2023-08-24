@@ -75,16 +75,16 @@ impl Hal {
         })
     }
 
-    /// Create system peripherals of HAL.
+    /// Creates system peripherals of HAL.
     ///
     /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
     /// containing peripherals used by [`SystemHal`] API implementation.
     ///
     /// Some of these peripherals will be accessible only during HAL initialization
-    /// (between [`Hal::create`] and [`SystemHal::configure_hardware`] calls).
+    /// (between [`SystemHal::initialize`] and [`SystemHal::configure_hardware`] calls).
     ///
     /// # Safety
-    /// This function should be only called once inside [`Hal::create`].
+    /// This function should be only called once inside [`SystemHal::initialize`].
     /// Subsequent calls will return valid peripherals, but it's not possible to
     /// guarantee safety if multiple instances of peripherals are used in the system.
     fn create_system_peripherals() -> SystemPeripherals {
@@ -106,7 +106,7 @@ impl SystemHal for Hal {
     type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
-    /// Initialize global HAL instance using PAC peripherals.
+    /// Initializes global HAL instance using PAC peripherals.
     ///
     /// Calling this function begins HAL initialization process. This process must be finished
     /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
@@ -119,7 +119,7 @@ impl SystemHal for Hal {
     /// Subsequent calls will return an error, indicating that HAL instance has already been created.
     ///
     /// # Return
-    /// `()` on success, [`HalError::HalAlreadyCreated`] if called more than once.
+    /// `()` on success, [`HalError::HalAlreadyInitialized`] if called more than once.
     fn initialize() -> Result<(), HalError> {
         Hal::execute_critical(|_| {
             // SAFETY:
@@ -144,7 +144,7 @@ impl SystemHal for Hal {
     /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
     ///
     /// Calling this function finishes HAL initialization process. It should be called as soon as possible
-    /// after creating HAL instance via [`SystemHal::create`].
+    /// after creating HAL instance via [`SystemHal::initialize`].
     ///
     /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
