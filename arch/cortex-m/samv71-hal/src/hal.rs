@@ -257,8 +257,8 @@ impl SystemHal for Hal {
 
     /// Exits critical section by enabling global interrupts.
     ///
-    /// # Safety:
-    /// This function should never be called in critical sections created with [`SystemHal::execute_critical`]
+    /// # Safety
+    /// <div class="warning">This function should never be called scope-bound critical sections (like the one created with <code>SystemHal::execute_critical</code>)</div>
     fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }
