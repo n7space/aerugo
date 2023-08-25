@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
+
 poetry run isort --check ./*.py
 poetry run black --check ./*.py
 poetry run flake8 ./*.py

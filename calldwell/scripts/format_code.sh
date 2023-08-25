@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
+
 poetry run isort ./*.py
 poetry run isort ./examples/**/*.py
 poetry run black ./*.py
