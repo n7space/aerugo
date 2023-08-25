@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
 
 poetry run isort --check tests/requirements/test/*.py
 poetry run black --check tests/requirements/test/*.py
