@@ -20,3 +20,15 @@ repos:
         entry: scripts/check_code.sh
         stages: [commit]
         language: system
+
+      - id: python-check-aerugo
+        name: Check Aerugo's Python code
+        entry: scripts/check_python_code.sh
+        stages: [commit]
+        language: system
+
+      - id: python-check-calldwell
+        name: Check Calldwell's Python code
+        entry: bash -c 'cd calldwell && ./scripts/check_code.sh'
+        stages: [commit]
+        language: system
