@@ -149,7 +149,7 @@ fn get_irq_count() -> u32 {
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),

@@ -99,7 +99,7 @@ fn initialize_tasks() {
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),

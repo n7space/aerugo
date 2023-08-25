@@ -13,7 +13,7 @@ use cortex_m_rt::entry;
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     with_rtt_out(|o, _| o.write_str("Running tests..."));
 
