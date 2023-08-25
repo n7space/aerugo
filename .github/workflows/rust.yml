@@ -21,7 +21,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-          targets: x86_64-unknown-linux-gnu
+          targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: run format
         run: ./scripts/check_fmt.sh
         shell: bash
@@ -34,7 +34,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy
-          targets: x86_64-unknown-linux-gnu
+          targets: thumbv7em-none-eabihf, x86_64-unknown-linux-gnu
       - name: check code
         run: ./scripts/check_code.sh
         shell: bash
