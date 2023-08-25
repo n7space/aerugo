@@ -11,7 +11,3 @@ poetry run isort --check scripts/*.py
 poetry run black --check scripts/*.py
 poetry run flake8 scripts/*.py
 poetry run mypy scripts/*.py
-
-pushd ./calldwell >/dev/null
-sh ./scripts/check_code.sh
-popd >/dev/null
