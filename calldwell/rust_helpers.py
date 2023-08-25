@@ -116,7 +116,7 @@ def init_remote_calldwell_rs_session(
 
 
 def build_cargo_app(
-    project_path: Path, target_name: str, release_build: bool = False
+    project_path: Path, target_triple: str, release_build: bool = False
 ) -> Optional[Path]:
     """Builds Cargo binary and returns path to it's executable, or None if Cargo is not installed.
     Throws an exception on build failure.
@@ -146,7 +146,7 @@ def build_cargo_app(
 
     build_type = "release" if release_build else "debug"
     exec_name = project_path.name
-    return project_path / "target" / target_name / build_type / exec_name
+    return project_path / "target" / target_triple / build_type / exec_name
 
 
 def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
