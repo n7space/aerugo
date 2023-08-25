@@ -123,7 +123,7 @@ def build_cargo_app(
 
     Parameters:
     * `project_path` - Path to the project
-    * `target_name` - Target architecture triple, for example `thumbv7em-none-eabihf`
+    * `target_triple` - Target architecture triple, for example `thumbv7em-none-eabihf`
     * `release_build` - If `True`, a release build will be produced. If `False`, debug build
                         will be produced instead.
     """
