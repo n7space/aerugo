@@ -1,3 +1,3 @@
 #!/bin/sh
-poetry run isort ./*.py
-poetry run black ./*.py
+poetry run isort ./*.py ./examples/**/*.py
+poetry run black ./*.py ./examples/**/*.py
