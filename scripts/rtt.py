@@ -6,9 +6,7 @@ from calldwell.rtt_client import RTTClient
 
 def get_args() -> Tuple[str, int]:
     if len(sys.argv) != 2:
-        print(
-            "RTT client script, connects to RTT server and prints incoming data on stdout"
-        )
+        print("RTT client script, connects to RTT server and prints incoming data on stdout")
         print(f"Usage: {sys.argv[0]} hostname:port")
         exit(1)
 

@@ -4,6 +4,14 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Tuple
 
+from calldwell.gdb_client import GDBClient
+from calldwell.rtt_client import RTTClient
+from calldwell.rust_helpers import (
+    RTT_SECTION_ID,
+    RTT_SECTION_SEARCHED_MEMORY_LENGTH,
+    RTT_SECTION_SYMBOL_NAME,
+)
+from calldwell.ssh_client import SSHClient
 from tests.requirements.test.test_utils import (
     BOARD_GDB_PORT,
     BOARD_HOSTNAME,
@@ -14,18 +22,10 @@ from tests.requirements.test.test_utils import (
     build_cargo_app,
 )
 
-from calldwell.gdb_client import GDBClient
-from calldwell.rtt_client import RTTClient
-from calldwell.rust_helpers import (
-    RTT_SECTION_ID,
-    RTT_SECTION_SEARCHED_MEMORY_LENGTH,
-    RTT_SECTION_SYMBOL_NAME,
-)
-from calldwell.ssh_client import SSHClient
-
 # This script should be run from project's root dir, not from `scripts/`!
 EXAMPLES_DIR_PATH = Path("./examples")
 RTT_INIT_FUNCTION_NAME = "init_rtt"
+TARGET_TRIPLE = "thumbv7em-none-eabihf"
 
 
 class ExitReason(IntEnum):
@@ -90,9 +90,7 @@ def load_and_start_program(gdb: GDBClient, program_path: Path):
 
 
 def wait_for_rtt_init(gdb: GDBClient, example_name: str):
-    rtt_init_function_full_name = (
-        f"{example_name.replace('-', '_')}::{RTT_INIT_FUNCTION_NAME}"
-    )
+    rtt_init_function_full_name = f"{example_name.replace('-', '_')}::{RTT_INIT_FUNCTION_NAME}"
 
     if not gdb.set_breakpoint(rtt_init_function_full_name):
         print(
@@ -103,7 +101,7 @@ def wait_for_rtt_init(gdb: GDBClient, example_name: str):
     gdb.continue_program()
 
     if not gdb.wait_for_breakpoint_hit():
-        print(f"Error: Program has stopped, but not because of a breakpoint!")
+        print("Error: Program has stopped, but not because of a breakpoint!")
         exit(ExitReason.UNEXPECTED_STOP)
 
     gdb.finish_function_execution()
@@ -112,18 +110,14 @@ def wait_for_rtt_init(gdb: GDBClient, example_name: str):
 def setup_rtt(gdb: GDBClient) -> RTTClient:
     rtt_symbol = gdb.get_variable(RTT_SECTION_SYMBOL_NAME)
     if rtt_symbol is None:
-        print(
-            f"Error: Could not find RTT symbol '{RTT_SECTION_SYMBOL_NAME}' in the binary!"
-        )
+        print(f"Error: Could not find RTT symbol '{RTT_SECTION_SYMBOL_NAME}' in the binary!")
         exit(ExitReason.COULD_NOT_FIND_RTT_SYMBOL)
 
     if not gdb.start_rtt_server(BOARD_RTT_PORT, 0):
         print(f"Error: Could not start RTT server @ {BOARD_RTT_PORT}!")
         exit(ExitReason.CANNOT_START_RTT_SERVER)
 
-    if not gdb.setup_rtt(
-        rtt_symbol.address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID
-    ):
+    if not gdb.setup_rtt(rtt_symbol.address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
         print(
             f"Could not setup RTT for section @ {rtt_symbol.address} "
             f"searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
@@ -148,9 +142,9 @@ def main():
         )
         exit(ExitReason.INVALID_EXAMPLE_PATH)
 
-    program_path = build_cargo_app(example_path, release_build=True)
+    program_path = build_cargo_app(example_path, TARGET_TRIPLE, release_build=True)
     if program_path is None:
-        print(f"Error: Cargo executable not found!")
+        print("Error: Cargo executable not found!")
         exit(ExitReason.CARGO_NOT_FOUND)
 
     gdb, ssh = start_gdb()

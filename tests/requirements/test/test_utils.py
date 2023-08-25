@@ -5,7 +5,7 @@ from typing import Tuple
 
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import CalldwellRTTClient
-from calldwell.rust_helpers import init_remote_calldwell_rs_session, build_cargo_app
+from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
 
 BOARD_LOGIN = str(os.environ.get("AERUGO_BOARD_LOGIN"))
