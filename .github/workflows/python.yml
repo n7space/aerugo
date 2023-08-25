@@ -1,0 +1,43 @@
+name: Python
+
+on:
+  push:
+    branches:
+      - 'main'
+      - '**'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  check_code:
+    name: Check Python code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Setup Aerugo virtual environment
+        run: poetry install --with=dev
+        
+      - name: Check Aerugo code
+        run: ./scripts/check_python_code.sh
+
+      - name: Setup Calldwell virtual environment
+        working-directory: ./calldwell
+        run: poetry install --with=dev
+
+      - name: Check Calldwell code
+        working-directory: ./calldwell
+        run: ./scripts/check_code.sh
+      

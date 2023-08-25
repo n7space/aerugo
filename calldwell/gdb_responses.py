@@ -175,7 +175,7 @@ class GDBResponsesList:
         of whitespace at the beginning and the end.
 
         # Parameters
-        * `separator` [str] - A separator inserter between each payload on the list.
+        * `separator` [str] - A separator inserted between each payload on the list.
         * `escape` [bool] - If `True`, escaped characters in payloads will be unescaped to
                             produce human-readable string.
         """

@@ -4,7 +4,6 @@
 extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt;
-extern crate panic_rtt_target;
 extern crate rtt_target;
 
 use calldwell::with_rtt_out;
@@ -14,7 +13,7 @@ use cortex_m_rt::entry;
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     with_rtt_out(|o, _| o.write_str("Running tests..."));
 

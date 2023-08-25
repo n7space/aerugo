@@ -5,7 +5,6 @@ extern crate aerugo;
 extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
-extern crate panic_rtt_target;
 
 use aerugo::{
     time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
@@ -100,7 +99,7 @@ fn initialize_tasks() {
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),

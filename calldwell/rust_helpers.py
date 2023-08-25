@@ -1,5 +1,8 @@
 """Module containing some boilerplate, common to all tests that use `calldwell-rs` library."""
 import logging
+import shutil
+import subprocess
+from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
 
 from .gdb_client import GDBClient
@@ -82,12 +85,6 @@ def init_remote_calldwell_rs_session(
         logging.error(f"Could not connect to remote GDB server @ {gdb_server_full_hostname}")
         return None
 
-    if not gdb.start_rtt_server(rtt_server_port, 0):
-        logging.error(f"Could not start RTT server @ TCP port {rtt_server_port}")
-        return None
-
-    rtt = CalldwellRTTClient(gdb_server_hostname, rtt_server_port)
-
     if not gdb.load_executable(path_to_test_executable):
         logging.error(f"Could not load executable {path_to_test_executable} into MCU memory")
         return None
@@ -101,27 +98,9 @@ def init_remote_calldwell_rs_session(
         logging.error("Could not start execution of test program")
         return None
 
-    if not gdb.setup_rtt(rtt_symbol.address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
-        logging.error(
-            f"Could not setup RTT for section @ {rtt_symbol.address} "
-            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
-        )
-        return None
-
-    if not gdb.set_breakpoint(CALLDWELL_INIT_FUNCTION_NAME):
-        logging.error(f"Could not set breakpoint @ {CALLDWELL_INIT_FUNCTION_NAME}")
-        return None
-
-    gdb.continue_program()
-
-    if not gdb.wait_for_breakpoint_hit():
-        logging.error("Program has stopped, but not because of a breakpoint")
-        return None
-
-    gdb.finish_function_execution()
-
-    if not gdb.start_rtt():
-        logging.error("Could not start RTT (probably because the section wasn't found)")
+    rtt = _initialize_rtt(gdb, gdb_server_hostname, rtt_server_port, rtt_symbol.address)
+    if rtt is None:
+        logging.error("Couldn't initialize RTT facilities")
         return None
 
     if pre_handshake_hook is not None:
@@ -134,6 +113,40 @@ def init_remote_calldwell_rs_session(
         return None
 
     return gdb, rtt
+
+
+def build_cargo_app(
+    project_path: Path, target_triple: str, release_build: bool = False
+) -> Optional[Path]:
+    """Builds Cargo binary and returns path to it's executable, or None if Cargo is not installed.
+    Throws an exception on build failure.
+
+    Parameters:
+    * `project_path` - Path to the project
+    * `target_triple` - Target architecture triple, for example `thumbv7em-none-eabihf`
+    * `release_build` - If `True`, a release build will be produced. If `False`, debug build
+                        will be produced instead.
+    """
+
+    cargo = shutil.which("cargo")
+    if cargo is None:
+        logging.error("Error: Cargo executable not found!")
+        return None
+
+    build_command = [cargo, "build"]
+    if release_build:
+        build_command.append("--release")
+
+    subprocess.run(
+        build_command,
+        cwd=project_path,
+        text=True,
+        check=True,
+    )
+
+    build_type = "release" if release_build else "debug"
+    exec_name = project_path.name
+    return project_path / "target" / target_triple / build_type / exec_name
 
 
 def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
@@ -160,3 +173,40 @@ def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
         return False
 
     return True
+
+
+def _initialize_rtt(
+    gdb: GDBClient,
+    gdb_server_hostname: str,
+    rtt_server_port: int,
+    rtt_address: int,
+) -> Optional[CalldwellRTTClient]:
+    """Performs RTT initialization after program start, and creates Calldwell's RTT client."""
+    if not gdb.set_breakpoint(CALLDWELL_INIT_FUNCTION_NAME):
+        logging.error(f"Could not set breakpoint @ {CALLDWELL_INIT_FUNCTION_NAME}")
+        return None
+
+    gdb.continue_program()
+
+    if not gdb.wait_for_breakpoint_hit():
+        logging.error("Program has stopped, but not because of a breakpoint")
+        return None
+
+    gdb.finish_function_execution()
+
+    if not gdb.start_rtt_server(rtt_server_port, 0):
+        logging.error(f"Could not start RTT server @ TCP port {rtt_server_port}")
+        return None
+
+    if not gdb.setup_rtt(rtt_address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
+        logging.error(
+            f"Could not setup RTT for section @ {rtt_address} "
+            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
+        )
+        return None
+
+    if not gdb.start_rtt():
+        logging.error("Could not start RTT (probably because the section wasn't found)")
+        return None
+
+    return CalldwellRTTClient(gdb_server_hostname, rtt_server_port)

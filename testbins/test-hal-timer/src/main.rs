@@ -5,7 +5,6 @@ extern crate aerugo;
 extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
-extern crate panic_rtt_target;
 
 use aerugo::{
     hal::drivers::timer::{
@@ -150,7 +149,7 @@ fn get_irq_count() -> u32 {
 
 #[entry]
 fn main() -> ! {
-    calldwell::start_test_session();
+    calldwell::start_session();
 
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(3),

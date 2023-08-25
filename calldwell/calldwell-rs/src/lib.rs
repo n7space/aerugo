@@ -9,7 +9,7 @@
 
 mod streams;
 
-use core::panic;
+use core::panic::PanicInfo;
 use core::{cell::RefCell, str::from_utf8};
 
 use core::fmt::Write;
@@ -26,7 +26,7 @@ static RTT_OUT: Mutex<RefCell<Option<UpStream>>> = Mutex::new(RefCell::new(None)
 /// Should be called as soon as possible in the program.
 ///
 /// Will panic on error caused by miscommunication with test host.
-pub fn start_test_session() {
+pub fn start_session() {
     initialize();
 
     with_rtt_out(|o, _| o.write_str("calldwell-rs started"));
@@ -166,4 +166,16 @@ where
 
         f(rtt_in, rtt_out, cs)
     })
+}
+
+#[panic_handler]
+fn calldwell_panic(info: &PanicInfo) -> ! {
+    with_rtt_out(|w, _| {
+        write!(w.writer(), "{}", info).unwrap();
+    });
+
+    // Disable interrupts to make sure the execution will not escape from here
+    let _state = unsafe { critical_section::acquire() };
+
+    loop {}
 }
