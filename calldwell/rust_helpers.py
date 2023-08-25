@@ -1,5 +1,8 @@
 """Module containing some boilerplate, common to all tests that use `calldwell-rs` library."""
 import logging
+import shutil
+import subprocess
+from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
 
 from .gdb_client import GDBClient
@@ -134,6 +137,40 @@ def init_remote_calldwell_rs_session(
         return None
 
     return gdb, rtt
+
+
+def build_cargo_app(
+    project_path: Path, target_name: str, release_build: bool = False
+) -> Optional[Path]:
+    """Builds Cargo binary and returns path to it's executable, or None if Cargo is not installed.
+    Throws an exception on build failure.
+
+    Parameters:
+    * `project_path` - Path to the project
+    * `target_name` - Target architecture triple, for example `thumbv7em-none-eabihf`
+    * `release_build` - If `True`, a release build will be produced. If `False`, debug build
+                        will be produced instead.
+    """
+
+    cargo = shutil.which("cargo")
+    if cargo is None:
+        logging.error("Error: Cargo executable not found!")
+        return None
+
+    build_command = [cargo, "build"]
+    if release_build:
+        build_command.append("--release")
+
+    subprocess.run(
+        build_command,
+        cwd=project_path,
+        text=True,
+        check=True,
+    )
+
+    build_type = "release" if release_build else "debug"
+    exec_name = project_path.name
+    return project_path / "target" / target_name / build_type / exec_name
 
 
 def _perform_handshake(rtt: CalldwellRTTClient) -> bool:

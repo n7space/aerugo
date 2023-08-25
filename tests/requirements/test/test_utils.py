@@ -1,13 +1,11 @@
 import logging
 import os
-import shutil
-import subprocess
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import CalldwellRTTClient
-from calldwell.rust_helpers import init_remote_calldwell_rs_session
+from calldwell.rust_helpers import init_remote_calldwell_rs_session, build_cargo_app
 from calldwell.ssh_client import SSHClient
 
 BOARD_LOGIN = str(os.environ.get("AERUGO_BOARD_LOGIN"))
@@ -20,35 +18,10 @@ TEST_BINS_DIRECTORY = Path("./testbins")
 TARGET_NAME = "thumbv7em-none-eabihf"
 
 
-def build_cargo_app(project_path: Path, release_build: bool = False) -> Optional[Path]:
-    """Builds Cargo binary and returns path to it's executable, or None if Cargo is not installed.
-    Throws an exception on build failure."""
-
-    cargo = shutil.which("cargo")
-    if cargo is None:
-        logging.error(f"Error: Cargo executable not found!")
-        return None
-
-    build_command = [cargo, "build"]
-    if release_build:
-        build_command.append("--release")
-
-    subprocess.run(
-        build_command,
-        cwd=project_path,
-        text=True,
-        check=True,
-    )
-
-    build_type = "release" if release_build else "debug"
-    exec_name = project_path.name
-    return project_path / "target" / TARGET_NAME / build_type / exec_name
-
-
 def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
     project_path = TEST_BINS_DIRECTORY / test_name
-    test_binary_path = build_cargo_app(project_path)
+    test_binary_path = build_cargo_app(project_path, TARGET_NAME)
     if test_binary_path is None:
         exit(100)
 
