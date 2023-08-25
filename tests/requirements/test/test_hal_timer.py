@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from test_utils import finish_test, init_test
+from test_utils import finish_test, init_test, setup_logger
 
 TEST_NAME = "test-hal-timer"
 
@@ -22,7 +22,7 @@ def main():
     for _ in range(10):
         fast_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_fast = average_difference(fast_irq_counts)
-    print(f"Average differences (fast clock): {avg_diffs_fast:.03f}")
+    logging.info(f"Average differences (fast clock): {avg_diffs_fast:.03f}")
 
     # After 10 messages, tasklet should disable the timer, so incoming IRQ counts
     # should not change
@@ -30,7 +30,7 @@ def main():
     for _ in range(10):
         stopped_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_stopped = average_difference(stopped_irq_counts)
-    print(f"Average differences (clock stopped): {avg_diffs_stopped:.03f}")
+    logging.info(f"Average differences (clock stopped): {avg_diffs_stopped:.03f}")
 
     # After another 10 messages, tasklet should switch timer's source to slower one
     # and enable it, returning IRQ count that's changing slower
@@ -39,18 +39,18 @@ def main():
         slow_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
 
     avg_diffs_slow = average_difference(slow_irq_counts)
-    print(f"Average differences (slow clock): {avg_diffs_slow:.03f}")
+    logging.info(f"Average differences (slow clock): {avg_diffs_slow:.03f}")
 
     if avg_diffs_fast <= avg_diffs_slow:
-        print("TEST FAILED: FASTER CLOCK IS IN FACT SLOWER")
+        logging.critical("TEST FAILED: FASTER CLOCK IS IN FACT SLOWER")
         exit(2)
 
     if avg_diffs_stopped != 0:
-        print("TEST FAILED: CLOCK DID NOT STOP")
+        logging.critical("TEST FAILED: CLOCK DID NOT STOP")
 
     finish_test(ssh)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    setup_logger()
     main()

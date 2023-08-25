@@ -18,6 +18,12 @@ TEST_BINS_DIRECTORY = Path("./testbins")
 TARGET_NAME = "thumbv7em-none-eabihf"
 
 
+def setup_logger():
+    logging.basicConfig(
+        level=logging.INFO, format="[%(asctime)s] <%(levelname)s|%(name)s>: %(message)s"
+    )
+
+
 def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
     project_path = TEST_BINS_DIRECTORY / test_name
@@ -38,7 +44,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
     )
 
     if session is None:
-        logging.error("Test failed, cannot initialize Calldwell session")
+        logging.critical("Test failed, cannot initialize Calldwell session")
         exit(1)
 
     gdb, rtt = session
@@ -48,6 +54,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
 
 
 def finish_test(ssh: SSHClient):
+    logging.info("TEST SUCCESSFUL!")
     logging.info("Finishing the test, cleaning up environment...")
     ssh.execute("pkill openocd")
     ssh.close()
