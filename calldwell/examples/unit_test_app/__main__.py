@@ -1,0 +1,79 @@
+import logging
+import os
+import sys
+from pathlib import Path
+
+from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
+from calldwell.ssh_client import SSHClient
+
+# This example is prepared to run on remote development setup and requires following
+# environmental variables:
+try:
+    BOARD_LOGIN = str(os.environ.get("CALLDWELL_BOARD_LOGIN"))
+    """SSH login of the development setup"""
+    BOARD_PASSWORD = str(os.environ.get("CALLDWELL_BOARD_PASSWORD"))
+    """SSH password of the development setup"""
+    BOARD_HOSTNAME = str(os.environ.get("CALLDWELL_BOARD_HOSTNAME"))
+    """Development setup's hostname/IP address"""
+    BOARD_GDB_EXEC_SCRIPT = str(os.environ.get("CALLDWELL_BOARD_GDB_EXEC_SCRIPT"))
+    """Script that should run GDB server on development setup"""
+    BOARD_GDB_PORT = int(str(os.environ.get("CALLDWELL_BOARD_GDB_PORT")))
+    """GDB port of development's setup GDB server"""
+    BOARD_RTT_PORT = int(str(os.environ.get("CALLDWELL_BOARD_RTT_PORT")))
+    """Port on which the RTT server will provide RTT data"""
+    GDB_EXECUTABLE = str(os.environ.get("CALLDWELL_GDB_EXECUTABLE"))
+    """GDB executable name/path"""
+    TARGET_TRIPLE = str(os.environ.get("CALLDWELL_TARGET_TRIPLE"))
+    """Target platform triple (for example, thumbv7em-none-eabihf)"""
+except ValueError as e:
+    print("Missing/invalid environmental variables, read the source of this script for details!")
+    print(f"Exception: {e}")
+    exit(1)
+
+
+def init_example():
+    project_path = Path(sys.argv[0])
+
+    logging.info("Building the example binary...")
+    test_bin_path = build_cargo_app(project_path, TARGET_TRIPLE, release_build=True)
+    if test_bin_path is None:
+        logging.error("Could not build the binary!")
+        exit(100)
+
+    logging.info("Starting GDB server on development setup..")
+    ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
+    ssh.execute(BOARD_GDB_EXEC_SCRIPT)
+
+    session = init_remote_calldwell_rs_session(
+        gdb_executable=GDB_EXECUTABLE,
+        gdb_server_hostname=BOARD_HOSTNAME,
+        gdb_server_port=BOARD_GDB_PORT,
+        rtt_server_port=BOARD_RTT_PORT,
+        path_to_test_executable=str(test_bin_path.absolute()),
+    )
+
+    if session is None:
+        logging.error("Failed to initialize remote Calldwell-rs session!")
+        exit(200)
+
+    gdb, rtt = session
+
+    logging.info("Example started!")
+    return gdb, rtt, ssh
+
+
+def main():
+    _, rtt, ssh = init_example()
+
+    message = rtt.receive_string_stream()
+    while message != "All tests done!":
+        print(message)
+        message = rtt.receive_string_stream()
+
+    print(message)
+    ssh.close()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    main()
