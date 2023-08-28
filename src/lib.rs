@@ -19,6 +19,7 @@ mod event_manager;
 mod execution_monitoring;
 mod executor;
 mod message_queue;
+mod stubs;
 mod tasklet;
 mod time_manager;
 
