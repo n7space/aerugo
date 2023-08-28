@@ -11,3 +11,6 @@ description = "x86 specific implementation for Aerugo"
 
 [dependencies]
 aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
+
+[features]
+log = []

@@ -24,7 +24,7 @@ from tests.requirements.test.test_utils import (
 
 # This script should be run from project's root dir, not from `scripts/`!
 EXAMPLES_DIR_PATH = Path("./examples")
-RTT_INIT_FUNCTION_NAME = "init_rtt"
+RTT_INIT_FUNCTION_NAME = "aerugo_cortex_m::logger::init_log"
 TARGET_TRIPLE = "thumbv7em-none-eabihf"
 
 
@@ -90,7 +90,7 @@ def load_and_start_program(gdb: GDBClient, program_path: Path):
 
 
 def wait_for_rtt_init(gdb: GDBClient, example_name: str):
-    rtt_init_function_full_name = f"{example_name.replace('-', '_')}::{RTT_INIT_FUNCTION_NAME}"
+    rtt_init_function_full_name = RTT_INIT_FUNCTION_NAME
 
     if not gdb.set_breakpoint(rtt_init_function_full_name):
         print(

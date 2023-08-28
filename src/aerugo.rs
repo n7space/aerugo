@@ -10,6 +10,8 @@ use bare_metal::CriticalSection;
 use env_parser::read_env;
 
 use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
+#[cfg(feature = "log")]
+use crate::arch::init_log;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
@@ -65,6 +67,8 @@ impl Aerugo {
 
     /// Initialize the system runtime and hardware.
     pub fn initialize(&'static self, config: SystemHardwareConfig) -> UserPeripherals {
+        #[cfg(feature = "log")]
+        init_log();
         Hal::configure_hardware(config)
             .expect("HAL initialization or hardware configuration failed");
         Hal::create_user_peripherals().expect("Cannot create user peripherals instance")
