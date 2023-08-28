@@ -1,9 +1,9 @@
-import logging
 import sys
 from enum import IntEnum
 from pathlib import Path
 from typing import Tuple
 
+from calldwell import init_default_logger
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import RTTClient
 from calldwell.rust_helpers import (
@@ -164,5 +164,5 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    init_default_logger()
     main()
