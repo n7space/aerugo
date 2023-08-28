@@ -1,5 +1,5 @@
 use aerugo::{
-    log, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    logln, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 
 #[derive(Default)]
@@ -9,7 +9,7 @@ struct TaskAContext {
 
 fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     if context.cnt < 2 {
-        log!("TaskA");
+        logln!("TaskA");
         context.cnt += 1;
     } else {
         std::process::exit(0);
@@ -23,7 +23,7 @@ struct TaskBContext {
 
 fn task_b(_: (), context: &mut TaskBContext, _: &dyn RuntimeApi) {
     if context.cnt < 2 {
-        log!("TaskB");
+        logln!("TaskB");
         context.cnt += 1;
     } else {
         std::process::exit(0);

@@ -1,5 +1,5 @@
 use aerugo::{
-    log, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    logln, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
     TaskletConfig, TaskletStorage, AERUGO,
 };
 
@@ -39,12 +39,12 @@ fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
 
 fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
     context.cnt += data;
-    log!("TaskB: {}", context.cnt);
+    logln!("TaskB: {}", context.cnt);
 }
 
 fn task_c(data: u8, context: &mut TaskCContext, _: &dyn RuntimeApi) {
     context.cnt += data;
-    log!("TaskC: {}", context.cnt);
+    logln!("TaskC: {}", context.cnt);
 
     if context.cnt == 5 {
         std::process::exit(0)

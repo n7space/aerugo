@@ -1,5 +1,5 @@
 use aerugo::{
-    log, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, InitApi,
+    logln, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, InitApi,
     MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage, AERUGO,
 };
@@ -26,7 +26,7 @@ fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     let enable_status = context.enable_condition_handle.get_value();
     let done_status = context.done_condition_handle.get_value();
 
-    log!("TaskA: {}, {}", enable_status, done_status);
+    logln!("TaskA: {}, {}", enable_status, done_status);
 
     context
         .queue_handle
@@ -36,7 +36,7 @@ fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
 
 #[allow(clippy::needless_pass_by_ref_mut)]
 fn task_b(data: u8, context: &mut TaskBContext, _: &dyn RuntimeApi) {
-    log!("TaskB: {}", data);
+    logln!("TaskB: {}", data);
 
     context.counter += 1;
 
@@ -51,7 +51,7 @@ fn task_c(data: bool, context: &mut TaskCContext, _: &dyn RuntimeApi) {
     let enable_status = context.enable_condition_handle.get_value();
     let done_status = context.done_condition_handle.get_value();
 
-    log!("TaskC: {}, {}", enable_status, done_status);
+    logln!("TaskC: {}, {}", enable_status, done_status);
 
     if data {
         std::process::exit(0)
