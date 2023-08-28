@@ -22,7 +22,7 @@ impl CyclicExecution {
         CyclicExecution { tasklet, period }
     }
 
-    /// Wakes thet stored tasklet.
+    /// Wakes that stored tasklet.
     pub(crate) fn wake_tasklet(&self) {
         AERUGO.wake_tasklet(&self.tasklet);
     }
