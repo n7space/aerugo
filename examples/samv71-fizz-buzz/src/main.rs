@@ -4,16 +4,14 @@
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
-extern crate rtt_target as rtt;
 
 use aerugo::{
-    time::MillisDurationU32, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
-    EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage, AERUGO,
+    log, logln, time::MillisDurationU32, BooleanConditionHandle, BooleanConditionSet,
+    BooleanConditionStorage, EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
+    SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 
 use rt::entry;
-use rtt::{rprint, rprintln};
 
 struct ProducerContext {
     acc: u8,
@@ -48,7 +46,7 @@ fn distributor(val: u8, _: &mut DistributorContext, api: &'static dyn RuntimeApi
         (_, 0) => api
             .emit_event(FizzBuzzEvents::Buzz.into())
             .expect("Failed to emit Buzz"),
-        _ => rprint!("{}\n", val),
+        _ => log!("{}\n", val),
     }
 }
 
@@ -56,10 +54,10 @@ fn distributor(val: u8, _: &mut DistributorContext, api: &'static dyn RuntimeApi
 struct FizzContext {}
 
 fn fizz(val: EventId, _: &mut FizzContext, _: &'static dyn RuntimeApi) {
-    rprint!("Fizz");
+    log!("Fizz");
 
     if let FizzBuzzEvents::Fizz = val.into() {
-        rprint!("\n");
+        log!("\n");
     }
 }
 
@@ -67,14 +65,14 @@ fn fizz(val: EventId, _: &mut FizzContext, _: &'static dyn RuntimeApi) {
 struct BuzzContext {}
 
 fn buzz(_: EventId, _: &mut BuzzContext, _: &'static dyn RuntimeApi) {
-    rprint!("Buzz\n");
+    log!("Buzz\n");
 }
 
 #[derive(Default)]
 struct DoneContext {}
 
 fn done(_: bool, _: &mut DoneContext, _: &'static dyn RuntimeApi) {
-    rprint!("Done!\n");
+    log!("Done!\n");
 }
 
 static PRODUCER_STORAGE: TaskletStorage<(), ProducerContext, 1> = TaskletStorage::new();
@@ -116,14 +114,12 @@ impl From<EventId> for FizzBuzzEvents {
 
 #[entry]
 fn main() -> ! {
-    init_rtt();
-
-    rprintln!("Hello, world! Initializing Aerugo...");
-
     AERUGO.initialize(SystemHardwareConfig {
         watchdog_timeout: MillisDurationU32::secs(5),
         ..Default::default()
     });
+
+    logln!("Hello, world! Aerugo initialized!");
 
     AERUGO
         .create_message_queue(&ELEM_QUEUE)
@@ -255,9 +251,4 @@ fn main() -> ! {
         .expect("Unable to subscribe Done to GenerateNumbersCondition");
 
     AERUGO.start();
-}
-
-#[inline(never)]
-fn init_rtt() {
-    rtt::rtt_init_print!();
 }

@@ -13,7 +13,6 @@ aerugo = { version = "0.1.0", path = "../..", features = [
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.3"
 panic-rtt-target = { version = "0.1.2", features = ["cortex-m"] }
-rtt-target = "0.4.0"
 
 [profile.release]
 codegen-units = 1
