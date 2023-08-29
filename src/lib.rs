@@ -22,6 +22,7 @@ mod message_queue;
 mod stubs;
 mod tasklet;
 mod time_manager;
+mod utils;
 
 pub use self::aerugo::{Aerugo, AERUGO};
 pub use self::api::{InitApi, RuntimeApi};

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Check tests if changed
-if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached)" =~ "tests/requirements/test/" ]]; then
+if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached -- '*.py')" =~ "tests/requirements/test/" ]]; then
     poetry run isort --check tests/requirements/test/*.py
     poetry run black --check tests/requirements/test/*.py
     poetry run flake8 tests/requirements/test/*.py
@@ -11,7 +11,7 @@ if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached)" =~ "te
 fi
 
 # Check scripts if changed
-if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached)" =~ "scripts/" ]]; then
+if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached -- '*.py')" =~ "scripts/" ]]; then
     poetry run isort --check scripts/*.py
     poetry run black --check scripts/*.py
     poetry run flake8 scripts/*.py

@@ -11,6 +11,8 @@ pub enum RuntimeError {
     DataQueueFull,
     /// Event with given ID was not found.
     EventNotFound(EventId),
+    /// Enqueued event to a full event queue.
+    EventQueueFull,
     /// Tried to perform an operation before system initialization.
     SystemNotInitialized,
     /// Tried to initialize system more than once
