@@ -18,6 +18,20 @@ struct DummyTaskContext {
 
 fn dummy_task(_: (), context: &mut DummyTaskContext, api: &'static dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
+
+    if context.acc == 10 {
+        let startup_time = api.get_startup_time();
+        let startup_secs = startup_time.unwrap().to_secs();
+        let startup_ms = startup_time.unwrap().to_millis() % 1000;
+        let startup_us = startup_time.unwrap().to_micros() % (1000 * 1000);
+        logln!(
+            "Startup time is {}s, {}ms, {}ns",
+            startup_secs,
+            startup_ms,
+            startup_us
+        );
+    }
+
     if context.acc % 300 == 0 {
         let time = api.get_system_time().duration_since_epoch();
         let time_seconds = time.to_secs();
