@@ -40,7 +40,7 @@ impl EventSet {
     /// * `event_id` - Event ID to activate.
     ///
     /// # Return
-    /// `()` if successful, `RuntimeError` otherwise.
+    /// `true` if successfully activated event, `false` if event was already on the event queue and is waiting for trigger, `RuntimeError` otherwise.
     pub(crate) fn activate_event(&self, event_id: EventId) -> Result<bool, RuntimeError> {
         let event_activated = self.event_queue.lock(|event_queue| {
             let found_event = event_queue.iter().find(|&&id| id == event_id);
