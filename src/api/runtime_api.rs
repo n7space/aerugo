@@ -41,6 +41,14 @@ pub trait RuntimeApi {
     /// * `offset` - Time offset.
     fn set_system_time_offset(&'static self, offset: crate::time::TimerDurationU64<1_000_000>);
 
+    /// Returns time elapsed between system initialization and start of the scheduler.
+    /// If called before scheduler's start, should return `None`.
+    fn get_startup_time(&'static self) -> Option<crate::time::TimerDurationU64<1_000_000>>;
+
+    /// Returns time elapsed since scheduler's start.
+    /// If called before scheduler's start, should return `None`.
+    fn get_time_since_startup(&'static self) -> Option<crate::time::TimerInstantU64<1_000_000>>;
+
     /// Returns an iterator to the list with IDs of registered tasklets.
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
 

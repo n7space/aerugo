@@ -53,7 +53,7 @@ static TIME_MANAGER: TimeManager = TimeManager::new();
 /// both for user and for the internal system parts.
 pub struct Aerugo {
     /// Time source, responsible for creating timestamps.
-    _time_source: TimeSource,
+    time_source: TimeSource,
 }
 
 impl Aerugo {
@@ -67,7 +67,7 @@ impl Aerugo {
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
         Aerugo {
-            _time_source: TimeSource::new(),
+            time_source: TimeSource::new(),
         }
     }
 
@@ -88,6 +88,7 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called more than once.
     pub fn start(&'static self) -> ! {
+        self.time_source.mark_system_start();
         Hal::exit_critical();
         EXECUTOR.run_scheduler()
     }
@@ -706,11 +707,26 @@ impl RuntimeApi for Aerugo {
     }
 
     fn get_system_time(&'static self) -> Timestamp {
+        if let Some(system_time) = self.time_source.time_since_user_offset() {
+            return system_time;
+        }
         TimeSource::time_since_init()
     }
 
-    fn set_system_time_offset(&'static self, _offset: Duration) {
-        todo!()
+    fn set_system_time_offset(&'static self, offset: Duration) {
+        self.time_source.set_user_offset(offset);
+    }
+
+    /// Returns time elapsed between system initialization and start of the scheduler.
+    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
+    fn get_startup_time(&'static self) -> Option<Duration> {
+        self.time_source.startup_duration()
+    }
+
+    /// Returns time elapsed since scheduler's start.
+    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
+    fn get_time_since_startup(&'static self) -> Option<Timestamp> {
+        self.time_source.time_since_start()
     }
 
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
