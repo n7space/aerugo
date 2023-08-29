@@ -1,5 +1,6 @@
 use aerugo::{
-    log, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    logln, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
+    AERUGO,
 };
 
 enum MyEvents {
@@ -39,7 +40,7 @@ fn task_a(_: (), context: &mut TaskAContext, api: &'static dyn RuntimeApi) {
         1 => api
             .emit_event(MyEvents::SmallEvent.into())
             .expect("Failed to emit SmallEvent"),
-        2 => log!("TaskA"),
+        2 => logln!("TaskA"),
         3 => std::process::exit(0),
         _ => unreachable!(),
     }
@@ -51,7 +52,7 @@ fn task_a(_: (), context: &mut TaskAContext, api: &'static dyn RuntimeApi) {
 struct TaskBContext {}
 
 fn task_b(value: EventId, _: &mut TaskBContext, api: &'static dyn RuntimeApi) {
-    log!("TaskB: {}", value);
+    logln!("TaskB: {}", value);
 
     match value.into() {
         MyEvents::SmallEvent => api.clear_event_queue(),
@@ -63,14 +64,14 @@ fn task_b(value: EventId, _: &mut TaskBContext, api: &'static dyn RuntimeApi) {
 struct TaskCContext {}
 
 fn task_c(value: EventId, _: &mut TaskCContext, _: &'static dyn RuntimeApi) {
-    log!("TaskC: {}", value);
+    logln!("TaskC: {}", value);
 }
 
 #[derive(Default)]
 struct TaskDContext {}
 
 fn task_d(value: EventId, _: &mut TaskDContext, _: &'static dyn RuntimeApi) {
-    log!("TaskD: {}", value);
+    logln!("TaskD: {}", value);
 }
 
 static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new();

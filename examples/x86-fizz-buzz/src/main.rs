@@ -1,7 +1,7 @@
 use aerugo::{
-    log, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, EventId, InitApi,
-    MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    log, logln, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, EventId,
+    InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 
 struct ProducerContext {
@@ -37,7 +37,7 @@ fn distributor(val: u8, _: &mut DistributorContext, api: &'static dyn RuntimeApi
         (_, 0) => api
             .emit_event(FizzBuzzEvents::Buzz.into())
             .expect("Failed to emit Buzz"),
-        _ => log!("{}\n", val),
+        _ => logln!("{}", val),
     }
 }
 
@@ -48,7 +48,7 @@ fn fizz(val: EventId, _: &mut FizzContext, _: &'static dyn RuntimeApi) {
     log!("Fizz");
 
     if let FizzBuzzEvents::Fizz = val.into() {
-        log!("\n");
+        logln!();
     }
 }
 
@@ -56,14 +56,14 @@ fn fizz(val: EventId, _: &mut FizzContext, _: &'static dyn RuntimeApi) {
 struct BuzzContext {}
 
 fn buzz(_: EventId, _: &mut BuzzContext, _: &'static dyn RuntimeApi) {
-    log!("Buzz\n");
+    logln!("Buzz");
 }
 
 #[derive(Default)]
 struct DoneContext {}
 
 fn done(_: bool, _: &mut DoneContext, _: &'static dyn RuntimeApi) {
-    log!("Done!\n");
+    logln!("Done!");
 
     std::process::exit(0);
 }

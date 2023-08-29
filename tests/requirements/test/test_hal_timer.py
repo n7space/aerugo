@@ -1,7 +1,9 @@
 import logging
 from typing import List
 
-from test_utils import finish_test, init_test, setup_logger
+from test_utils import finish_test, init_test
+
+from calldwell import init_default_logger
 
 TEST_NAME = "test-hal-timer"
 
@@ -52,5 +54,5 @@ def main():
 
 
 if __name__ == "__main__":
-    setup_logger()
+    init_default_logger()
     main()

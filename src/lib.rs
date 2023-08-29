@@ -19,6 +19,7 @@ mod event_manager;
 mod execution_monitoring;
 mod executor;
 mod message_queue;
+mod stubs;
 mod tasklet;
 mod time_manager;
 
@@ -44,4 +45,5 @@ pub(crate) use aerugo_x86 as arch;
 #[cfg(feature = "use-aerugo-x86")]
 pub use x86_hal as hal;
 
-pub use arch::log;
+#[cfg(feature = "log")]
+pub use arch::{log, logln};

@@ -1,5 +1,5 @@
 use aerugo::{
-    log, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    logln, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 
 #[derive(Default)]
@@ -9,7 +9,7 @@ struct TaskAContext {
 
 fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
-    log!("TaskA: {}", context.acc);
+    logln!("TaskA: {}", context.acc);
 }
 
 #[derive(Default)]
@@ -19,7 +19,7 @@ struct TaskBContext {
 
 fn task_b(_: (), context: &mut TaskBContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(2);
-    log!("TaskB: {}", context.acc);
+    logln!("TaskB: {}", context.acc);
 }
 
 static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new();

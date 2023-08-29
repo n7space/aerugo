@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 
+from calldwell import init_default_logger
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
 
@@ -75,5 +76,5 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    init_default_logger()
     main()

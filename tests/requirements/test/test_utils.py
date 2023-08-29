@@ -18,12 +18,6 @@ TEST_BINS_DIRECTORY = Path("./testbins")
 TARGET_NAME = "thumbv7em-none-eabihf"
 
 
-def setup_logger():
-    logging.basicConfig(
-        level=logging.INFO, format="[%(asctime)s] <%(levelname)s|%(name)s>: %(message)s"
-    )
-
-
 def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
     project_path = TEST_BINS_DIRECTORY / test_name

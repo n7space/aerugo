@@ -1,5 +1,6 @@
 use aerugo::{
-    log, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    logln, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
+    AERUGO,
 };
 
 enum MyEvents {
@@ -48,14 +49,14 @@ fn task_a(_: (), context: &mut TaskAContext, api: &'static dyn RuntimeApi) {
 struct TaskBContext {}
 
 fn task_b(value: EventId, _: &mut TaskBContext, _: &'static dyn RuntimeApi) {
-    log!("TaskB: {}", value);
+    logln!("TaskB: {}", value);
 }
 
 #[derive(Default)]
 struct TaskCContext {}
 
 fn task_c(value: EventId, _: &mut TaskCContext, api: &'static dyn RuntimeApi) {
-    log!("TaskC: {}", value);
+    logln!("TaskC: {}", value);
     api.cancel_event(MyEvents::Event42.into())
         .expect("Failed to cancel Event42");
 }
