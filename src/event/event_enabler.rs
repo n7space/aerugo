@@ -45,7 +45,6 @@ impl EventEnabler {
 
         // This is safe, because this structure can be only created at system initialization.
         unsafe {
-            self.event_set.add_event(event_id)?;
             event.add_set(self.event_set)?;
         }
 
