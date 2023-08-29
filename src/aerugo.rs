@@ -23,6 +23,7 @@ use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
+use crate::time_source::{Duration, TimeSource, Timestamp};
 
 /// Core system.
 ///
@@ -50,7 +51,10 @@ static TIME_MANAGER: TimeManager = TimeManager::new();
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 /// It should be used as a [singleton](crate::aerugo::AERUGO) that acts as a system API,
 /// both for user and for the internal system parts.
-pub struct Aerugo;
+pub struct Aerugo {
+    /// Time source, responsible for creating timestamps.
+    _time_source: TimeSource,
+}
 
 impl Aerugo {
     /// Maximum number of tasklets registered in the system.
@@ -62,7 +66,9 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        Aerugo {}
+        Aerugo {
+            _time_source: TimeSource::new(),
+        }
     }
 
     /// Initialize the system runtime and hardware.
@@ -699,11 +705,11 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.clear()
     }
 
-    fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000> {
-        Hal::get_system_time()
+    fn get_system_time(&'static self) -> Timestamp {
+        TimeSource::time_since_init()
     }
 
-    fn set_system_time_offset(&'static self, _offset: crate::time::TimerDurationU64<1_000_000>) {
+    fn set_system_time_offset(&'static self, _offset: Duration) {
         todo!()
     }
 
