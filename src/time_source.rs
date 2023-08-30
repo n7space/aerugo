@@ -41,7 +41,7 @@ impl TimeSource {
 
     /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::Aerugo::start)), or `None` if system hasn't started yet.
     pub fn time_since_start(&self) -> Option<Timestamp> {
-        // SAFETY: This is safe as long as used in single-core context.
+        // SAFETY: This is safe as long as used in single-core context and `mark_system_start` is not being called.
         if let Some(start_offset) = unsafe { *self.system_start_offset.as_ref() } {
             let current_time = TimeSource::time_since_init();
             return current_time.checked_sub_duration(start_offset);
@@ -51,7 +51,7 @@ impl TimeSource {
 
     /// Returns time since user-defined offset, or `None` if offset is not defined, or cannot be subtracted from system time.
     pub fn time_since_user_offset(&self) -> Option<Timestamp> {
-        // SAFETY: This is safe as long as used in single-core context.
+        // SAFETY: This is safe as long as used in single-core context and `set_user_offset` is not being called.
         if let Some(user_offset) = unsafe { *self.user_offset.as_ref() } {
             let current_time = TimeSource::time_since_init();
             return current_time.checked_sub_duration(user_offset);
@@ -67,12 +67,11 @@ impl TimeSource {
     /// See [`TimeSource::time_since_init`] for details about time since system initialization.
     ///
     /// # Safety
-    /// This should never be called in IRQ context.
+    /// This can be called only if offset time will be guaranteed to not be accessed until this function ends.
     ///
     /// # Parameters
     /// * `duration` - Duration to offset the time source with.
-    pub fn set_user_offset(&self, duration: Duration) {
-        // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member.
+    pub(crate) unsafe fn set_user_offset(&self, duration: Duration) {
         let offset_ref = unsafe { self.user_offset.as_mut_ref() };
         offset_ref.replace(duration);
     }
@@ -86,10 +85,9 @@ impl TimeSource {
     /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting the scheduler.
     ///
     /// # Safety
-    /// This should never be called in IRQ context.
-    pub(crate) fn mark_system_start(&self) {
+    /// This can be called only if system start time will be guaranteed to not be accessed until this function ends.
+    pub(crate) unsafe fn mark_system_start(&self) {
         let current_time = TimeSource::time_since_init();
-        // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member.
         let offset_ref = unsafe { self.system_start_offset.as_mut_ref() };
         offset_ref.replace(current_time.duration_since_epoch());
     }

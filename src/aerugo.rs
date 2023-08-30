@@ -88,7 +88,11 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called more than once.
     pub fn start(&'static self) -> ! {
-        self.time_source.mark_system_start();
+        // SAFETY: This is safe, because it's called from non-IRQ context, and
+        // system time cannot be accessed from IRQ context
+        unsafe {
+            self.time_source.mark_system_start();
+        }
         Hal::exit_critical();
         EXECUTOR.run_scheduler()
     }
@@ -412,9 +416,9 @@ impl InitApi for Aerugo {
 
     /// Subscribes a tasklet to events.
     ///
-    /// Tasklet subscribes for emited events. After subscription, specific events have to be enabled
+    /// Tasklet subscribes for emitted events. After subscription, specific events have to be enabled
     /// for this tasklet using [EventEnabler] returned from this
-    /// function. Emiting an event will wake up all tasklet for which it is enabled and make them
+    /// function. Emitting an event will wake up all tasklet for which it is enabled and make them
     /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
     /// event. On each execution tasklet will handle one event, receiving it's ID in step function.
     ///
@@ -714,7 +718,11 @@ impl RuntimeApi for Aerugo {
     }
 
     fn set_system_time_offset(&'static self, offset: Duration) {
-        self.time_source.set_user_offset(offset);
+        // SAFETY: This is safe, because it's called from non-IRQ context, and
+        // system time cannot be accessed from IRQ context
+        unsafe {
+            self.time_source.set_user_offset(offset);
+        }
     }
 
     /// Returns time elapsed between system initialization and start of the scheduler.
