@@ -67,16 +67,14 @@ impl TimeSource {
     /// See [`TimeSource::time_since_init`] for details about time since system initialization.
     ///
     /// # Safety
-    /// This executes in critical section, as it mutates the internal state of TimeSource.
+    /// This should never be called in IRQ context.
     ///
     /// # Parameters
     /// * `duration` - Duration to offset the time source with.
     pub fn set_user_offset(&self, duration: Duration) {
-        Hal::execute_critical(|_| {
-            // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member.
-            let offset_ref = unsafe { self.user_offset.as_mut_ref() };
-            offset_ref.replace(duration);
-        })
+        // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member.
+        let offset_ref = unsafe { self.user_offset.as_mut_ref() };
+        offset_ref.replace(duration);
     }
 
     /// Returns the duration between system initialization and start of the scheduler, or `None` if system hasn't started yet.
@@ -88,14 +86,11 @@ impl TimeSource {
     /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting the scheduler.
     ///
     /// # Safety
-    /// This executes in critical section, as it mutates the internal state of TimeSource.
+    /// This should never be called in IRQ context.
     pub(crate) fn mark_system_start(&self) {
-        Hal::execute_critical(|_| {
-            let current_time = TimeSource::time_since_init();
-            // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member
-            // until OS starts (which happens after this function is called).
-            let offset_ref = unsafe { self.system_start_offset.as_mut_ref() };
-            offset_ref.replace(current_time.duration_since_epoch());
-        })
+        let current_time = TimeSource::time_since_init();
+        // SAFETY: This is safe, as it's the only place where this member is mutated, and IRQs should not access this member.
+        let offset_ref = unsafe { self.system_start_offset.as_mut_ref() };
+        offset_ref.replace(current_time.duration_since_epoch());
     }
 }
