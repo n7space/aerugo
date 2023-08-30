@@ -1,7 +1,7 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use aerugo_hal::Instant;
+use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
 use cortex_m::asm;
@@ -38,7 +38,7 @@ impl Hal {
     ///
     /// Some of these peripherals are taken from SystemPeripherals structure, hence
     /// this function should not be called before finishing HAL initialization (via
-    /// [`SystemHal::configure_hardware] function).
+    /// [`AerugoHal::configure_hardware] function).
     ///
     /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
@@ -76,7 +76,7 @@ impl Hal {
     /// Initializes global HAL instance using PAC peripherals.
     ///
     /// Calling this function begins HAL initialization process. This process must be finished
-    /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
+    /// by calling [`AerugoHal::configure_hardware`]. Until then, no other HAL functions should
     /// be called, as they will most likely fail.
     ///
     /// # Safety
@@ -107,7 +107,7 @@ impl Hal {
     /// Creates system peripherals of HAL.
     ///
     /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
-    /// containing peripherals used by [`SystemHal`] API implementation.
+    /// containing peripherals used by [`AerugoHal`] API implementation.
     ///
     /// # Safety
     /// This function should be only called once inside [`Hal::initialize`].
@@ -127,7 +127,7 @@ impl Hal {
     }
 }
 
-impl SystemHal for Hal {
+impl AerugoHal for Hal {
     type Error = HalError;
 
     /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
@@ -254,7 +254,7 @@ impl SystemHal for Hal {
     /// Exits critical section by enabling global interrupts.
     ///
     /// # Safety
-    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>SystemHal::execute_critical</code>)</div>
+    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>AerugoHal::execute_critical</code>)</div>
     fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }

@@ -1,11 +1,10 @@
 //! Module containing Aerugo's time source module, providing configurable timestamps for the system
 //! Should be used internally by the system.
 
-use aerugo_hal::system_hal::SystemHal;
-
 use crate::hal::Hal;
 use crate::internal_cell::InternalCell;
 use crate::{Duration, Instant};
+use aerugo_hal::AerugoHal;
 
 /// Time source, responsible for creating timestamps.
 ///

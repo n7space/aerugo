@@ -8,8 +8,11 @@ HAL (Hardware Abstract Layer) for Aerugo system.
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-pub mod system_hal;
+mod config;
 
+use bare_metal::CriticalSection;
+
+pub use config::SystemHardwareConfig;
 pub use fugit as time;
 
 /// Constant representing system timer frequency.
@@ -20,3 +23,44 @@ pub const SYSTEM_TIMER_FREQUENCY: u32 = 1_000_000;
 pub type Instant = time::TimerInstantU64<SYSTEM_TIMER_FREQUENCY>;
 /// Type representing Aerugo duration.
 pub type Duration = time::TimerDurationU64<SYSTEM_TIMER_FREQUENCY>;
+
+/// System HAL trait.
+pub trait AerugoHal {
+    /// Type for system HAL error.
+    type Error;
+
+    /// Configure system hardware.
+    ///
+    /// Implementation should initialize and configure all core system peripherals.
+    ///
+    /// # Parameters
+    /// * `config` - System hardware configuration.
+    fn configure_hardware(config: SystemHardwareConfig) -> Result<(), Self::Error>;
+
+    /// Gets current system time timestamp.
+    fn get_system_time() -> Instant;
+
+    /// Feeds the system watchdog.
+    fn feed_watchdog();
+
+    /// Enters critical section
+    fn enter_critical();
+
+    /// Exits critical section
+    fn exit_critical();
+
+    /// Executes closure `f` in an interrupt-free context.
+    ///
+    /// # Generic Parameters
+    /// * `F` - Closure type.
+    /// * `R` - Closure return type.
+    ///
+    /// # Parameters
+    /// * `f` - Closure to execute.
+    ///
+    /// # Return
+    /// Closure result.
+    fn execute_critical<F, R>(f: F) -> R
+    where
+        F: FnOnce(&CriticalSection) -> R;
+}

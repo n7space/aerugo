@@ -5,7 +5,7 @@
 //!
 //! This module also contains singleton instances of all system parts.
 
-use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use env_parser::read_env;
 

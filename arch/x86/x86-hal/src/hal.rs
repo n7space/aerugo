@@ -3,8 +3,8 @@
 use std::convert::TryInto;
 use std::time::SystemTime;
 
-use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
 use aerugo_hal::Instant;
+use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
 
@@ -24,7 +24,7 @@ impl Hal {
     }
 }
 
-impl SystemHal for Hal {
+impl AerugoHal for Hal {
     type Error = HalError;
 
     fn configure_hardware(_config: SystemHardwareConfig) -> Result<(), HalError> {

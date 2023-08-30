@@ -9,7 +9,7 @@ use crate::drivers::{
 
 /// System peripherals structure. These peripherals are represented as HAL drivers.
 /// Some of these peripherals are available only during HAL initialization
-/// (between `SystemHal::initialize` and `SystemHal::configure_hardware` calls).
+/// (between `AerugoHal::initialize` and `AerugoHal::configure_hardware` calls).
 pub struct SystemPeripherals {
     /// Watchdog instance.
     pub watchdog: Watchdog,
