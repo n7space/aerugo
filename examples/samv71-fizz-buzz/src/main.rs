@@ -6,9 +6,9 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 use aerugo::{
-    log, logln, time::MillisDurationU32, BooleanConditionHandle, BooleanConditionSet,
-    BooleanConditionStorage, EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
-    SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    log, logln, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, Duration,
+    EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 
 use rt::entry;
@@ -115,7 +115,7 @@ impl From<EventId> for FizzBuzzEvents {
 #[entry]
 fn main() -> ! {
     AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(5),
+        watchdog_timeout: Duration::secs(5),
         ..Default::default()
     });
 

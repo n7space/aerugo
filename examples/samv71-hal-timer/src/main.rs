@@ -15,8 +15,8 @@ use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
 
 use aerugo::{
-    hal::drivers::timer::Timer, logln, time::MillisDurationU32, InitApi, RuntimeApi,
-    SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    hal::drivers::timer::Timer, logln, Duration, InitApi, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage, AERUGO,
 };
 use rt::entry;
 
@@ -100,7 +100,7 @@ fn init_tasks() {
 #[entry]
 fn main() -> ! {
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(5),
+        watchdog_timeout: Duration::secs(5),
         ..Default::default()
     });
 
