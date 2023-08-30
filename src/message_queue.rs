@@ -28,17 +28,17 @@ type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 #[repr(C)]
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
-    data_queue: Mutex<&'static mut QueueData<T, N>>,
+    data_queue: &'static Mutex<QueueData<T, N>>,
     /// Tasklets registered to this queue.
     registered_tasklets: InternalCell<TaskletList>,
 }
 
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
-    pub(crate) fn new(data_queue: &'static mut QueueData<T, N>) -> Self {
+    pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
         MessageQueue {
-            data_queue: Mutex::new(data_queue),
             registered_tasklets: TaskletList::new().into(),
+            data_queue,
         }
     }
 

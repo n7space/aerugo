@@ -5,10 +5,12 @@
 
 use super::MessageQueue;
 
+use core::cell::OnceCell;
+
 use heapless::Vec;
 
 use crate::api::InitError;
-use crate::internal_cell::InternalCell;
+use crate::arch::Mutex;
 use crate::message_queue::MessageQueueHandle;
 
 /// Type of the queue buffer storage.
@@ -27,28 +29,26 @@ pub(crate) type QueueData<T, const N: usize> = heapless::spsc::Queue<T, N>;
 /// * `N` - Size of the queue.
 pub struct MessageQueueStorage<T, const N: usize> {
     /// Marks whether this storage has been initialized.
-    initialized: InternalCell<bool>,
+    initialized: OnceCell<()>,
     /// Buffer for the queue structure.
-    queue_buffer: InternalCell<QueueBuffer>,
+    queue_buffer: OnceCell<QueueBuffer>,
     /// Buffer for the queue data.
-    queue_data: InternalCell<QueueData<T, N>>,
+    queue_data: Mutex<QueueData<T, N>>,
 }
 
 impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Creates new storage.
     pub const fn new() -> Self {
         MessageQueueStorage {
-            initialized: InternalCell::new(false),
-            queue_buffer: InternalCell::new(QueueBuffer::new()),
-            queue_data: InternalCell::new(QueueData::new()),
+            initialized: OnceCell::new(),
+            queue_buffer: OnceCell::new(),
+            queue_data: Mutex::new(QueueData::new()),
         }
     }
 
     /// Returns initialization status of this storage.
     pub fn is_initialized(&'static self) -> bool {
-        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
-        // the `init` function.
-        unsafe { *self.initialized.as_ref() }
+        self.initialized.get().is_some()
     }
 
     /// Creates new handle to a queue allocated in this storage.
@@ -58,13 +58,14 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     pub fn create_handle(&'static self) -> Option<MessageQueueHandle<T, N>> {
         // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
         // the `init` function.
-        match unsafe { *self.initialized.as_ref() } {
-            true => {
-                // SAFETY: This is safe because storage has been initialized.
-                let message_queue = unsafe { self.message_queue() };
+        match self.initialized.get() {
+            Some(_) => {
+                let message_queue = self
+                    .message_queue()
+                    .expect("Failed to get reference to the stored MessageQueue");
                 Some(MessageQueueHandle::new(message_queue))
             }
-            false => None,
+            None => None,
         }
     }
 
@@ -77,35 +78,45 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// This is unsafe, because it mutably borrows the stored queue and queue data buffers.
     /// This is safe to call before the system initialization.
     pub(crate) unsafe fn init(&'static self) -> Result<(), InitError> {
-        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
-        // this function.
-        if unsafe { *self.initialized.as_ref() } {
+        if self.initialized.get().is_some() {
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let queue = MessageQueue::<T, N>::new(self.queue_data.as_mut_ref());
+        let queue = MessageQueue::<T, N>::new(&self.queue_data);
 
         // This is safe, because `queue_buffer` doesn't contain any value yet, and it's size is
         // guaranteed to be large enough to store queue structure.
-        let queue_buffer = self.queue_buffer.as_mut_ref().as_mut_ptr() as *mut MessageQueue<T, N>;
+        let queue_buffer = QueueBuffer::new();
         unsafe {
-            core::ptr::write(queue_buffer, queue);
+            let queue_buffer_ptr = queue_buffer.as_ptr() as *mut MessageQueue<T, N>;
+            core::ptr::write(queue_buffer_ptr, queue);
         }
 
-        *self.initialized.as_mut_ref() = true;
+        self.queue_buffer
+            .set(queue_buffer)
+            .expect("Failed to initialize MessageQueueStorage buffer");
+
+        self.initialized
+            .set(())
+            .expect("Failed to initialize MessageQueueStorage");
 
         Ok(())
     }
 
     /// Returns a reference to the stored MessageQueue structure.
-    ///
-    /// # Safety
-    /// This is safe to call only when this storage has been initialized.
     #[inline(always)]
-    unsafe fn message_queue(&'static self) -> &'static MessageQueue<T, N> {
-        &*(self.queue_buffer.as_ref().as_ptr() as *const MessageQueue<T, N>)
+    fn message_queue(&'static self) -> Option<&'static MessageQueue<T, N>> {
+        match self.queue_buffer.get() {
+            Some(buffer) => {
+                // This is safe, because buffer is initialized
+                unsafe { Some(&*(buffer.as_ptr() as *const MessageQueue<T, N>)) }
+            }
+            None => None,
+        }
     }
 }
+
+unsafe impl<T, const N: usize> Sync for MessageQueueStorage<T, N> {}
 
 #[cfg(test)]
 mod tests {
