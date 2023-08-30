@@ -1,9 +1,9 @@
 //! Module containing watchdog configuration types.
 
-use fugit::MillisDurationU32;
+use aerugo_hal::Duration;
 
 /// Maximum duration that watchdog can wait before triggering an event.
-pub const MAXIMUM_WATCHDOG_DURATION: MillisDurationU32 = MillisDurationU32::secs(16);
+pub const MAXIMUM_WATCHDOG_DURATION: Duration = Duration::secs(16);
 
 /// Structure representing Watchdog configuration.
 ///
@@ -15,7 +15,7 @@ pub struct WatchdogConfig {
     /// If true, watchdog will reset the MCU on timeout.
     pub reset_enabled: bool,
     /// Defines the reset value for watchdog's counter in watchdog clock cycles.
-    pub duration: MillisDurationU32,
+    pub duration: Duration,
     /// If true, watchdog will run in idle state.
     pub run_in_idle: bool,
     /// If true, watchdog will run in debug state.

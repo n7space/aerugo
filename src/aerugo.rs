@@ -23,7 +23,8 @@ use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
-use crate::time_source::{Duration, TimeSource, Timestamp};
+use crate::time_source::TimeSource;
+use crate::{Duration, Instant};
 
 /// Core system.
 ///
@@ -710,7 +711,7 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.clear()
     }
 
-    fn get_system_time(&'static self) -> Timestamp {
+    fn get_system_time(&'static self) -> Instant {
         if let Some(system_time) = self.time_source.time_since_user_offset() {
             return system_time;
         }
@@ -733,7 +734,7 @@ impl RuntimeApi for Aerugo {
 
     /// Returns time elapsed since scheduler's start.
     /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_time_since_startup(&'static self) -> Option<Timestamp> {
+    fn get_time_since_startup(&'static self) -> Option<Instant> {
         self.time_source.time_since_start()
     }
 

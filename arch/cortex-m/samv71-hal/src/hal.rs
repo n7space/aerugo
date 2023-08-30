@@ -1,6 +1,7 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
+use aerugo_hal::Instant;
 use bare_metal::CriticalSection;
 
 use cortex_m::asm;
@@ -30,9 +31,6 @@ static HAL_SYSTEM_PERIPHERALS: InternalCell<Option<SystemPeripherals>> = Interna
 pub struct Hal;
 
 impl Hal {
-    /// Frequency of system timer.
-    const TIMER_FREQ: u32 = 1_000_000;
-
     /// Creates user peripherals instance.
     ///
     /// This function steals PAC peripherals and returns a [`UserPeripherals`] structure
@@ -130,8 +128,6 @@ impl Hal {
 }
 
 impl SystemHal for Hal {
-    type Instant = crate::time::TimerInstantU64<{ Hal::TIMER_FREQ }>;
-    type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
     /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
@@ -206,7 +202,7 @@ impl SystemHal for Hal {
         result
     }
 
-    fn get_system_time() -> Self::Instant {
+    fn get_system_time() -> Instant {
         // SAFETY: This is safe, because this is a single-core system, and no other references to
         // system peripherals should exist during this call.
         let peripherals = unsafe {
@@ -234,7 +230,7 @@ impl SystemHal for Hal {
         let time_ch0 = ch0.counter_value();
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
-        crate::time::TimerInstantU64::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
+        Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
     }
 
     fn feed_watchdog() {

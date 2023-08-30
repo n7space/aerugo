@@ -4,6 +4,7 @@ use std::convert::TryInto;
 use std::time::SystemTime;
 
 use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
+use aerugo_hal::Instant;
 use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
 
@@ -17,9 +18,6 @@ static TIME_START: Lazy<SystemTime> = Lazy::new(SystemTime::now);
 pub struct Hal {}
 
 impl Hal {
-    /// Frequency for the time types (TODO)
-    const TIMER_FREQ: u32 = 1_000_000;
-
     /// Returns empty UserPeripherals struct, as x86 does not provide any.
     pub fn create_user_peripherals() -> Option<UserPeripherals> {
         Some(UserPeripherals {})
@@ -27,8 +25,6 @@ impl Hal {
 }
 
 impl SystemHal for Hal {
-    type Instant = crate::time::TimerInstantU64<{ Hal::TIMER_FREQ }>;
-    type Duration = crate::time::TimerDurationU64<{ Hal::TIMER_FREQ }>;
     type Error = HalError;
 
     fn configure_hardware(_config: SystemHardwareConfig) -> Result<(), HalError> {
@@ -36,8 +32,8 @@ impl SystemHal for Hal {
         Ok(())
     }
 
-    fn get_system_time() -> Self::Instant {
-        Self::Instant::from_ticks(
+    fn get_system_time() -> Instant {
+        Instant::from_ticks(
             TIME_START
                 .elapsed()
                 .expect("{}")

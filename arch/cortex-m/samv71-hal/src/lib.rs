@@ -9,8 +9,6 @@ SAMV71 implementation of aerugo HAL.
 extern crate internal_cell;
 extern crate samv71q21_pac as pac;
 
-pub(crate) use fugit as time;
-
 pub mod drivers;
 pub mod error;
 pub mod hal;

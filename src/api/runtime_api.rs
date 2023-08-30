@@ -8,6 +8,7 @@ use crate::api::RuntimeError;
 use crate::event::EventId;
 use crate::execution_monitoring::ExecutionStats;
 use crate::tasklet::TaskletId;
+use crate::{Duration, Instant};
 
 /// System runtime API.
 pub trait RuntimeApi {
@@ -33,21 +34,21 @@ pub trait RuntimeApi {
     fn clear_event_queue(&'static self);
 
     /// Gets current system time timestamp.
-    fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000>;
+    fn get_system_time(&'static self) -> Instant;
 
     /// Sets system time offset.
     ///
     /// # Parameters
     /// * `offset` - Time offset.
-    fn set_system_time_offset(&'static self, offset: crate::time::TimerDurationU64<1_000_000>);
+    fn set_system_time_offset(&'static self, offset: Duration);
 
     /// Returns time elapsed between system initialization and start of the scheduler.
     /// If called before scheduler's start, should return `None`.
-    fn get_startup_time(&'static self) -> Option<crate::time::TimerDurationU64<1_000_000>>;
+    fn get_startup_time(&'static self) -> Option<Duration>;
 
     /// Returns time elapsed since scheduler's start.
     /// If called before scheduler's start, should return `None`.
-    fn get_time_since_startup(&'static self) -> Option<crate::time::TimerInstantU64<1_000_000>>;
+    fn get_time_since_startup(&'static self) -> Option<Instant>;
 
     /// Returns an iterator to the list with IDs of registered tasklets.
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;

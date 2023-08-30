@@ -35,7 +35,7 @@ pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
 pub use aerugo_hal::system_hal::SystemHardwareConfig;
 
-pub use fugit as time;
+pub use aerugo_hal::{time, Duration, Instant};
 
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub(crate) use aerugo_cortex_m as arch;
