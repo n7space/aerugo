@@ -12,8 +12,7 @@ use aerugo::{
         Waveform, TC1,
     },
     hal::{drivers::timer::channel_config::ChannelInterrupts, interrupt, NVIC, PMC},
-    time::MillisDurationU32,
-    InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 use calldwell::with_rtt_out;
 use core::{cell::RefCell, fmt::Write, ops::AddAssign};
@@ -152,7 +151,7 @@ fn main() -> ! {
     calldwell::start_session();
 
     let peripherals = AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(3),
+        watchdog_timeout: Duration::secs(3),
         ..Default::default()
     });
 

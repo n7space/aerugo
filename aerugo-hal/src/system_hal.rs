@@ -5,20 +5,9 @@ mod config;
 pub use self::config::SystemHardwareConfig;
 
 use bare_metal::CriticalSection;
-use core::ops::{Add, Sub};
 
 /// System HAL trait.
 pub trait SystemHal {
-    /// Type for an instant in time.
-    type Instant: Ord
-        + Copy
-        + Add<Self::Duration, Output = Self::Instant>
-        + Sub<Self::Duration, Output = Self::Instant>
-        + Sub<Self::Instant, Output = Self::Duration>;
-
-    /// Type for a duration of time.
-    type Duration;
-
     /// Type for system HAL error.
     type Error;
 
@@ -31,7 +20,7 @@ pub trait SystemHal {
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), Self::Error>;
 
     /// Gets current system time timestamp.
-    fn get_system_time() -> Self::Instant;
+    fn get_system_time() -> crate::Instant;
 
     /// Feeds the system watchdog.
     fn feed_watchdog();

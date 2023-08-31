@@ -23,6 +23,8 @@ use crate::hal::{user_peripherals::UserPeripherals, Hal};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
+use crate::time_source::TimeSource;
+use crate::{Duration, Instant};
 
 /// Core system.
 ///
@@ -50,7 +52,10 @@ static TIME_MANAGER: TimeManager = TimeManager::new();
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 /// It should be used as a [singleton](crate::aerugo::AERUGO) that acts as a system API,
 /// both for user and for the internal system parts.
-pub struct Aerugo;
+pub struct Aerugo {
+    /// Time source, responsible for creating timestamps.
+    time_source: TimeSource,
+}
 
 impl Aerugo {
     /// Maximum number of tasklets registered in the system.
@@ -62,7 +67,9 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
-        Aerugo {}
+        Aerugo {
+            time_source: TimeSource::new(),
+        }
     }
 
     /// Initialize the system runtime and hardware.
@@ -82,6 +89,11 @@ impl Aerugo {
     /// # Safety
     /// This shouldn't be called more than once.
     pub fn start(&'static self) -> ! {
+        // SAFETY: This is safe, because it's called from non-IRQ context, and
+        // system time cannot be accessed from IRQ context
+        unsafe {
+            self.time_source.mark_system_start();
+        }
         Hal::exit_critical();
         EXECUTOR.run_scheduler()
     }
@@ -405,9 +417,9 @@ impl InitApi for Aerugo {
 
     /// Subscribes a tasklet to events.
     ///
-    /// Tasklet subscribes for emited events. After subscription, specific events have to be enabled
+    /// Tasklet subscribes for emitted events. After subscription, specific events have to be enabled
     /// for this tasklet using [EventEnabler] returned from this
-    /// function. Emiting an event will wake up all tasklet for which it is enabled and make them
+    /// function. Emitting an event will wake up all tasklet for which it is enabled and make them
     /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
     /// event. On each execution tasklet will handle one event, receiving it's ID in step function.
     ///
@@ -699,12 +711,31 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.clear()
     }
 
-    fn get_system_time(&'static self) -> crate::time::TimerInstantU64<1_000_000> {
-        Hal::get_system_time()
+    fn get_system_time(&'static self) -> Instant {
+        match self.time_source.time_since_user_offset() {
+            Some(system_time) => system_time,
+            None => TimeSource::time_since_init(),
+        }
     }
 
-    fn set_system_time_offset(&'static self, _offset: crate::time::TimerDurationU64<1_000_000>) {
-        todo!()
+    fn set_system_time_offset(&'static self, offset: Duration) {
+        // SAFETY: This is safe, because it's called from non-IRQ context, and
+        // system time cannot be accessed from IRQ context
+        unsafe {
+            self.time_source.set_user_offset(offset);
+        }
+    }
+
+    /// Returns time elapsed between system initialization and start of the scheduler.
+    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
+    fn get_startup_time(&'static self) -> Option<Duration> {
+        self.time_source.startup_duration()
+    }
+
+    /// Returns time elapsed since scheduler's start.
+    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
+    fn get_time_since_startup(&'static self) -> Option<Instant> {
+        self.time_source.time_since_start()
     }
 
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {

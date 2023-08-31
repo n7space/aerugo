@@ -6,8 +6,8 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 use aerugo::{
-    logln, time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    logln, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
+    AERUGO,
 };
 use rt::entry;
 
@@ -28,7 +28,7 @@ static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStor
 #[entry]
 fn main() -> ! {
     AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(5),
+        watchdog_timeout: Duration::secs(5),
         ..Default::default()
     });
 

@@ -7,8 +7,7 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
 use aerugo::{
-    time::MillisDurationU32, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 use calldwell::with_rtt_out;
 use cortex_m::asm;
@@ -102,7 +101,7 @@ fn main() -> ! {
     calldwell::start_session();
 
     AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: MillisDurationU32::secs(3),
+        watchdog_timeout: Duration::secs(3),
         ..Default::default()
     });
 
