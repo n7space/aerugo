@@ -1,7 +1,6 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::SystemInstant;
-use aerugo_hal::{AerugoHal, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, SystemHardwareConfig, SystemInstant};
 use bare_metal::CriticalSection;
 
 use crate::cortex_m;
