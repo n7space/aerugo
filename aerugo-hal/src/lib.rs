@@ -20,9 +20,9 @@ pub use fugit as time;
 /// Aerugo requires a timer with frequency of 1MHz to measure time with microsecond precision.
 pub const SYSTEM_TIMER_FREQUENCY: u32 = 1_000_000;
 /// Type representing Aerugo timestamp.
-pub type SystemInstant = time::TimerInstantU64<SYSTEM_TIMER_FREQUENCY>;
+pub type Instant = time::TimerInstantU64<SYSTEM_TIMER_FREQUENCY>;
 /// Type representing Aerugo duration.
-pub type SystemDuration = time::TimerDurationU64<SYSTEM_TIMER_FREQUENCY>;
+pub type Duration = time::TimerDurationU64<SYSTEM_TIMER_FREQUENCY>;
 
 /// System HAL trait.
 pub trait AerugoHal {
@@ -38,7 +38,7 @@ pub trait AerugoHal {
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), Self::Error>;
 
     /// Gets current system time timestamp.
-    fn get_system_time() -> SystemInstant;
+    fn get_system_time() -> Instant;
 
     /// Feeds the system watchdog.
     fn feed_watchdog();

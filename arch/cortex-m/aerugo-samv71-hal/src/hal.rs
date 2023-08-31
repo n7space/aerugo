@@ -1,6 +1,6 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::{AerugoHal, SystemHardwareConfig, SystemInstant};
+use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
 use crate::cortex_m;
@@ -193,7 +193,7 @@ impl AerugoHal for Hal {
         result
     }
 
-    fn get_system_time() -> SystemInstant {
+    fn get_system_time() -> Instant {
         // SAFETY: This is safe, because this is a single-core system, and no other references to
         // system peripherals should exist during this call.
         let peripherals = unsafe {
@@ -220,7 +220,7 @@ impl AerugoHal for Hal {
         let time_ch0 = ch0.counter_value();
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
-        SystemInstant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
+        Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
     }
 
     fn feed_watchdog() {

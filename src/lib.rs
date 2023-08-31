@@ -33,7 +33,7 @@ pub use self::boolean_condition::{
 pub use self::event::{EventEnabler, EventId};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
-pub use aerugo_hal::{time, SystemDuration, SystemHardwareConfig, SystemInstant};
+pub use aerugo_hal::{time, Duration, Instant, SystemHardwareConfig};
 
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub(crate) use aerugo_cortex_m as arch;

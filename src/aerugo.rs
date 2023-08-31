@@ -24,7 +24,7 @@ use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;
 use crate::time_source::TimeSource;
-use crate::{SystemDuration, SystemInstant};
+use crate::{Duration, Instant};
 
 /// Core system.
 ///
@@ -711,14 +711,14 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.clear()
     }
 
-    fn get_system_time(&'static self) -> SystemInstant {
+    fn get_system_time(&'static self) -> Instant {
         match self.time_source.time_since_user_offset() {
             Some(system_time) => system_time,
             None => TimeSource::time_since_init(),
         }
     }
 
-    fn set_system_time_offset(&'static self, offset: SystemDuration) {
+    fn set_system_time_offset(&'static self, offset: Duration) {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
         unsafe {
@@ -728,13 +728,13 @@ impl RuntimeApi for Aerugo {
 
     /// Returns time elapsed between system initialization and start of the scheduler.
     /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_startup_time(&'static self) -> Option<SystemDuration> {
+    fn get_startup_time(&'static self) -> Option<Duration> {
         self.time_source.startup_duration()
     }
 
     /// Returns time elapsed since scheduler's start.
     /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_time_since_startup(&'static self) -> Option<SystemInstant> {
+    fn get_time_since_startup(&'static self) -> Option<Instant> {
         self.time_source.time_since_start()
     }
 
