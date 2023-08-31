@@ -711,7 +711,7 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.clear()
     }
 
-    fn get_system_time(&'static self) -> Instant {
+    fn get_system_time(&'static self) -> SystemInstant {
         match self.time_source.time_since_user_offset() {
             Some(system_time) => system_time,
             None => TimeSource::time_since_init(),

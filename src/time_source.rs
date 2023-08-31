@@ -34,7 +34,7 @@ impl TimeSource {
 
     /// Returns time since system initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize), start of the hardware timer)
     #[inline(always)]
-    pub fn time_since_init() -> Instant {
+    pub fn time_since_init() -> SystemInstant {
         Hal::get_system_time()
     }
 
@@ -44,7 +44,7 @@ impl TimeSource {
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
     /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different thread)
     /// is an undefined behavior.
-    pub fn time_since_start(&self) -> Option<Instant> {
+    pub fn time_since_start(&self) -> Option<SystemInstant> {
         match unsafe { *self.system_start_offset.as_ref() } {
             Some(start_offset) => TimeSource::time_since_init().checked_sub_duration(start_offset),
             None => None,
@@ -57,7 +57,7 @@ impl TimeSource {
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
     /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different thread)
     /// is an undefined behavior.
-    pub fn time_since_user_offset(&self) -> Option<Instant> {
+    pub fn time_since_user_offset(&self) -> Option<SystemInstant> {
         match unsafe { *self.user_offset.as_ref() } {
             Some(user_offset) => TimeSource::time_since_init().checked_add_duration(user_offset),
             None => None,
@@ -89,7 +89,7 @@ impl TimeSource {
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
     /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
     /// thread) is an undefined behavior.
-    pub fn startup_duration(&self) -> Option<Duration> {
+    pub fn startup_duration(&self) -> Option<SystemDuration> {
         unsafe { *self.system_start_offset.as_ref() }
     }
 
