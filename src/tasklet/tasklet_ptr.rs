@@ -14,7 +14,7 @@
 use core::cmp::Ordering;
 
 use crate::tasklet::{tasklet_vtable, Tasklet, TaskletStatus, TaskletVTable};
-use crate::Instant;
+use crate::SystemInstant;
 
 /// Raw tasklet pointer.
 #[derive(Clone)]
@@ -70,13 +70,13 @@ impl TaskletPtr {
 
     /// See: [get_last_execution_time](crate::tasklet::Tasklet::get_last_execution_time())
     #[inline(always)]
-    pub(crate) fn get_last_execution_time(&self) -> Instant {
+    pub(crate) fn get_last_execution_time(&self) -> SystemInstant {
         (self.vtable.get_last_execution_time)(self.ptr)
     }
 
     /// See: [set_last_execution_time](crate::tasklet::Tasklet::set_last_execution_time())
     #[inline(always)]
-    pub(crate) fn set_last_execution_time(&self, time: Instant) {
+    pub(crate) fn set_last_execution_time(&self, time: SystemInstant) {
         (self.vtable.set_last_execution_time)(self.ptr, time)
     }
 

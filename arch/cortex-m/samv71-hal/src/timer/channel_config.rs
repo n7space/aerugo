@@ -1,6 +1,6 @@
 //! Module containing channel configuration and status structures.
 
-use pac::tc0::tc_channel::cmr_waveform_mode::TCCLKSSELECT_A as PacClockId;
+use crate::pac::tc0::tc_channel::cmr_waveform_mode::TCCLKSSELECT_A as PacClockId;
 
 /// Structure representing available channel interrupts.
 #[derive(Debug, Eq, PartialEq)]

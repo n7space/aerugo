@@ -3,7 +3,7 @@
 use std::convert::TryInto;
 use std::time::SystemTime;
 
-use aerugo_hal::Instant;
+use aerugo_hal::SystemInstant;
 use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use once_cell::sync::Lazy;
@@ -32,8 +32,8 @@ impl AerugoHal for Hal {
         Ok(())
     }
 
-    fn get_system_time() -> Instant {
-        Instant::from_ticks(
+    fn get_system_time() -> SystemInstant {
+        SystemInstant::from_ticks(
             TIME_START
                 .elapsed()
                 .expect("{}")

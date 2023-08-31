@@ -1,6 +1,6 @@
 //! Module with functionalities of timer's channel in waveform mode.
 
-use pac::tc0::tc_channel::CMR_WAVEFORM_MODE;
+use crate::pac::tc0::tc_channel::CMR_WAVEFORM_MODE;
 
 use super::{
     waveform_config::{

@@ -3,7 +3,7 @@
 
 use crate::hal::Hal;
 use crate::internal_cell::InternalCell;
-use crate::{Duration, Instant};
+use crate::{SystemDuration, SystemInstant};
 use aerugo_hal::AerugoHal;
 
 /// Time source, responsible for creating timestamps.
@@ -18,9 +18,9 @@ use aerugo_hal::AerugoHal;
 /// unless it's explicitly guaranteed by design that mutations will not occur during interrupt's execution.
 pub struct TimeSource {
     /// Time since system's scheduler start.
-    system_start_offset: InternalCell<Option<Duration>>,
+    system_start_offset: InternalCell<Option<SystemDuration>>,
     /// User-defined offset.
-    user_offset: InternalCell<Option<Duration>>,
+    user_offset: InternalCell<Option<SystemDuration>>,
 }
 
 impl TimeSource {
@@ -78,7 +78,7 @@ impl TimeSource {
     ///
     /// # Parameters
     /// * `duration` - Duration to offset the time source with.
-    pub(crate) unsafe fn set_user_offset(&self, duration: Duration) {
+    pub(crate) unsafe fn set_user_offset(&self, duration: SystemDuration) {
         let offset_ref = unsafe { self.user_offset.as_mut_ref() };
         offset_ref.replace(duration);
     }

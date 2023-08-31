@@ -11,8 +11,11 @@ use aerugo::{
         channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Timer,
         Waveform, TC1,
     },
-    hal::{drivers::timer::channel_config::ChannelInterrupts, interrupt, NVIC, PMC},
-    Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    hal::{
+        drivers::interrupt, drivers::pac::NVIC, drivers::pac::PMC,
+        drivers::timer::channel_config::ChannelInterrupts,
+    },
+    InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
 };
 use calldwell::with_rtt_out;
 use core::{cell::RefCell, fmt::Write, ops::AddAssign};
@@ -150,10 +153,7 @@ fn get_irq_count() -> u32 {
 fn main() -> ! {
     calldwell::start_session();
 
-    let peripherals = AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: Duration::secs(3),
-        ..Default::default()
-    });
+    let peripherals = AERUGO.initialize(SystemHardwareConfig::default());
 
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
 

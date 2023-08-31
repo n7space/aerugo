@@ -7,7 +7,7 @@
 //! For more information look at `TaskletPtr` structure.
 
 use crate::tasklet::{Tasklet, TaskletStatus};
-use crate::Instant;
+use crate::SystemInstant;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
@@ -20,9 +20,9 @@ pub(crate) struct TaskletVTable {
     /// Pointer to [set_status](set_status()) function.
     pub(crate) set_status: fn(*const (), TaskletStatus),
     /// Pointer to [get_last_execution_time](get_last_execution_time()) function.
-    pub(crate) get_last_execution_time: fn(*const ()) -> Instant,
+    pub(crate) get_last_execution_time: fn(*const ()) -> SystemInstant,
     /// Pointer to [set_last_execution_time](set_last_execution_time()) function.
-    pub(crate) set_last_execution_time: fn(*const (), Instant),
+    pub(crate) set_last_execution_time: fn(*const (), SystemInstant),
     /// Pointer to [has_work](has_work()) function.
     pub(crate) has_work: fn(*const ()) -> bool,
     /// Pointer to [is_active](is_active()) function.
@@ -104,7 +104,7 @@ fn set_status<T: 'static, C: 'static, const COND_COUNT: usize>(
 #[inline(always)]
 fn get_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
-) -> Instant {
+) -> SystemInstant {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
@@ -117,7 +117,7 @@ fn get_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
 #[inline(always)]
 fn set_last_execution_time<T: 'static, C: 'static, const COND_COUNT: usize>(
     ptr: *const (),
-    time: Instant,
+    time: SystemInstant,
 ) {
     // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
     // and so is the only type that we store in the `*const ()`.

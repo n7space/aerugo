@@ -1,31 +1,29 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::Instant;
+use aerugo_hal::SystemInstant;
 use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
 use cortex_m::asm;
 
-use crate::drivers::timer::channel_config::ChannelClock;
-use crate::drivers::timer::timer_config::{ExternalClock, ExternalClockSource};
-use crate::drivers::timer::waveform_config::{
-    ComparisonEffect, OutputSignalEffects, WaveformModeConfig,
-};
-use crate::drivers::timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform};
-use crate::drivers::watchdog::watchdog_config::WatchdogConfig;
-use crate::drivers::watchdog::Watchdog;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
-use internal_cell::InternalCell;
-use pac::{self, PMC, TC0};
+use samv71_hal::pac::{self, PMC, TC0};
+use samv71_hal::timer::channel_config::ChannelClock;
+use samv71_hal::timer::timer_config::{ExternalClock, ExternalClockSource};
+use samv71_hal::timer::waveform_config::{
+    ComparisonEffect, OutputSignalEffects, WaveformModeConfig,
+};
+use samv71_hal::timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform};
+use samv71_hal::watchdog::{Watchdog, WatchdogConfig};
 
 /// Global system peripherals instance, used internally by HAL.
 ///
 /// # Safety
 /// Mutex is not used here, because it would imply a critical section at every access to HAL.
 /// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
-static HAL_SYSTEM_PERIPHERALS: InternalCell<Option<SystemPeripherals>> = InternalCell::new(None);
+static mut HAL_SYSTEM_PERIPHERALS: Option<SystemPeripherals> = None;
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
 pub struct Hal;
@@ -52,7 +50,7 @@ impl Hal {
     /// [`None`] otherwise.
     pub fn create_user_peripherals() -> Option<UserPeripherals> {
         Hal::execute_critical(|_| {
-            if let Some(system_peripherals) = unsafe { HAL_SYSTEM_PERIPHERALS.as_mut_ref() } {
+            if let Some(system_peripherals) = unsafe { &mut HAL_SYSTEM_PERIPHERALS } {
                 let mcu_peripherals = unsafe { pac::Peripherals::steal() };
                 let core_peripherals = unsafe { pac::CorePeripherals::steal() };
 
@@ -95,11 +93,7 @@ impl Hal {
             return Err(HalError::HalAlreadyInitialized);
         }
 
-        unsafe {
-            HAL_SYSTEM_PERIPHERALS
-                .as_mut_ref()
-                .replace(Hal::create_system_peripherals())
-        };
+        unsafe { HAL_SYSTEM_PERIPHERALS.replace(Hal::create_system_peripherals()) };
 
         Ok(())
     }
@@ -147,7 +141,7 @@ impl AerugoHal for Hal {
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
             // of single-core MCU and no other references to peripherals should exist at this time.
-            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.is_some() };
             if !is_hal_created {
                 return Err(HalError::HalNotInitialized);
             }
@@ -157,7 +151,6 @@ impl AerugoHal for Hal {
             // We also checked that peripherals exist, so it should realistically never panic.
             let peripherals = unsafe {
                 HAL_SYSTEM_PERIPHERALS
-                    .as_mut_ref()
                     .as_mut()
                     .expect("HAL is not initialized")
             };
@@ -202,12 +195,11 @@ impl AerugoHal for Hal {
         result
     }
 
-    fn get_system_time() -> Instant {
+    fn get_system_time() -> SystemInstant {
         // SAFETY: This is safe, because this is a single-core system, and no other references to
         // system peripherals should exist during this call.
         let peripherals = unsafe {
             HAL_SYSTEM_PERIPHERALS
-                .as_ref()
                 .as_ref()
                 .expect("HAL cannot be accessed before initialization")
         };
@@ -230,7 +222,7 @@ impl AerugoHal for Hal {
         let time_ch0 = ch0.counter_value();
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
-        Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
+        SystemInstant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
     }
 
     fn feed_watchdog() {
@@ -238,7 +230,6 @@ impl AerugoHal for Hal {
         // system peripherals should exist during this call.
         let peripherals = unsafe {
             HAL_SYSTEM_PERIPHERALS
-                .as_mut_ref()
                 .as_mut()
                 .expect("HAL cannot be accessed before initialization")
         };

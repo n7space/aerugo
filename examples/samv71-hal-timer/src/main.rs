@@ -7,16 +7,16 @@ extern crate panic_rtt_target;
 
 use core::cell::RefCell;
 
+use aerugo::hal::drivers::pac::PMC;
 use aerugo::hal::drivers::timer::{
     channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Waveform, TC1,
 };
-use aerugo::hal::PMC;
 use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
 
 use aerugo::{
-    hal::drivers::timer::Timer, logln, Duration, InitApi, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage, AERUGO,
+    hal::drivers::timer::Timer, logln, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage, AERUGO,
 };
 use rt::entry;
 
@@ -99,10 +99,7 @@ fn init_tasks() {
 
 #[entry]
 fn main() -> ! {
-    let peripherals = AERUGO.initialize(SystemHardwareConfig {
-        watchdog_timeout: Duration::secs(5),
-        ..Default::default()
-    });
+    let peripherals = AERUGO.initialize(SystemHardwareConfig::default());
 
     logln!("Hello, world! Aerugo initialized!");
 

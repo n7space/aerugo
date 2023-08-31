@@ -32,7 +32,7 @@ use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
 use crate::internal_cell::InternalCell;
-use crate::Instant;
+use crate::SystemInstant;
 
 /// Type of function that is executed by the tasklet in its step.
 pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);
@@ -55,7 +55,7 @@ pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     /// Tasklet status.
     status: Mutex<TaskletStatus>,
     /// Last execution time.
-    last_execution_time: Mutex<Instant>,
+    last_execution_time: Mutex<SystemInstant>,
     /// Step function.
     step_fn: StepFn<T, C>,
     /// Context data.
@@ -78,7 +78,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             name: config.name,
             priority: config.priority,
             status: Mutex::new(TaskletStatus::Sleeping),
-            last_execution_time: Mutex::new(Instant::from_ticks(0)),
+            last_execution_time: Mutex::new(SystemInstant::from_ticks(0)),
             step_fn,
             context: InternalCell::new(context),
             condition_set,
@@ -110,7 +110,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     }
 
     /// Returns last execution time.
-    pub(crate) fn get_last_execution_time(&self) -> Instant {
+    pub(crate) fn get_last_execution_time(&self) -> SystemInstant {
         self.last_execution_time.lock(|t| *t)
     }
 
@@ -118,7 +118,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     ///
     /// # Parameters
     /// * `time` - Last execution time.
-    pub(crate) fn set_last_execution_time(&self, time: Instant) {
+    pub(crate) fn set_last_execution_time(&self, time: SystemInstant) {
         self.last_execution_time.lock(|t| *t = time)
     }
 
