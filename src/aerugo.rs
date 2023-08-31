@@ -712,10 +712,10 @@ impl RuntimeApi for Aerugo {
     }
 
     fn get_system_time(&'static self) -> Instant {
-        if let Some(system_time) = self.time_source.time_since_user_offset() {
-            return system_time;
+        match self.time_source.time_since_user_offset() {
+            Some(system_time) => system_time,
+            None => TimeSource::time_since_init(),
         }
-        TimeSource::time_since_init()
     }
 
     fn set_system_time_offset(&'static self, offset: Duration) {
