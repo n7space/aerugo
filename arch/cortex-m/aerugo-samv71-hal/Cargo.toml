@@ -12,7 +12,6 @@ description = "Crate with AerugoHal implementation for SAMV71"
 [dependencies]
 aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
 bare-metal = "0.2.5"
-cortex-m = "0.7.7"
 samv71-hal = { version = "0.1.0", path = "../samv71-hal" }
 
 [features]

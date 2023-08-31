@@ -5,6 +5,7 @@
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
+pub use cortex_m;
 pub use embedded_hal;
 pub use fugit as time;
 pub use samv71q21_pac as pac;

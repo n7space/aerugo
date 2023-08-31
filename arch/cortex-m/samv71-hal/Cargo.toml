@@ -10,6 +10,7 @@ license.workspace = true
 description = "Crate containing drivers for SAMV71 peripherals"
 
 [dependencies]
+cortex-m = "0.7.7"
 embedded-hal = "0.2.7"
 fugit = "0.3.7"
 samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }

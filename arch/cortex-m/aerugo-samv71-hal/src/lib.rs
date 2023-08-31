@@ -14,4 +14,5 @@ pub mod user_peripherals;
 
 pub use hal::Hal;
 pub use samv71_hal as drivers;
+pub use samv71_hal::cortex_m;
 pub use user_peripherals::UserPeripherals;

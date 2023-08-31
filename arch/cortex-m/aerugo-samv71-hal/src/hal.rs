@@ -4,8 +4,7 @@ use aerugo_hal::SystemInstant;
 use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
-use cortex_m::asm;
-
+use crate::cortex_m;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
@@ -348,7 +347,7 @@ fn configure_timer_pmc(pmc: &PMC) {
 
     // Wait until PCK6 is ready
     while pmc.sr.read().pckrdy6().bit_is_clear() {
-        asm::nop();
+        cortex_m::asm::nop();
     }
 }
 
