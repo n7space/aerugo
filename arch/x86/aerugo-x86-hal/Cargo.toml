@@ -1,5 +1,5 @@
 [package]
-name = "x86-hal"
+name = "aerugo-x86-hal"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

@@ -7,16 +7,13 @@ rust-version.workspace = true
 repository.workspace = true
 # homepage.workspace = true
 license.workspace = true
-description = "SAMV71 implementation of aerugo HAL"
+description = "Crate containing drivers for SAMV71 peripherals"
 
 [dependencies]
-aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
 cortex-m = "0.7.7"
-bare-metal = "0.2.4"
-samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }
 embedded-hal = "0.2.7"
-aerugo-cortex-m = { version = "0.1.0", path = "../aerugo-cortex-m" }
-internal-cell = { version = "0.0.1", path = "../../../utils/internal_cell" }
+fugit = "0.3.7"
+samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }
 
 [features]
 rt = ["samv71q21-pac/rt"]

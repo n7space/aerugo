@@ -1,6 +1,6 @@
 //! Module containing configuration structures for Timer
 
-use pac::tc0::bmr::{TC0XC0SSELECT_A, TC1XC1SSELECT_A, TC2XC2SSELECT_A};
+use crate::pac::tc0::bmr::{TC0XC0SSELECT_A, TC1XC1SSELECT_A, TC2XC2SSELECT_A};
 
 /// External clock signal source.
 ///

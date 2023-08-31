@@ -1,6 +1,6 @@
 //! Waveform-mode related configuration structures.
 
-use pac::tc0::tc_channel::cmr_waveform_mode::{
+use crate::pac::tc0::tc_channel::cmr_waveform_mode::{
     ACPASELECT_A, EEVTEDGSELECT_A, EEVTSELECT_A, WAVSELSELECT_A,
 };
 

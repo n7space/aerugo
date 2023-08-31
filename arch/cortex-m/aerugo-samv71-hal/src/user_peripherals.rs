@@ -1,6 +1,6 @@
 //! Module representing user-accessible peripherals.
 
-use pac;
+use samv71_hal::pac;
 
 /// Peripherals structure.
 /// These peripherals can be used to create HAL drivers in user code.

@@ -14,7 +14,7 @@ pub mod watchdog_config;
 pub mod watchdog_error;
 
 use crate::pac::WDT;
-use aerugo_hal::Duration;
+use crate::Milliseconds;
 pub use watchdog_config::WatchdogConfig;
 pub use watchdog_error::WatchdogError;
 
@@ -27,11 +27,6 @@ pub struct Watchdog {
     /// Indicates whether the watchdog has already been configured (or disabled).
     configured: bool,
 }
-
-/// # Safety
-/// Watchdog does not auto-implement Sync due to WDT structure containing a pointer.
-/// Since it owns WDT, and it's running in single-core environment, it's safe to share.
-unsafe impl Sync for Watchdog {}
 
 impl Watchdog {
     /// Create a watchdog instance from PAC peripheral.
@@ -131,7 +126,7 @@ impl Watchdog {
     /// `duration` must be in inclusive range [0, [`MAXIMUM_WATCHDOG_DURATION`]].
     /// Since it's internal, private function, it does not perform any checks.
     /// To safely convert any duration into watchdog counter value, use [`clamp_and_convert_duration`](Watchdog::clamp_and_convert_duration).
-    fn convert_duration_to_counter_value(duration: Duration) -> u16 {
+    fn convert_duration_to_counter_value(duration: Milliseconds) -> u16 {
         let duration_ratio: f32 =
             (duration.to_secs() as f32) / (MAXIMUM_WATCHDOG_DURATION.to_secs() as f32);
 
@@ -146,8 +141,8 @@ impl Watchdog {
     ///
     /// # Returns
     /// Watchdog counter value representing passed duration.
-    fn clamp_and_convert_duration(duration: Duration) -> u16 {
-        let clamped_duration = duration.clamp(Duration::secs(0), Duration::secs(16));
+    fn clamp_and_convert_duration(duration: Milliseconds) -> u16 {
+        let clamped_duration = duration.clamp(Milliseconds::secs(0), Milliseconds::secs(16));
 
         Watchdog::convert_duration_to_counter_value(clamped_duration)
     }

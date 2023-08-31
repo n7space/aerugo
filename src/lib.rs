@@ -33,19 +33,17 @@ pub use self::boolean_condition::{
 pub use self::event::{EventEnabler, EventId};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
-pub use aerugo_hal::system_hal::SystemHardwareConfig;
-
-pub use aerugo_hal::{time, Duration, Instant};
+pub use aerugo_hal::{time, Duration, Instant, SystemHardwareConfig};
 
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub(crate) use aerugo_cortex_m as arch;
 #[cfg(feature = "use-aerugo-cortex-m")]
-pub use samv71_hal as hal;
+pub use aerugo_samv71_hal as hal;
 
 #[cfg(feature = "use-aerugo-x86")]
 pub(crate) use aerugo_x86 as arch;
 #[cfg(feature = "use-aerugo-x86")]
-pub use x86_hal as hal;
+pub use aerugo_x86_hal as hal;
 
 #[cfg(feature = "log")]
 pub use arch::{log, logln};

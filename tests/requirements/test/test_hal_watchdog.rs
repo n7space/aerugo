@@ -1,7 +1,7 @@
 // Test scenario:
-// - Configure Aerugo with watchdog that will reset the MCU after 3 seconds
-// - Execute a task that will run shorter than 3 seconds and send a message to host
-// - Execute a task that will run longer than 3 seconds
+// - Configure Aerugo with watchdog that will reset the MCU after 5 seconds
+// - Execute a task that will run shorter than 5 seconds and send a message to host
+// - Execute a task that will run longer than 5 seconds
 // - Validate that MCU has rebooted
 
 /// @SRS{ROS-FUN-BSP-WDT-020}

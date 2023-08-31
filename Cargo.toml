@@ -2,10 +2,11 @@
 members = [
     "aerugo-hal",
     "arch/cortex-m/aerugo-cortex-m",
+    "arch/cortex-m/aerugo-samv71-hal",
     "arch/cortex-m/samv71-hal",
     "arch/cortex-m/samv71q21-pac",
     "arch/x86/aerugo-x86",
-    "arch/x86/x86-hal",
+    "arch/x86/aerugo-x86-hal",
     "utils/env-parser",
     "utils/env-parser-tests",
     "utils/internal_cell",
@@ -44,15 +45,16 @@ keywords = ["rtos", "space"]
 categories = ["aerospace", "embedded", "hardware-support", "no-std"]
 
 [dependencies]
-heapless = "0.7"
-bare-metal = "0.2.4"
-aerugo-hal = { version = "0.1.0", path = "aerugo-hal" }
 aerugo-cortex-m = { version = "0.1.0", path = "arch/cortex-m/aerugo-cortex-m", optional = true }
-samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
+aerugo-hal = { version = "0.1.0", path = "aerugo-hal" }
+aerugo-samv71-hal = { version = "0.1.0", path = "arch/cortex-m/aerugo-samv71-hal", optional = true }
 aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
-x86-hal = { version = "0.1.0", path = "arch/x86/x86-hal", optional = true }
+aerugo-x86-hal = { version = "0.1.0", path = "arch/x86/aerugo-x86-hal", optional = true }
+bare-metal = "0.2.4"
 env-parser = { version = "1.0.0", path = "utils/env-parser" }
+heapless = "0.7"
 internal-cell = { version = "0.0.1", path = "utils/internal_cell" }
+samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
 
 [dev-dependencies]
 test-binary = "3.0"
@@ -60,10 +62,10 @@ assert_cmd = "2.0"
 
 [features]
 default = ["log"]
-use-aerugo-cortex-m = ["aerugo-cortex-m", "samv71-hal"]
-use-aerugo-x86 = ["aerugo-x86", "x86-hal"]
+use-aerugo-cortex-m = ["aerugo-cortex-m", "aerugo-samv71-hal"]
+use-aerugo-x86 = ["aerugo-x86", "aerugo-x86-hal"]
 test-aerugo-cortex-m = ["use-aerugo-x86"]
-rt = ["samv71-hal?/rt"]
+rt = ["aerugo-samv71-hal?/rt"]
 log = ["aerugo-cortex-m?/log", "aerugo-x86?/log"]
 
 [profile.release]

@@ -1,0 +1,18 @@
+[package]
+name = "aerugo-samv71-hal"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+# homepage.workspace = true
+license.workspace = true
+description = "Crate with AerugoHal implementation for SAMV71"
+
+[dependencies]
+aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
+bare-metal = "0.2.5"
+samv71-hal = { version = "0.1.0", path = "../samv71-hal" }
+
+[features]
+rt = ["samv71-hal/rt"]

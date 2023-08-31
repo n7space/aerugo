@@ -1,15 +1,14 @@
 //! Module representing peripherals internally used by Aerugo.
 
-use pac::{PMC, TC0};
-
-use crate::drivers::{
+use samv71_hal::pac::{PMC, TC0};
+use samv71_hal::{
     timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform},
     watchdog::Watchdog,
 };
 
 /// System peripherals structure. These peripherals are represented as HAL drivers.
 /// Some of these peripherals are available only during HAL initialization
-/// (between `SystemHal::initialize` and `SystemHal::configure_hardware` calls).
+/// (between `AerugoHal::initialize` and `AerugoHal::configure_hardware` calls).
 pub struct SystemPeripherals {
     /// Watchdog instance.
     pub watchdog: Watchdog,

@@ -1,31 +1,27 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
-use aerugo_hal::Instant;
+use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 
-use cortex_m::asm;
-
-use crate::drivers::timer::channel_config::ChannelClock;
-use crate::drivers::timer::timer_config::{ExternalClock, ExternalClockSource};
-use crate::drivers::timer::waveform_config::{
-    ComparisonEffect, OutputSignalEffects, WaveformModeConfig,
-};
-use crate::drivers::timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform};
-use crate::drivers::watchdog::watchdog_config::WatchdogConfig;
-use crate::drivers::watchdog::Watchdog;
+use crate::cortex_m;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
-use internal_cell::InternalCell;
-use pac::{self, PMC, TC0};
+use samv71_hal::pac::{self, PMC, TC0};
+use samv71_hal::timer::channel_config::ChannelClock;
+use samv71_hal::timer::timer_config::{ExternalClock, ExternalClockSource};
+use samv71_hal::timer::waveform_config::{
+    ComparisonEffect, OutputSignalEffects, WaveformModeConfig,
+};
+use samv71_hal::timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform};
+use samv71_hal::watchdog::{Watchdog, WatchdogConfig};
 
 /// Global system peripherals instance, used internally by HAL.
 ///
 /// # Safety
 /// Mutex is not used here, because it would imply a critical section at every access to HAL.
 /// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
-static HAL_SYSTEM_PERIPHERALS: InternalCell<Option<SystemPeripherals>> = InternalCell::new(None);
+static mut HAL_SYSTEM_PERIPHERALS: Option<SystemPeripherals> = None;
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
 pub struct Hal;
@@ -38,7 +34,7 @@ impl Hal {
     ///
     /// Some of these peripherals are taken from SystemPeripherals structure, hence
     /// this function should not be called before finishing HAL initialization (via
-    /// [`SystemHal::configure_hardware] function).
+    /// [`AerugoHal::configure_hardware] function).
     ///
     /// This function executes in critical section, as it modifies HAL_SYSTEM_PERIPHERALS.
     ///
@@ -52,7 +48,7 @@ impl Hal {
     /// [`None`] otherwise.
     pub fn create_user_peripherals() -> Option<UserPeripherals> {
         Hal::execute_critical(|_| {
-            if let Some(system_peripherals) = unsafe { HAL_SYSTEM_PERIPHERALS.as_mut_ref() } {
+            if let Some(system_peripherals) = unsafe { &mut HAL_SYSTEM_PERIPHERALS } {
                 let mcu_peripherals = unsafe { pac::Peripherals::steal() };
                 let core_peripherals = unsafe { pac::CorePeripherals::steal() };
 
@@ -76,7 +72,7 @@ impl Hal {
     /// Initializes global HAL instance using PAC peripherals.
     ///
     /// Calling this function begins HAL initialization process. This process must be finished
-    /// by calling [`SystemHal::configure_hardware`]. Until then, no other HAL functions should
+    /// by calling [`AerugoHal::configure_hardware`]. Until then, no other HAL functions should
     /// be called, as they will most likely fail.
     ///
     /// # Safety
@@ -95,11 +91,7 @@ impl Hal {
             return Err(HalError::HalAlreadyInitialized);
         }
 
-        unsafe {
-            HAL_SYSTEM_PERIPHERALS
-                .as_mut_ref()
-                .replace(Hal::create_system_peripherals())
-        };
+        unsafe { HAL_SYSTEM_PERIPHERALS.replace(Hal::create_system_peripherals()) };
 
         Ok(())
     }
@@ -107,7 +99,7 @@ impl Hal {
     /// Creates system peripherals of HAL.
     ///
     /// This function steals PAC peripherals and returns a [`SystemPeripherals`] structure
-    /// containing peripherals used by [`SystemHal`] API implementation.
+    /// containing peripherals used by [`AerugoHal`] API implementation.
     ///
     /// # Safety
     /// This function should be only called once inside [`Hal::initialize`].
@@ -127,7 +119,7 @@ impl Hal {
     }
 }
 
-impl SystemHal for Hal {
+impl AerugoHal for Hal {
     type Error = HalError;
 
     /// This function performs SAMV71 hardware configuration required for the HAL to work correctly.
@@ -147,7 +139,7 @@ impl SystemHal for Hal {
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
             // of single-core MCU and no other references to peripherals should exist at this time.
-            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+            let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.is_some() };
             if !is_hal_created {
                 return Err(HalError::HalNotInitialized);
             }
@@ -157,7 +149,6 @@ impl SystemHal for Hal {
             // We also checked that peripherals exist, so it should realistically never panic.
             let peripherals = unsafe {
                 HAL_SYSTEM_PERIPHERALS
-                    .as_mut_ref()
                     .as_mut()
                     .expect("HAL is not initialized")
             };
@@ -208,7 +199,6 @@ impl SystemHal for Hal {
         let peripherals = unsafe {
             HAL_SYSTEM_PERIPHERALS
                 .as_ref()
-                .as_ref()
                 .expect("HAL cannot be accessed before initialization")
         };
 
@@ -238,7 +228,6 @@ impl SystemHal for Hal {
         // system peripherals should exist during this call.
         let peripherals = unsafe {
             HAL_SYSTEM_PERIPHERALS
-                .as_mut_ref()
                 .as_mut()
                 .expect("HAL cannot be accessed before initialization")
         };
@@ -254,7 +243,7 @@ impl SystemHal for Hal {
     /// Exits critical section by enabling global interrupts.
     ///
     /// # Safety
-    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>SystemHal::execute_critical</code>)</div>
+    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>AerugoHal::execute_critical</code>)</div>
     fn exit_critical() {
         unsafe { cortex_m::interrupt::enable() };
     }
@@ -357,7 +346,7 @@ fn configure_timer_pmc(pmc: &PMC) {
 
     // Wait until PCK6 is ready
     while pmc.sr.read().pckrdy6().bit_is_clear() {
-        asm::nop();
+        cortex_m::asm::nop();
     }
 }
 

@@ -5,7 +5,7 @@
 //!
 //! This module also contains singleton instances of all system parts.
 
-use aerugo_hal::system_hal::{SystemHal, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use bare_metal::CriticalSection;
 use env_parser::read_env;
 
@@ -19,7 +19,7 @@ use crate::event::{Event, EventEnabler, EventId};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
-use crate::hal::{user_peripherals::UserPeripherals, Hal};
+use crate::hal::{Hal, UserPeripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
 use crate::time_manager::TimeManager;

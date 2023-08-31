@@ -1,7 +1,7 @@
 //! Module representing timer counter's channel
 
+use crate::pac::tc0::tc_channel::TC_CHANNEL;
 use core::marker::PhantomData;
-use pac::tc0::tc_channel::TC_CHANNEL;
 
 use super::channel_config::*;
 use super::waveform_config::WaveformModeConfig;
@@ -20,8 +20,13 @@ pub struct Channel<Timer, ID, Mode> {
 }
 
 /// Assuming that the user does not create an instance of channel by himself, and instead relies on
-/// instances provided by HAL, it's safe to share channel instances as there's only a single instance that can
-/// access hardware channel's registers at once, and it cannot be copied.
+/// instances provided by HAL, it's safe to send channels to other threads, as there's only a single
+/// instance that can access hardware channel's registers at once, and it cannot be copied.
+///
+/// Sharing references (`Sync`) to a channel between threads is not safe, and should be managed by the user.
+///
+/// If that invariant is broken by the user, any usage of cloned Channels from other thread's context (including
+/// interrupt context) can be considered unsafe.
 unsafe impl<Timer, ID, Mode> Send for Channel<Timer, ID, Mode> {}
 
 /// Enumeration listing available channels.

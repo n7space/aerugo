@@ -11,3 +11,4 @@ mod system_peripherals;
 pub mod user_peripherals;
 
 pub use self::hal::Hal;
+pub use user_peripherals::UserPeripherals;

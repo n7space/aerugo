@@ -28,7 +28,7 @@ def main():
             exit(2)
 
     logging.info("Expecting a watchdog-induced MCU reset now...")
-    # Default watchdog timeout is 16s. Watchdog in this test is set to 3s, but timeout must be
+    # Default watchdog timeout is 16s. Watchdog in this test is set to 5s, but timeout must be
     # few seconds higher to compensate for communication delays and MCU clock inaccuracies.
     gdb.wait_for_reset(timeout=10)
     logging.info("Watchdog-induced reset detected!")
