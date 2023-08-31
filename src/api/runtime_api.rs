@@ -2,7 +2,7 @@
 //!
 //! This API can be used by the user in tasklet functions to interact with the system.
 
-use bare_metal::CriticalSection;
+use aerugo_hal::CriticalSection;
 
 use crate::api::RuntimeError;
 use crate::event::EventId;
@@ -85,6 +85,6 @@ pub trait RuntimeApi {
     /// Closure result.
     fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R,
+        F: FnOnce(CriticalSection) -> R,
         Self: Sized;
 }

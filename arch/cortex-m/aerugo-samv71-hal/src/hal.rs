@@ -1,7 +1,7 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
-use bare_metal::CriticalSection;
+use aerugo_hal::critical_section;
+use aerugo_hal::{AerugoHal, CriticalSection, Instant, SystemHardwareConfig};
 
 use crate::cortex_m;
 use crate::error::HalError;
@@ -250,9 +250,9 @@ impl AerugoHal for Hal {
 
     fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R,
+        F: FnOnce(CriticalSection) -> R,
     {
-        cortex_m::interrupt::free(f)
+        critical_section::with(f)
     }
 }
 

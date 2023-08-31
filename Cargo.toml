@@ -50,7 +50,6 @@ aerugo-hal = { version = "0.1.0", path = "aerugo-hal" }
 aerugo-samv71-hal = { version = "0.1.0", path = "arch/cortex-m/aerugo-samv71-hal", optional = true }
 aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
 aerugo-x86-hal = { version = "0.1.0", path = "arch/x86/aerugo-x86-hal", optional = true }
-bare-metal = "0.2.4"
 env-parser = { version = "1.0.0", path = "utils/env-parser" }
 heapless = "0.7"
 internal-cell = { version = "0.0.1", path = "utils/internal_cell" }

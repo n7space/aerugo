@@ -11,5 +11,4 @@ description = "x86 implementation of aerugo HAL"
 
 [dependencies]
 aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
-bare-metal = "0.2.4"
 once_cell = "1.18.0"
