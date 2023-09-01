@@ -1,7 +1,6 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
-use aerugo_hal::critical_section;
-use aerugo_hal::{AerugoHal, CriticalSection, Instant, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
 
 use crate::cortex_m;
 use crate::error::HalError;
@@ -22,6 +21,8 @@ use samv71_hal::watchdog::{Watchdog, WatchdogConfig};
 /// Mutex is not used here, because it would imply a critical section at every access to HAL.
 /// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
 static mut HAL_SYSTEM_PERIPHERALS: Option<SystemPeripherals> = None;
+
+/// Global "restore state" that's used to manage
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
 pub struct Hal;
@@ -47,7 +48,7 @@ impl Hal {
     /// [`Some(UserPeripherals)`] if called for the first time after HAL initialization,
     /// [`None`] otherwise.
     pub fn create_user_peripherals() -> Option<UserPeripherals> {
-        Hal::execute_critical(|_| {
+        critical_section::with(|_| {
             if let Some(system_peripherals) = unsafe { &mut HAL_SYSTEM_PERIPHERALS } {
                 let mcu_peripherals = unsafe { pac::Peripherals::steal() };
                 let core_peripherals = unsafe { pac::CorePeripherals::steal() };
@@ -134,7 +135,7 @@ impl AerugoHal for Hal {
     /// # Return
     /// `()` on success, [`HalError`] if HAL was already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
-        let result = Hal::execute_critical(|_| {
+        let result = critical_section::with(|_| {
             Hal::initialize()?;
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
@@ -186,10 +187,6 @@ impl AerugoHal for Hal {
             Ok(())
         });
 
-        if config.disable_interrupts_during_setup {
-            Hal::enter_critical();
-        }
-
         result
     }
 
@@ -233,26 +230,6 @@ impl AerugoHal for Hal {
         };
 
         peripherals.watchdog.feed();
-    }
-
-    /// Enters critical section by disabling global interrupts.
-    fn enter_critical() {
-        cortex_m::interrupt::disable();
-    }
-
-    /// Exits critical section by enabling global interrupts.
-    ///
-    /// # Safety
-    /// <div class="warning">This function should never be called from scope-bound critical sections (like the one created with <code>AerugoHal::execute_critical</code>)</div>
-    fn exit_critical() {
-        unsafe { cortex_m::interrupt::enable() };
-    }
-
-    fn execute_critical<F, R>(f: F) -> R
-    where
-        F: FnOnce(CriticalSection) -> R,
-    {
-        critical_section::with(f)
     }
 }
 
