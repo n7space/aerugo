@@ -15,6 +15,10 @@ pub enum RuntimeError {
     EventQueueFull,
     /// Tried to perform an operation before system initialization.
     SystemNotInitialized,
-    /// Tried to initialize system more than once
+    /// Tried to initialize system more than once.
     SystemAlreadyInitialized,
+    /// Tried to set user time offset more than once.
+    UserTimeOffsetAlreadySet,
+    /// Tried to set system time start more than once.
+    SystemTimeStartAlreadySet,
 }

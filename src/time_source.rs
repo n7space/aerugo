@@ -1,10 +1,14 @@
 //! Module containing Aerugo's time source module, providing configurable timestamps for the system
+//!
 //! Should be used internally by the system.
 
-use crate::hal::Hal;
-use crate::internal_cell::InternalCell;
-use crate::{Duration, Instant};
+use core::cell::OnceCell;
+
 use aerugo_hal::AerugoHal;
+
+use crate::api::RuntimeError;
+use crate::hal::Hal;
+use crate::{Duration, Instant};
 
 /// Time source, responsible for creating timestamps.
 ///
@@ -18,50 +22,64 @@ use aerugo_hal::AerugoHal;
 /// unless it's explicitly guaranteed by design that mutations will not occur during interrupt's execution.
 pub struct TimeSource {
     /// Time since system's scheduler start.
-    system_start_offset: InternalCell<Option<Duration>>,
+    system_start_offset: OnceCell<Duration>,
     /// User-defined offset.
-    user_offset: InternalCell<Option<Duration>>,
+    user_offset: OnceCell<Duration>,
 }
 
 impl TimeSource {
     /// Creates new instance of TimeSource
     pub const fn new() -> Self {
         TimeSource {
-            system_start_offset: InternalCell::new(None),
-            user_offset: InternalCell::new(None),
+            system_start_offset: OnceCell::new(),
+            user_offset: OnceCell::new(),
         }
     }
 
-    /// Returns time since system initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize), start of the hardware timer)
+    /// Returns time since system initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize),
+    /// start of the hardware timer)
     #[inline(always)]
     pub fn time_since_init() -> Instant {
         Hal::get_system_time()
     }
 
-    /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::Aerugo::start)), or `None` if system hasn't started yet.
+    /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::Aerugo::start)),
+    /// or `None` if system hasn't started yet.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different thread)
-    /// is an undefined behavior.
+    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
     pub fn time_since_start(&self) -> Option<Instant> {
-        match unsafe { *self.system_start_offset.as_ref() } {
-            Some(start_offset) => TimeSource::time_since_init().checked_sub_duration(start_offset),
+        match self.system_start_offset.get() {
+            Some(start_offset) => TimeSource::time_since_init().checked_sub_duration(*start_offset),
             None => None,
         }
     }
 
-    /// Returns time since user-defined offset, or `None` if offset is not defined, or cannot be subtracted from system time.
+    /// Returns time since user-defined offset, or `None` if offset is not defined, or cannot be subtracted from
+    /// system time.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different thread)
-    /// is an undefined behavior.
+    /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
     pub fn time_since_user_offset(&self) -> Option<Instant> {
-        match unsafe { *self.user_offset.as_ref() } {
-            Some(user_offset) => TimeSource::time_since_init().checked_add_duration(user_offset),
+        match self.user_offset.get() {
+            Some(user_offset) => TimeSource::time_since_init().checked_add_duration(*user_offset),
             None => None,
         }
+    }
+
+    /// Returns the duration between system initialization and start of the scheduler, or `None` if system
+    /// hasn't started yet.
+    ///
+    /// # Safety
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
+    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
+    pub fn startup_duration(&self) -> Option<Duration> {
+        self.system_start_offset.get().copied()
     }
 
     /// Sets user-defined offset.
@@ -78,30 +96,33 @@ impl TimeSource {
     ///
     /// # Parameters
     /// * `duration` - Duration to offset the time source with.
-    pub(crate) unsafe fn set_user_offset(&self, duration: Duration) {
-        let offset_ref = unsafe { self.user_offset.as_mut_ref() };
-        offset_ref.replace(duration);
+    pub(crate) unsafe fn set_user_offset(&self, duration: Duration) -> Result<(), RuntimeError> {
+        match self.user_offset.set(duration) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(RuntimeError::UserTimeOffsetAlreadySet),
+        }
     }
 
-    /// Returns the duration between system initialization and start of the scheduler, or `None` if system hasn't started yet.
-    ///
-    /// # Safety
-    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
-    pub fn startup_duration(&self) -> Option<Duration> {
-        unsafe { *self.system_start_offset.as_ref() }
-    }
-
-    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting the scheduler.
+    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting
+    /// the scheduler.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
     /// Calling [`TimeSource::startup_duration`] in parallel with this function (interrupt is treated as different
     /// thread) is an undefined behavior.
-    pub(crate) unsafe fn mark_system_start(&self) {
+    pub(crate) unsafe fn set_system_start(&self) -> Result<(), RuntimeError> {
         let current_time = TimeSource::time_since_init();
-        let offset_ref = unsafe { self.system_start_offset.as_mut_ref() };
-        offset_ref.replace(current_time.duration_since_epoch());
+
+        match self
+            .system_start_offset
+            .set(current_time.duration_since_epoch())
+        {
+            Ok(_) => Ok(()),
+            Err(_) => Err(RuntimeError::SystemTimeStartAlreadySet),
+        }
     }
 }
+
+/// SAFETY: This is safe, because only [Aerugo](crate::aerugo::Aerugo) uses this. Access to it is
+/// not available from IRQ context, so it's safe on the single threading environment.
+unsafe impl Sync for TimeSource {}
