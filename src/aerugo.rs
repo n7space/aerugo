@@ -5,8 +5,7 @@
 //!
 //! This module also contains singleton instances of all system parts.
 
-use aerugo_hal::{AerugoHal, SystemHardwareConfig};
-use bare_metal::CriticalSection;
+use aerugo_hal::{AerugoHal, CriticalSection, SystemHardwareConfig};
 use env_parser::read_env;
 
 use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
@@ -747,18 +746,18 @@ impl RuntimeApi for Aerugo {
     }
 
     fn enter_critical() {
-        todo!()
+        Hal::enter_critical();
     }
 
     fn exit_critical() {
-        todo!()
+        Hal::exit_critical();
     }
 
-    fn execute_critical<F, R>(_f: F) -> R
+    fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R,
+        F: FnOnce(CriticalSection) -> R,
     {
-        todo!()
+        Hal::execute_critical(f)
     }
 }
 

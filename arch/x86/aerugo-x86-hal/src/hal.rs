@@ -4,8 +4,7 @@ use std::convert::TryInto;
 use std::time::SystemTime;
 
 use aerugo_hal::Instant;
-use aerugo_hal::{AerugoHal, SystemHardwareConfig};
-use bare_metal::CriticalSection;
+use aerugo_hal::{AerugoHal, CriticalSection, SystemHardwareConfig};
 use once_cell::sync::Lazy;
 
 use crate::error::HalError;
@@ -57,9 +56,9 @@ impl AerugoHal for Hal {
 
     fn execute_critical<F, R>(f: F) -> R
     where
-        F: FnOnce(&CriticalSection) -> R,
+        F: FnOnce(CriticalSection) -> R,
     {
         // There is no critical section implementation for x86 target.
-        f(unsafe { &CriticalSection::new() })
+        f(unsafe { CriticalSection::new() })
     }
 }
