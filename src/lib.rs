@@ -8,8 +8,6 @@
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-extern crate internal_cell;
-
 mod aerugo;
 mod api;
 mod boolean_condition;
