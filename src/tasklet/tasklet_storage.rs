@@ -5,14 +5,13 @@
 
 use super::Tasklet;
 
-use core::cell::OnceCell;
+use core::cell::{OnceCell, UnsafeCell};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
 
 use crate::api::InitError;
 use crate::boolean_condition::BooleanConditionSet;
-use crate::internal_cell::InternalCell;
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
 
 /// Type of the tasklet buffer storage.
@@ -36,7 +35,7 @@ pub struct TaskletStorage<T, C, const COND_COUNT: usize> {
     /// Buffer for the tasklet structure.
     tasklet_buffer: OnceCell<TaskletBuffer>,
     /// Storage for the context data.
-    tasklet_context: InternalCell<MaybeUninit<C>>,
+    tasklet_context: UnsafeCell<MaybeUninit<C>>,
     /// Storage for the tasklet conditions.
     tasklet_conditions: OnceCell<BooleanConditionSet<COND_COUNT>>,
     /// Marker for the tasklet data type.
@@ -49,7 +48,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         TaskletStorage {
             initialized: OnceCell::new(),
             tasklet_buffer: OnceCell::new(),
-            tasklet_context: InternalCell::new(MaybeUninit::uninit()),
+            tasklet_context: UnsafeCell::new(MaybeUninit::uninit()),
             tasklet_conditions: OnceCell::new(),
             _data_type_marker: PhantomData,
         }
@@ -96,7 +95,9 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             return Err(InitError::StorageAlreadyInitialized);
         }
 
-        let tasklet_context = self.tasklet_context.as_mut_ref();
+        // SAFETY: The tasklet created below is the only one with access to the context data, and
+        // as such stores the mutable reference to the context data.
+        let tasklet_context: &mut MaybeUninit<C> = &mut *self.tasklet_context.get();
         tasklet_context.write(context);
 
         let tasklet = Tasklet::<T, C, COND_COUNT>::new(
