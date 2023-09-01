@@ -9,17 +9,15 @@ pub use self::boolean_condition_set::BooleanConditionSet;
 pub use self::boolean_condition_set::BooleanConditionSetType;
 pub use self::boolean_condition_storage::BooleanConditionStorage;
 
-use heapless::Vec;
-
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{InitError, SystemApi};
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
-use crate::internal_cell::InternalCell;
+use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 
 /// List of tasklets registered to a condition
-type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
+type TaskletList = InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 
 /// Boolean condition.
 #[repr(C)]
@@ -27,7 +25,7 @@ pub(crate) struct BooleanCondition {
     /// Condition value.
     value: Mutex<bool>,
     /// Tasklets registered to this queue.
-    registered_tasklets: InternalCell<TaskletList>,
+    registered_tasklets: TaskletList,
 }
 
 impl BooleanCondition {
@@ -35,7 +33,7 @@ impl BooleanCondition {
     pub(crate) fn new(value: bool) -> Self {
         BooleanCondition {
             value: Mutex::new(value),
-            registered_tasklets: TaskletList::new().into(),
+            registered_tasklets: TaskletList::new(),
         }
     }
 
@@ -72,7 +70,7 @@ impl BooleanCondition {
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
     /// This is safe to call before the system initialization.
     pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
-        match self.registered_tasklets.as_mut_ref().push(tasklet) {
+        match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletListFull),
         }
@@ -80,8 +78,7 @@ impl BooleanCondition {
 
     /// Wakes tasklets registered to this condition.
     fn wake_tasklets(&self) {
-        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
-        for t in unsafe { self.registered_tasklets.as_ref() } {
+        for t in &self.registered_tasklets {
             AERUGO.wake_tasklet(t);
         }
     }
