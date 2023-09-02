@@ -48,7 +48,7 @@ impl TimeSource {
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
+    /// Calling [`TimeSource::set_system_start`] in parallel with this function (interrupt is treated as different
     /// thread) is an undefined behavior.
     pub fn time_since_start(&self) -> Option<Instant> {
         match self.system_start_offset.get() {
@@ -76,7 +76,7 @@ impl TimeSource {
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::mark_system_start`] in parallel with this function (interrupt is treated as different
+    /// Calling [`TimeSource::set_system_start`] in parallel with this function (interrupt is treated as different
     /// thread) is an undefined behavior.
     pub fn startup_duration(&self) -> Option<Duration> {
         self.system_start_offset.get().copied()
