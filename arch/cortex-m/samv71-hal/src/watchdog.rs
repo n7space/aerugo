@@ -9,6 +9,14 @@
 //! On SAMV71, Watchdog is enabled by default with duration of 16 seconds,
 //! and can only be configured ONCE. Consequent configurations will have no effect,
 //! until the MCU performs a hard reset (via reset controller or power cycle).
+//!
+//! This module will track whether the watchdog was configured by it's instance already, or not.
+//! Configuration tracking is provided only as convenient way of communicating the fact that
+//! watchdog was reconfigured to the user.
+//!
+//! If the user creates multiple instances of [`Watchdog`] structure for the same watchdog,
+//! each will track the configuration separately, so it's recommended to keep to a single instance
+//! per physical watchdog, in order to prevent unexpected behavior.
 
 pub mod watchdog_config;
 pub mod watchdog_error;
