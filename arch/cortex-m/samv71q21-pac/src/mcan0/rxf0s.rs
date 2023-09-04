@@ -1,18 +1,5 @@
 #[doc = "Register `RXF0S` reader"]
-pub struct R(crate::R<RXF0S_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<RXF0S_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<RXF0S_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<RXF0S_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<RXF0S_SPEC>;
 #[doc = "Field `F0FL` reader - Receive FIFO 0 Fill Level"]
 pub type F0FL_R = crate::FieldReader;
 #[doc = "Field `F0GI` reader - Receive FIFO 0 Get Index"]
@@ -50,15 +37,13 @@ impl R {
         RF0L_R::new(((self.bits >> 25) & 1) != 0)
     }
 }
-#[doc = "Receive FIFO 0 Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [rxf0s](index.html) module"]
+#[doc = "Receive FIFO 0 Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`rxf0s::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct RXF0S_SPEC;
 impl crate::RegisterSpec for RXF0S_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [rxf0s::R](R) reader structure"]
-impl crate::Readable for RXF0S_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`rxf0s::R`](R) reader structure"]
+impl crate::Readable for RXF0S_SPEC {}
 #[doc = "`reset()` method sets RXF0S to value 0"]
 impl crate::Resettable for RXF0S_SPEC {
     const RESET_VALUE: Self::Ux = 0;

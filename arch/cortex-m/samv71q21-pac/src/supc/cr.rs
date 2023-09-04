@@ -1,24 +1,5 @@
 #[doc = "Register `CR` writer"]
-pub struct W(crate::W<CR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CR_SPEC>;
 #[doc = "Voltage Regulator Off\n\nValue on reset: 0"]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VROFFSELECT_AW {
@@ -34,16 +15,19 @@ impl From<VROFFSELECT_AW> for bool {
     }
 }
 #[doc = "Field `VROFF` writer - Voltage Regulator Off"]
-pub type VROFF_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O, VROFFSELECT_AW>;
-impl<'a, const O: u8> VROFF_W<'a, O> {
+pub type VROFF_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, VROFFSELECT_AW>;
+impl<'a, REG, const O: u8> VROFF_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "No effect."]
     #[inline(always)]
-    pub fn no_effect(self) -> &'a mut W {
+    pub fn no_effect(self) -> &'a mut crate::W<REG> {
         self.variant(VROFFSELECT_AW::NO_EFFECT)
     }
     #[doc = "If KEY is correct, VROFF asserts the vddcore_nreset and stops the voltage regulator."]
     #[inline(always)]
-    pub fn stop_vreg(self) -> &'a mut W {
+    pub fn stop_vreg(self) -> &'a mut crate::W<REG> {
         self.variant(VROFFSELECT_AW::STOP_VREG)
     }
 }
@@ -62,16 +46,19 @@ impl From<XTALSELSELECT_AW> for bool {
     }
 }
 #[doc = "Field `XTALSEL` writer - Crystal Oscillator Select"]
-pub type XTALSEL_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O, XTALSELSELECT_AW>;
-impl<'a, const O: u8> XTALSEL_W<'a, O> {
+pub type XTALSEL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, XTALSELSELECT_AW>;
+impl<'a, REG, const O: u8> XTALSEL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "No effect."]
     #[inline(always)]
-    pub fn no_effect(self) -> &'a mut W {
+    pub fn no_effect(self) -> &'a mut crate::W<REG> {
         self.variant(XTALSELSELECT_AW::NO_EFFECT)
     }
     #[doc = "If KEY is correct, XTALSEL switches the slow clock on the crystal oscillator output."]
     #[inline(always)]
-    pub fn crystal_sel(self) -> &'a mut W {
+    pub fn crystal_sel(self) -> &'a mut crate::W<REG> {
         self.variant(XTALSELSELECT_AW::CRYSTAL_SEL)
     }
 }
@@ -92,11 +79,15 @@ impl crate::FieldSpec for KEYSELECT_AW {
     type Ux = u8;
 }
 #[doc = "Field `KEY` writer - Password"]
-pub type KEY_W<'a, const O: u8> = crate::FieldWriter<'a, CR_SPEC, 8, O, KEYSELECT_AW>;
-impl<'a, const O: u8> KEY_W<'a, O> {
+pub type KEY_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 8, O, KEYSELECT_AW>;
+impl<'a, REG, const O: u8> KEY_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Writing any other value in this field aborts the write operation."]
     #[inline(always)]
-    pub fn passwd(self) -> &'a mut W {
+    pub fn passwd(self) -> &'a mut crate::W<REG> {
         self.variant(KEYSELECT_AW::PASSWD)
     }
 }
@@ -104,36 +95,35 @@ impl W {
     #[doc = "Bit 2 - Voltage Regulator Off"]
     #[inline(always)]
     #[must_use]
-    pub fn vroff(&mut self) -> VROFF_W<2> {
+    pub fn vroff(&mut self) -> VROFF_W<CR_SPEC, 2> {
         VROFF_W::new(self)
     }
     #[doc = "Bit 3 - Crystal Oscillator Select"]
     #[inline(always)]
     #[must_use]
-    pub fn xtalsel(&mut self) -> XTALSEL_W<3> {
+    pub fn xtalsel(&mut self) -> XTALSEL_W<CR_SPEC, 3> {
         XTALSEL_W::new(self)
     }
     #[doc = "Bits 24:31 - Password"]
     #[inline(always)]
     #[must_use]
-    pub fn key(&mut self) -> KEY_W<24> {
+    pub fn key(&mut self) -> KEY_W<CR_SPEC, 24> {
         KEY_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Supply Controller Control Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cr](index.html) module"]
+#[doc = "Supply Controller Control Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cr::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CR_SPEC;
 impl crate::RegisterSpec for CR_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [cr::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`cr::W`](W) writer structure"]
 impl crate::Writable for CR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

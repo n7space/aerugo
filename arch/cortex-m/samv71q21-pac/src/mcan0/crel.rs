@@ -1,18 +1,5 @@
 #[doc = "Register `CREL` reader"]
-pub struct R(crate::R<CREL_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CREL_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CREL_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CREL_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CREL_SPEC>;
 #[doc = "Field `DAY` reader - Timestamp Day"]
 pub type DAY_R = crate::FieldReader;
 #[doc = "Field `MON` reader - Timestamp Month"]
@@ -57,15 +44,13 @@ impl R {
         REL_R::new(((self.bits >> 28) & 0x0f) as u8)
     }
 }
-#[doc = "Core Release Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [crel](index.html) module"]
+#[doc = "Core Release Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`crel::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CREL_SPEC;
 impl crate::RegisterSpec for CREL_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [crel::R](R) reader structure"]
-impl crate::Readable for CREL_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`crel::R`](R) reader structure"]
+impl crate::Readable for CREL_SPEC {}
 #[doc = "`reset()` method sets CREL to value 0"]
 impl crate::Resettable for CREL_SPEC {
     const RESET_VALUE: Self::Ux = 0;

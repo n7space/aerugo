@@ -1,18 +1,5 @@
 #[doc = "Register `TXBCF` reader"]
-pub struct R(crate::R<TXBCF_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<TXBCF_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<TXBCF_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<TXBCF_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<TXBCF_SPEC>;
 #[doc = "Field `CF0` reader - Cancellation Finished for Transmit Buffer 0"]
 pub type CF0_R = crate::BitReader;
 #[doc = "Field `CF1` reader - Cancellation Finished for Transmit Buffer 1"]
@@ -239,15 +226,13 @@ impl R {
         CF31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Transmit Buffer Cancellation Finished Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [txbcf](index.html) module"]
+#[doc = "Transmit Buffer Cancellation Finished Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`txbcf::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct TXBCF_SPEC;
 impl crate::RegisterSpec for TXBCF_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [txbcf::R](R) reader structure"]
-impl crate::Readable for TXBCF_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`txbcf::R`](R) reader structure"]
+impl crate::Readable for TXBCF_SPEC {}
 #[doc = "`reset()` method sets TXBCF to value 0"]
 impl crate::Resettable for TXBCF_SPEC {
     const RESET_VALUE: Self::Ux = 0;

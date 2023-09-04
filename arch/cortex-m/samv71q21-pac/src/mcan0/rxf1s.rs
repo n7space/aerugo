@@ -1,18 +1,5 @@
 #[doc = "Register `RXF1S` reader"]
-pub struct R(crate::R<RXF1S_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<RXF1S_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<RXF1S_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<RXF1S_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<RXF1S_SPEC>;
 #[doc = "Field `F1FL` reader - Receive FIFO 1 Fill Level"]
 pub type F1FL_R = crate::FieldReader;
 #[doc = "Field `F1GI` reader - Receive FIFO 1 Get Index"]
@@ -59,22 +46,22 @@ impl DMS_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `IDLE`"]
+    #[doc = "Idle state, wait for reception of debug messages, DMA request is cleared."]
     #[inline(always)]
     pub fn is_idle(&self) -> bool {
         *self == DMSSELECT_A::IDLE
     }
-    #[doc = "Checks if the value of the field is `MSG_A`"]
+    #[doc = "Debug message A received."]
     #[inline(always)]
     pub fn is_msg_a(&self) -> bool {
         *self == DMSSELECT_A::MSG_A
     }
-    #[doc = "Checks if the value of the field is `MSG_AB`"]
+    #[doc = "Debug messages A, B received."]
     #[inline(always)]
     pub fn is_msg_ab(&self) -> bool {
         *self == DMSSELECT_A::MSG_AB
     }
-    #[doc = "Checks if the value of the field is `MSG_ABC`"]
+    #[doc = "Debug messages A, B, C received, DMA request is set."]
     #[inline(always)]
     pub fn is_msg_abc(&self) -> bool {
         *self == DMSSELECT_A::MSG_ABC
@@ -112,15 +99,13 @@ impl R {
         DMS_R::new(((self.bits >> 30) & 3) as u8)
     }
 }
-#[doc = "Receive FIFO 1 Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [rxf1s](index.html) module"]
+#[doc = "Receive FIFO 1 Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`rxf1s::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct RXF1S_SPEC;
 impl crate::RegisterSpec for RXF1S_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [rxf1s::R](R) reader structure"]
-impl crate::Readable for RXF1S_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`rxf1s::R`](R) reader structure"]
+impl crate::Readable for RXF1S_SPEC {}
 #[doc = "`reset()` method sets RXF1S to value 0"]
 impl crate::Resettable for RXF1S_SPEC {
     const RESET_VALUE: Self::Ux = 0;

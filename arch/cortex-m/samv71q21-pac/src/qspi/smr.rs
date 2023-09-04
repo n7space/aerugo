@@ -1,39 +1,7 @@
 #[doc = "Register `SMR` reader"]
-pub struct R(crate::R<SMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SMR_SPEC>;
 #[doc = "Register `SMR` writer"]
-pub struct W(crate::W<SMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<SMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<SMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<SMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<SMR_SPEC>;
 #[doc = "Field `SCREN` reader - Scrambling/Unscrambling Enable"]
 pub type SCREN_R = crate::BitReader<SCRENSELECT_A>;
 #[doc = "Scrambling/Unscrambling Enable\n\nValue on reset: 0"]
@@ -59,35 +27,38 @@ impl SCREN_R {
             true => SCRENSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "The scrambling/unscrambling is disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == SCRENSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "The scrambling/unscrambling is enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == SCRENSELECT_A::ENABLED
     }
 }
 #[doc = "Field `SCREN` writer - Scrambling/Unscrambling Enable"]
-pub type SCREN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O, SCRENSELECT_A>;
-impl<'a, const O: u8> SCREN_W<'a, O> {
+pub type SCREN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SCRENSELECT_A>;
+impl<'a, REG, const O: u8> SCREN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The scrambling/unscrambling is disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(SCRENSELECT_A::DISABLED)
     }
     #[doc = "The scrambling/unscrambling is enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(SCRENSELECT_A::ENABLED)
     }
 }
 #[doc = "Field `RVDIS` reader - Scrambling/Unscrambling Random Value Disable"]
 pub type RVDIS_R = crate::BitReader;
 #[doc = "Field `RVDIS` writer - Scrambling/Unscrambling Random Value Disable"]
-pub type RVDIS_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type RVDIS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Scrambling/Unscrambling Enable"]
     #[inline(always)]
@@ -104,34 +75,31 @@ impl W {
     #[doc = "Bit 0 - Scrambling/Unscrambling Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn scren(&mut self) -> SCREN_W<0> {
+    pub fn scren(&mut self) -> SCREN_W<SMR_SPEC, 0> {
         SCREN_W::new(self)
     }
     #[doc = "Bit 1 - Scrambling/Unscrambling Random Value Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn rvdis(&mut self) -> RVDIS_W<1> {
+    pub fn rvdis(&mut self) -> RVDIS_W<SMR_SPEC, 1> {
         RVDIS_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Scrambling Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [smr](index.html) module"]
+#[doc = "Scrambling Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`smr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`smr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SMR_SPEC;
 impl crate::RegisterSpec for SMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [smr::R](R) reader structure"]
-impl crate::Readable for SMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [smr::W](W) writer structure"]
+#[doc = "`read()` method returns [`smr::R`](R) reader structure"]
+impl crate::Readable for SMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`smr::W`](W) writer structure"]
 impl crate::Writable for SMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

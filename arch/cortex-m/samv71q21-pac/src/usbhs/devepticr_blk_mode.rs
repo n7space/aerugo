@@ -1,104 +1,84 @@
 #[doc = "Register `DEVEPTICR_BLK_MODE[%s]` writer"]
-pub struct W(crate::W<DEVEPTICR_BLK_MODE_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<DEVEPTICR_BLK_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<DEVEPTICR_BLK_MODE_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<DEVEPTICR_BLK_MODE_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<DEVEPTICR_BLK_MODE_SPEC>;
 #[doc = "Field `TXINIC` writer - Transmitted IN Data Interrupt Clear"]
-pub type TXINIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type TXINIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `RXOUTIC` writer - Received OUT Data Interrupt Clear"]
-pub type RXOUTIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type RXOUTIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `RXSTPIC` writer - Received SETUP Interrupt Clear"]
-pub type RXSTPIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type RXSTPIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `NAKOUTIC` writer - NAKed OUT Interrupt Clear"]
-pub type NAKOUTIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type NAKOUTIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `NAKINIC` writer - NAKed IN Interrupt Clear"]
-pub type NAKINIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type NAKINIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `OVERFIC` writer - Overflow Interrupt Clear"]
-pub type OVERFIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type OVERFIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `STALLEDIC` writer - STALLed Interrupt Clear"]
-pub type STALLEDIC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type STALLEDIC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SHORTPACKETC` writer - Short Packet Interrupt Clear"]
-pub type SHORTPACKETC_W<'a, const O: u8> = crate::BitWriter<'a, DEVEPTICR_BLK_MODE_SPEC, O>;
+pub type SHORTPACKETC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl W {
     #[doc = "Bit 0 - Transmitted IN Data Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn txinic(&mut self) -> TXINIC_W<0> {
+    pub fn txinic(&mut self) -> TXINIC_W<DEVEPTICR_BLK_MODE_SPEC, 0> {
         TXINIC_W::new(self)
     }
     #[doc = "Bit 1 - Received OUT Data Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn rxoutic(&mut self) -> RXOUTIC_W<1> {
+    pub fn rxoutic(&mut self) -> RXOUTIC_W<DEVEPTICR_BLK_MODE_SPEC, 1> {
         RXOUTIC_W::new(self)
     }
     #[doc = "Bit 2 - Received SETUP Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn rxstpic(&mut self) -> RXSTPIC_W<2> {
+    pub fn rxstpic(&mut self) -> RXSTPIC_W<DEVEPTICR_BLK_MODE_SPEC, 2> {
         RXSTPIC_W::new(self)
     }
     #[doc = "Bit 3 - NAKed OUT Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn nakoutic(&mut self) -> NAKOUTIC_W<3> {
+    pub fn nakoutic(&mut self) -> NAKOUTIC_W<DEVEPTICR_BLK_MODE_SPEC, 3> {
         NAKOUTIC_W::new(self)
     }
     #[doc = "Bit 4 - NAKed IN Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn nakinic(&mut self) -> NAKINIC_W<4> {
+    pub fn nakinic(&mut self) -> NAKINIC_W<DEVEPTICR_BLK_MODE_SPEC, 4> {
         NAKINIC_W::new(self)
     }
     #[doc = "Bit 5 - Overflow Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn overfic(&mut self) -> OVERFIC_W<5> {
+    pub fn overfic(&mut self) -> OVERFIC_W<DEVEPTICR_BLK_MODE_SPEC, 5> {
         OVERFIC_W::new(self)
     }
     #[doc = "Bit 6 - STALLed Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn stalledic(&mut self) -> STALLEDIC_W<6> {
+    pub fn stalledic(&mut self) -> STALLEDIC_W<DEVEPTICR_BLK_MODE_SPEC, 6> {
         STALLEDIC_W::new(self)
     }
     #[doc = "Bit 7 - Short Packet Interrupt Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn shortpacketc(&mut self) -> SHORTPACKETC_W<7> {
+    pub fn shortpacketc(&mut self) -> SHORTPACKETC_W<DEVEPTICR_BLK_MODE_SPEC, 7> {
         SHORTPACKETC_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Device Endpoint Interrupt Clear Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [devepticr_blk_mode](index.html) module"]
+#[doc = "Device Endpoint Interrupt Clear Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`devepticr_blk_mode::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DEVEPTICR_BLK_MODE_SPEC;
 impl crate::RegisterSpec for DEVEPTICR_BLK_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [devepticr_blk_mode::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`devepticr_blk_mode::W`](W) writer structure"]
 impl crate::Writable for DEVEPTICR_BLK_MODE_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

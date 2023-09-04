@@ -1,39 +1,7 @@
 #[doc = "Register `WUIR` reader"]
-pub struct R(crate::R<WUIR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<WUIR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<WUIR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<WUIR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<WUIR_SPEC>;
 #[doc = "Register `WUIR` writer"]
-pub struct W(crate::W<WUIR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<WUIR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<WUIR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<WUIR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<WUIR_SPEC>;
 #[doc = "Field `WKUPEN0` reader - Wake-up Input Enable 0 to 0"]
 pub type WKUPEN0_R = crate::BitReader<WKUPEN0SELECT_A>;
 #[doc = "Wake-up Input Enable 0 to 0\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl WKUPEN0_R {
             true => WKUPEN0SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN0SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN0SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN0` writer - Wake-up Input Enable 0 to 0"]
-pub type WKUPEN0_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN0SELECT_A>;
-impl<'a, const O: u8> WKUPEN0_W<'a, O> {
+pub type WKUPEN0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN0SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN0SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN0SELECT_A::ENABLE)
     }
 }
@@ -109,28 +80,31 @@ impl WKUPEN1_R {
             true => WKUPEN1SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN1SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN1SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN1` writer - Wake-up Input Enable 0 to 1"]
-pub type WKUPEN1_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN1SELECT_A>;
-impl<'a, const O: u8> WKUPEN1_W<'a, O> {
+pub type WKUPEN1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN1SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN1SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN1SELECT_A::ENABLE)
     }
 }
@@ -159,28 +133,31 @@ impl WKUPEN2_R {
             true => WKUPEN2SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN2SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN2SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN2` writer - Wake-up Input Enable 0 to 2"]
-pub type WKUPEN2_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN2SELECT_A>;
-impl<'a, const O: u8> WKUPEN2_W<'a, O> {
+pub type WKUPEN2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN2SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN2_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN2SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN2SELECT_A::ENABLE)
     }
 }
@@ -209,28 +186,31 @@ impl WKUPEN3_R {
             true => WKUPEN3SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN3SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN3SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN3` writer - Wake-up Input Enable 0 to 3"]
-pub type WKUPEN3_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN3SELECT_A>;
-impl<'a, const O: u8> WKUPEN3_W<'a, O> {
+pub type WKUPEN3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN3SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN3_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN3SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN3SELECT_A::ENABLE)
     }
 }
@@ -259,28 +239,31 @@ impl WKUPEN4_R {
             true => WKUPEN4SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN4SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN4SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN4` writer - Wake-up Input Enable 0 to 4"]
-pub type WKUPEN4_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN4SELECT_A>;
-impl<'a, const O: u8> WKUPEN4_W<'a, O> {
+pub type WKUPEN4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN4SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN4_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN4SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN4SELECT_A::ENABLE)
     }
 }
@@ -309,28 +292,31 @@ impl WKUPEN5_R {
             true => WKUPEN5SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN5SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN5SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN5` writer - Wake-up Input Enable 0 to 5"]
-pub type WKUPEN5_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN5SELECT_A>;
-impl<'a, const O: u8> WKUPEN5_W<'a, O> {
+pub type WKUPEN5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN5SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN5_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN5SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN5SELECT_A::ENABLE)
     }
 }
@@ -359,28 +345,31 @@ impl WKUPEN6_R {
             true => WKUPEN6SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN6SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN6SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN6` writer - Wake-up Input Enable 0 to 6"]
-pub type WKUPEN6_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN6SELECT_A>;
-impl<'a, const O: u8> WKUPEN6_W<'a, O> {
+pub type WKUPEN6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN6SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN6_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN6SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN6SELECT_A::ENABLE)
     }
 }
@@ -409,28 +398,31 @@ impl WKUPEN7_R {
             true => WKUPEN7SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN7SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN7SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN7` writer - Wake-up Input Enable 0 to 7"]
-pub type WKUPEN7_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN7SELECT_A>;
-impl<'a, const O: u8> WKUPEN7_W<'a, O> {
+pub type WKUPEN7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN7SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN7_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN7SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN7SELECT_A::ENABLE)
     }
 }
@@ -459,28 +451,31 @@ impl WKUPEN8_R {
             true => WKUPEN8SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN8SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN8SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN8` writer - Wake-up Input Enable 0 to 8"]
-pub type WKUPEN8_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN8SELECT_A>;
-impl<'a, const O: u8> WKUPEN8_W<'a, O> {
+pub type WKUPEN8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN8SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN8_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN8SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN8SELECT_A::ENABLE)
     }
 }
@@ -509,28 +504,31 @@ impl WKUPEN9_R {
             true => WKUPEN9SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN9SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN9SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN9` writer - Wake-up Input Enable 0 to 9"]
-pub type WKUPEN9_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN9SELECT_A>;
-impl<'a, const O: u8> WKUPEN9_W<'a, O> {
+pub type WKUPEN9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN9SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN9_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN9SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN9SELECT_A::ENABLE)
     }
 }
@@ -559,28 +557,31 @@ impl WKUPEN10_R {
             true => WKUPEN10SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN10SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN10SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN10` writer - Wake-up Input Enable 0 to 10"]
-pub type WKUPEN10_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN10SELECT_A>;
-impl<'a, const O: u8> WKUPEN10_W<'a, O> {
+pub type WKUPEN10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN10SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN10_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN10SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN10SELECT_A::ENABLE)
     }
 }
@@ -609,28 +610,31 @@ impl WKUPEN11_R {
             true => WKUPEN11SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN11SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN11SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN11` writer - Wake-up Input Enable 0 to 11"]
-pub type WKUPEN11_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN11SELECT_A>;
-impl<'a, const O: u8> WKUPEN11_W<'a, O> {
+pub type WKUPEN11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN11SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN11_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN11SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN11SELECT_A::ENABLE)
     }
 }
@@ -659,28 +663,31 @@ impl WKUPEN12_R {
             true => WKUPEN12SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN12SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN12SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN12` writer - Wake-up Input Enable 0 to 12"]
-pub type WKUPEN12_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN12SELECT_A>;
-impl<'a, const O: u8> WKUPEN12_W<'a, O> {
+pub type WKUPEN12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN12SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN12_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN12SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN12SELECT_A::ENABLE)
     }
 }
@@ -709,28 +716,31 @@ impl WKUPEN13_R {
             true => WKUPEN13SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == WKUPEN13SELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == WKUPEN13SELECT_A::ENABLE
     }
 }
 #[doc = "Field `WKUPEN13` writer - Wake-up Input Enable 0 to 13"]
-pub type WKUPEN13_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPEN13SELECT_A>;
-impl<'a, const O: u8> WKUPEN13_W<'a, O> {
+pub type WKUPEN13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPEN13SELECT_A>;
+impl<'a, REG, const O: u8> WKUPEN13_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The corresponding wake-up input has no wake-up effect."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN13SELECT_A::DISABLE)
     }
     #[doc = "The corresponding wake-up input is enabled for a wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPEN13SELECT_A::ENABLE)
     }
 }
@@ -759,28 +769,31 @@ impl WKUPT0_R {
             true => WKUPT0SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT0SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT0SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT0` writer - Wake-up Input Type 0 to 0"]
-pub type WKUPT0_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT0SELECT_A>;
-impl<'a, const O: u8> WKUPT0_W<'a, O> {
+pub type WKUPT0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT0SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT0SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT0SELECT_A::HIGH)
     }
 }
@@ -809,28 +822,31 @@ impl WKUPT1_R {
             true => WKUPT1SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT1SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT1SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT1` writer - Wake-up Input Type 0 to 1"]
-pub type WKUPT1_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT1SELECT_A>;
-impl<'a, const O: u8> WKUPT1_W<'a, O> {
+pub type WKUPT1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT1SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT1SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT1SELECT_A::HIGH)
     }
 }
@@ -859,28 +875,31 @@ impl WKUPT2_R {
             true => WKUPT2SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT2SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT2SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT2` writer - Wake-up Input Type 0 to 2"]
-pub type WKUPT2_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT2SELECT_A>;
-impl<'a, const O: u8> WKUPT2_W<'a, O> {
+pub type WKUPT2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT2SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT2_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT2SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT2SELECT_A::HIGH)
     }
 }
@@ -909,28 +928,31 @@ impl WKUPT3_R {
             true => WKUPT3SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT3SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT3SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT3` writer - Wake-up Input Type 0 to 3"]
-pub type WKUPT3_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT3SELECT_A>;
-impl<'a, const O: u8> WKUPT3_W<'a, O> {
+pub type WKUPT3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT3SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT3_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT3SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT3SELECT_A::HIGH)
     }
 }
@@ -959,28 +981,31 @@ impl WKUPT4_R {
             true => WKUPT4SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT4SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT4SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT4` writer - Wake-up Input Type 0 to 4"]
-pub type WKUPT4_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT4SELECT_A>;
-impl<'a, const O: u8> WKUPT4_W<'a, O> {
+pub type WKUPT4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT4SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT4_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT4SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT4SELECT_A::HIGH)
     }
 }
@@ -1009,28 +1034,31 @@ impl WKUPT5_R {
             true => WKUPT5SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT5SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT5SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT5` writer - Wake-up Input Type 0 to 5"]
-pub type WKUPT5_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT5SELECT_A>;
-impl<'a, const O: u8> WKUPT5_W<'a, O> {
+pub type WKUPT5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT5SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT5_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT5SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT5SELECT_A::HIGH)
     }
 }
@@ -1059,28 +1087,31 @@ impl WKUPT6_R {
             true => WKUPT6SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT6SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT6SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT6` writer - Wake-up Input Type 0 to 6"]
-pub type WKUPT6_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT6SELECT_A>;
-impl<'a, const O: u8> WKUPT6_W<'a, O> {
+pub type WKUPT6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT6SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT6_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT6SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT6SELECT_A::HIGH)
     }
 }
@@ -1109,28 +1140,31 @@ impl WKUPT7_R {
             true => WKUPT7SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT7SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT7SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT7` writer - Wake-up Input Type 0 to 7"]
-pub type WKUPT7_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT7SELECT_A>;
-impl<'a, const O: u8> WKUPT7_W<'a, O> {
+pub type WKUPT7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT7SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT7_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT7SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT7SELECT_A::HIGH)
     }
 }
@@ -1159,28 +1193,31 @@ impl WKUPT8_R {
             true => WKUPT8SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT8SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT8SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT8` writer - Wake-up Input Type 0 to 8"]
-pub type WKUPT8_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT8SELECT_A>;
-impl<'a, const O: u8> WKUPT8_W<'a, O> {
+pub type WKUPT8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT8SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT8_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT8SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT8SELECT_A::HIGH)
     }
 }
@@ -1209,28 +1246,31 @@ impl WKUPT9_R {
             true => WKUPT9SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT9SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT9SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT9` writer - Wake-up Input Type 0 to 9"]
-pub type WKUPT9_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT9SELECT_A>;
-impl<'a, const O: u8> WKUPT9_W<'a, O> {
+pub type WKUPT9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT9SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT9_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT9SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT9SELECT_A::HIGH)
     }
 }
@@ -1259,28 +1299,31 @@ impl WKUPT10_R {
             true => WKUPT10SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT10SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT10SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT10` writer - Wake-up Input Type 0 to 10"]
-pub type WKUPT10_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT10SELECT_A>;
-impl<'a, const O: u8> WKUPT10_W<'a, O> {
+pub type WKUPT10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT10SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT10_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT10SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT10SELECT_A::HIGH)
     }
 }
@@ -1309,28 +1352,31 @@ impl WKUPT11_R {
             true => WKUPT11SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT11SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT11SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT11` writer - Wake-up Input Type 0 to 11"]
-pub type WKUPT11_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT11SELECT_A>;
-impl<'a, const O: u8> WKUPT11_W<'a, O> {
+pub type WKUPT11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT11SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT11_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT11SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT11SELECT_A::HIGH)
     }
 }
@@ -1359,28 +1405,31 @@ impl WKUPT12_R {
             true => WKUPT12SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT12SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT12SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT12` writer - Wake-up Input Type 0 to 12"]
-pub type WKUPT12_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT12SELECT_A>;
-impl<'a, const O: u8> WKUPT12_W<'a, O> {
+pub type WKUPT12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT12SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT12_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT12SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT12SELECT_A::HIGH)
     }
 }
@@ -1409,28 +1458,31 @@ impl WKUPT13_R {
             true => WKUPT13SELECT_A::HIGH,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW`"]
+    #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_low(&self) -> bool {
         *self == WKUPT13SELECT_A::LOW
     }
-    #[doc = "Checks if the value of the field is `HIGH`"]
+    #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_high(&self) -> bool {
         *self == WKUPT13SELECT_A::HIGH
     }
 }
 #[doc = "Field `WKUPT13` writer - Wake-up Input Type 0 to 13"]
-pub type WKUPT13_W<'a, const O: u8> = crate::BitWriter<'a, WUIR_SPEC, O, WKUPT13SELECT_A>;
-impl<'a, const O: u8> WKUPT13_W<'a, O> {
+pub type WKUPT13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WKUPT13SELECT_A>;
+impl<'a, REG, const O: u8> WKUPT13_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A falling edge followed by a low level for a period defined by WKUPDBC on the corre-sponding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn low(self) -> &'a mut W {
+    pub fn low(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT13SELECT_A::LOW)
     }
     #[doc = "A rising edge followed by a high level for a period defined by WKUPDBC on the cor-responding wake-up input forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn high(self) -> &'a mut W {
+    pub fn high(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPT13SELECT_A::HIGH)
     }
 }
@@ -1580,190 +1632,187 @@ impl W {
     #[doc = "Bit 0 - Wake-up Input Enable 0 to 0"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen0(&mut self) -> WKUPEN0_W<0> {
+    pub fn wkupen0(&mut self) -> WKUPEN0_W<WUIR_SPEC, 0> {
         WKUPEN0_W::new(self)
     }
     #[doc = "Bit 1 - Wake-up Input Enable 0 to 1"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen1(&mut self) -> WKUPEN1_W<1> {
+    pub fn wkupen1(&mut self) -> WKUPEN1_W<WUIR_SPEC, 1> {
         WKUPEN1_W::new(self)
     }
     #[doc = "Bit 2 - Wake-up Input Enable 0 to 2"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen2(&mut self) -> WKUPEN2_W<2> {
+    pub fn wkupen2(&mut self) -> WKUPEN2_W<WUIR_SPEC, 2> {
         WKUPEN2_W::new(self)
     }
     #[doc = "Bit 3 - Wake-up Input Enable 0 to 3"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen3(&mut self) -> WKUPEN3_W<3> {
+    pub fn wkupen3(&mut self) -> WKUPEN3_W<WUIR_SPEC, 3> {
         WKUPEN3_W::new(self)
     }
     #[doc = "Bit 4 - Wake-up Input Enable 0 to 4"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen4(&mut self) -> WKUPEN4_W<4> {
+    pub fn wkupen4(&mut self) -> WKUPEN4_W<WUIR_SPEC, 4> {
         WKUPEN4_W::new(self)
     }
     #[doc = "Bit 5 - Wake-up Input Enable 0 to 5"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen5(&mut self) -> WKUPEN5_W<5> {
+    pub fn wkupen5(&mut self) -> WKUPEN5_W<WUIR_SPEC, 5> {
         WKUPEN5_W::new(self)
     }
     #[doc = "Bit 6 - Wake-up Input Enable 0 to 6"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen6(&mut self) -> WKUPEN6_W<6> {
+    pub fn wkupen6(&mut self) -> WKUPEN6_W<WUIR_SPEC, 6> {
         WKUPEN6_W::new(self)
     }
     #[doc = "Bit 7 - Wake-up Input Enable 0 to 7"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen7(&mut self) -> WKUPEN7_W<7> {
+    pub fn wkupen7(&mut self) -> WKUPEN7_W<WUIR_SPEC, 7> {
         WKUPEN7_W::new(self)
     }
     #[doc = "Bit 8 - Wake-up Input Enable 0 to 8"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen8(&mut self) -> WKUPEN8_W<8> {
+    pub fn wkupen8(&mut self) -> WKUPEN8_W<WUIR_SPEC, 8> {
         WKUPEN8_W::new(self)
     }
     #[doc = "Bit 9 - Wake-up Input Enable 0 to 9"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen9(&mut self) -> WKUPEN9_W<9> {
+    pub fn wkupen9(&mut self) -> WKUPEN9_W<WUIR_SPEC, 9> {
         WKUPEN9_W::new(self)
     }
     #[doc = "Bit 10 - Wake-up Input Enable 0 to 10"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen10(&mut self) -> WKUPEN10_W<10> {
+    pub fn wkupen10(&mut self) -> WKUPEN10_W<WUIR_SPEC, 10> {
         WKUPEN10_W::new(self)
     }
     #[doc = "Bit 11 - Wake-up Input Enable 0 to 11"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen11(&mut self) -> WKUPEN11_W<11> {
+    pub fn wkupen11(&mut self) -> WKUPEN11_W<WUIR_SPEC, 11> {
         WKUPEN11_W::new(self)
     }
     #[doc = "Bit 12 - Wake-up Input Enable 0 to 12"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen12(&mut self) -> WKUPEN12_W<12> {
+    pub fn wkupen12(&mut self) -> WKUPEN12_W<WUIR_SPEC, 12> {
         WKUPEN12_W::new(self)
     }
     #[doc = "Bit 13 - Wake-up Input Enable 0 to 13"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupen13(&mut self) -> WKUPEN13_W<13> {
+    pub fn wkupen13(&mut self) -> WKUPEN13_W<WUIR_SPEC, 13> {
         WKUPEN13_W::new(self)
     }
     #[doc = "Bit 16 - Wake-up Input Type 0 to 0"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt0(&mut self) -> WKUPT0_W<16> {
+    pub fn wkupt0(&mut self) -> WKUPT0_W<WUIR_SPEC, 16> {
         WKUPT0_W::new(self)
     }
     #[doc = "Bit 17 - Wake-up Input Type 0 to 1"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt1(&mut self) -> WKUPT1_W<17> {
+    pub fn wkupt1(&mut self) -> WKUPT1_W<WUIR_SPEC, 17> {
         WKUPT1_W::new(self)
     }
     #[doc = "Bit 18 - Wake-up Input Type 0 to 2"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt2(&mut self) -> WKUPT2_W<18> {
+    pub fn wkupt2(&mut self) -> WKUPT2_W<WUIR_SPEC, 18> {
         WKUPT2_W::new(self)
     }
     #[doc = "Bit 19 - Wake-up Input Type 0 to 3"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt3(&mut self) -> WKUPT3_W<19> {
+    pub fn wkupt3(&mut self) -> WKUPT3_W<WUIR_SPEC, 19> {
         WKUPT3_W::new(self)
     }
     #[doc = "Bit 20 - Wake-up Input Type 0 to 4"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt4(&mut self) -> WKUPT4_W<20> {
+    pub fn wkupt4(&mut self) -> WKUPT4_W<WUIR_SPEC, 20> {
         WKUPT4_W::new(self)
     }
     #[doc = "Bit 21 - Wake-up Input Type 0 to 5"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt5(&mut self) -> WKUPT5_W<21> {
+    pub fn wkupt5(&mut self) -> WKUPT5_W<WUIR_SPEC, 21> {
         WKUPT5_W::new(self)
     }
     #[doc = "Bit 22 - Wake-up Input Type 0 to 6"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt6(&mut self) -> WKUPT6_W<22> {
+    pub fn wkupt6(&mut self) -> WKUPT6_W<WUIR_SPEC, 22> {
         WKUPT6_W::new(self)
     }
     #[doc = "Bit 23 - Wake-up Input Type 0 to 7"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt7(&mut self) -> WKUPT7_W<23> {
+    pub fn wkupt7(&mut self) -> WKUPT7_W<WUIR_SPEC, 23> {
         WKUPT7_W::new(self)
     }
     #[doc = "Bit 24 - Wake-up Input Type 0 to 8"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt8(&mut self) -> WKUPT8_W<24> {
+    pub fn wkupt8(&mut self) -> WKUPT8_W<WUIR_SPEC, 24> {
         WKUPT8_W::new(self)
     }
     #[doc = "Bit 25 - Wake-up Input Type 0 to 9"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt9(&mut self) -> WKUPT9_W<25> {
+    pub fn wkupt9(&mut self) -> WKUPT9_W<WUIR_SPEC, 25> {
         WKUPT9_W::new(self)
     }
     #[doc = "Bit 26 - Wake-up Input Type 0 to 10"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt10(&mut self) -> WKUPT10_W<26> {
+    pub fn wkupt10(&mut self) -> WKUPT10_W<WUIR_SPEC, 26> {
         WKUPT10_W::new(self)
     }
     #[doc = "Bit 27 - Wake-up Input Type 0 to 11"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt11(&mut self) -> WKUPT11_W<27> {
+    pub fn wkupt11(&mut self) -> WKUPT11_W<WUIR_SPEC, 27> {
         WKUPT11_W::new(self)
     }
     #[doc = "Bit 28 - Wake-up Input Type 0 to 12"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt12(&mut self) -> WKUPT12_W<28> {
+    pub fn wkupt12(&mut self) -> WKUPT12_W<WUIR_SPEC, 28> {
         WKUPT12_W::new(self)
     }
     #[doc = "Bit 29 - Wake-up Input Type 0 to 13"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupt13(&mut self) -> WKUPT13_W<29> {
+    pub fn wkupt13(&mut self) -> WKUPT13_W<WUIR_SPEC, 29> {
         WKUPT13_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Supply Controller Wake-up Inputs Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [wuir](index.html) module"]
+#[doc = "Supply Controller Wake-up Inputs Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`wuir::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`wuir::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct WUIR_SPEC;
 impl crate::RegisterSpec for WUIR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [wuir::R](R) reader structure"]
-impl crate::Readable for WUIR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [wuir::W](W) writer structure"]
+#[doc = "`read()` method returns [`wuir::R`](R) reader structure"]
+impl crate::Readable for WUIR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`wuir::W`](W) writer structure"]
 impl crate::Writable for WUIR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

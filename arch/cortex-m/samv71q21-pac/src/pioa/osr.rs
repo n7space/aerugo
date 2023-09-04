@@ -1,18 +1,5 @@
 #[doc = "Register `OSR` reader"]
-pub struct R(crate::R<OSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<OSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<OSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<OSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<OSR_SPEC>;
 #[doc = "Field `P0` reader - Output Status"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Output Status"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Output Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [osr](index.html) module"]
+#[doc = "Output Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`osr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct OSR_SPEC;
 impl crate::RegisterSpec for OSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [osr::R](R) reader structure"]
-impl crate::Readable for OSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`osr::R`](R) reader structure"]
+impl crate::Readable for OSR_SPEC {}
 #[doc = "`reset()` method sets OSR to value 0"]
 impl crate::Resettable for OSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

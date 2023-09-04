@@ -1,67 +1,35 @@
 #[doc = "Register `CFG2` reader"]
-pub struct R(crate::R<CFG2_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CFG2_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CFG2_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CFG2_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CFG2_SPEC>;
 #[doc = "Register `CFG2` writer"]
-pub struct W(crate::W<CFG2_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CFG2_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CFG2_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CFG2_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CFG2_SPEC>;
 #[doc = "Field `IM_VSIZE` reader - Vertical Size of the Image Sensor \\[0..2047\\]"]
 pub type IM_VSIZE_R = crate::FieldReader<u16>;
 #[doc = "Field `IM_VSIZE` writer - Vertical Size of the Image Sensor \\[0..2047\\]"]
-pub type IM_VSIZE_W<'a, const O: u8> = crate::FieldWriter<'a, CFG2_SPEC, 11, O, u16>;
+pub type IM_VSIZE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 11, O, u16>;
 #[doc = "Field `GS_MODE` reader - Grayscale Pixel Format Mode"]
 pub type GS_MODE_R = crate::BitReader;
 #[doc = "Field `GS_MODE` writer - Grayscale Pixel Format Mode"]
-pub type GS_MODE_W<'a, const O: u8> = crate::BitWriter<'a, CFG2_SPEC, O>;
+pub type GS_MODE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `RGB_MODE` reader - RGB Input Mode"]
 pub type RGB_MODE_R = crate::BitReader;
 #[doc = "Field `RGB_MODE` writer - RGB Input Mode"]
-pub type RGB_MODE_W<'a, const O: u8> = crate::BitWriter<'a, CFG2_SPEC, O>;
+pub type RGB_MODE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `GRAYSCALE` reader - Grayscale Mode Format Enable"]
 pub type GRAYSCALE_R = crate::BitReader;
 #[doc = "Field `GRAYSCALE` writer - Grayscale Mode Format Enable"]
-pub type GRAYSCALE_W<'a, const O: u8> = crate::BitWriter<'a, CFG2_SPEC, O>;
+pub type GRAYSCALE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `RGB_SWAP` reader - RGB Format Swap Mode"]
 pub type RGB_SWAP_R = crate::BitReader;
 #[doc = "Field `RGB_SWAP` writer - RGB Format Swap Mode"]
-pub type RGB_SWAP_W<'a, const O: u8> = crate::BitWriter<'a, CFG2_SPEC, O>;
+pub type RGB_SWAP_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `COL_SPACE` reader - Color Space for the Image Data"]
 pub type COL_SPACE_R = crate::BitReader;
 #[doc = "Field `COL_SPACE` writer - Color Space for the Image Data"]
-pub type COL_SPACE_W<'a, const O: u8> = crate::BitWriter<'a, CFG2_SPEC, O>;
+pub type COL_SPACE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `IM_HSIZE` reader - Horizontal Size of the Image Sensor \\[0..2047\\]"]
 pub type IM_HSIZE_R = crate::FieldReader<u16>;
 #[doc = "Field `IM_HSIZE` writer - Horizontal Size of the Image Sensor \\[0..2047\\]"]
-pub type IM_HSIZE_W<'a, const O: u8> = crate::FieldWriter<'a, CFG2_SPEC, 11, O, u16>;
+pub type IM_HSIZE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 11, O, u16>;
 #[doc = "Field `YCC_SWAP` reader - YCrCb Format Swap Mode"]
 pub type YCC_SWAP_R = crate::FieldReader<YCC_SWAPSELECT_A>;
 #[doc = "YCrCb Format Swap Mode\n\nValue on reset: 0"]
@@ -98,49 +66,52 @@ impl YCC_SWAP_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `DEFAULT`"]
+    #[doc = "Byte 0 Cb(i)Byte 1 Y(i)Byte 2 Cr(i)Byte 3 Y(i+1)"]
     #[inline(always)]
     pub fn is_default(&self) -> bool {
         *self == YCC_SWAPSELECT_A::DEFAULT
     }
-    #[doc = "Checks if the value of the field is `MODE1`"]
+    #[doc = "Byte 0 Cr(i)Byte 1 Y(i)Byte 2 Cb(i)Byte 3 Y(i+1)"]
     #[inline(always)]
     pub fn is_mode1(&self) -> bool {
         *self == YCC_SWAPSELECT_A::MODE1
     }
-    #[doc = "Checks if the value of the field is `MODE2`"]
+    #[doc = "Byte 0 Y(i)Byte 1 Cb(i)Byte 2 Y(i+1)Byte 3 Cr(i)"]
     #[inline(always)]
     pub fn is_mode2(&self) -> bool {
         *self == YCC_SWAPSELECT_A::MODE2
     }
-    #[doc = "Checks if the value of the field is `MODE3`"]
+    #[doc = "Byte 0 Y(i)Byte 1 Cr(i)Byte 2 Y(i+1)Byte 3 Cb(i)"]
     #[inline(always)]
     pub fn is_mode3(&self) -> bool {
         *self == YCC_SWAPSELECT_A::MODE3
     }
 }
 #[doc = "Field `YCC_SWAP` writer - YCrCb Format Swap Mode"]
-pub type YCC_SWAP_W<'a, const O: u8> =
-    crate::FieldWriterSafe<'a, CFG2_SPEC, 2, O, YCC_SWAPSELECT_A>;
-impl<'a, const O: u8> YCC_SWAP_W<'a, O> {
+pub type YCC_SWAP_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, YCC_SWAPSELECT_A>;
+impl<'a, REG, const O: u8> YCC_SWAP_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Byte 0 Cb(i)Byte 1 Y(i)Byte 2 Cr(i)Byte 3 Y(i+1)"]
     #[inline(always)]
-    pub fn default(self) -> &'a mut W {
+    pub fn default(self) -> &'a mut crate::W<REG> {
         self.variant(YCC_SWAPSELECT_A::DEFAULT)
     }
     #[doc = "Byte 0 Cr(i)Byte 1 Y(i)Byte 2 Cb(i)Byte 3 Y(i+1)"]
     #[inline(always)]
-    pub fn mode1(self) -> &'a mut W {
+    pub fn mode1(self) -> &'a mut crate::W<REG> {
         self.variant(YCC_SWAPSELECT_A::MODE1)
     }
     #[doc = "Byte 0 Y(i)Byte 1 Cb(i)Byte 2 Y(i+1)Byte 3 Cr(i)"]
     #[inline(always)]
-    pub fn mode2(self) -> &'a mut W {
+    pub fn mode2(self) -> &'a mut crate::W<REG> {
         self.variant(YCC_SWAPSELECT_A::MODE2)
     }
     #[doc = "Byte 0 Y(i)Byte 1 Cr(i)Byte 2 Y(i+1)Byte 3 Cb(i)"]
     #[inline(always)]
-    pub fn mode3(self) -> &'a mut W {
+    pub fn mode3(self) -> &'a mut crate::W<REG> {
         self.variant(YCC_SWAPSELECT_A::MODE3)
     }
 }
@@ -180,48 +151,52 @@ impl RGB_CFG_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `DEFAULT`"]
+    #[doc = "Byte 0 R/G(MSB)Byte 1 G(LSB)/BByte 2 R/G(MSB)Byte 3 G(LSB)/B"]
     #[inline(always)]
     pub fn is_default(&self) -> bool {
         *self == RGB_CFGSELECT_A::DEFAULT
     }
-    #[doc = "Checks if the value of the field is `MODE1`"]
+    #[doc = "Byte 0 B/G(MSB)Byte 1 G(LSB)/RByte 2 B/G(MSB)Byte 3 G(LSB)/R"]
     #[inline(always)]
     pub fn is_mode1(&self) -> bool {
         *self == RGB_CFGSELECT_A::MODE1
     }
-    #[doc = "Checks if the value of the field is `MODE2`"]
+    #[doc = "Byte 0 G(LSB)/RByte 1 B/G(MSB)Byte 2 G(LSB)/RByte 3 B/G(MSB)"]
     #[inline(always)]
     pub fn is_mode2(&self) -> bool {
         *self == RGB_CFGSELECT_A::MODE2
     }
-    #[doc = "Checks if the value of the field is `MODE3`"]
+    #[doc = "Byte 0 G(LSB)/BByte 1 R/G(MSB)Byte 2 G(LSB)/BByte 3 R/G(MSB)"]
     #[inline(always)]
     pub fn is_mode3(&self) -> bool {
         *self == RGB_CFGSELECT_A::MODE3
     }
 }
 #[doc = "Field `RGB_CFG` writer - RGB Pixel Mapping Configuration"]
-pub type RGB_CFG_W<'a, const O: u8> = crate::FieldWriterSafe<'a, CFG2_SPEC, 2, O, RGB_CFGSELECT_A>;
-impl<'a, const O: u8> RGB_CFG_W<'a, O> {
+pub type RGB_CFG_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, RGB_CFGSELECT_A>;
+impl<'a, REG, const O: u8> RGB_CFG_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Byte 0 R/G(MSB)Byte 1 G(LSB)/BByte 2 R/G(MSB)Byte 3 G(LSB)/B"]
     #[inline(always)]
-    pub fn default(self) -> &'a mut W {
+    pub fn default(self) -> &'a mut crate::W<REG> {
         self.variant(RGB_CFGSELECT_A::DEFAULT)
     }
     #[doc = "Byte 0 B/G(MSB)Byte 1 G(LSB)/RByte 2 B/G(MSB)Byte 3 G(LSB)/R"]
     #[inline(always)]
-    pub fn mode1(self) -> &'a mut W {
+    pub fn mode1(self) -> &'a mut crate::W<REG> {
         self.variant(RGB_CFGSELECT_A::MODE1)
     }
     #[doc = "Byte 0 G(LSB)/RByte 1 B/G(MSB)Byte 2 G(LSB)/RByte 3 B/G(MSB)"]
     #[inline(always)]
-    pub fn mode2(self) -> &'a mut W {
+    pub fn mode2(self) -> &'a mut crate::W<REG> {
         self.variant(RGB_CFGSELECT_A::MODE2)
     }
     #[doc = "Byte 0 G(LSB)/BByte 1 R/G(MSB)Byte 2 G(LSB)/BByte 3 R/G(MSB)"]
     #[inline(always)]
-    pub fn mode3(self) -> &'a mut W {
+    pub fn mode3(self) -> &'a mut crate::W<REG> {
         self.variant(RGB_CFGSELECT_A::MODE3)
     }
 }
@@ -276,76 +251,73 @@ impl W {
     #[doc = "Bits 0:10 - Vertical Size of the Image Sensor \\[0..2047\\]"]
     #[inline(always)]
     #[must_use]
-    pub fn im_vsize(&mut self) -> IM_VSIZE_W<0> {
+    pub fn im_vsize(&mut self) -> IM_VSIZE_W<CFG2_SPEC, 0> {
         IM_VSIZE_W::new(self)
     }
     #[doc = "Bit 11 - Grayscale Pixel Format Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn gs_mode(&mut self) -> GS_MODE_W<11> {
+    pub fn gs_mode(&mut self) -> GS_MODE_W<CFG2_SPEC, 11> {
         GS_MODE_W::new(self)
     }
     #[doc = "Bit 12 - RGB Input Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn rgb_mode(&mut self) -> RGB_MODE_W<12> {
+    pub fn rgb_mode(&mut self) -> RGB_MODE_W<CFG2_SPEC, 12> {
         RGB_MODE_W::new(self)
     }
     #[doc = "Bit 13 - Grayscale Mode Format Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn grayscale(&mut self) -> GRAYSCALE_W<13> {
+    pub fn grayscale(&mut self) -> GRAYSCALE_W<CFG2_SPEC, 13> {
         GRAYSCALE_W::new(self)
     }
     #[doc = "Bit 14 - RGB Format Swap Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn rgb_swap(&mut self) -> RGB_SWAP_W<14> {
+    pub fn rgb_swap(&mut self) -> RGB_SWAP_W<CFG2_SPEC, 14> {
         RGB_SWAP_W::new(self)
     }
     #[doc = "Bit 15 - Color Space for the Image Data"]
     #[inline(always)]
     #[must_use]
-    pub fn col_space(&mut self) -> COL_SPACE_W<15> {
+    pub fn col_space(&mut self) -> COL_SPACE_W<CFG2_SPEC, 15> {
         COL_SPACE_W::new(self)
     }
     #[doc = "Bits 16:26 - Horizontal Size of the Image Sensor \\[0..2047\\]"]
     #[inline(always)]
     #[must_use]
-    pub fn im_hsize(&mut self) -> IM_HSIZE_W<16> {
+    pub fn im_hsize(&mut self) -> IM_HSIZE_W<CFG2_SPEC, 16> {
         IM_HSIZE_W::new(self)
     }
     #[doc = "Bits 28:29 - YCrCb Format Swap Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn ycc_swap(&mut self) -> YCC_SWAP_W<28> {
+    pub fn ycc_swap(&mut self) -> YCC_SWAP_W<CFG2_SPEC, 28> {
         YCC_SWAP_W::new(self)
     }
     #[doc = "Bits 30:31 - RGB Pixel Mapping Configuration"]
     #[inline(always)]
     #[must_use]
-    pub fn rgb_cfg(&mut self) -> RGB_CFG_W<30> {
+    pub fn rgb_cfg(&mut self) -> RGB_CFG_W<CFG2_SPEC, 30> {
         RGB_CFG_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "ISI Configuration 2 Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cfg2](index.html) module"]
+#[doc = "ISI Configuration 2 Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cfg2::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cfg2::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CFG2_SPEC;
 impl crate::RegisterSpec for CFG2_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cfg2::R](R) reader structure"]
-impl crate::Readable for CFG2_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [cfg2::W](W) writer structure"]
+#[doc = "`read()` method returns [`cfg2::R`](R) reader structure"]
+impl crate::Readable for CFG2_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`cfg2::W`](W) writer structure"]
 impl crate::Writable for CFG2_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

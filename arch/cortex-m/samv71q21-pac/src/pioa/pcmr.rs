@@ -1,43 +1,11 @@
 #[doc = "Register `PCMR` reader"]
-pub struct R(crate::R<PCMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<PCMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<PCMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<PCMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<PCMR_SPEC>;
 #[doc = "Register `PCMR` writer"]
-pub struct W(crate::W<PCMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<PCMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<PCMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<PCMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<PCMR_SPEC>;
 #[doc = "Field `PCEN` reader - Parallel Capture Mode Enable"]
 pub type PCEN_R = crate::BitReader;
 #[doc = "Field `PCEN` writer - Parallel Capture Mode Enable"]
-pub type PCEN_W<'a, const O: u8> = crate::BitWriter<'a, PCMR_SPEC, O>;
+pub type PCEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DSIZE` reader - Parallel Capture Mode Data Size"]
 pub type DSIZE_R = crate::FieldReader<DSIZESELECT_A>;
 #[doc = "Parallel Capture Mode Data Size\n\nValue on reset: 0"]
@@ -71,53 +39,57 @@ impl DSIZE_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `BYTE`"]
+    #[doc = "The reception data in the PIO_PCRHR is a byte (8-bit)"]
     #[inline(always)]
     pub fn is_byte(&self) -> bool {
         *self == DSIZESELECT_A::BYTE
     }
-    #[doc = "Checks if the value of the field is `HALFWORD`"]
+    #[doc = "The reception data in the PIO_PCRHR is a half-word (16-bit)"]
     #[inline(always)]
     pub fn is_halfword(&self) -> bool {
         *self == DSIZESELECT_A::HALFWORD
     }
-    #[doc = "Checks if the value of the field is `WORD`"]
+    #[doc = "The reception data in the PIO_PCRHR is a word (32-bit)"]
     #[inline(always)]
     pub fn is_word(&self) -> bool {
         *self == DSIZESELECT_A::WORD
     }
 }
 #[doc = "Field `DSIZE` writer - Parallel Capture Mode Data Size"]
-pub type DSIZE_W<'a, const O: u8> = crate::FieldWriter<'a, PCMR_SPEC, 2, O, DSIZESELECT_A>;
-impl<'a, const O: u8> DSIZE_W<'a, O> {
+pub type DSIZE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, DSIZESELECT_A>;
+impl<'a, REG, const O: u8> DSIZE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The reception data in the PIO_PCRHR is a byte (8-bit)"]
     #[inline(always)]
-    pub fn byte(self) -> &'a mut W {
+    pub fn byte(self) -> &'a mut crate::W<REG> {
         self.variant(DSIZESELECT_A::BYTE)
     }
     #[doc = "The reception data in the PIO_PCRHR is a half-word (16-bit)"]
     #[inline(always)]
-    pub fn halfword(self) -> &'a mut W {
+    pub fn halfword(self) -> &'a mut crate::W<REG> {
         self.variant(DSIZESELECT_A::HALFWORD)
     }
     #[doc = "The reception data in the PIO_PCRHR is a word (32-bit)"]
     #[inline(always)]
-    pub fn word(self) -> &'a mut W {
+    pub fn word(self) -> &'a mut crate::W<REG> {
         self.variant(DSIZESELECT_A::WORD)
     }
 }
 #[doc = "Field `ALWYS` reader - Parallel Capture Mode Always Sampling"]
 pub type ALWYS_R = crate::BitReader;
 #[doc = "Field `ALWYS` writer - Parallel Capture Mode Always Sampling"]
-pub type ALWYS_W<'a, const O: u8> = crate::BitWriter<'a, PCMR_SPEC, O>;
+pub type ALWYS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `HALFS` reader - Parallel Capture Mode Half Sampling"]
 pub type HALFS_R = crate::BitReader;
 #[doc = "Field `HALFS` writer - Parallel Capture Mode Half Sampling"]
-pub type HALFS_W<'a, const O: u8> = crate::BitWriter<'a, PCMR_SPEC, O>;
+pub type HALFS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FRSTS` reader - Parallel Capture Mode First Sample"]
 pub type FRSTS_R = crate::BitReader;
 #[doc = "Field `FRSTS` writer - Parallel Capture Mode First Sample"]
-pub type FRSTS_W<'a, const O: u8> = crate::BitWriter<'a, PCMR_SPEC, O>;
+pub type FRSTS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Parallel Capture Mode Enable"]
     #[inline(always)]
@@ -149,52 +121,49 @@ impl W {
     #[doc = "Bit 0 - Parallel Capture Mode Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn pcen(&mut self) -> PCEN_W<0> {
+    pub fn pcen(&mut self) -> PCEN_W<PCMR_SPEC, 0> {
         PCEN_W::new(self)
     }
     #[doc = "Bits 4:5 - Parallel Capture Mode Data Size"]
     #[inline(always)]
     #[must_use]
-    pub fn dsize(&mut self) -> DSIZE_W<4> {
+    pub fn dsize(&mut self) -> DSIZE_W<PCMR_SPEC, 4> {
         DSIZE_W::new(self)
     }
     #[doc = "Bit 9 - Parallel Capture Mode Always Sampling"]
     #[inline(always)]
     #[must_use]
-    pub fn alwys(&mut self) -> ALWYS_W<9> {
+    pub fn alwys(&mut self) -> ALWYS_W<PCMR_SPEC, 9> {
         ALWYS_W::new(self)
     }
     #[doc = "Bit 10 - Parallel Capture Mode Half Sampling"]
     #[inline(always)]
     #[must_use]
-    pub fn halfs(&mut self) -> HALFS_W<10> {
+    pub fn halfs(&mut self) -> HALFS_W<PCMR_SPEC, 10> {
         HALFS_W::new(self)
     }
     #[doc = "Bit 11 - Parallel Capture Mode First Sample"]
     #[inline(always)]
     #[must_use]
-    pub fn frsts(&mut self) -> FRSTS_W<11> {
+    pub fn frsts(&mut self) -> FRSTS_W<PCMR_SPEC, 11> {
         FRSTS_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Parallel Capture Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [pcmr](index.html) module"]
+#[doc = "Parallel Capture Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`pcmr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`pcmr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct PCMR_SPEC;
 impl crate::RegisterSpec for PCMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [pcmr::R](R) reader structure"]
-impl crate::Readable for PCMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [pcmr::W](W) writer structure"]
+#[doc = "`read()` method returns [`pcmr::R`](R) reader structure"]
+impl crate::Readable for PCMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`pcmr::W`](W) writer structure"]
 impl crate::Writable for PCMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

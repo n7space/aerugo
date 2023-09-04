@@ -108,71 +108,88 @@ pub struct RegisterBlock {
     #[doc = "0x610..0x648 - Channel Interrupt Enable Register"]
     pub xdmac_chid23: XDMAC_CHID,
 }
-#[doc = "GTYPE (r) register accessor: an alias for `Reg<GTYPE_SPEC>`"]
+#[doc = "GTYPE (r) register accessor: Global Type Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gtype::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gtype`]
+module"]
 pub type GTYPE = crate::Reg<gtype::GTYPE_SPEC>;
 #[doc = "Global Type Register"]
 pub mod gtype;
-#[doc = "GCFG (rw) register accessor: an alias for `Reg<GCFG_SPEC>`"]
+#[doc = "GCFG (rw) register accessor: Global Configuration Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gcfg::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gcfg::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gcfg`]
+module"]
 pub type GCFG = crate::Reg<gcfg::GCFG_SPEC>;
 #[doc = "Global Configuration Register"]
 pub mod gcfg;
-#[doc = "GWAC (rw) register accessor: an alias for `Reg<GWAC_SPEC>`"]
+#[doc = "GWAC (rw) register accessor: Global Weighted Arbiter Configuration Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gwac::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gwac::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gwac`]
+module"]
 pub type GWAC = crate::Reg<gwac::GWAC_SPEC>;
 #[doc = "Global Weighted Arbiter Configuration Register"]
 pub mod gwac;
-#[doc = "GIE (w) register accessor: an alias for `Reg<GIE_SPEC>`"]
+#[doc = "GIE (w) register accessor: Global Interrupt Enable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gie::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gie`]
+module"]
 pub type GIE = crate::Reg<gie::GIE_SPEC>;
 #[doc = "Global Interrupt Enable Register"]
 pub mod gie;
-#[doc = "GID (w) register accessor: an alias for `Reg<GID_SPEC>`"]
+#[doc = "GID (w) register accessor: Global Interrupt Disable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gid::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gid`]
+module"]
 pub type GID = crate::Reg<gid::GID_SPEC>;
 #[doc = "Global Interrupt Disable Register"]
 pub mod gid;
-#[doc = "GIM (r) register accessor: an alias for `Reg<GIM_SPEC>`"]
+#[doc = "GIM (r) register accessor: Global Interrupt Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gim::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gim`]
+module"]
 pub type GIM = crate::Reg<gim::GIM_SPEC>;
 #[doc = "Global Interrupt Mask Register"]
 pub mod gim;
-#[doc = "GIS (r) register accessor: an alias for `Reg<GIS_SPEC>`"]
+#[doc = "GIS (r) register accessor: Global Interrupt Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gis::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gis`]
+module"]
 pub type GIS = crate::Reg<gis::GIS_SPEC>;
 #[doc = "Global Interrupt Status Register"]
 pub mod gis;
-#[doc = "GE (w) register accessor: an alias for `Reg<GE_SPEC>`"]
+#[doc = "GE (w) register accessor: Global Channel Enable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`ge::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`ge`]
+module"]
 pub type GE = crate::Reg<ge::GE_SPEC>;
 #[doc = "Global Channel Enable Register"]
 pub mod ge;
-#[doc = "GD (w) register accessor: an alias for `Reg<GD_SPEC>`"]
+#[doc = "GD (w) register accessor: Global Channel Disable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gd::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gd`]
+module"]
 pub type GD = crate::Reg<gd::GD_SPEC>;
 #[doc = "Global Channel Disable Register"]
 pub mod gd;
-#[doc = "GS (r) register accessor: an alias for `Reg<GS_SPEC>`"]
+#[doc = "GS (r) register accessor: Global Channel Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gs::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gs`]
+module"]
 pub type GS = crate::Reg<gs::GS_SPEC>;
 #[doc = "Global Channel Status Register"]
 pub mod gs;
-#[doc = "GRS (rw) register accessor: an alias for `Reg<GRS_SPEC>`"]
+#[doc = "GRS (rw) register accessor: Global Channel Read Suspend Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`grs::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`grs::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`grs`]
+module"]
 pub type GRS = crate::Reg<grs::GRS_SPEC>;
 #[doc = "Global Channel Read Suspend Register"]
 pub mod grs;
-#[doc = "GWS (rw) register accessor: an alias for `Reg<GWS_SPEC>`"]
+#[doc = "GWS (rw) register accessor: Global Channel Write Suspend Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gws::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gws::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gws`]
+module"]
 pub type GWS = crate::Reg<gws::GWS_SPEC>;
 #[doc = "Global Channel Write Suspend Register"]
 pub mod gws;
-#[doc = "GRWS (w) register accessor: an alias for `Reg<GRWS_SPEC>`"]
+#[doc = "GRWS (w) register accessor: Global Channel Read Write Suspend Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`grws::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`grws`]
+module"]
 pub type GRWS = crate::Reg<grws::GRWS_SPEC>;
 #[doc = "Global Channel Read Write Suspend Register"]
 pub mod grws;
-#[doc = "GRWR (w) register accessor: an alias for `Reg<GRWR_SPEC>`"]
+#[doc = "GRWR (w) register accessor: Global Channel Read Write Resume Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`grwr::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`grwr`]
+module"]
 pub type GRWR = crate::Reg<grwr::GRWR_SPEC>;
 #[doc = "Global Channel Read Write Resume Register"]
 pub mod grwr;
-#[doc = "GSWR (w) register accessor: an alias for `Reg<GSWR_SPEC>`"]
+#[doc = "GSWR (w) register accessor: Global Channel Software Request Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gswr::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gswr`]
+module"]
 pub type GSWR = crate::Reg<gswr::GSWR_SPEC>;
 #[doc = "Global Channel Software Request Register"]
 pub mod gswr;
-#[doc = "GSWS (r) register accessor: an alias for `Reg<GSWS_SPEC>`"]
+#[doc = "GSWS (r) register accessor: Global Channel Software Request Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gsws::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gsws`]
+module"]
 pub type GSWS = crate::Reg<gsws::GSWS_SPEC>;
 #[doc = "Global Channel Software Request Status Register"]
 pub mod gsws;
-#[doc = "GSWF (w) register accessor: an alias for `Reg<GSWF_SPEC>`"]
+#[doc = "GSWF (w) register accessor: Global Channel Software Flush Request Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gswf::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`gswf`]
+module"]
 pub type GSWF = crate::Reg<gswf::GSWF_SPEC>;
 #[doc = "Global Channel Software Flush Request Register"]
 pub mod gswf;

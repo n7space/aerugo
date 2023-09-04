@@ -1,18 +1,5 @@
 #[doc = "Register `UASR` reader"]
-pub struct R(crate::R<UASR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<UASR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<UASR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<UASR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<UASR_SPEC>;
 #[doc = "Field `URAT` reader - Undefined Register Access Trace"]
 pub type URAT_R = crate::FieldReader<URATSELECT_A>;
 #[doc = "Undefined Register Access Trace\n\nValue on reset: 0"]
@@ -52,27 +39,27 @@ impl URAT_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `UNSPEC_STRUCT_MEMBER`"]
+    #[doc = "Unspecified structure member set to one detected when the descriptor is loaded."]
     #[inline(always)]
     pub fn is_unspec_struct_member(&self) -> bool {
         *self == URATSELECT_A::UNSPEC_STRUCT_MEMBER
     }
-    #[doc = "Checks if the value of the field is `ICM_CFG_MODIFIED`"]
+    #[doc = "ICM_CFG modified during active monitoring."]
     #[inline(always)]
     pub fn is_icm_cfg_modified(&self) -> bool {
         *self == URATSELECT_A::ICM_CFG_MODIFIED
     }
-    #[doc = "Checks if the value of the field is `ICM_DSCR_MODIFIED`"]
+    #[doc = "ICM_DSCR modified during active monitoring."]
     #[inline(always)]
     pub fn is_icm_dscr_modified(&self) -> bool {
         *self == URATSELECT_A::ICM_DSCR_MODIFIED
     }
-    #[doc = "Checks if the value of the field is `ICM_HASH_MODIFIED`"]
+    #[doc = "ICM_HASH modified during active monitoring"]
     #[inline(always)]
     pub fn is_icm_hash_modified(&self) -> bool {
         *self == URATSELECT_A::ICM_HASH_MODIFIED
     }
-    #[doc = "Checks if the value of the field is `READ_ACCESS`"]
+    #[doc = "Write-only register read access"]
     #[inline(always)]
     pub fn is_read_access(&self) -> bool {
         *self == URATSELECT_A::READ_ACCESS
@@ -85,15 +72,13 @@ impl R {
         URAT_R::new((self.bits & 7) as u8)
     }
 }
-#[doc = "Undefined Access Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [uasr](index.html) module"]
+#[doc = "Undefined Access Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`uasr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct UASR_SPEC;
 impl crate::RegisterSpec for UASR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [uasr::R](R) reader structure"]
-impl crate::Readable for UASR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`uasr::R`](R) reader structure"]
+impl crate::Readable for UASR_SPEC {}
 #[doc = "`reset()` method sets UASR to value 0"]
 impl crate::Resettable for UASR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

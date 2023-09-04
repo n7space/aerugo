@@ -1,18 +1,5 @@
 #[doc = "Register `HSTISR` reader"]
-pub struct R(crate::R<HSTISR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<HSTISR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<HSTISR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<HSTISR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<HSTISR_SPEC>;
 #[doc = "Field `DCONNI` reader - Device Connection Interrupt"]
 pub type DCONNI_R = crate::BitReader;
 #[doc = "Field `DDISCI` reader - Device Disconnection Interrupt"]
@@ -183,15 +170,13 @@ impl R {
         DMA_7_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Host Global Interrupt Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [hstisr](index.html) module"]
+#[doc = "Host Global Interrupt Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`hstisr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct HSTISR_SPEC;
 impl crate::RegisterSpec for HSTISR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [hstisr::R](R) reader structure"]
-impl crate::Readable for HSTISR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`hstisr::R`](R) reader structure"]
+impl crate::Readable for HSTISR_SPEC {}
 #[doc = "`reset()` method sets HSTISR to value 0"]
 impl crate::Resettable for HSTISR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

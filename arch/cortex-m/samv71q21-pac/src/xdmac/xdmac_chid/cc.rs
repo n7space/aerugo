@@ -1,39 +1,7 @@
 #[doc = "Register `CC` reader"]
-pub struct R(crate::R<CC_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CC_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CC_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CC_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CC_SPEC>;
 #[doc = "Register `CC` writer"]
-pub struct W(crate::W<CC_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CC_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CC_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CC_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CC_SPEC>;
 #[doc = "Field `TYPE` reader - Channel x Transfer Type"]
 pub type TYPE_R = crate::BitReader<TYPESELECT_A>;
 #[doc = "Channel x Transfer Type\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl TYPE_R {
             true => TYPESELECT_A::PER_TRAN,
         }
     }
-    #[doc = "Checks if the value of the field is `MEM_TRAN`"]
+    #[doc = "Self-triggered mode (memory-to-memory transfer)."]
     #[inline(always)]
     pub fn is_mem_tran(&self) -> bool {
         *self == TYPESELECT_A::MEM_TRAN
     }
-    #[doc = "Checks if the value of the field is `PER_TRAN`"]
+    #[doc = "Synchronized mode (peripheral-to-memory or memory-to-peripheral transfer)."]
     #[inline(always)]
     pub fn is_per_tran(&self) -> bool {
         *self == TYPESELECT_A::PER_TRAN
     }
 }
 #[doc = "Field `TYPE` writer - Channel x Transfer Type"]
-pub type TYPE_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, TYPESELECT_A>;
-impl<'a, const O: u8> TYPE_W<'a, O> {
+pub type TYPE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, TYPESELECT_A>;
+impl<'a, REG, const O: u8> TYPE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Self-triggered mode (memory-to-memory transfer)."]
     #[inline(always)]
-    pub fn mem_tran(self) -> &'a mut W {
+    pub fn mem_tran(self) -> &'a mut crate::W<REG> {
         self.variant(TYPESELECT_A::MEM_TRAN)
     }
     #[doc = "Synchronized mode (peripheral-to-memory or memory-to-peripheral transfer)."]
     #[inline(always)]
-    pub fn per_tran(self) -> &'a mut W {
+    pub fn per_tran(self) -> &'a mut crate::W<REG> {
         self.variant(TYPESELECT_A::PER_TRAN)
     }
 }
@@ -120,48 +91,52 @@ impl MBSIZE_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `SINGLE`"]
+    #[doc = "The memory burst size is set to one."]
     #[inline(always)]
     pub fn is_single(&self) -> bool {
         *self == MBSIZESELECT_A::SINGLE
     }
-    #[doc = "Checks if the value of the field is `FOUR`"]
+    #[doc = "The memory burst size is set to four."]
     #[inline(always)]
     pub fn is_four(&self) -> bool {
         *self == MBSIZESELECT_A::FOUR
     }
-    #[doc = "Checks if the value of the field is `EIGHT`"]
+    #[doc = "The memory burst size is set to eight."]
     #[inline(always)]
     pub fn is_eight(&self) -> bool {
         *self == MBSIZESELECT_A::EIGHT
     }
-    #[doc = "Checks if the value of the field is `SIXTEEN`"]
+    #[doc = "The memory burst size is set to sixteen."]
     #[inline(always)]
     pub fn is_sixteen(&self) -> bool {
         *self == MBSIZESELECT_A::SIXTEEN
     }
 }
 #[doc = "Field `MBSIZE` writer - Channel x Memory Burst Size"]
-pub type MBSIZE_W<'a, const O: u8> = crate::FieldWriterSafe<'a, CC_SPEC, 2, O, MBSIZESELECT_A>;
-impl<'a, const O: u8> MBSIZE_W<'a, O> {
+pub type MBSIZE_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, MBSIZESELECT_A>;
+impl<'a, REG, const O: u8> MBSIZE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The memory burst size is set to one."]
     #[inline(always)]
-    pub fn single(self) -> &'a mut W {
+    pub fn single(self) -> &'a mut crate::W<REG> {
         self.variant(MBSIZESELECT_A::SINGLE)
     }
     #[doc = "The memory burst size is set to four."]
     #[inline(always)]
-    pub fn four(self) -> &'a mut W {
+    pub fn four(self) -> &'a mut crate::W<REG> {
         self.variant(MBSIZESELECT_A::FOUR)
     }
     #[doc = "The memory burst size is set to eight."]
     #[inline(always)]
-    pub fn eight(self) -> &'a mut W {
+    pub fn eight(self) -> &'a mut crate::W<REG> {
         self.variant(MBSIZESELECT_A::EIGHT)
     }
     #[doc = "The memory burst size is set to sixteen."]
     #[inline(always)]
-    pub fn sixteen(self) -> &'a mut W {
+    pub fn sixteen(self) -> &'a mut crate::W<REG> {
         self.variant(MBSIZESELECT_A::SIXTEEN)
     }
 }
@@ -190,28 +165,31 @@ impl DSYNC_R {
             true => DSYNCSELECT_A::MEM2PER,
         }
     }
-    #[doc = "Checks if the value of the field is `PER2MEM`"]
+    #[doc = "Peripheral-to-memory transfer."]
     #[inline(always)]
     pub fn is_per2mem(&self) -> bool {
         *self == DSYNCSELECT_A::PER2MEM
     }
-    #[doc = "Checks if the value of the field is `MEM2PER`"]
+    #[doc = "Memory-to-peripheral transfer."]
     #[inline(always)]
     pub fn is_mem2per(&self) -> bool {
         *self == DSYNCSELECT_A::MEM2PER
     }
 }
 #[doc = "Field `DSYNC` writer - Channel x Synchronization"]
-pub type DSYNC_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, DSYNCSELECT_A>;
-impl<'a, const O: u8> DSYNC_W<'a, O> {
+pub type DSYNC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, DSYNCSELECT_A>;
+impl<'a, REG, const O: u8> DSYNC_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Peripheral-to-memory transfer."]
     #[inline(always)]
-    pub fn per2mem(self) -> &'a mut W {
+    pub fn per2mem(self) -> &'a mut crate::W<REG> {
         self.variant(DSYNCSELECT_A::PER2MEM)
     }
     #[doc = "Memory-to-peripheral transfer."]
     #[inline(always)]
-    pub fn mem2per(self) -> &'a mut W {
+    pub fn mem2per(self) -> &'a mut crate::W<REG> {
         self.variant(DSYNCSELECT_A::MEM2PER)
     }
 }
@@ -240,28 +218,31 @@ impl SWREQ_R {
             true => SWREQSELECT_A::SWR_CONNECTED,
         }
     }
-    #[doc = "Checks if the value of the field is `HWR_CONNECTED`"]
+    #[doc = "Hardware request line is connected to the peripheral request line."]
     #[inline(always)]
     pub fn is_hwr_connected(&self) -> bool {
         *self == SWREQSELECT_A::HWR_CONNECTED
     }
-    #[doc = "Checks if the value of the field is `SWR_CONNECTED`"]
+    #[doc = "Software request is connected to the peripheral request line."]
     #[inline(always)]
     pub fn is_swr_connected(&self) -> bool {
         *self == SWREQSELECT_A::SWR_CONNECTED
     }
 }
 #[doc = "Field `SWREQ` writer - Channel x Software Request Trigger"]
-pub type SWREQ_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, SWREQSELECT_A>;
-impl<'a, const O: u8> SWREQ_W<'a, O> {
+pub type SWREQ_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SWREQSELECT_A>;
+impl<'a, REG, const O: u8> SWREQ_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Hardware request line is connected to the peripheral request line."]
     #[inline(always)]
-    pub fn hwr_connected(self) -> &'a mut W {
+    pub fn hwr_connected(self) -> &'a mut crate::W<REG> {
         self.variant(SWREQSELECT_A::HWR_CONNECTED)
     }
     #[doc = "Software request is connected to the peripheral request line."]
     #[inline(always)]
-    pub fn swr_connected(self) -> &'a mut W {
+    pub fn swr_connected(self) -> &'a mut crate::W<REG> {
         self.variant(SWREQSELECT_A::SWR_CONNECTED)
     }
 }
@@ -290,28 +271,31 @@ impl MEMSET_R {
             true => MEMSETSELECT_A::HW_MODE,
         }
     }
-    #[doc = "Checks if the value of the field is `NORMAL_MODE`"]
+    #[doc = "Memset is not activated."]
     #[inline(always)]
     pub fn is_normal_mode(&self) -> bool {
         *self == MEMSETSELECT_A::NORMAL_MODE
     }
-    #[doc = "Checks if the value of the field is `HW_MODE`"]
+    #[doc = "Sets the block of memory pointed by DA field to the specified value. This operation is performed on 8-, 16- or 32-bit basis."]
     #[inline(always)]
     pub fn is_hw_mode(&self) -> bool {
         *self == MEMSETSELECT_A::HW_MODE
     }
 }
 #[doc = "Field `MEMSET` writer - Channel x Fill Block of memory"]
-pub type MEMSET_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, MEMSETSELECT_A>;
-impl<'a, const O: u8> MEMSET_W<'a, O> {
+pub type MEMSET_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, MEMSETSELECT_A>;
+impl<'a, REG, const O: u8> MEMSET_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Memset is not activated."]
     #[inline(always)]
-    pub fn normal_mode(self) -> &'a mut W {
+    pub fn normal_mode(self) -> &'a mut crate::W<REG> {
         self.variant(MEMSETSELECT_A::NORMAL_MODE)
     }
     #[doc = "Sets the block of memory pointed by DA field to the specified value. This operation is performed on 8-, 16- or 32-bit basis."]
     #[inline(always)]
-    pub fn hw_mode(self) -> &'a mut W {
+    pub fn hw_mode(self) -> &'a mut crate::W<REG> {
         self.variant(MEMSETSELECT_A::HW_MODE)
     }
 }
@@ -354,58 +338,62 @@ impl CSIZE_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `CHK_1`"]
+    #[doc = "1 data transferred"]
     #[inline(always)]
     pub fn is_chk_1(&self) -> bool {
         *self == CSIZESELECT_A::CHK_1
     }
-    #[doc = "Checks if the value of the field is `CHK_2`"]
+    #[doc = "2 data transferred"]
     #[inline(always)]
     pub fn is_chk_2(&self) -> bool {
         *self == CSIZESELECT_A::CHK_2
     }
-    #[doc = "Checks if the value of the field is `CHK_4`"]
+    #[doc = "4 data transferred"]
     #[inline(always)]
     pub fn is_chk_4(&self) -> bool {
         *self == CSIZESELECT_A::CHK_4
     }
-    #[doc = "Checks if the value of the field is `CHK_8`"]
+    #[doc = "8 data transferred"]
     #[inline(always)]
     pub fn is_chk_8(&self) -> bool {
         *self == CSIZESELECT_A::CHK_8
     }
-    #[doc = "Checks if the value of the field is `CHK_16`"]
+    #[doc = "16 data transferred"]
     #[inline(always)]
     pub fn is_chk_16(&self) -> bool {
         *self == CSIZESELECT_A::CHK_16
     }
 }
 #[doc = "Field `CSIZE` writer - Channel x Chunk Size"]
-pub type CSIZE_W<'a, const O: u8> = crate::FieldWriter<'a, CC_SPEC, 3, O, CSIZESELECT_A>;
-impl<'a, const O: u8> CSIZE_W<'a, O> {
+pub type CSIZE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, CSIZESELECT_A>;
+impl<'a, REG, const O: u8> CSIZE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "1 data transferred"]
     #[inline(always)]
-    pub fn chk_1(self) -> &'a mut W {
+    pub fn chk_1(self) -> &'a mut crate::W<REG> {
         self.variant(CSIZESELECT_A::CHK_1)
     }
     #[doc = "2 data transferred"]
     #[inline(always)]
-    pub fn chk_2(self) -> &'a mut W {
+    pub fn chk_2(self) -> &'a mut crate::W<REG> {
         self.variant(CSIZESELECT_A::CHK_2)
     }
     #[doc = "4 data transferred"]
     #[inline(always)]
-    pub fn chk_4(self) -> &'a mut W {
+    pub fn chk_4(self) -> &'a mut crate::W<REG> {
         self.variant(CSIZESELECT_A::CHK_4)
     }
     #[doc = "8 data transferred"]
     #[inline(always)]
-    pub fn chk_8(self) -> &'a mut W {
+    pub fn chk_8(self) -> &'a mut crate::W<REG> {
         self.variant(CSIZESELECT_A::CHK_8)
     }
     #[doc = "16 data transferred"]
     #[inline(always)]
-    pub fn chk_16(self) -> &'a mut W {
+    pub fn chk_16(self) -> &'a mut crate::W<REG> {
         self.variant(CSIZESELECT_A::CHK_16)
     }
 }
@@ -442,38 +430,42 @@ impl DWIDTH_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `BYTE`"]
+    #[doc = "The data size is set to 8 bits"]
     #[inline(always)]
     pub fn is_byte(&self) -> bool {
         *self == DWIDTHSELECT_A::BYTE
     }
-    #[doc = "Checks if the value of the field is `HALFWORD`"]
+    #[doc = "The data size is set to 16 bits"]
     #[inline(always)]
     pub fn is_halfword(&self) -> bool {
         *self == DWIDTHSELECT_A::HALFWORD
     }
-    #[doc = "Checks if the value of the field is `WORD`"]
+    #[doc = "The data size is set to 32 bits"]
     #[inline(always)]
     pub fn is_word(&self) -> bool {
         *self == DWIDTHSELECT_A::WORD
     }
 }
 #[doc = "Field `DWIDTH` writer - Channel x Data Width"]
-pub type DWIDTH_W<'a, const O: u8> = crate::FieldWriter<'a, CC_SPEC, 2, O, DWIDTHSELECT_A>;
-impl<'a, const O: u8> DWIDTH_W<'a, O> {
+pub type DWIDTH_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, DWIDTHSELECT_A>;
+impl<'a, REG, const O: u8> DWIDTH_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The data size is set to 8 bits"]
     #[inline(always)]
-    pub fn byte(self) -> &'a mut W {
+    pub fn byte(self) -> &'a mut crate::W<REG> {
         self.variant(DWIDTHSELECT_A::BYTE)
     }
     #[doc = "The data size is set to 16 bits"]
     #[inline(always)]
-    pub fn halfword(self) -> &'a mut W {
+    pub fn halfword(self) -> &'a mut crate::W<REG> {
         self.variant(DWIDTHSELECT_A::HALFWORD)
     }
     #[doc = "The data size is set to 32 bits"]
     #[inline(always)]
-    pub fn word(self) -> &'a mut W {
+    pub fn word(self) -> &'a mut crate::W<REG> {
         self.variant(DWIDTHSELECT_A::WORD)
     }
 }
@@ -502,28 +494,31 @@ impl SIF_R {
             true => SIFSELECT_A::AHB_IF1,
         }
     }
-    #[doc = "Checks if the value of the field is `AHB_IF0`"]
+    #[doc = "The data is read through the system bus interface 0."]
     #[inline(always)]
     pub fn is_ahb_if0(&self) -> bool {
         *self == SIFSELECT_A::AHB_IF0
     }
-    #[doc = "Checks if the value of the field is `AHB_IF1`"]
+    #[doc = "The data is read through the system bus interface 1."]
     #[inline(always)]
     pub fn is_ahb_if1(&self) -> bool {
         *self == SIFSELECT_A::AHB_IF1
     }
 }
 #[doc = "Field `SIF` writer - Channel x Source Interface Identifier"]
-pub type SIF_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, SIFSELECT_A>;
-impl<'a, const O: u8> SIF_W<'a, O> {
+pub type SIF_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SIFSELECT_A>;
+impl<'a, REG, const O: u8> SIF_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The data is read through the system bus interface 0."]
     #[inline(always)]
-    pub fn ahb_if0(self) -> &'a mut W {
+    pub fn ahb_if0(self) -> &'a mut crate::W<REG> {
         self.variant(SIFSELECT_A::AHB_IF0)
     }
     #[doc = "The data is read through the system bus interface 1."]
     #[inline(always)]
-    pub fn ahb_if1(self) -> &'a mut W {
+    pub fn ahb_if1(self) -> &'a mut crate::W<REG> {
         self.variant(SIFSELECT_A::AHB_IF1)
     }
 }
@@ -552,28 +547,31 @@ impl DIF_R {
             true => DIFSELECT_A::AHB_IF1,
         }
     }
-    #[doc = "Checks if the value of the field is `AHB_IF0`"]
+    #[doc = "The data is written through the system bus interface 0."]
     #[inline(always)]
     pub fn is_ahb_if0(&self) -> bool {
         *self == DIFSELECT_A::AHB_IF0
     }
-    #[doc = "Checks if the value of the field is `AHB_IF1`"]
+    #[doc = "The data is written though the system bus interface 1."]
     #[inline(always)]
     pub fn is_ahb_if1(&self) -> bool {
         *self == DIFSELECT_A::AHB_IF1
     }
 }
 #[doc = "Field `DIF` writer - Channel x Destination Interface Identifier"]
-pub type DIF_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, DIFSELECT_A>;
-impl<'a, const O: u8> DIF_W<'a, O> {
+pub type DIF_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, DIFSELECT_A>;
+impl<'a, REG, const O: u8> DIF_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The data is written through the system bus interface 0."]
     #[inline(always)]
-    pub fn ahb_if0(self) -> &'a mut W {
+    pub fn ahb_if0(self) -> &'a mut crate::W<REG> {
         self.variant(DIFSELECT_A::AHB_IF0)
     }
     #[doc = "The data is written though the system bus interface 1."]
     #[inline(always)]
-    pub fn ahb_if1(self) -> &'a mut W {
+    pub fn ahb_if1(self) -> &'a mut crate::W<REG> {
         self.variant(DIFSELECT_A::AHB_IF1)
     }
 }
@@ -613,48 +611,52 @@ impl SAM_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `FIXED_AM`"]
+    #[doc = "The address remains unchanged."]
     #[inline(always)]
     pub fn is_fixed_am(&self) -> bool {
         *self == SAMSELECT_A::FIXED_AM
     }
-    #[doc = "Checks if the value of the field is `INCREMENTED_AM`"]
+    #[doc = "The addressing mode is incremented (the increment size is set to the data size)."]
     #[inline(always)]
     pub fn is_incremented_am(&self) -> bool {
         *self == SAMSELECT_A::INCREMENTED_AM
     }
-    #[doc = "Checks if the value of the field is `UBS_AM`"]
+    #[doc = "The microblock stride is added at the microblock boundary."]
     #[inline(always)]
     pub fn is_ubs_am(&self) -> bool {
         *self == SAMSELECT_A::UBS_AM
     }
-    #[doc = "Checks if the value of the field is `UBS_DS_AM`"]
+    #[doc = "The microblock stride is added at the microblock boundary, the data stride is added at the data boundary."]
     #[inline(always)]
     pub fn is_ubs_ds_am(&self) -> bool {
         *self == SAMSELECT_A::UBS_DS_AM
     }
 }
 #[doc = "Field `SAM` writer - Channel x Source Addressing Mode"]
-pub type SAM_W<'a, const O: u8> = crate::FieldWriterSafe<'a, CC_SPEC, 2, O, SAMSELECT_A>;
-impl<'a, const O: u8> SAM_W<'a, O> {
+pub type SAM_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, SAMSELECT_A>;
+impl<'a, REG, const O: u8> SAM_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The address remains unchanged."]
     #[inline(always)]
-    pub fn fixed_am(self) -> &'a mut W {
+    pub fn fixed_am(self) -> &'a mut crate::W<REG> {
         self.variant(SAMSELECT_A::FIXED_AM)
     }
     #[doc = "The addressing mode is incremented (the increment size is set to the data size)."]
     #[inline(always)]
-    pub fn incremented_am(self) -> &'a mut W {
+    pub fn incremented_am(self) -> &'a mut crate::W<REG> {
         self.variant(SAMSELECT_A::INCREMENTED_AM)
     }
     #[doc = "The microblock stride is added at the microblock boundary."]
     #[inline(always)]
-    pub fn ubs_am(self) -> &'a mut W {
+    pub fn ubs_am(self) -> &'a mut crate::W<REG> {
         self.variant(SAMSELECT_A::UBS_AM)
     }
     #[doc = "The microblock stride is added at the microblock boundary, the data stride is added at the data boundary."]
     #[inline(always)]
-    pub fn ubs_ds_am(self) -> &'a mut W {
+    pub fn ubs_ds_am(self) -> &'a mut crate::W<REG> {
         self.variant(SAMSELECT_A::UBS_DS_AM)
     }
 }
@@ -694,48 +696,52 @@ impl DAM_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `FIXED_AM`"]
+    #[doc = "The address remains unchanged."]
     #[inline(always)]
     pub fn is_fixed_am(&self) -> bool {
         *self == DAMSELECT_A::FIXED_AM
     }
-    #[doc = "Checks if the value of the field is `INCREMENTED_AM`"]
+    #[doc = "The addressing mode is incremented (the increment size is set to the data size)."]
     #[inline(always)]
     pub fn is_incremented_am(&self) -> bool {
         *self == DAMSELECT_A::INCREMENTED_AM
     }
-    #[doc = "Checks if the value of the field is `UBS_AM`"]
+    #[doc = "The microblock stride is added at the microblock boundary."]
     #[inline(always)]
     pub fn is_ubs_am(&self) -> bool {
         *self == DAMSELECT_A::UBS_AM
     }
-    #[doc = "Checks if the value of the field is `UBS_DS_AM`"]
+    #[doc = "The microblock stride is added at the microblock boundary; the data stride is added at the data boundary."]
     #[inline(always)]
     pub fn is_ubs_ds_am(&self) -> bool {
         *self == DAMSELECT_A::UBS_DS_AM
     }
 }
 #[doc = "Field `DAM` writer - Channel x Destination Addressing Mode"]
-pub type DAM_W<'a, const O: u8> = crate::FieldWriterSafe<'a, CC_SPEC, 2, O, DAMSELECT_A>;
-impl<'a, const O: u8> DAM_W<'a, O> {
+pub type DAM_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, DAMSELECT_A>;
+impl<'a, REG, const O: u8> DAM_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The address remains unchanged."]
     #[inline(always)]
-    pub fn fixed_am(self) -> &'a mut W {
+    pub fn fixed_am(self) -> &'a mut crate::W<REG> {
         self.variant(DAMSELECT_A::FIXED_AM)
     }
     #[doc = "The addressing mode is incremented (the increment size is set to the data size)."]
     #[inline(always)]
-    pub fn incremented_am(self) -> &'a mut W {
+    pub fn incremented_am(self) -> &'a mut crate::W<REG> {
         self.variant(DAMSELECT_A::INCREMENTED_AM)
     }
     #[doc = "The microblock stride is added at the microblock boundary."]
     #[inline(always)]
-    pub fn ubs_am(self) -> &'a mut W {
+    pub fn ubs_am(self) -> &'a mut crate::W<REG> {
         self.variant(DAMSELECT_A::UBS_AM)
     }
     #[doc = "The microblock stride is added at the microblock boundary; the data stride is added at the data boundary."]
     #[inline(always)]
-    pub fn ubs_ds_am(self) -> &'a mut W {
+    pub fn ubs_ds_am(self) -> &'a mut crate::W<REG> {
         self.variant(DAMSELECT_A::UBS_DS_AM)
     }
 }
@@ -764,28 +770,31 @@ impl INITD_R {
             true => INITDSELECT_A::TERMINATED,
         }
     }
-    #[doc = "Checks if the value of the field is `IN_PROGRESS`"]
+    #[doc = "Channel initialization is in progress."]
     #[inline(always)]
     pub fn is_in_progress(&self) -> bool {
         *self == INITDSELECT_A::IN_PROGRESS
     }
-    #[doc = "Checks if the value of the field is `TERMINATED`"]
+    #[doc = "Channel initialization is completed."]
     #[inline(always)]
     pub fn is_terminated(&self) -> bool {
         *self == INITDSELECT_A::TERMINATED
     }
 }
 #[doc = "Field `INITD` writer - Channel Initialization Terminated (this bit is read-only)"]
-pub type INITD_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, INITDSELECT_A>;
-impl<'a, const O: u8> INITD_W<'a, O> {
+pub type INITD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, INITDSELECT_A>;
+impl<'a, REG, const O: u8> INITD_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Channel initialization is in progress."]
     #[inline(always)]
-    pub fn in_progress(self) -> &'a mut W {
+    pub fn in_progress(self) -> &'a mut crate::W<REG> {
         self.variant(INITDSELECT_A::IN_PROGRESS)
     }
     #[doc = "Channel initialization is completed."]
     #[inline(always)]
-    pub fn terminated(self) -> &'a mut W {
+    pub fn terminated(self) -> &'a mut crate::W<REG> {
         self.variant(INITDSELECT_A::TERMINATED)
     }
 }
@@ -814,28 +823,31 @@ impl RDIP_R {
             true => RDIPSELECT_A::IN_PROGRESS,
         }
     }
-    #[doc = "Checks if the value of the field is `DONE`"]
+    #[doc = "No active read transaction on the bus."]
     #[inline(always)]
     pub fn is_done(&self) -> bool {
         *self == RDIPSELECT_A::DONE
     }
-    #[doc = "Checks if the value of the field is `IN_PROGRESS`"]
+    #[doc = "A read transaction is in progress."]
     #[inline(always)]
     pub fn is_in_progress(&self) -> bool {
         *self == RDIPSELECT_A::IN_PROGRESS
     }
 }
 #[doc = "Field `RDIP` writer - Read in Progress (this bit is read-only)"]
-pub type RDIP_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, RDIPSELECT_A>;
-impl<'a, const O: u8> RDIP_W<'a, O> {
+pub type RDIP_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, RDIPSELECT_A>;
+impl<'a, REG, const O: u8> RDIP_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "No active read transaction on the bus."]
     #[inline(always)]
-    pub fn done(self) -> &'a mut W {
+    pub fn done(self) -> &'a mut crate::W<REG> {
         self.variant(RDIPSELECT_A::DONE)
     }
     #[doc = "A read transaction is in progress."]
     #[inline(always)]
-    pub fn in_progress(self) -> &'a mut W {
+    pub fn in_progress(self) -> &'a mut crate::W<REG> {
         self.variant(RDIPSELECT_A::IN_PROGRESS)
     }
 }
@@ -864,28 +876,31 @@ impl WRIP_R {
             true => WRIPSELECT_A::IN_PROGRESS,
         }
     }
-    #[doc = "Checks if the value of the field is `DONE`"]
+    #[doc = "No active write transaction on the bus."]
     #[inline(always)]
     pub fn is_done(&self) -> bool {
         *self == WRIPSELECT_A::DONE
     }
-    #[doc = "Checks if the value of the field is `IN_PROGRESS`"]
+    #[doc = "A write transaction is in progress."]
     #[inline(always)]
     pub fn is_in_progress(&self) -> bool {
         *self == WRIPSELECT_A::IN_PROGRESS
     }
 }
 #[doc = "Field `WRIP` writer - Write in Progress (this bit is read-only)"]
-pub type WRIP_W<'a, const O: u8> = crate::BitWriter<'a, CC_SPEC, O, WRIPSELECT_A>;
-impl<'a, const O: u8> WRIP_W<'a, O> {
+pub type WRIP_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, WRIPSELECT_A>;
+impl<'a, REG, const O: u8> WRIP_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "No active write transaction on the bus."]
     #[inline(always)]
-    pub fn done(self) -> &'a mut W {
+    pub fn done(self) -> &'a mut crate::W<REG> {
         self.variant(WRIPSELECT_A::DONE)
     }
     #[doc = "A write transaction is in progress."]
     #[inline(always)]
-    pub fn in_progress(self) -> &'a mut W {
+    pub fn in_progress(self) -> &'a mut crate::W<REG> {
         self.variant(WRIPSELECT_A::IN_PROGRESS)
     }
 }
@@ -1069,528 +1084,532 @@ impl PERID_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `HSMCI`"]
+    #[doc = "HSMCI"]
     #[inline(always)]
     pub fn is_hsmci(&self) -> bool {
         *self == PERIDSELECT_A::HSMCI
     }
-    #[doc = "Checks if the value of the field is `SPI0_TX`"]
+    #[doc = "SPI0_TX"]
     #[inline(always)]
     pub fn is_spi0_tx(&self) -> bool {
         *self == PERIDSELECT_A::SPI0_TX
     }
-    #[doc = "Checks if the value of the field is `SPI0_RX`"]
+    #[doc = "SPI0_RX"]
     #[inline(always)]
     pub fn is_spi0_rx(&self) -> bool {
         *self == PERIDSELECT_A::SPI0_RX
     }
-    #[doc = "Checks if the value of the field is `SPI1_TX`"]
+    #[doc = "SPI1_TX"]
     #[inline(always)]
     pub fn is_spi1_tx(&self) -> bool {
         *self == PERIDSELECT_A::SPI1_TX
     }
-    #[doc = "Checks if the value of the field is `SPI1_RX`"]
+    #[doc = "SPI1_RX"]
     #[inline(always)]
     pub fn is_spi1_rx(&self) -> bool {
         *self == PERIDSELECT_A::SPI1_RX
     }
-    #[doc = "Checks if the value of the field is `QSPI_TX`"]
+    #[doc = "QSPI_TX"]
     #[inline(always)]
     pub fn is_qspi_tx(&self) -> bool {
         *self == PERIDSELECT_A::QSPI_TX
     }
-    #[doc = "Checks if the value of the field is `QSPI_RX`"]
+    #[doc = "QSPI_RX"]
     #[inline(always)]
     pub fn is_qspi_rx(&self) -> bool {
         *self == PERIDSELECT_A::QSPI_RX
     }
-    #[doc = "Checks if the value of the field is `USART0_TX`"]
+    #[doc = "USART0_TX"]
     #[inline(always)]
     pub fn is_usart0_tx(&self) -> bool {
         *self == PERIDSELECT_A::USART0_TX
     }
-    #[doc = "Checks if the value of the field is `USART0_RX`"]
+    #[doc = "USART0_RX"]
     #[inline(always)]
     pub fn is_usart0_rx(&self) -> bool {
         *self == PERIDSELECT_A::USART0_RX
     }
-    #[doc = "Checks if the value of the field is `USART1_TX`"]
+    #[doc = "USART1_TX"]
     #[inline(always)]
     pub fn is_usart1_tx(&self) -> bool {
         *self == PERIDSELECT_A::USART1_TX
     }
-    #[doc = "Checks if the value of the field is `USART1_RX`"]
+    #[doc = "USART1_RX"]
     #[inline(always)]
     pub fn is_usart1_rx(&self) -> bool {
         *self == PERIDSELECT_A::USART1_RX
     }
-    #[doc = "Checks if the value of the field is `USART2_TX`"]
+    #[doc = "USART2_TX"]
     #[inline(always)]
     pub fn is_usart2_tx(&self) -> bool {
         *self == PERIDSELECT_A::USART2_TX
     }
-    #[doc = "Checks if the value of the field is `USART2_RX`"]
+    #[doc = "USART2_RX"]
     #[inline(always)]
     pub fn is_usart2_rx(&self) -> bool {
         *self == PERIDSELECT_A::USART2_RX
     }
-    #[doc = "Checks if the value of the field is `PWM0`"]
+    #[doc = "PWM0"]
     #[inline(always)]
     pub fn is_pwm0(&self) -> bool {
         *self == PERIDSELECT_A::PWM0
     }
-    #[doc = "Checks if the value of the field is `TWIHS0_TX`"]
+    #[doc = "TWIHS0_TX"]
     #[inline(always)]
     pub fn is_twihs0_tx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS0_TX
     }
-    #[doc = "Checks if the value of the field is `TWIHS0_RX`"]
+    #[doc = "TWIHS0_RX"]
     #[inline(always)]
     pub fn is_twihs0_rx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS0_RX
     }
-    #[doc = "Checks if the value of the field is `TWIHS1_TX`"]
+    #[doc = "TWIHS1_TX"]
     #[inline(always)]
     pub fn is_twihs1_tx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS1_TX
     }
-    #[doc = "Checks if the value of the field is `TWIHS1_RX`"]
+    #[doc = "TWIHS1_RX"]
     #[inline(always)]
     pub fn is_twihs1_rx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS1_RX
     }
-    #[doc = "Checks if the value of the field is `TWIHS2_TX`"]
+    #[doc = "TWIHS2_TX"]
     #[inline(always)]
     pub fn is_twihs2_tx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS2_TX
     }
-    #[doc = "Checks if the value of the field is `TWIHS2_RX`"]
+    #[doc = "TWIHS2_RX"]
     #[inline(always)]
     pub fn is_twihs2_rx(&self) -> bool {
         *self == PERIDSELECT_A::TWIHS2_RX
     }
-    #[doc = "Checks if the value of the field is `UART0_TX`"]
+    #[doc = "UART0_TX"]
     #[inline(always)]
     pub fn is_uart0_tx(&self) -> bool {
         *self == PERIDSELECT_A::UART0_TX
     }
-    #[doc = "Checks if the value of the field is `UART0_RX`"]
+    #[doc = "UART0_RX"]
     #[inline(always)]
     pub fn is_uart0_rx(&self) -> bool {
         *self == PERIDSELECT_A::UART0_RX
     }
-    #[doc = "Checks if the value of the field is `UART1_TX`"]
+    #[doc = "UART1_TX"]
     #[inline(always)]
     pub fn is_uart1_tx(&self) -> bool {
         *self == PERIDSELECT_A::UART1_TX
     }
-    #[doc = "Checks if the value of the field is `UART1_RX`"]
+    #[doc = "UART1_RX"]
     #[inline(always)]
     pub fn is_uart1_rx(&self) -> bool {
         *self == PERIDSELECT_A::UART1_RX
     }
-    #[doc = "Checks if the value of the field is `UART2_TX`"]
+    #[doc = "UART2_TX"]
     #[inline(always)]
     pub fn is_uart2_tx(&self) -> bool {
         *self == PERIDSELECT_A::UART2_TX
     }
-    #[doc = "Checks if the value of the field is `UART2_RX`"]
+    #[doc = "UART2_RX"]
     #[inline(always)]
     pub fn is_uart2_rx(&self) -> bool {
         *self == PERIDSELECT_A::UART2_RX
     }
-    #[doc = "Checks if the value of the field is `UART3_TX`"]
+    #[doc = "UART3_TX"]
     #[inline(always)]
     pub fn is_uart3_tx(&self) -> bool {
         *self == PERIDSELECT_A::UART3_TX
     }
-    #[doc = "Checks if the value of the field is `UART3_RX`"]
+    #[doc = "UART3_RX"]
     #[inline(always)]
     pub fn is_uart3_rx(&self) -> bool {
         *self == PERIDSELECT_A::UART3_RX
     }
-    #[doc = "Checks if the value of the field is `UART4_TX`"]
+    #[doc = "UART4_TX"]
     #[inline(always)]
     pub fn is_uart4_tx(&self) -> bool {
         *self == PERIDSELECT_A::UART4_TX
     }
-    #[doc = "Checks if the value of the field is `UART4_RX`"]
+    #[doc = "UART4_RX"]
     #[inline(always)]
     pub fn is_uart4_rx(&self) -> bool {
         *self == PERIDSELECT_A::UART4_RX
     }
-    #[doc = "Checks if the value of the field is `DACC0`"]
+    #[doc = "DACC0"]
     #[inline(always)]
     pub fn is_dacc0(&self) -> bool {
         *self == PERIDSELECT_A::DACC0
     }
-    #[doc = "Checks if the value of the field is `DACC1`"]
+    #[doc = "DACC1"]
     #[inline(always)]
     pub fn is_dacc1(&self) -> bool {
         *self == PERIDSELECT_A::DACC1
     }
-    #[doc = "Checks if the value of the field is `SSC_TX`"]
+    #[doc = "SSC_TX"]
     #[inline(always)]
     pub fn is_ssc_tx(&self) -> bool {
         *self == PERIDSELECT_A::SSC_TX
     }
-    #[doc = "Checks if the value of the field is `SSC_RX`"]
+    #[doc = "SSC_RX"]
     #[inline(always)]
     pub fn is_ssc_rx(&self) -> bool {
         *self == PERIDSELECT_A::SSC_RX
     }
-    #[doc = "Checks if the value of the field is `PIOA`"]
+    #[doc = "PIOA"]
     #[inline(always)]
     pub fn is_pioa(&self) -> bool {
         *self == PERIDSELECT_A::PIOA
     }
-    #[doc = "Checks if the value of the field is `AFEC0`"]
+    #[doc = "AFEC0"]
     #[inline(always)]
     pub fn is_afec0(&self) -> bool {
         *self == PERIDSELECT_A::AFEC0
     }
-    #[doc = "Checks if the value of the field is `AFEC1`"]
+    #[doc = "AFEC1"]
     #[inline(always)]
     pub fn is_afec1(&self) -> bool {
         *self == PERIDSELECT_A::AFEC1
     }
-    #[doc = "Checks if the value of the field is `AES_TX`"]
+    #[doc = "AES_TX"]
     #[inline(always)]
     pub fn is_aes_tx(&self) -> bool {
         *self == PERIDSELECT_A::AES_TX
     }
-    #[doc = "Checks if the value of the field is `AES_RX`"]
+    #[doc = "AES_RX"]
     #[inline(always)]
     pub fn is_aes_rx(&self) -> bool {
         *self == PERIDSELECT_A::AES_RX
     }
-    #[doc = "Checks if the value of the field is `PWM1`"]
+    #[doc = "PWM1"]
     #[inline(always)]
     pub fn is_pwm1(&self) -> bool {
         *self == PERIDSELECT_A::PWM1
     }
-    #[doc = "Checks if the value of the field is `TC0`"]
+    #[doc = "TC0"]
     #[inline(always)]
     pub fn is_tc0(&self) -> bool {
         *self == PERIDSELECT_A::TC0
     }
-    #[doc = "Checks if the value of the field is `TC3`"]
+    #[doc = "TC3"]
     #[inline(always)]
     pub fn is_tc3(&self) -> bool {
         *self == PERIDSELECT_A::TC3
     }
-    #[doc = "Checks if the value of the field is `TC6`"]
+    #[doc = "TC6"]
     #[inline(always)]
     pub fn is_tc6(&self) -> bool {
         *self == PERIDSELECT_A::TC6
     }
-    #[doc = "Checks if the value of the field is `TC9`"]
+    #[doc = "TC9"]
     #[inline(always)]
     pub fn is_tc9(&self) -> bool {
         *self == PERIDSELECT_A::TC9
     }
-    #[doc = "Checks if the value of the field is `I2SC0_TX_LEFT`"]
+    #[doc = "I2SC0_TX_LEFT"]
     #[inline(always)]
     pub fn is_i2sc0_tx_left(&self) -> bool {
         *self == PERIDSELECT_A::I2SC0_TX_LEFT
     }
-    #[doc = "Checks if the value of the field is `I2SC0_RX_LEFT`"]
+    #[doc = "I2SC0_RX_LEFT"]
     #[inline(always)]
     pub fn is_i2sc0_rx_left(&self) -> bool {
         *self == PERIDSELECT_A::I2SC0_RX_LEFT
     }
-    #[doc = "Checks if the value of the field is `I2SC1_TX_LEFT`"]
+    #[doc = "I2SC1_TX_LEFT"]
     #[inline(always)]
     pub fn is_i2sc1_tx_left(&self) -> bool {
         *self == PERIDSELECT_A::I2SC1_TX_LEFT
     }
-    #[doc = "Checks if the value of the field is `I2SC1_RX_LEFT`"]
+    #[doc = "I2SC1_RX_LEFT"]
     #[inline(always)]
     pub fn is_i2sc1_rx_left(&self) -> bool {
         *self == PERIDSELECT_A::I2SC1_RX_LEFT
     }
-    #[doc = "Checks if the value of the field is `I2SC0_TX_RIGHT`"]
+    #[doc = "I2SC0_TX_RIGHT"]
     #[inline(always)]
     pub fn is_i2sc0_tx_right(&self) -> bool {
         *self == PERIDSELECT_A::I2SC0_TX_RIGHT
     }
-    #[doc = "Checks if the value of the field is `I2SC0_RX_RIGHT`"]
+    #[doc = "I2SC0_RX_RIGHT"]
     #[inline(always)]
     pub fn is_i2sc0_rx_right(&self) -> bool {
         *self == PERIDSELECT_A::I2SC0_RX_RIGHT
     }
-    #[doc = "Checks if the value of the field is `I2SC1_TX_RIGHT`"]
+    #[doc = "I2SC1_TX_RIGHT"]
     #[inline(always)]
     pub fn is_i2sc1_tx_right(&self) -> bool {
         *self == PERIDSELECT_A::I2SC1_TX_RIGHT
     }
-    #[doc = "Checks if the value of the field is `I2SC1_RX_RIGHT`"]
+    #[doc = "I2SC1_RX_RIGHT"]
     #[inline(always)]
     pub fn is_i2sc1_rx_right(&self) -> bool {
         *self == PERIDSELECT_A::I2SC1_RX_RIGHT
     }
 }
 #[doc = "Field `PERID` writer - Channel x Peripheral Hardware Request Line Identifier"]
-pub type PERID_W<'a, const O: u8> = crate::FieldWriter<'a, CC_SPEC, 7, O, PERIDSELECT_A>;
-impl<'a, const O: u8> PERID_W<'a, O> {
+pub type PERID_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 7, O, PERIDSELECT_A>;
+impl<'a, REG, const O: u8> PERID_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "HSMCI"]
     #[inline(always)]
-    pub fn hsmci(self) -> &'a mut W {
+    pub fn hsmci(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::HSMCI)
     }
     #[doc = "SPI0_TX"]
     #[inline(always)]
-    pub fn spi0_tx(self) -> &'a mut W {
+    pub fn spi0_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SPI0_TX)
     }
     #[doc = "SPI0_RX"]
     #[inline(always)]
-    pub fn spi0_rx(self) -> &'a mut W {
+    pub fn spi0_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SPI0_RX)
     }
     #[doc = "SPI1_TX"]
     #[inline(always)]
-    pub fn spi1_tx(self) -> &'a mut W {
+    pub fn spi1_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SPI1_TX)
     }
     #[doc = "SPI1_RX"]
     #[inline(always)]
-    pub fn spi1_rx(self) -> &'a mut W {
+    pub fn spi1_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SPI1_RX)
     }
     #[doc = "QSPI_TX"]
     #[inline(always)]
-    pub fn qspi_tx(self) -> &'a mut W {
+    pub fn qspi_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::QSPI_TX)
     }
     #[doc = "QSPI_RX"]
     #[inline(always)]
-    pub fn qspi_rx(self) -> &'a mut W {
+    pub fn qspi_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::QSPI_RX)
     }
     #[doc = "USART0_TX"]
     #[inline(always)]
-    pub fn usart0_tx(self) -> &'a mut W {
+    pub fn usart0_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART0_TX)
     }
     #[doc = "USART0_RX"]
     #[inline(always)]
-    pub fn usart0_rx(self) -> &'a mut W {
+    pub fn usart0_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART0_RX)
     }
     #[doc = "USART1_TX"]
     #[inline(always)]
-    pub fn usart1_tx(self) -> &'a mut W {
+    pub fn usart1_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART1_TX)
     }
     #[doc = "USART1_RX"]
     #[inline(always)]
-    pub fn usart1_rx(self) -> &'a mut W {
+    pub fn usart1_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART1_RX)
     }
     #[doc = "USART2_TX"]
     #[inline(always)]
-    pub fn usart2_tx(self) -> &'a mut W {
+    pub fn usart2_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART2_TX)
     }
     #[doc = "USART2_RX"]
     #[inline(always)]
-    pub fn usart2_rx(self) -> &'a mut W {
+    pub fn usart2_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::USART2_RX)
     }
     #[doc = "PWM0"]
     #[inline(always)]
-    pub fn pwm0(self) -> &'a mut W {
+    pub fn pwm0(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::PWM0)
     }
     #[doc = "TWIHS0_TX"]
     #[inline(always)]
-    pub fn twihs0_tx(self) -> &'a mut W {
+    pub fn twihs0_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS0_TX)
     }
     #[doc = "TWIHS0_RX"]
     #[inline(always)]
-    pub fn twihs0_rx(self) -> &'a mut W {
+    pub fn twihs0_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS0_RX)
     }
     #[doc = "TWIHS1_TX"]
     #[inline(always)]
-    pub fn twihs1_tx(self) -> &'a mut W {
+    pub fn twihs1_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS1_TX)
     }
     #[doc = "TWIHS1_RX"]
     #[inline(always)]
-    pub fn twihs1_rx(self) -> &'a mut W {
+    pub fn twihs1_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS1_RX)
     }
     #[doc = "TWIHS2_TX"]
     #[inline(always)]
-    pub fn twihs2_tx(self) -> &'a mut W {
+    pub fn twihs2_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS2_TX)
     }
     #[doc = "TWIHS2_RX"]
     #[inline(always)]
-    pub fn twihs2_rx(self) -> &'a mut W {
+    pub fn twihs2_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TWIHS2_RX)
     }
     #[doc = "UART0_TX"]
     #[inline(always)]
-    pub fn uart0_tx(self) -> &'a mut W {
+    pub fn uart0_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART0_TX)
     }
     #[doc = "UART0_RX"]
     #[inline(always)]
-    pub fn uart0_rx(self) -> &'a mut W {
+    pub fn uart0_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART0_RX)
     }
     #[doc = "UART1_TX"]
     #[inline(always)]
-    pub fn uart1_tx(self) -> &'a mut W {
+    pub fn uart1_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART1_TX)
     }
     #[doc = "UART1_RX"]
     #[inline(always)]
-    pub fn uart1_rx(self) -> &'a mut W {
+    pub fn uart1_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART1_RX)
     }
     #[doc = "UART2_TX"]
     #[inline(always)]
-    pub fn uart2_tx(self) -> &'a mut W {
+    pub fn uart2_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART2_TX)
     }
     #[doc = "UART2_RX"]
     #[inline(always)]
-    pub fn uart2_rx(self) -> &'a mut W {
+    pub fn uart2_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART2_RX)
     }
     #[doc = "UART3_TX"]
     #[inline(always)]
-    pub fn uart3_tx(self) -> &'a mut W {
+    pub fn uart3_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART3_TX)
     }
     #[doc = "UART3_RX"]
     #[inline(always)]
-    pub fn uart3_rx(self) -> &'a mut W {
+    pub fn uart3_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART3_RX)
     }
     #[doc = "UART4_TX"]
     #[inline(always)]
-    pub fn uart4_tx(self) -> &'a mut W {
+    pub fn uart4_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART4_TX)
     }
     #[doc = "UART4_RX"]
     #[inline(always)]
-    pub fn uart4_rx(self) -> &'a mut W {
+    pub fn uart4_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::UART4_RX)
     }
     #[doc = "DACC0"]
     #[inline(always)]
-    pub fn dacc0(self) -> &'a mut W {
+    pub fn dacc0(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::DACC0)
     }
     #[doc = "DACC1"]
     #[inline(always)]
-    pub fn dacc1(self) -> &'a mut W {
+    pub fn dacc1(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::DACC1)
     }
     #[doc = "SSC_TX"]
     #[inline(always)]
-    pub fn ssc_tx(self) -> &'a mut W {
+    pub fn ssc_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SSC_TX)
     }
     #[doc = "SSC_RX"]
     #[inline(always)]
-    pub fn ssc_rx(self) -> &'a mut W {
+    pub fn ssc_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::SSC_RX)
     }
     #[doc = "PIOA"]
     #[inline(always)]
-    pub fn pioa(self) -> &'a mut W {
+    pub fn pioa(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::PIOA)
     }
     #[doc = "AFEC0"]
     #[inline(always)]
-    pub fn afec0(self) -> &'a mut W {
+    pub fn afec0(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::AFEC0)
     }
     #[doc = "AFEC1"]
     #[inline(always)]
-    pub fn afec1(self) -> &'a mut W {
+    pub fn afec1(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::AFEC1)
     }
     #[doc = "AES_TX"]
     #[inline(always)]
-    pub fn aes_tx(self) -> &'a mut W {
+    pub fn aes_tx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::AES_TX)
     }
     #[doc = "AES_RX"]
     #[inline(always)]
-    pub fn aes_rx(self) -> &'a mut W {
+    pub fn aes_rx(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::AES_RX)
     }
     #[doc = "PWM1"]
     #[inline(always)]
-    pub fn pwm1(self) -> &'a mut W {
+    pub fn pwm1(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::PWM1)
     }
     #[doc = "TC0"]
     #[inline(always)]
-    pub fn tc0(self) -> &'a mut W {
+    pub fn tc0(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TC0)
     }
     #[doc = "TC3"]
     #[inline(always)]
-    pub fn tc3(self) -> &'a mut W {
+    pub fn tc3(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TC3)
     }
     #[doc = "TC6"]
     #[inline(always)]
-    pub fn tc6(self) -> &'a mut W {
+    pub fn tc6(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TC6)
     }
     #[doc = "TC9"]
     #[inline(always)]
-    pub fn tc9(self) -> &'a mut W {
+    pub fn tc9(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::TC9)
     }
     #[doc = "I2SC0_TX_LEFT"]
     #[inline(always)]
-    pub fn i2sc0_tx_left(self) -> &'a mut W {
+    pub fn i2sc0_tx_left(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC0_TX_LEFT)
     }
     #[doc = "I2SC0_RX_LEFT"]
     #[inline(always)]
-    pub fn i2sc0_rx_left(self) -> &'a mut W {
+    pub fn i2sc0_rx_left(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC0_RX_LEFT)
     }
     #[doc = "I2SC1_TX_LEFT"]
     #[inline(always)]
-    pub fn i2sc1_tx_left(self) -> &'a mut W {
+    pub fn i2sc1_tx_left(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC1_TX_LEFT)
     }
     #[doc = "I2SC1_RX_LEFT"]
     #[inline(always)]
-    pub fn i2sc1_rx_left(self) -> &'a mut W {
+    pub fn i2sc1_rx_left(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC1_RX_LEFT)
     }
     #[doc = "I2SC0_TX_RIGHT"]
     #[inline(always)]
-    pub fn i2sc0_tx_right(self) -> &'a mut W {
+    pub fn i2sc0_tx_right(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC0_TX_RIGHT)
     }
     #[doc = "I2SC0_RX_RIGHT"]
     #[inline(always)]
-    pub fn i2sc0_rx_right(self) -> &'a mut W {
+    pub fn i2sc0_rx_right(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC0_RX_RIGHT)
     }
     #[doc = "I2SC1_TX_RIGHT"]
     #[inline(always)]
-    pub fn i2sc1_tx_right(self) -> &'a mut W {
+    pub fn i2sc1_tx_right(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC1_TX_RIGHT)
     }
     #[doc = "I2SC1_RX_RIGHT"]
     #[inline(always)]
-    pub fn i2sc1_rx_right(self) -> &'a mut W {
+    pub fn i2sc1_rx_right(self) -> &'a mut crate::W<REG> {
         self.variant(PERIDSELECT_A::I2SC1_RX_RIGHT)
     }
 }
@@ -1675,112 +1694,109 @@ impl W {
     #[doc = "Bit 0 - Channel x Transfer Type"]
     #[inline(always)]
     #[must_use]
-    pub fn type_(&mut self) -> TYPE_W<0> {
+    pub fn type_(&mut self) -> TYPE_W<CC_SPEC, 0> {
         TYPE_W::new(self)
     }
     #[doc = "Bits 1:2 - Channel x Memory Burst Size"]
     #[inline(always)]
     #[must_use]
-    pub fn mbsize(&mut self) -> MBSIZE_W<1> {
+    pub fn mbsize(&mut self) -> MBSIZE_W<CC_SPEC, 1> {
         MBSIZE_W::new(self)
     }
     #[doc = "Bit 4 - Channel x Synchronization"]
     #[inline(always)]
     #[must_use]
-    pub fn dsync(&mut self) -> DSYNC_W<4> {
+    pub fn dsync(&mut self) -> DSYNC_W<CC_SPEC, 4> {
         DSYNC_W::new(self)
     }
     #[doc = "Bit 6 - Channel x Software Request Trigger"]
     #[inline(always)]
     #[must_use]
-    pub fn swreq(&mut self) -> SWREQ_W<6> {
+    pub fn swreq(&mut self) -> SWREQ_W<CC_SPEC, 6> {
         SWREQ_W::new(self)
     }
     #[doc = "Bit 7 - Channel x Fill Block of memory"]
     #[inline(always)]
     #[must_use]
-    pub fn memset(&mut self) -> MEMSET_W<7> {
+    pub fn memset(&mut self) -> MEMSET_W<CC_SPEC, 7> {
         MEMSET_W::new(self)
     }
     #[doc = "Bits 8:10 - Channel x Chunk Size"]
     #[inline(always)]
     #[must_use]
-    pub fn csize(&mut self) -> CSIZE_W<8> {
+    pub fn csize(&mut self) -> CSIZE_W<CC_SPEC, 8> {
         CSIZE_W::new(self)
     }
     #[doc = "Bits 11:12 - Channel x Data Width"]
     #[inline(always)]
     #[must_use]
-    pub fn dwidth(&mut self) -> DWIDTH_W<11> {
+    pub fn dwidth(&mut self) -> DWIDTH_W<CC_SPEC, 11> {
         DWIDTH_W::new(self)
     }
     #[doc = "Bit 13 - Channel x Source Interface Identifier"]
     #[inline(always)]
     #[must_use]
-    pub fn sif(&mut self) -> SIF_W<13> {
+    pub fn sif(&mut self) -> SIF_W<CC_SPEC, 13> {
         SIF_W::new(self)
     }
     #[doc = "Bit 14 - Channel x Destination Interface Identifier"]
     #[inline(always)]
     #[must_use]
-    pub fn dif(&mut self) -> DIF_W<14> {
+    pub fn dif(&mut self) -> DIF_W<CC_SPEC, 14> {
         DIF_W::new(self)
     }
     #[doc = "Bits 16:17 - Channel x Source Addressing Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn sam(&mut self) -> SAM_W<16> {
+    pub fn sam(&mut self) -> SAM_W<CC_SPEC, 16> {
         SAM_W::new(self)
     }
     #[doc = "Bits 18:19 - Channel x Destination Addressing Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn dam(&mut self) -> DAM_W<18> {
+    pub fn dam(&mut self) -> DAM_W<CC_SPEC, 18> {
         DAM_W::new(self)
     }
     #[doc = "Bit 21 - Channel Initialization Terminated (this bit is read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn initd(&mut self) -> INITD_W<21> {
+    pub fn initd(&mut self) -> INITD_W<CC_SPEC, 21> {
         INITD_W::new(self)
     }
     #[doc = "Bit 22 - Read in Progress (this bit is read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn rdip(&mut self) -> RDIP_W<22> {
+    pub fn rdip(&mut self) -> RDIP_W<CC_SPEC, 22> {
         RDIP_W::new(self)
     }
     #[doc = "Bit 23 - Write in Progress (this bit is read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn wrip(&mut self) -> WRIP_W<23> {
+    pub fn wrip(&mut self) -> WRIP_W<CC_SPEC, 23> {
         WRIP_W::new(self)
     }
     #[doc = "Bits 24:30 - Channel x Peripheral Hardware Request Line Identifier"]
     #[inline(always)]
     #[must_use]
-    pub fn perid(&mut self) -> PERID_W<24> {
+    pub fn perid(&mut self) -> PERID_W<CC_SPEC, 24> {
         PERID_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Channel Configuration Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cc](index.html) module"]
+#[doc = "Channel Configuration Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cc::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cc::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CC_SPEC;
 impl crate::RegisterSpec for CC_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cc::R](R) reader structure"]
-impl crate::Readable for CC_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [cc::W](W) writer structure"]
+#[doc = "`read()` method returns [`cc::R`](R) reader structure"]
+impl crate::Readable for CC_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`cc::W`](W) writer structure"]
 impl crate::Writable for CC_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,18 +1,5 @@
 #[doc = "Register `TXBTO` reader"]
-pub struct R(crate::R<TXBTO_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<TXBTO_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<TXBTO_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<TXBTO_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<TXBTO_SPEC>;
 #[doc = "Field `TO0` reader - Transmission Occurred for Buffer 0"]
 pub type TO0_R = crate::BitReader;
 #[doc = "Field `TO1` reader - Transmission Occurred for Buffer 1"]
@@ -239,15 +226,13 @@ impl R {
         TO31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Transmit Buffer Transmission Occurred Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [txbto](index.html) module"]
+#[doc = "Transmit Buffer Transmission Occurred Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`txbto::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct TXBTO_SPEC;
 impl crate::RegisterSpec for TXBTO_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [txbto::R](R) reader structure"]
-impl crate::Readable for TXBTO_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`txbto::R`](R) reader structure"]
+impl crate::Readable for TXBTO_SPEC {}
 #[doc = "`reset()` method sets TXBTO to value 0"]
 impl crate::Resettable for TXBTO_SPEC {
     const RESET_VALUE: Self::Ux = 0;

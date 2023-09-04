@@ -1,67 +1,35 @@
 #[doc = "Register `US_LONMR` reader"]
-pub struct R(crate::R<US_LONMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<US_LONMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<US_LONMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<US_LONMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<US_LONMR_SPEC>;
 #[doc = "Register `US_LONMR` writer"]
-pub struct W(crate::W<US_LONMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<US_LONMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<US_LONMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<US_LONMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<US_LONMR_SPEC>;
 #[doc = "Field `COMMT` reader - LON comm_type Parameter Value"]
 pub type COMMT_R = crate::BitReader;
 #[doc = "Field `COMMT` writer - LON comm_type Parameter Value"]
-pub type COMMT_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type COMMT_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `COLDET` reader - LON Collision Detection Feature"]
 pub type COLDET_R = crate::BitReader;
 #[doc = "Field `COLDET` writer - LON Collision Detection Feature"]
-pub type COLDET_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type COLDET_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TCOL` reader - Terminate Frame upon Collision Notification"]
 pub type TCOL_R = crate::BitReader;
 #[doc = "Field `TCOL` writer - Terminate Frame upon Collision Notification"]
-pub type TCOL_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type TCOL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CDTAIL` reader - LON Collision Detection on Frame Tail"]
 pub type CDTAIL_R = crate::BitReader;
 #[doc = "Field `CDTAIL` writer - LON Collision Detection on Frame Tail"]
-pub type CDTAIL_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type CDTAIL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DMAM` reader - LON DMA Mode"]
 pub type DMAM_R = crate::BitReader;
 #[doc = "Field `DMAM` writer - LON DMA Mode"]
-pub type DMAM_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type DMAM_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LCDS` reader - LON Collision Detection Source"]
 pub type LCDS_R = crate::BitReader;
 #[doc = "Field `LCDS` writer - LON Collision Detection Source"]
-pub type LCDS_W<'a, const O: u8> = crate::BitWriter<'a, US_LONMR_SPEC, O>;
+pub type LCDS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `EOFS` reader - End of Frame Condition Size"]
 pub type EOFS_R = crate::FieldReader;
 #[doc = "Field `EOFS` writer - End of Frame Condition Size"]
-pub type EOFS_W<'a, const O: u8> = crate::FieldWriter<'a, US_LONMR_SPEC, 8, O>;
+pub type EOFS_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 8, O>;
 impl R {
     #[doc = "Bit 0 - LON comm_type Parameter Value"]
     #[inline(always)]
@@ -103,64 +71,61 @@ impl W {
     #[doc = "Bit 0 - LON comm_type Parameter Value"]
     #[inline(always)]
     #[must_use]
-    pub fn commt(&mut self) -> COMMT_W<0> {
+    pub fn commt(&mut self) -> COMMT_W<US_LONMR_SPEC, 0> {
         COMMT_W::new(self)
     }
     #[doc = "Bit 1 - LON Collision Detection Feature"]
     #[inline(always)]
     #[must_use]
-    pub fn coldet(&mut self) -> COLDET_W<1> {
+    pub fn coldet(&mut self) -> COLDET_W<US_LONMR_SPEC, 1> {
         COLDET_W::new(self)
     }
     #[doc = "Bit 2 - Terminate Frame upon Collision Notification"]
     #[inline(always)]
     #[must_use]
-    pub fn tcol(&mut self) -> TCOL_W<2> {
+    pub fn tcol(&mut self) -> TCOL_W<US_LONMR_SPEC, 2> {
         TCOL_W::new(self)
     }
     #[doc = "Bit 3 - LON Collision Detection on Frame Tail"]
     #[inline(always)]
     #[must_use]
-    pub fn cdtail(&mut self) -> CDTAIL_W<3> {
+    pub fn cdtail(&mut self) -> CDTAIL_W<US_LONMR_SPEC, 3> {
         CDTAIL_W::new(self)
     }
     #[doc = "Bit 4 - LON DMA Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn dmam(&mut self) -> DMAM_W<4> {
+    pub fn dmam(&mut self) -> DMAM_W<US_LONMR_SPEC, 4> {
         DMAM_W::new(self)
     }
     #[doc = "Bit 5 - LON Collision Detection Source"]
     #[inline(always)]
     #[must_use]
-    pub fn lcds(&mut self) -> LCDS_W<5> {
+    pub fn lcds(&mut self) -> LCDS_W<US_LONMR_SPEC, 5> {
         LCDS_W::new(self)
     }
     #[doc = "Bits 16:23 - End of Frame Condition Size"]
     #[inline(always)]
     #[must_use]
-    pub fn eofs(&mut self) -> EOFS_W<16> {
+    pub fn eofs(&mut self) -> EOFS_W<US_LONMR_SPEC, 16> {
         EOFS_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "LON Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [us_lonmr](index.html) module"]
+#[doc = "LON Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`us_lonmr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`us_lonmr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct US_LONMR_SPEC;
 impl crate::RegisterSpec for US_LONMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [us_lonmr::R](R) reader structure"]
-impl crate::Readable for US_LONMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [us_lonmr::W](W) writer structure"]
+#[doc = "`read()` method returns [`us_lonmr::R`](R) reader structure"]
+impl crate::Readable for US_LONMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`us_lonmr::W`](W) writer structure"]
 impl crate::Writable for US_LONMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,63 +1,31 @@
 #[doc = "Register `MSS` reader"]
-pub struct R(crate::R<MSS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<MSS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<MSS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<MSS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<MSS_SPEC>;
 #[doc = "Register `MSS` writer"]
-pub struct W(crate::W<MSS_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<MSS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<MSS_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<MSS_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<MSS_SPEC>;
 #[doc = "Field `RSTSYSCMD` reader - Reset System Command Detected in the System Quadlet (cleared by writing a 0)"]
 pub type RSTSYSCMD_R = crate::BitReader;
 #[doc = "Field `RSTSYSCMD` writer - Reset System Command Detected in the System Quadlet (cleared by writing a 0)"]
-pub type RSTSYSCMD_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type RSTSYSCMD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LKSYSCMD` reader - Network Lock System Command Detected in the System Quadlet (cleared by writing a 0)"]
 pub type LKSYSCMD_R = crate::BitReader;
 #[doc = "Field `LKSYSCMD` writer - Network Lock System Command Detected in the System Quadlet (cleared by writing a 0)"]
-pub type LKSYSCMD_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type LKSYSCMD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `ULKSYSCMD` reader - Network Unlock System Command Detected in the System Quadlet (cleared by writing a 0)"]
 pub type ULKSYSCMD_R = crate::BitReader;
 #[doc = "Field `ULKSYSCMD` writer - Network Unlock System Command Detected in the System Quadlet (cleared by writing a 0)"]
-pub type ULKSYSCMD_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type ULKSYSCMD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CSSYSCMD` reader - Channel Scan System Command Detected in the System Quadlet (cleared by writing a 0)"]
 pub type CSSYSCMD_R = crate::BitReader;
 #[doc = "Field `CSSYSCMD` writer - Channel Scan System Command Detected in the System Quadlet (cleared by writing a 0)"]
-pub type CSSYSCMD_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type CSSYSCMD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SWSYSCMD` reader - Software System Command Detected in the System Quadlet (cleared by writing a 0)"]
 pub type SWSYSCMD_R = crate::BitReader;
 #[doc = "Field `SWSYSCMD` writer - Software System Command Detected in the System Quadlet (cleared by writing a 0)"]
-pub type SWSYSCMD_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type SWSYSCMD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SERVREQ` reader - Service Request Enabled"]
 pub type SERVREQ_R = crate::BitReader;
 #[doc = "Field `SERVREQ` writer - Service Request Enabled"]
-pub type SERVREQ_W<'a, const O: u8> = crate::BitWriter<'a, MSS_SPEC, O>;
+pub type SERVREQ_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Reset System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
@@ -94,58 +62,55 @@ impl W {
     #[doc = "Bit 0 - Reset System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
     #[must_use]
-    pub fn rstsyscmd(&mut self) -> RSTSYSCMD_W<0> {
+    pub fn rstsyscmd(&mut self) -> RSTSYSCMD_W<MSS_SPEC, 0> {
         RSTSYSCMD_W::new(self)
     }
     #[doc = "Bit 1 - Network Lock System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
     #[must_use]
-    pub fn lksyscmd(&mut self) -> LKSYSCMD_W<1> {
+    pub fn lksyscmd(&mut self) -> LKSYSCMD_W<MSS_SPEC, 1> {
         LKSYSCMD_W::new(self)
     }
     #[doc = "Bit 2 - Network Unlock System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
     #[must_use]
-    pub fn ulksyscmd(&mut self) -> ULKSYSCMD_W<2> {
+    pub fn ulksyscmd(&mut self) -> ULKSYSCMD_W<MSS_SPEC, 2> {
         ULKSYSCMD_W::new(self)
     }
     #[doc = "Bit 3 - Channel Scan System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
     #[must_use]
-    pub fn cssyscmd(&mut self) -> CSSYSCMD_W<3> {
+    pub fn cssyscmd(&mut self) -> CSSYSCMD_W<MSS_SPEC, 3> {
         CSSYSCMD_W::new(self)
     }
     #[doc = "Bit 4 - Software System Command Detected in the System Quadlet (cleared by writing a 0)"]
     #[inline(always)]
     #[must_use]
-    pub fn swsyscmd(&mut self) -> SWSYSCMD_W<4> {
+    pub fn swsyscmd(&mut self) -> SWSYSCMD_W<MSS_SPEC, 4> {
         SWSYSCMD_W::new(self)
     }
     #[doc = "Bit 5 - Service Request Enabled"]
     #[inline(always)]
     #[must_use]
-    pub fn servreq(&mut self) -> SERVREQ_W<5> {
+    pub fn servreq(&mut self) -> SERVREQ_W<MSS_SPEC, 5> {
         SERVREQ_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "MediaLB System Status Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [mss](index.html) module"]
+#[doc = "MediaLB System Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mss::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mss::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct MSS_SPEC;
 impl crate::RegisterSpec for MSS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [mss::R](R) reader structure"]
-impl crate::Readable for MSS_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [mss::W](W) writer structure"]
+#[doc = "`read()` method returns [`mss::R`](R) reader structure"]
+impl crate::Readable for MSS_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`mss::W`](W) writer structure"]
 impl crate::Writable for MSS_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

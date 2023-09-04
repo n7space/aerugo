@@ -1,39 +1,7 @@
 #[doc = "Register `DRIVER` reader"]
-pub struct R(crate::R<DRIVER_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<DRIVER_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<DRIVER_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<DRIVER_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<DRIVER_SPEC>;
 #[doc = "Register `DRIVER` writer"]
-pub struct W(crate::W<DRIVER_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<DRIVER_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<DRIVER_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<DRIVER_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<DRIVER_SPEC>;
 #[doc = "Field `LINE0` reader - Drive of PIO Line 0"]
 pub type LINE0_R = crate::BitReader<LINE0SELECT_A>;
 #[doc = "Drive of PIO Line 0\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl LINE0_R {
             true => LINE0SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE0SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE0SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE0` writer - Drive of PIO Line 0"]
-pub type LINE0_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE0SELECT_A>;
-impl<'a, const O: u8> LINE0_W<'a, O> {
+pub type LINE0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE0SELECT_A>;
+impl<'a, REG, const O: u8> LINE0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE0SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE0SELECT_A::HIGH_DRIVE)
     }
 }
@@ -109,28 +80,31 @@ impl LINE1_R {
             true => LINE1SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE1SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE1SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE1` writer - Drive of PIO Line 1"]
-pub type LINE1_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE1SELECT_A>;
-impl<'a, const O: u8> LINE1_W<'a, O> {
+pub type LINE1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE1SELECT_A>;
+impl<'a, REG, const O: u8> LINE1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE1SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE1SELECT_A::HIGH_DRIVE)
     }
 }
@@ -159,28 +133,31 @@ impl LINE2_R {
             true => LINE2SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE2SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE2SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE2` writer - Drive of PIO Line 2"]
-pub type LINE2_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE2SELECT_A>;
-impl<'a, const O: u8> LINE2_W<'a, O> {
+pub type LINE2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE2SELECT_A>;
+impl<'a, REG, const O: u8> LINE2_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE2SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE2SELECT_A::HIGH_DRIVE)
     }
 }
@@ -209,28 +186,31 @@ impl LINE3_R {
             true => LINE3SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE3SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE3SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE3` writer - Drive of PIO Line 3"]
-pub type LINE3_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE3SELECT_A>;
-impl<'a, const O: u8> LINE3_W<'a, O> {
+pub type LINE3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE3SELECT_A>;
+impl<'a, REG, const O: u8> LINE3_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE3SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE3SELECT_A::HIGH_DRIVE)
     }
 }
@@ -259,28 +239,31 @@ impl LINE4_R {
             true => LINE4SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE4SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE4SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE4` writer - Drive of PIO Line 4"]
-pub type LINE4_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE4SELECT_A>;
-impl<'a, const O: u8> LINE4_W<'a, O> {
+pub type LINE4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE4SELECT_A>;
+impl<'a, REG, const O: u8> LINE4_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE4SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE4SELECT_A::HIGH_DRIVE)
     }
 }
@@ -309,28 +292,31 @@ impl LINE5_R {
             true => LINE5SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE5SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE5SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE5` writer - Drive of PIO Line 5"]
-pub type LINE5_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE5SELECT_A>;
-impl<'a, const O: u8> LINE5_W<'a, O> {
+pub type LINE5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE5SELECT_A>;
+impl<'a, REG, const O: u8> LINE5_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE5SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE5SELECT_A::HIGH_DRIVE)
     }
 }
@@ -359,28 +345,31 @@ impl LINE6_R {
             true => LINE6SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE6SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE6SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE6` writer - Drive of PIO Line 6"]
-pub type LINE6_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE6SELECT_A>;
-impl<'a, const O: u8> LINE6_W<'a, O> {
+pub type LINE6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE6SELECT_A>;
+impl<'a, REG, const O: u8> LINE6_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE6SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE6SELECT_A::HIGH_DRIVE)
     }
 }
@@ -409,28 +398,31 @@ impl LINE7_R {
             true => LINE7SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE7SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE7SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE7` writer - Drive of PIO Line 7"]
-pub type LINE7_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE7SELECT_A>;
-impl<'a, const O: u8> LINE7_W<'a, O> {
+pub type LINE7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE7SELECT_A>;
+impl<'a, REG, const O: u8> LINE7_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE7SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE7SELECT_A::HIGH_DRIVE)
     }
 }
@@ -459,28 +451,31 @@ impl LINE8_R {
             true => LINE8SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE8SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE8SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE8` writer - Drive of PIO Line 8"]
-pub type LINE8_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE8SELECT_A>;
-impl<'a, const O: u8> LINE8_W<'a, O> {
+pub type LINE8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE8SELECT_A>;
+impl<'a, REG, const O: u8> LINE8_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE8SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE8SELECT_A::HIGH_DRIVE)
     }
 }
@@ -509,28 +504,31 @@ impl LINE9_R {
             true => LINE9SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE9SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE9SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE9` writer - Drive of PIO Line 9"]
-pub type LINE9_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE9SELECT_A>;
-impl<'a, const O: u8> LINE9_W<'a, O> {
+pub type LINE9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE9SELECT_A>;
+impl<'a, REG, const O: u8> LINE9_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE9SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE9SELECT_A::HIGH_DRIVE)
     }
 }
@@ -559,28 +557,31 @@ impl LINE10_R {
             true => LINE10SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE10SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE10SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE10` writer - Drive of PIO Line 10"]
-pub type LINE10_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE10SELECT_A>;
-impl<'a, const O: u8> LINE10_W<'a, O> {
+pub type LINE10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE10SELECT_A>;
+impl<'a, REG, const O: u8> LINE10_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE10SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE10SELECT_A::HIGH_DRIVE)
     }
 }
@@ -609,28 +610,31 @@ impl LINE11_R {
             true => LINE11SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE11SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE11SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE11` writer - Drive of PIO Line 11"]
-pub type LINE11_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE11SELECT_A>;
-impl<'a, const O: u8> LINE11_W<'a, O> {
+pub type LINE11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE11SELECT_A>;
+impl<'a, REG, const O: u8> LINE11_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE11SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE11SELECT_A::HIGH_DRIVE)
     }
 }
@@ -659,28 +663,31 @@ impl LINE12_R {
             true => LINE12SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE12SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE12SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE12` writer - Drive of PIO Line 12"]
-pub type LINE12_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE12SELECT_A>;
-impl<'a, const O: u8> LINE12_W<'a, O> {
+pub type LINE12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE12SELECT_A>;
+impl<'a, REG, const O: u8> LINE12_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE12SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE12SELECT_A::HIGH_DRIVE)
     }
 }
@@ -709,28 +716,31 @@ impl LINE13_R {
             true => LINE13SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE13SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE13SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE13` writer - Drive of PIO Line 13"]
-pub type LINE13_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE13SELECT_A>;
-impl<'a, const O: u8> LINE13_W<'a, O> {
+pub type LINE13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE13SELECT_A>;
+impl<'a, REG, const O: u8> LINE13_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE13SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE13SELECT_A::HIGH_DRIVE)
     }
 }
@@ -759,28 +769,31 @@ impl LINE14_R {
             true => LINE14SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE14SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE14SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE14` writer - Drive of PIO Line 14"]
-pub type LINE14_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE14SELECT_A>;
-impl<'a, const O: u8> LINE14_W<'a, O> {
+pub type LINE14_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE14SELECT_A>;
+impl<'a, REG, const O: u8> LINE14_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE14SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE14SELECT_A::HIGH_DRIVE)
     }
 }
@@ -809,28 +822,31 @@ impl LINE15_R {
             true => LINE15SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE15SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE15SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE15` writer - Drive of PIO Line 15"]
-pub type LINE15_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE15SELECT_A>;
-impl<'a, const O: u8> LINE15_W<'a, O> {
+pub type LINE15_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE15SELECT_A>;
+impl<'a, REG, const O: u8> LINE15_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE15SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE15SELECT_A::HIGH_DRIVE)
     }
 }
@@ -859,28 +875,31 @@ impl LINE16_R {
             true => LINE16SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE16SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE16SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE16` writer - Drive of PIO Line 16"]
-pub type LINE16_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE16SELECT_A>;
-impl<'a, const O: u8> LINE16_W<'a, O> {
+pub type LINE16_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE16SELECT_A>;
+impl<'a, REG, const O: u8> LINE16_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE16SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE16SELECT_A::HIGH_DRIVE)
     }
 }
@@ -909,28 +928,31 @@ impl LINE17_R {
             true => LINE17SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE17SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE17SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE17` writer - Drive of PIO Line 17"]
-pub type LINE17_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE17SELECT_A>;
-impl<'a, const O: u8> LINE17_W<'a, O> {
+pub type LINE17_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE17SELECT_A>;
+impl<'a, REG, const O: u8> LINE17_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE17SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE17SELECT_A::HIGH_DRIVE)
     }
 }
@@ -959,28 +981,31 @@ impl LINE18_R {
             true => LINE18SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE18SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE18SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE18` writer - Drive of PIO Line 18"]
-pub type LINE18_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE18SELECT_A>;
-impl<'a, const O: u8> LINE18_W<'a, O> {
+pub type LINE18_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE18SELECT_A>;
+impl<'a, REG, const O: u8> LINE18_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE18SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE18SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1009,28 +1034,31 @@ impl LINE19_R {
             true => LINE19SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE19SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE19SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE19` writer - Drive of PIO Line 19"]
-pub type LINE19_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE19SELECT_A>;
-impl<'a, const O: u8> LINE19_W<'a, O> {
+pub type LINE19_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE19SELECT_A>;
+impl<'a, REG, const O: u8> LINE19_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE19SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE19SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1059,28 +1087,31 @@ impl LINE20_R {
             true => LINE20SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE20SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE20SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE20` writer - Drive of PIO Line 20"]
-pub type LINE20_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE20SELECT_A>;
-impl<'a, const O: u8> LINE20_W<'a, O> {
+pub type LINE20_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE20SELECT_A>;
+impl<'a, REG, const O: u8> LINE20_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE20SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE20SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1109,28 +1140,31 @@ impl LINE21_R {
             true => LINE21SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE21SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE21SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE21` writer - Drive of PIO Line 21"]
-pub type LINE21_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE21SELECT_A>;
-impl<'a, const O: u8> LINE21_W<'a, O> {
+pub type LINE21_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE21SELECT_A>;
+impl<'a, REG, const O: u8> LINE21_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE21SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE21SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1159,28 +1193,31 @@ impl LINE22_R {
             true => LINE22SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE22SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE22SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE22` writer - Drive of PIO Line 22"]
-pub type LINE22_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE22SELECT_A>;
-impl<'a, const O: u8> LINE22_W<'a, O> {
+pub type LINE22_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE22SELECT_A>;
+impl<'a, REG, const O: u8> LINE22_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE22SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE22SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1209,28 +1246,31 @@ impl LINE23_R {
             true => LINE23SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE23SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE23SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE23` writer - Drive of PIO Line 23"]
-pub type LINE23_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE23SELECT_A>;
-impl<'a, const O: u8> LINE23_W<'a, O> {
+pub type LINE23_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE23SELECT_A>;
+impl<'a, REG, const O: u8> LINE23_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE23SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE23SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1259,28 +1299,31 @@ impl LINE24_R {
             true => LINE24SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE24SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE24SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE24` writer - Drive of PIO Line 24"]
-pub type LINE24_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE24SELECT_A>;
-impl<'a, const O: u8> LINE24_W<'a, O> {
+pub type LINE24_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE24SELECT_A>;
+impl<'a, REG, const O: u8> LINE24_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE24SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE24SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1309,28 +1352,31 @@ impl LINE25_R {
             true => LINE25SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE25SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE25SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE25` writer - Drive of PIO Line 25"]
-pub type LINE25_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE25SELECT_A>;
-impl<'a, const O: u8> LINE25_W<'a, O> {
+pub type LINE25_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE25SELECT_A>;
+impl<'a, REG, const O: u8> LINE25_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE25SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE25SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1359,28 +1405,31 @@ impl LINE26_R {
             true => LINE26SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE26SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE26SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE26` writer - Drive of PIO Line 26"]
-pub type LINE26_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE26SELECT_A>;
-impl<'a, const O: u8> LINE26_W<'a, O> {
+pub type LINE26_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE26SELECT_A>;
+impl<'a, REG, const O: u8> LINE26_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE26SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE26SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1409,28 +1458,31 @@ impl LINE27_R {
             true => LINE27SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE27SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE27SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE27` writer - Drive of PIO Line 27"]
-pub type LINE27_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE27SELECT_A>;
-impl<'a, const O: u8> LINE27_W<'a, O> {
+pub type LINE27_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE27SELECT_A>;
+impl<'a, REG, const O: u8> LINE27_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE27SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE27SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1459,28 +1511,31 @@ impl LINE28_R {
             true => LINE28SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE28SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE28SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE28` writer - Drive of PIO Line 28"]
-pub type LINE28_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE28SELECT_A>;
-impl<'a, const O: u8> LINE28_W<'a, O> {
+pub type LINE28_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE28SELECT_A>;
+impl<'a, REG, const O: u8> LINE28_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE28SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE28SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1509,28 +1564,31 @@ impl LINE29_R {
             true => LINE29SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE29SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE29SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE29` writer - Drive of PIO Line 29"]
-pub type LINE29_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE29SELECT_A>;
-impl<'a, const O: u8> LINE29_W<'a, O> {
+pub type LINE29_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE29SELECT_A>;
+impl<'a, REG, const O: u8> LINE29_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE29SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE29SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1559,28 +1617,31 @@ impl LINE30_R {
             true => LINE30SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE30SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE30SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE30` writer - Drive of PIO Line 30"]
-pub type LINE30_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE30SELECT_A>;
-impl<'a, const O: u8> LINE30_W<'a, O> {
+pub type LINE30_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE30SELECT_A>;
+impl<'a, REG, const O: u8> LINE30_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE30SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE30SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1609,28 +1670,31 @@ impl LINE31_R {
             true => LINE31SELECT_A::HIGH_DRIVE,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_DRIVE`"]
+    #[doc = "Lowest drive"]
     #[inline(always)]
     pub fn is_low_drive(&self) -> bool {
         *self == LINE31SELECT_A::LOW_DRIVE
     }
-    #[doc = "Checks if the value of the field is `HIGH_DRIVE`"]
+    #[doc = "Highest drive"]
     #[inline(always)]
     pub fn is_high_drive(&self) -> bool {
         *self == LINE31SELECT_A::HIGH_DRIVE
     }
 }
 #[doc = "Field `LINE31` writer - Drive of PIO Line 31"]
-pub type LINE31_W<'a, const O: u8> = crate::BitWriter<'a, DRIVER_SPEC, O, LINE31SELECT_A>;
-impl<'a, const O: u8> LINE31_W<'a, O> {
+pub type LINE31_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LINE31SELECT_A>;
+impl<'a, REG, const O: u8> LINE31_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Lowest drive"]
     #[inline(always)]
-    pub fn low_drive(self) -> &'a mut W {
+    pub fn low_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE31SELECT_A::LOW_DRIVE)
     }
     #[doc = "Highest drive"]
     #[inline(always)]
-    pub fn high_drive(self) -> &'a mut W {
+    pub fn high_drive(self) -> &'a mut crate::W<REG> {
         self.variant(LINE31SELECT_A::HIGH_DRIVE)
     }
 }
@@ -1800,214 +1864,211 @@ impl W {
     #[doc = "Bit 0 - Drive of PIO Line 0"]
     #[inline(always)]
     #[must_use]
-    pub fn line0(&mut self) -> LINE0_W<0> {
+    pub fn line0(&mut self) -> LINE0_W<DRIVER_SPEC, 0> {
         LINE0_W::new(self)
     }
     #[doc = "Bit 1 - Drive of PIO Line 1"]
     #[inline(always)]
     #[must_use]
-    pub fn line1(&mut self) -> LINE1_W<1> {
+    pub fn line1(&mut self) -> LINE1_W<DRIVER_SPEC, 1> {
         LINE1_W::new(self)
     }
     #[doc = "Bit 2 - Drive of PIO Line 2"]
     #[inline(always)]
     #[must_use]
-    pub fn line2(&mut self) -> LINE2_W<2> {
+    pub fn line2(&mut self) -> LINE2_W<DRIVER_SPEC, 2> {
         LINE2_W::new(self)
     }
     #[doc = "Bit 3 - Drive of PIO Line 3"]
     #[inline(always)]
     #[must_use]
-    pub fn line3(&mut self) -> LINE3_W<3> {
+    pub fn line3(&mut self) -> LINE3_W<DRIVER_SPEC, 3> {
         LINE3_W::new(self)
     }
     #[doc = "Bit 4 - Drive of PIO Line 4"]
     #[inline(always)]
     #[must_use]
-    pub fn line4(&mut self) -> LINE4_W<4> {
+    pub fn line4(&mut self) -> LINE4_W<DRIVER_SPEC, 4> {
         LINE4_W::new(self)
     }
     #[doc = "Bit 5 - Drive of PIO Line 5"]
     #[inline(always)]
     #[must_use]
-    pub fn line5(&mut self) -> LINE5_W<5> {
+    pub fn line5(&mut self) -> LINE5_W<DRIVER_SPEC, 5> {
         LINE5_W::new(self)
     }
     #[doc = "Bit 6 - Drive of PIO Line 6"]
     #[inline(always)]
     #[must_use]
-    pub fn line6(&mut self) -> LINE6_W<6> {
+    pub fn line6(&mut self) -> LINE6_W<DRIVER_SPEC, 6> {
         LINE6_W::new(self)
     }
     #[doc = "Bit 7 - Drive of PIO Line 7"]
     #[inline(always)]
     #[must_use]
-    pub fn line7(&mut self) -> LINE7_W<7> {
+    pub fn line7(&mut self) -> LINE7_W<DRIVER_SPEC, 7> {
         LINE7_W::new(self)
     }
     #[doc = "Bit 8 - Drive of PIO Line 8"]
     #[inline(always)]
     #[must_use]
-    pub fn line8(&mut self) -> LINE8_W<8> {
+    pub fn line8(&mut self) -> LINE8_W<DRIVER_SPEC, 8> {
         LINE8_W::new(self)
     }
     #[doc = "Bit 9 - Drive of PIO Line 9"]
     #[inline(always)]
     #[must_use]
-    pub fn line9(&mut self) -> LINE9_W<9> {
+    pub fn line9(&mut self) -> LINE9_W<DRIVER_SPEC, 9> {
         LINE9_W::new(self)
     }
     #[doc = "Bit 10 - Drive of PIO Line 10"]
     #[inline(always)]
     #[must_use]
-    pub fn line10(&mut self) -> LINE10_W<10> {
+    pub fn line10(&mut self) -> LINE10_W<DRIVER_SPEC, 10> {
         LINE10_W::new(self)
     }
     #[doc = "Bit 11 - Drive of PIO Line 11"]
     #[inline(always)]
     #[must_use]
-    pub fn line11(&mut self) -> LINE11_W<11> {
+    pub fn line11(&mut self) -> LINE11_W<DRIVER_SPEC, 11> {
         LINE11_W::new(self)
     }
     #[doc = "Bit 12 - Drive of PIO Line 12"]
     #[inline(always)]
     #[must_use]
-    pub fn line12(&mut self) -> LINE12_W<12> {
+    pub fn line12(&mut self) -> LINE12_W<DRIVER_SPEC, 12> {
         LINE12_W::new(self)
     }
     #[doc = "Bit 13 - Drive of PIO Line 13"]
     #[inline(always)]
     #[must_use]
-    pub fn line13(&mut self) -> LINE13_W<13> {
+    pub fn line13(&mut self) -> LINE13_W<DRIVER_SPEC, 13> {
         LINE13_W::new(self)
     }
     #[doc = "Bit 14 - Drive of PIO Line 14"]
     #[inline(always)]
     #[must_use]
-    pub fn line14(&mut self) -> LINE14_W<14> {
+    pub fn line14(&mut self) -> LINE14_W<DRIVER_SPEC, 14> {
         LINE14_W::new(self)
     }
     #[doc = "Bit 15 - Drive of PIO Line 15"]
     #[inline(always)]
     #[must_use]
-    pub fn line15(&mut self) -> LINE15_W<15> {
+    pub fn line15(&mut self) -> LINE15_W<DRIVER_SPEC, 15> {
         LINE15_W::new(self)
     }
     #[doc = "Bit 16 - Drive of PIO Line 16"]
     #[inline(always)]
     #[must_use]
-    pub fn line16(&mut self) -> LINE16_W<16> {
+    pub fn line16(&mut self) -> LINE16_W<DRIVER_SPEC, 16> {
         LINE16_W::new(self)
     }
     #[doc = "Bit 17 - Drive of PIO Line 17"]
     #[inline(always)]
     #[must_use]
-    pub fn line17(&mut self) -> LINE17_W<17> {
+    pub fn line17(&mut self) -> LINE17_W<DRIVER_SPEC, 17> {
         LINE17_W::new(self)
     }
     #[doc = "Bit 18 - Drive of PIO Line 18"]
     #[inline(always)]
     #[must_use]
-    pub fn line18(&mut self) -> LINE18_W<18> {
+    pub fn line18(&mut self) -> LINE18_W<DRIVER_SPEC, 18> {
         LINE18_W::new(self)
     }
     #[doc = "Bit 19 - Drive of PIO Line 19"]
     #[inline(always)]
     #[must_use]
-    pub fn line19(&mut self) -> LINE19_W<19> {
+    pub fn line19(&mut self) -> LINE19_W<DRIVER_SPEC, 19> {
         LINE19_W::new(self)
     }
     #[doc = "Bit 20 - Drive of PIO Line 20"]
     #[inline(always)]
     #[must_use]
-    pub fn line20(&mut self) -> LINE20_W<20> {
+    pub fn line20(&mut self) -> LINE20_W<DRIVER_SPEC, 20> {
         LINE20_W::new(self)
     }
     #[doc = "Bit 21 - Drive of PIO Line 21"]
     #[inline(always)]
     #[must_use]
-    pub fn line21(&mut self) -> LINE21_W<21> {
+    pub fn line21(&mut self) -> LINE21_W<DRIVER_SPEC, 21> {
         LINE21_W::new(self)
     }
     #[doc = "Bit 22 - Drive of PIO Line 22"]
     #[inline(always)]
     #[must_use]
-    pub fn line22(&mut self) -> LINE22_W<22> {
+    pub fn line22(&mut self) -> LINE22_W<DRIVER_SPEC, 22> {
         LINE22_W::new(self)
     }
     #[doc = "Bit 23 - Drive of PIO Line 23"]
     #[inline(always)]
     #[must_use]
-    pub fn line23(&mut self) -> LINE23_W<23> {
+    pub fn line23(&mut self) -> LINE23_W<DRIVER_SPEC, 23> {
         LINE23_W::new(self)
     }
     #[doc = "Bit 24 - Drive of PIO Line 24"]
     #[inline(always)]
     #[must_use]
-    pub fn line24(&mut self) -> LINE24_W<24> {
+    pub fn line24(&mut self) -> LINE24_W<DRIVER_SPEC, 24> {
         LINE24_W::new(self)
     }
     #[doc = "Bit 25 - Drive of PIO Line 25"]
     #[inline(always)]
     #[must_use]
-    pub fn line25(&mut self) -> LINE25_W<25> {
+    pub fn line25(&mut self) -> LINE25_W<DRIVER_SPEC, 25> {
         LINE25_W::new(self)
     }
     #[doc = "Bit 26 - Drive of PIO Line 26"]
     #[inline(always)]
     #[must_use]
-    pub fn line26(&mut self) -> LINE26_W<26> {
+    pub fn line26(&mut self) -> LINE26_W<DRIVER_SPEC, 26> {
         LINE26_W::new(self)
     }
     #[doc = "Bit 27 - Drive of PIO Line 27"]
     #[inline(always)]
     #[must_use]
-    pub fn line27(&mut self) -> LINE27_W<27> {
+    pub fn line27(&mut self) -> LINE27_W<DRIVER_SPEC, 27> {
         LINE27_W::new(self)
     }
     #[doc = "Bit 28 - Drive of PIO Line 28"]
     #[inline(always)]
     #[must_use]
-    pub fn line28(&mut self) -> LINE28_W<28> {
+    pub fn line28(&mut self) -> LINE28_W<DRIVER_SPEC, 28> {
         LINE28_W::new(self)
     }
     #[doc = "Bit 29 - Drive of PIO Line 29"]
     #[inline(always)]
     #[must_use]
-    pub fn line29(&mut self) -> LINE29_W<29> {
+    pub fn line29(&mut self) -> LINE29_W<DRIVER_SPEC, 29> {
         LINE29_W::new(self)
     }
     #[doc = "Bit 30 - Drive of PIO Line 30"]
     #[inline(always)]
     #[must_use]
-    pub fn line30(&mut self) -> LINE30_W<30> {
+    pub fn line30(&mut self) -> LINE30_W<DRIVER_SPEC, 30> {
         LINE30_W::new(self)
     }
     #[doc = "Bit 31 - Drive of PIO Line 31"]
     #[inline(always)]
     #[must_use]
-    pub fn line31(&mut self) -> LINE31_W<31> {
+    pub fn line31(&mut self) -> LINE31_W<DRIVER_SPEC, 31> {
         LINE31_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "I/O Drive Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [driver](index.html) module"]
+#[doc = "I/O Drive Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`driver::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`driver::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DRIVER_SPEC;
 impl crate::RegisterSpec for DRIVER_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [driver::R](R) reader structure"]
-impl crate::Readable for DRIVER_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [driver::W](W) writer structure"]
+#[doc = "`read()` method returns [`driver::R`](R) reader structure"]
+impl crate::Readable for DRIVER_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`driver::W`](W) writer structure"]
 impl crate::Writable for DRIVER_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

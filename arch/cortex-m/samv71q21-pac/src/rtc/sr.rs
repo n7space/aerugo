@@ -1,18 +1,5 @@
 #[doc = "Register `SR` reader"]
-pub struct R(crate::R<SR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SR_SPEC>;
 #[doc = "Field `ACKUPD` reader - Acknowledge for Update"]
 pub type ACKUPD_R = crate::BitReader<ACKUPDSELECT_A>;
 #[doc = "Acknowledge for Update\n\nValue on reset: 0"]
@@ -38,12 +25,12 @@ impl ACKUPD_R {
             true => ACKUPDSELECT_A::UPDATE,
         }
     }
-    #[doc = "Checks if the value of the field is `FREERUN`"]
+    #[doc = "Time and calendar registers cannot be updated."]
     #[inline(always)]
     pub fn is_freerun(&self) -> bool {
         *self == ACKUPDSELECT_A::FREERUN
     }
-    #[doc = "Checks if the value of the field is `UPDATE`"]
+    #[doc = "Time and calendar registers can be updated."]
     #[inline(always)]
     pub fn is_update(&self) -> bool {
         *self == ACKUPDSELECT_A::UPDATE
@@ -74,12 +61,12 @@ impl ALARM_R {
             true => ALARMSELECT_A::ALARMEVENT,
         }
     }
-    #[doc = "Checks if the value of the field is `NO_ALARMEVENT`"]
+    #[doc = "No alarm matching condition occurred."]
     #[inline(always)]
     pub fn is_no_alarmevent(&self) -> bool {
         *self == ALARMSELECT_A::NO_ALARMEVENT
     }
-    #[doc = "Checks if the value of the field is `ALARMEVENT`"]
+    #[doc = "An alarm matching condition has occurred."]
     #[inline(always)]
     pub fn is_alarmevent(&self) -> bool {
         *self == ALARMSELECT_A::ALARMEVENT
@@ -110,12 +97,12 @@ impl SEC_R {
             true => SECSELECT_A::SECEVENT,
         }
     }
-    #[doc = "Checks if the value of the field is `NO_SECEVENT`"]
+    #[doc = "No second event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_no_secevent(&self) -> bool {
         *self == SECSELECT_A::NO_SECEVENT
     }
-    #[doc = "Checks if the value of the field is `SECEVENT`"]
+    #[doc = "At least one second event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_secevent(&self) -> bool {
         *self == SECSELECT_A::SECEVENT
@@ -146,12 +133,12 @@ impl TIMEV_R {
             true => TIMEVSELECT_A::TIMEVENT,
         }
     }
-    #[doc = "Checks if the value of the field is `NO_TIMEVENT`"]
+    #[doc = "No time event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_no_timevent(&self) -> bool {
         *self == TIMEVSELECT_A::NO_TIMEVENT
     }
-    #[doc = "Checks if the value of the field is `TIMEVENT`"]
+    #[doc = "At least one time event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_timevent(&self) -> bool {
         *self == TIMEVSELECT_A::TIMEVENT
@@ -182,12 +169,12 @@ impl CALEV_R {
             true => CALEVSELECT_A::CALEVENT,
         }
     }
-    #[doc = "Checks if the value of the field is `NO_CALEVENT`"]
+    #[doc = "No calendar event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_no_calevent(&self) -> bool {
         *self == CALEVSELECT_A::NO_CALEVENT
     }
-    #[doc = "Checks if the value of the field is `CALEVENT`"]
+    #[doc = "At least one calendar event has occurred since the last clear."]
     #[inline(always)]
     pub fn is_calevent(&self) -> bool {
         *self == CALEVSELECT_A::CALEVENT
@@ -218,12 +205,12 @@ impl TDERR_R {
             true => TDERRSELECT_A::ERR_TIMEDATE,
         }
     }
-    #[doc = "Checks if the value of the field is `CORRECT`"]
+    #[doc = "The internal free running counters are carrying valid values since the last read of the Status Register (RTC_SR)."]
     #[inline(always)]
     pub fn is_correct(&self) -> bool {
         *self == TDERRSELECT_A::CORRECT
     }
-    #[doc = "Checks if the value of the field is `ERR_TIMEDATE`"]
+    #[doc = "The internal free running counters have been corrupted (invalid date or time, non-BCD values) since the last read and/or they are still invalid."]
     #[inline(always)]
     pub fn is_err_timedate(&self) -> bool {
         *self == TDERRSELECT_A::ERR_TIMEDATE
@@ -261,15 +248,13 @@ impl R {
         TDERR_R::new(((self.bits >> 5) & 1) != 0)
     }
 }
-#[doc = "Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [sr](index.html) module"]
+#[doc = "Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`sr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SR_SPEC;
 impl crate::RegisterSpec for SR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [sr::R](R) reader structure"]
-impl crate::Readable for SR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`sr::R`](R) reader structure"]
+impl crate::Readable for SR_SPEC {}
 #[doc = "`reset()` method sets SR to value 0"]
 impl crate::Resettable for SR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

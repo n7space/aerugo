@@ -1,43 +1,11 @@
 #[doc = "Register `ETRG1` reader"]
-pub struct R(crate::R<ETRG1_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ETRG1_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ETRG1_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ETRG1_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ETRG1_SPEC>;
 #[doc = "Register `ETRG1` writer"]
-pub struct W(crate::W<ETRG1_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<ETRG1_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<ETRG1_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<ETRG1_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<ETRG1_SPEC>;
 #[doc = "Field `MAXCNT` reader - Maximum Counter value"]
 pub type MAXCNT_R = crate::FieldReader<u32>;
 #[doc = "Field `MAXCNT` writer - Maximum Counter value"]
-pub type MAXCNT_W<'a, const O: u8> = crate::FieldWriter<'a, ETRG1_SPEC, 24, O, u32>;
+pub type MAXCNT_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 24, O, u32>;
 #[doc = "Field `TRGMODE` reader - External Trigger Mode"]
 pub type TRGMODE_R = crate::FieldReader<TRGMODESELECT_A>;
 #[doc = "External Trigger Mode\n\nValue on reset: 0"]
@@ -74,48 +42,52 @@ impl TRGMODE_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `OFF`"]
+    #[doc = "External trigger is not enabled."]
     #[inline(always)]
     pub fn is_off(&self) -> bool {
         *self == TRGMODESELECT_A::OFF
     }
-    #[doc = "Checks if the value of the field is `MODE1`"]
+    #[doc = "External PWM Reset Mode"]
     #[inline(always)]
     pub fn is_mode1(&self) -> bool {
         *self == TRGMODESELECT_A::MODE1
     }
-    #[doc = "Checks if the value of the field is `MODE2`"]
+    #[doc = "External PWM Start Mode"]
     #[inline(always)]
     pub fn is_mode2(&self) -> bool {
         *self == TRGMODESELECT_A::MODE2
     }
-    #[doc = "Checks if the value of the field is `MODE3`"]
+    #[doc = "Cycle-by-cycle Duty Mode"]
     #[inline(always)]
     pub fn is_mode3(&self) -> bool {
         *self == TRGMODESELECT_A::MODE3
     }
 }
 #[doc = "Field `TRGMODE` writer - External Trigger Mode"]
-pub type TRGMODE_W<'a, const O: u8> = crate::FieldWriterSafe<'a, ETRG1_SPEC, 2, O, TRGMODESELECT_A>;
-impl<'a, const O: u8> TRGMODE_W<'a, O> {
+pub type TRGMODE_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, TRGMODESELECT_A>;
+impl<'a, REG, const O: u8> TRGMODE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "External trigger is not enabled."]
     #[inline(always)]
-    pub fn off(self) -> &'a mut W {
+    pub fn off(self) -> &'a mut crate::W<REG> {
         self.variant(TRGMODESELECT_A::OFF)
     }
     #[doc = "External PWM Reset Mode"]
     #[inline(always)]
-    pub fn mode1(self) -> &'a mut W {
+    pub fn mode1(self) -> &'a mut crate::W<REG> {
         self.variant(TRGMODESELECT_A::MODE1)
     }
     #[doc = "External PWM Start Mode"]
     #[inline(always)]
-    pub fn mode2(self) -> &'a mut W {
+    pub fn mode2(self) -> &'a mut crate::W<REG> {
         self.variant(TRGMODESELECT_A::MODE2)
     }
     #[doc = "Cycle-by-cycle Duty Mode"]
     #[inline(always)]
-    pub fn mode3(self) -> &'a mut W {
+    pub fn mode3(self) -> &'a mut crate::W<REG> {
         self.variant(TRGMODESELECT_A::MODE3)
     }
 }
@@ -144,43 +116,46 @@ impl TRGEDGE_R {
             true => TRGEDGESELECT_A::RISING_ONE,
         }
     }
-    #[doc = "Checks if the value of the field is `FALLING_ZERO`"]
+    #[doc = "TRGMODE = 1: TRGINx event detection on falling edge.TRGMODE = 2, 3: TRGINx active level is 0"]
     #[inline(always)]
     pub fn is_falling_zero(&self) -> bool {
         *self == TRGEDGESELECT_A::FALLING_ZERO
     }
-    #[doc = "Checks if the value of the field is `RISING_ONE`"]
+    #[doc = "TRGMODE = 1: TRGINx event detection on rising edge.TRGMODE = 2, 3: TRGINx active level is 1"]
     #[inline(always)]
     pub fn is_rising_one(&self) -> bool {
         *self == TRGEDGESELECT_A::RISING_ONE
     }
 }
 #[doc = "Field `TRGEDGE` writer - Edge Selection"]
-pub type TRGEDGE_W<'a, const O: u8> = crate::BitWriter<'a, ETRG1_SPEC, O, TRGEDGESELECT_A>;
-impl<'a, const O: u8> TRGEDGE_W<'a, O> {
+pub type TRGEDGE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, TRGEDGESELECT_A>;
+impl<'a, REG, const O: u8> TRGEDGE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "TRGMODE = 1: TRGINx event detection on falling edge.TRGMODE = 2, 3: TRGINx active level is 0"]
     #[inline(always)]
-    pub fn falling_zero(self) -> &'a mut W {
+    pub fn falling_zero(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEDGESELECT_A::FALLING_ZERO)
     }
     #[doc = "TRGMODE = 1: TRGINx event detection on rising edge.TRGMODE = 2, 3: TRGINx active level is 1"]
     #[inline(always)]
-    pub fn rising_one(self) -> &'a mut W {
+    pub fn rising_one(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEDGESELECT_A::RISING_ONE)
     }
 }
 #[doc = "Field `TRGFILT` reader - Filtered input"]
 pub type TRGFILT_R = crate::BitReader;
 #[doc = "Field `TRGFILT` writer - Filtered input"]
-pub type TRGFILT_W<'a, const O: u8> = crate::BitWriter<'a, ETRG1_SPEC, O>;
+pub type TRGFILT_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TRGSRC` reader - Trigger Source"]
 pub type TRGSRC_R = crate::BitReader;
 #[doc = "Field `TRGSRC` writer - Trigger Source"]
-pub type TRGSRC_W<'a, const O: u8> = crate::BitWriter<'a, ETRG1_SPEC, O>;
+pub type TRGSRC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `RFEN` reader - Recoverable Fault Enable"]
 pub type RFEN_R = crate::BitReader;
 #[doc = "Field `RFEN` writer - Recoverable Fault Enable"]
-pub type RFEN_W<'a, const O: u8> = crate::BitWriter<'a, ETRG1_SPEC, O>;
+pub type RFEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bits 0:23 - Maximum Counter value"]
     #[inline(always)]
@@ -217,58 +192,55 @@ impl W {
     #[doc = "Bits 0:23 - Maximum Counter value"]
     #[inline(always)]
     #[must_use]
-    pub fn maxcnt(&mut self) -> MAXCNT_W<0> {
+    pub fn maxcnt(&mut self) -> MAXCNT_W<ETRG1_SPEC, 0> {
         MAXCNT_W::new(self)
     }
     #[doc = "Bits 24:25 - External Trigger Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn trgmode(&mut self) -> TRGMODE_W<24> {
+    pub fn trgmode(&mut self) -> TRGMODE_W<ETRG1_SPEC, 24> {
         TRGMODE_W::new(self)
     }
     #[doc = "Bit 28 - Edge Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn trgedge(&mut self) -> TRGEDGE_W<28> {
+    pub fn trgedge(&mut self) -> TRGEDGE_W<ETRG1_SPEC, 28> {
         TRGEDGE_W::new(self)
     }
     #[doc = "Bit 29 - Filtered input"]
     #[inline(always)]
     #[must_use]
-    pub fn trgfilt(&mut self) -> TRGFILT_W<29> {
+    pub fn trgfilt(&mut self) -> TRGFILT_W<ETRG1_SPEC, 29> {
         TRGFILT_W::new(self)
     }
     #[doc = "Bit 30 - Trigger Source"]
     #[inline(always)]
     #[must_use]
-    pub fn trgsrc(&mut self) -> TRGSRC_W<30> {
+    pub fn trgsrc(&mut self) -> TRGSRC_W<ETRG1_SPEC, 30> {
         TRGSRC_W::new(self)
     }
     #[doc = "Bit 31 - Recoverable Fault Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn rfen(&mut self) -> RFEN_W<31> {
+    pub fn rfen(&mut self) -> RFEN_W<ETRG1_SPEC, 31> {
         RFEN_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "PWM External Trigger Register (trg_num = 1)\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [etrg1](index.html) module"]
+#[doc = "PWM External Trigger Register (trg_num = 1)\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`etrg1::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`etrg1::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ETRG1_SPEC;
 impl crate::RegisterSpec for ETRG1_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [etrg1::R](R) reader structure"]
-impl crate::Readable for ETRG1_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [etrg1::W](W) writer structure"]
+#[doc = "`read()` method returns [`etrg1::R`](R) reader structure"]
+impl crate::Readable for ETRG1_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`etrg1::W`](W) writer structure"]
 impl crate::Writable for ETRG1_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

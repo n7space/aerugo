@@ -1,59 +1,27 @@
 #[doc = "Register `CTRL` reader"]
-pub struct R(crate::R<CTRL_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CTRL_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CTRL_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CTRL_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CTRL_SPEC>;
 #[doc = "Register `CTRL` writer"]
-pub struct W(crate::W<CTRL_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CTRL_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CTRL_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CTRL_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CTRL_SPEC>;
 #[doc = "Field `RDERRE` reader - Remote Device Connection Error Interrupt Enable"]
 pub type RDERRE_R = crate::BitReader;
 #[doc = "Field `RDERRE` writer - Remote Device Connection Error Interrupt Enable"]
-pub type RDERRE_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O>;
+pub type RDERRE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `VBUSHWC` reader - VBUS Hardware Control"]
 pub type VBUSHWC_R = crate::BitReader;
 #[doc = "Field `VBUSHWC` writer - VBUS Hardware Control"]
-pub type VBUSHWC_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O>;
+pub type VBUSHWC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FRZCLK` reader - Freeze USB Clock"]
 pub type FRZCLK_R = crate::BitReader;
 #[doc = "Field `FRZCLK` writer - Freeze USB Clock"]
-pub type FRZCLK_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O>;
+pub type FRZCLK_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `USBE` reader - USBHS Enable"]
 pub type USBE_R = crate::BitReader;
 #[doc = "Field `USBE` writer - USBHS Enable"]
-pub type USBE_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O>;
+pub type USBE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `UID` reader - UID Pin Enable"]
 pub type UID_R = crate::BitReader;
 #[doc = "Field `UID` writer - UID Pin Enable"]
-pub type UID_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O>;
+pub type UID_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `UIMOD` reader - USBHS Mode"]
 pub type UIMOD_R = crate::BitReader<UIMODSELECT_A>;
 #[doc = "USBHS Mode\n\nValue on reset: 0"]
@@ -79,28 +47,31 @@ impl UIMOD_R {
             true => UIMODSELECT_A::DEVICE,
         }
     }
-    #[doc = "Checks if the value of the field is `HOST`"]
+    #[doc = "The module is in USB Host mode."]
     #[inline(always)]
     pub fn is_host(&self) -> bool {
         *self == UIMODSELECT_A::HOST
     }
-    #[doc = "Checks if the value of the field is `DEVICE`"]
+    #[doc = "The module is in USB Device mode."]
     #[inline(always)]
     pub fn is_device(&self) -> bool {
         *self == UIMODSELECT_A::DEVICE
     }
 }
 #[doc = "Field `UIMOD` writer - USBHS Mode"]
-pub type UIMOD_W<'a, const O: u8> = crate::BitWriter<'a, CTRL_SPEC, O, UIMODSELECT_A>;
-impl<'a, const O: u8> UIMOD_W<'a, O> {
+pub type UIMOD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, UIMODSELECT_A>;
+impl<'a, REG, const O: u8> UIMOD_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The module is in USB Host mode."]
     #[inline(always)]
-    pub fn host(self) -> &'a mut W {
+    pub fn host(self) -> &'a mut crate::W<REG> {
         self.variant(UIMODSELECT_A::HOST)
     }
     #[doc = "The module is in USB Device mode."]
     #[inline(always)]
-    pub fn device(self) -> &'a mut W {
+    pub fn device(self) -> &'a mut crate::W<REG> {
         self.variant(UIMODSELECT_A::DEVICE)
     }
 }
@@ -140,58 +111,55 @@ impl W {
     #[doc = "Bit 4 - Remote Device Connection Error Interrupt Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn rderre(&mut self) -> RDERRE_W<4> {
+    pub fn rderre(&mut self) -> RDERRE_W<CTRL_SPEC, 4> {
         RDERRE_W::new(self)
     }
     #[doc = "Bit 8 - VBUS Hardware Control"]
     #[inline(always)]
     #[must_use]
-    pub fn vbushwc(&mut self) -> VBUSHWC_W<8> {
+    pub fn vbushwc(&mut self) -> VBUSHWC_W<CTRL_SPEC, 8> {
         VBUSHWC_W::new(self)
     }
     #[doc = "Bit 14 - Freeze USB Clock"]
     #[inline(always)]
     #[must_use]
-    pub fn frzclk(&mut self) -> FRZCLK_W<14> {
+    pub fn frzclk(&mut self) -> FRZCLK_W<CTRL_SPEC, 14> {
         FRZCLK_W::new(self)
     }
     #[doc = "Bit 15 - USBHS Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn usbe(&mut self) -> USBE_W<15> {
+    pub fn usbe(&mut self) -> USBE_W<CTRL_SPEC, 15> {
         USBE_W::new(self)
     }
     #[doc = "Bit 24 - UID Pin Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn uid(&mut self) -> UID_W<24> {
+    pub fn uid(&mut self) -> UID_W<CTRL_SPEC, 24> {
         UID_W::new(self)
     }
     #[doc = "Bit 25 - USBHS Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn uimod(&mut self) -> UIMOD_W<25> {
+    pub fn uimod(&mut self) -> UIMOD_W<CTRL_SPEC, 25> {
         UIMOD_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "General Control Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [ctrl](index.html) module"]
+#[doc = "General Control Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`ctrl::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`ctrl::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CTRL_SPEC;
 impl crate::RegisterSpec for CTRL_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [ctrl::R](R) reader structure"]
-impl crate::Readable for CTRL_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [ctrl::W](W) writer structure"]
+#[doc = "`read()` method returns [`ctrl::R`](R) reader structure"]
+impl crate::Readable for CTRL_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`ctrl::W`](W) writer structure"]
 impl crate::Writable for CTRL_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

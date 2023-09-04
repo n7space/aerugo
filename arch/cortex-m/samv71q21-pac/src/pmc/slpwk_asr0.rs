@@ -1,18 +1,5 @@
 #[doc = "Register `SLPWK_ASR0` reader"]
-pub struct R(crate::R<SLPWK_ASR0_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SLPWK_ASR0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SLPWK_ASR0_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SLPWK_ASR0_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SLPWK_ASR0_SPEC>;
 #[doc = "Field `PID7` reader - Peripheral 7 Activity Status"]
 pub type PID7_R = crate::BitReader;
 #[doc = "Field `PID8` reader - Peripheral 8 Activity Status"]
@@ -190,15 +177,13 @@ impl R {
         PID31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "SleepWalking Activity Status Register 0\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [slpwk_asr0](index.html) module"]
+#[doc = "SleepWalking Activity Status Register 0\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`slpwk_asr0::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SLPWK_ASR0_SPEC;
 impl crate::RegisterSpec for SLPWK_ASR0_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [slpwk_asr0::R](R) reader structure"]
-impl crate::Readable for SLPWK_ASR0_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`slpwk_asr0::R`](R) reader structure"]
+impl crate::Readable for SLPWK_ASR0_SPEC {}
 #[doc = "`reset()` method sets SLPWK_ASR0 to value 0"]
 impl crate::Resettable for SLPWK_ASR0_SPEC {
     const RESET_VALUE: Self::Ux = 0;

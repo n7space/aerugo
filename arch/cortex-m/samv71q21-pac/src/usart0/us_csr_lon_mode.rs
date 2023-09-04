@@ -1,18 +1,5 @@
 #[doc = "Register `US_CSR_LON_MODE` reader"]
-pub struct R(crate::R<US_CSR_LON_MODE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<US_CSR_LON_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<US_CSR_LON_MODE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<US_CSR_LON_MODE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<US_CSR_LON_MODE_SPEC>;
 #[doc = "Field `RXRDY` reader - Receiver Ready (cleared by reading US_RHR)"]
 pub type RXRDY_R = crate::BitReader;
 #[doc = "Field `TXRDY` reader - Transmitter Ready (cleared by writing US_THR)"]
@@ -99,15 +86,13 @@ impl R {
         LBLOVFE_R::new(((self.bits >> 28) & 1) != 0)
     }
 }
-#[doc = "Channel Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [us_csr_lon_mode](index.html) module"]
+#[doc = "Channel Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`us_csr_lon_mode::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct US_CSR_LON_MODE_SPEC;
 impl crate::RegisterSpec for US_CSR_LON_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [us_csr_lon_mode::R](R) reader structure"]
-impl crate::Readable for US_CSR_LON_MODE_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`us_csr_lon_mode::R`](R) reader structure"]
+impl crate::Readable for US_CSR_LON_MODE_SPEC {}
 #[doc = "`reset()` method sets US_CSR_LON_MODE to value 0"]
 impl crate::Resettable for US_CSR_LON_MODE_SPEC {
     const RESET_VALUE: Self::Ux = 0;

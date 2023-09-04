@@ -1,18 +1,5 @@
 #[doc = "Register `CHSR` reader"]
-pub struct R(crate::R<CHSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CHSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CHSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CHSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CHSR_SPEC>;
 #[doc = "Field `CH0` reader - Channel 0 Status"]
 pub type CH0_R = crate::BitReader;
 #[doc = "Field `CH1` reader - Channel 1 Status"]
@@ -43,15 +30,13 @@ impl R {
         DACRDY1_R::new(((self.bits >> 9) & 1) != 0)
     }
 }
-#[doc = "Channel Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [chsr](index.html) module"]
+#[doc = "Channel Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`chsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CHSR_SPEC;
 impl crate::RegisterSpec for CHSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [chsr::R](R) reader structure"]
-impl crate::Readable for CHSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`chsr::R`](R) reader structure"]
+impl crate::Readable for CHSR_SPEC {}
 #[doc = "`reset()` method sets CHSR to value 0"]
 impl crate::Resettable for CHSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

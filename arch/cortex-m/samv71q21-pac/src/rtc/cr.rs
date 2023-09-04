@@ -1,47 +1,15 @@
 #[doc = "Register `CR` reader"]
-pub struct R(crate::R<CR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CR_SPEC>;
 #[doc = "Register `CR` writer"]
-pub struct W(crate::W<CR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CR_SPEC>;
 #[doc = "Field `UPDTIM` reader - Update Request Time Register"]
 pub type UPDTIM_R = crate::BitReader;
 #[doc = "Field `UPDTIM` writer - Update Request Time Register"]
-pub type UPDTIM_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O>;
+pub type UPDTIM_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `UPDCAL` reader - Update Request Calendar Register"]
 pub type UPDCAL_R = crate::BitReader;
 #[doc = "Field `UPDCAL` writer - Update Request Calendar Register"]
-pub type UPDCAL_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O>;
+pub type UPDCAL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TIMEVSEL` reader - Time Event Selection"]
 pub type TIMEVSEL_R = crate::FieldReader<TIMEVSELSELECT_A>;
 #[doc = "Time Event Selection\n\nValue on reset: 0"]
@@ -78,48 +46,52 @@ impl TIMEVSEL_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `MINUTE`"]
+    #[doc = "Minute change"]
     #[inline(always)]
     pub fn is_minute(&self) -> bool {
         *self == TIMEVSELSELECT_A::MINUTE
     }
-    #[doc = "Checks if the value of the field is `HOUR`"]
+    #[doc = "Hour change"]
     #[inline(always)]
     pub fn is_hour(&self) -> bool {
         *self == TIMEVSELSELECT_A::HOUR
     }
-    #[doc = "Checks if the value of the field is `MIDNIGHT`"]
+    #[doc = "Every day at midnight"]
     #[inline(always)]
     pub fn is_midnight(&self) -> bool {
         *self == TIMEVSELSELECT_A::MIDNIGHT
     }
-    #[doc = "Checks if the value of the field is `NOON`"]
+    #[doc = "Every day at noon"]
     #[inline(always)]
     pub fn is_noon(&self) -> bool {
         *self == TIMEVSELSELECT_A::NOON
     }
 }
 #[doc = "Field `TIMEVSEL` writer - Time Event Selection"]
-pub type TIMEVSEL_W<'a, const O: u8> = crate::FieldWriterSafe<'a, CR_SPEC, 2, O, TIMEVSELSELECT_A>;
-impl<'a, const O: u8> TIMEVSEL_W<'a, O> {
+pub type TIMEVSEL_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, TIMEVSELSELECT_A>;
+impl<'a, REG, const O: u8> TIMEVSEL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Minute change"]
     #[inline(always)]
-    pub fn minute(self) -> &'a mut W {
+    pub fn minute(self) -> &'a mut crate::W<REG> {
         self.variant(TIMEVSELSELECT_A::MINUTE)
     }
     #[doc = "Hour change"]
     #[inline(always)]
-    pub fn hour(self) -> &'a mut W {
+    pub fn hour(self) -> &'a mut crate::W<REG> {
         self.variant(TIMEVSELSELECT_A::HOUR)
     }
     #[doc = "Every day at midnight"]
     #[inline(always)]
-    pub fn midnight(self) -> &'a mut W {
+    pub fn midnight(self) -> &'a mut crate::W<REG> {
         self.variant(TIMEVSELSELECT_A::MIDNIGHT)
     }
     #[doc = "Every day at noon"]
     #[inline(always)]
-    pub fn noon(self) -> &'a mut W {
+    pub fn noon(self) -> &'a mut crate::W<REG> {
         self.variant(TIMEVSELSELECT_A::NOON)
     }
 }
@@ -156,38 +128,42 @@ impl CALEVSEL_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `WEEK`"]
+    #[doc = "Week change (every Monday at time 00:00:00)"]
     #[inline(always)]
     pub fn is_week(&self) -> bool {
         *self == CALEVSELSELECT_A::WEEK
     }
-    #[doc = "Checks if the value of the field is `MONTH`"]
+    #[doc = "Month change (every 01 of each month at time 00:00:00)"]
     #[inline(always)]
     pub fn is_month(&self) -> bool {
         *self == CALEVSELSELECT_A::MONTH
     }
-    #[doc = "Checks if the value of the field is `YEAR`"]
+    #[doc = "Year change (every January 1 at time 00:00:00)"]
     #[inline(always)]
     pub fn is_year(&self) -> bool {
         *self == CALEVSELSELECT_A::YEAR
     }
 }
 #[doc = "Field `CALEVSEL` writer - Calendar Event Selection"]
-pub type CALEVSEL_W<'a, const O: u8> = crate::FieldWriter<'a, CR_SPEC, 2, O, CALEVSELSELECT_A>;
-impl<'a, const O: u8> CALEVSEL_W<'a, O> {
+pub type CALEVSEL_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, CALEVSELSELECT_A>;
+impl<'a, REG, const O: u8> CALEVSEL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Week change (every Monday at time 00:00:00)"]
     #[inline(always)]
-    pub fn week(self) -> &'a mut W {
+    pub fn week(self) -> &'a mut crate::W<REG> {
         self.variant(CALEVSELSELECT_A::WEEK)
     }
     #[doc = "Month change (every 01 of each month at time 00:00:00)"]
     #[inline(always)]
-    pub fn month(self) -> &'a mut W {
+    pub fn month(self) -> &'a mut crate::W<REG> {
         self.variant(CALEVSELSELECT_A::MONTH)
     }
     #[doc = "Year change (every January 1 at time 00:00:00)"]
     #[inline(always)]
-    pub fn year(self) -> &'a mut W {
+    pub fn year(self) -> &'a mut crate::W<REG> {
         self.variant(CALEVSELSELECT_A::YEAR)
     }
 }
@@ -217,46 +193,43 @@ impl W {
     #[doc = "Bit 0 - Update Request Time Register"]
     #[inline(always)]
     #[must_use]
-    pub fn updtim(&mut self) -> UPDTIM_W<0> {
+    pub fn updtim(&mut self) -> UPDTIM_W<CR_SPEC, 0> {
         UPDTIM_W::new(self)
     }
     #[doc = "Bit 1 - Update Request Calendar Register"]
     #[inline(always)]
     #[must_use]
-    pub fn updcal(&mut self) -> UPDCAL_W<1> {
+    pub fn updcal(&mut self) -> UPDCAL_W<CR_SPEC, 1> {
         UPDCAL_W::new(self)
     }
     #[doc = "Bits 8:9 - Time Event Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn timevsel(&mut self) -> TIMEVSEL_W<8> {
+    pub fn timevsel(&mut self) -> TIMEVSEL_W<CR_SPEC, 8> {
         TIMEVSEL_W::new(self)
     }
     #[doc = "Bits 16:17 - Calendar Event Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn calevsel(&mut self) -> CALEVSEL_W<16> {
+    pub fn calevsel(&mut self) -> CALEVSEL_W<CR_SPEC, 16> {
         CALEVSEL_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Control Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cr](index.html) module"]
+#[doc = "Control Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CR_SPEC;
 impl crate::RegisterSpec for CR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cr::R](R) reader structure"]
-impl crate::Readable for CR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [cr::W](W) writer structure"]
+#[doc = "`read()` method returns [`cr::R`](R) reader structure"]
+impl crate::Readable for CR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`cr::W`](W) writer structure"]
 impl crate::Writable for CR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

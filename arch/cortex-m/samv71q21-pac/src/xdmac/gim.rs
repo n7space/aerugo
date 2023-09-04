@@ -1,18 +1,5 @@
 #[doc = "Register `GIM` reader"]
-pub struct R(crate::R<GIM_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GIM_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GIM_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GIM_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GIM_SPEC>;
 #[doc = "Field `IM0` reader - XDMAC Channel 0 Interrupt Mask Bit"]
 pub type IM0_R = crate::BitReader;
 #[doc = "Field `IM1` reader - XDMAC Channel 1 Interrupt Mask Bit"]
@@ -183,15 +170,13 @@ impl R {
         IM23_R::new(((self.bits >> 23) & 1) != 0)
     }
 }
-#[doc = "Global Interrupt Mask Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gim](index.html) module"]
+#[doc = "Global Interrupt Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gim::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GIM_SPEC;
 impl crate::RegisterSpec for GIM_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gim::R](R) reader structure"]
-impl crate::Readable for GIM_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`gim::R`](R) reader structure"]
+impl crate::Readable for GIM_SPEC {}
 #[doc = "`reset()` method sets GIM to value 0"]
 impl crate::Resettable for GIM_SPEC {
     const RESET_VALUE: Self::Ux = 0;

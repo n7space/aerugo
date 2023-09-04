@@ -1,18 +1,5 @@
 #[doc = "Register `ISR` reader"]
-pub struct R(crate::R<ISR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ISR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ISR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ISR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ISR_SPEC>;
 #[doc = "Field `DATRDY` reader - Data Ready (cleared by setting bit START or bit SWRST in AES_CR or by reading AES_ODATARx)"]
 pub type DATRDY_R = crate::BitReader;
 #[doc = "Field `URAD` reader - Unspecified Register Access Detection Status (cleared by writing SWRST in AES_CR)"]
@@ -59,32 +46,32 @@ impl URAT_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `IDR_WR_PROCESSING`"]
+    #[doc = "Input Data Register written during the data processing when SMOD = 0x2 mode."]
     #[inline(always)]
     pub fn is_idr_wr_processing(&self) -> bool {
         *self == URATSELECT_A::IDR_WR_PROCESSING
     }
-    #[doc = "Checks if the value of the field is `ODR_RD_PROCESSING`"]
+    #[doc = "Output Data Register read during the data processing."]
     #[inline(always)]
     pub fn is_odr_rd_processing(&self) -> bool {
         *self == URATSELECT_A::ODR_RD_PROCESSING
     }
-    #[doc = "Checks if the value of the field is `MR_WR_PROCESSING`"]
+    #[doc = "Mode Register written during the data processing."]
     #[inline(always)]
     pub fn is_mr_wr_processing(&self) -> bool {
         *self == URATSELECT_A::MR_WR_PROCESSING
     }
-    #[doc = "Checks if the value of the field is `ODR_RD_SUBKGEN`"]
+    #[doc = "Output Data Register read during the sub-keys generation."]
     #[inline(always)]
     pub fn is_odr_rd_subkgen(&self) -> bool {
         *self == URATSELECT_A::ODR_RD_SUBKGEN
     }
-    #[doc = "Checks if the value of the field is `MR_WR_SUBKGEN`"]
+    #[doc = "Mode Register written during the sub-keys generation."]
     #[inline(always)]
     pub fn is_mr_wr_subkgen(&self) -> bool {
         *self == URATSELECT_A::MR_WR_SUBKGEN
     }
-    #[doc = "Checks if the value of the field is `WOR_RD_ACCESS`"]
+    #[doc = "Write-only register read access."]
     #[inline(always)]
     pub fn is_wor_rd_access(&self) -> bool {
         *self == URATSELECT_A::WOR_RD_ACCESS
@@ -114,15 +101,13 @@ impl R {
         TAGRDY_R::new(((self.bits >> 16) & 1) != 0)
     }
 }
-#[doc = "Interrupt Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [isr](index.html) module"]
+#[doc = "Interrupt Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`isr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ISR_SPEC;
 impl crate::RegisterSpec for ISR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [isr::R](R) reader structure"]
-impl crate::Readable for ISR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`isr::R`](R) reader structure"]
+impl crate::Readable for ISR_SPEC {}
 #[doc = "`reset()` method sets ISR to value 0"]
 impl crate::Resettable for ISR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

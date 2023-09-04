@@ -1,18 +1,5 @@
 #[doc = "Register `CALIB` reader"]
-pub struct R(crate::R<CALIB_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CALIB_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CALIB_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CALIB_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CALIB_SPEC>;
 #[doc = "Field `TENMS` reader - Reload value to use for 10ms timing"]
 pub type TENMS_R = crate::FieldReader<u32>;
 #[doc = "Field `SKEW` reader - Indicates whether the TENMS value is exact"]
@@ -40,12 +27,12 @@ impl SKEW_R {
             true => SKEWSELECT_A::VALUE_1,
         }
     }
-    #[doc = "Checks if the value of the field is `VALUE_0`"]
+    #[doc = "10ms calibration value is exact"]
     #[inline(always)]
     pub fn is_value_0(&self) -> bool {
         *self == SKEWSELECT_A::VALUE_0
     }
-    #[doc = "Checks if the value of the field is `VALUE_1`"]
+    #[doc = "10ms calibration value is inexact, because of the clock frequency"]
     #[inline(always)]
     pub fn is_value_1(&self) -> bool {
         *self == SKEWSELECT_A::VALUE_1
@@ -76,12 +63,12 @@ impl NOREF_R {
             true => NOREFSELECT_A::VALUE_1,
         }
     }
-    #[doc = "Checks if the value of the field is `VALUE_0`"]
+    #[doc = "The reference clock is provided"]
     #[inline(always)]
     pub fn is_value_0(&self) -> bool {
         *self == NOREFSELECT_A::VALUE_0
     }
-    #[doc = "Checks if the value of the field is `VALUE_1`"]
+    #[doc = "The reference clock is not provided"]
     #[inline(always)]
     pub fn is_value_1(&self) -> bool {
         *self == NOREFSELECT_A::VALUE_1
@@ -104,15 +91,13 @@ impl R {
         NOREF_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Calibration Value Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [calib](index.html) module"]
+#[doc = "Calibration Value Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`calib::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CALIB_SPEC;
 impl crate::RegisterSpec for CALIB_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [calib::R](R) reader structure"]
-impl crate::Readable for CALIB_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`calib::R`](R) reader structure"]
+impl crate::Readable for CALIB_SPEC {}
 #[doc = "`reset()` method sets CALIB to value 0"]
 impl crate::Resettable for CALIB_SPEC {
     const RESET_VALUE: Self::Ux = 0;

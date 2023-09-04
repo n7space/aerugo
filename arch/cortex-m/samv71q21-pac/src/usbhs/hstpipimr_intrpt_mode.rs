@@ -1,18 +1,5 @@
 #[doc = "Register `HSTPIPIMR_INTRPT_MODE[%s]` reader"]
-pub struct R(crate::R<HSTPIPIMR_INTRPT_MODE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<HSTPIPIMR_INTRPT_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<HSTPIPIMR_INTRPT_MODE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<HSTPIPIMR_INTRPT_MODE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<HSTPIPIMR_INTRPT_MODE_SPEC>;
 #[doc = "Field `RXINE` reader - Received IN Data Interrupt Enable"]
 pub type RXINE_R = crate::BitReader;
 #[doc = "Field `TXOUTE` reader - Transmitted OUT Data Interrupt Enable"]
@@ -106,15 +93,13 @@ impl R {
         RSTDT_R::new(((self.bits >> 18) & 1) != 0)
     }
 }
-#[doc = "Host Pipe Mask Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [hstpipimr_intrpt_mode](index.html) module"]
+#[doc = "Host Pipe Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`hstpipimr_intrpt_mode::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct HSTPIPIMR_INTRPT_MODE_SPEC;
 impl crate::RegisterSpec for HSTPIPIMR_INTRPT_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [hstpipimr_intrpt_mode::R](R) reader structure"]
-impl crate::Readable for HSTPIPIMR_INTRPT_MODE_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`hstpipimr_intrpt_mode::R`](R) reader structure"]
+impl crate::Readable for HSTPIPIMR_INTRPT_MODE_SPEC {}
 #[doc = "`reset()` method sets HSTPIPIMR_INTRPT_MODE[%s]
 to value 0"]
 impl crate::Resettable for HSTPIPIMR_INTRPT_MODE_SPEC {

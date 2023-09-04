@@ -1,18 +1,5 @@
 #[doc = "Register `PSR` reader"]
-pub struct R(crate::R<PSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<PSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<PSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<PSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<PSR_SPEC>;
 #[doc = "Field `LEC` reader - Last Error Code (set to 111 on read)"]
 pub type LEC_R = crate::FieldReader<LECSELECT_A>;
 #[doc = "Last Error Code (set to 111 on read)\n\nValue on reset: 0"]
@@ -61,42 +48,42 @@ impl LEC_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `NO_ERROR`"]
+    #[doc = "No error occurred since LEC has been reset by successful reception or transmission."]
     #[inline(always)]
     pub fn is_no_error(&self) -> bool {
         *self == LECSELECT_A::NO_ERROR
     }
-    #[doc = "Checks if the value of the field is `STUFF_ERROR`"]
+    #[doc = "More than 5 equal bits in a sequence have occurred in a part of a received message where this is not allowed."]
     #[inline(always)]
     pub fn is_stuff_error(&self) -> bool {
         *self == LECSELECT_A::STUFF_ERROR
     }
-    #[doc = "Checks if the value of the field is `FORM_ERROR`"]
+    #[doc = "A fixed format part of a received frame has the wrong format."]
     #[inline(always)]
     pub fn is_form_error(&self) -> bool {
         *self == LECSELECT_A::FORM_ERROR
     }
-    #[doc = "Checks if the value of the field is `ACK_ERROR`"]
+    #[doc = "The message transmitted by the MCAN was not acknowledged by another node."]
     #[inline(always)]
     pub fn is_ack_error(&self) -> bool {
         *self == LECSELECT_A::ACK_ERROR
     }
-    #[doc = "Checks if the value of the field is `BIT1_ERROR`"]
+    #[doc = "During transmission of a message (with the exception of the arbitration field), the device tried to send a recessive level (bit of logical value '1'), but the monitored bus value was dominant."]
     #[inline(always)]
     pub fn is_bit1_error(&self) -> bool {
         *self == LECSELECT_A::BIT1_ERROR
     }
-    #[doc = "Checks if the value of the field is `BIT0_ERROR`"]
+    #[doc = "During transmission of a message (or acknowledge bit, or active error flag, or overload flag), the device tried to send a dominant level (data or identifier bit logical value '0'), but the monitored bus value was recessive. During Bus_Off recovery, this status is set each time a sequence of 11 recessive bits has been monitored. This enables the processor to monitor the proceeding of the Bus_Off recovery sequence (indicating the bus is not stuck at dominant or continuously disturbed)."]
     #[inline(always)]
     pub fn is_bit0_error(&self) -> bool {
         *self == LECSELECT_A::BIT0_ERROR
     }
-    #[doc = "Checks if the value of the field is `CRC_ERROR`"]
+    #[doc = "The CRC check sum of a received message was incorrect. The CRC of an incoming message does not match the CRC calculated from the received data."]
     #[inline(always)]
     pub fn is_crc_error(&self) -> bool {
         *self == LECSELECT_A::CRC_ERROR
     }
-    #[doc = "Checks if the value of the field is `NO_CHANGE`"]
+    #[doc = "Any read access to the Protocol Status Register re-initializes the LEC to '7'. When the LEC shows value '7', no CAN bus event was detected since the last processor read access to the Protocol Status Register."]
     #[inline(always)]
     pub fn is_no_change(&self) -> bool {
         *self == LECSELECT_A::NO_CHANGE
@@ -138,22 +125,22 @@ impl ACT_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `SYNCHRONIZING`"]
+    #[doc = "Node is synchronizing on CAN communication"]
     #[inline(always)]
     pub fn is_synchronizing(&self) -> bool {
         *self == ACTSELECT_A::SYNCHRONIZING
     }
-    #[doc = "Checks if the value of the field is `IDLE`"]
+    #[doc = "Node is neither receiver nor transmitter"]
     #[inline(always)]
     pub fn is_idle(&self) -> bool {
         *self == ACTSELECT_A::IDLE
     }
-    #[doc = "Checks if the value of the field is `RECEIVER`"]
+    #[doc = "Node is operating as receiver"]
     #[inline(always)]
     pub fn is_receiver(&self) -> bool {
         *self == ACTSELECT_A::RECEIVER
     }
-    #[doc = "Checks if the value of the field is `TRANSMITTER`"]
+    #[doc = "Node is operating as transmitter"]
     #[inline(always)]
     pub fn is_transmitter(&self) -> bool {
         *self == ACTSELECT_A::TRANSMITTER
@@ -234,15 +221,13 @@ impl R {
         TDCV_R::new(((self.bits >> 16) & 0x7f) as u8)
     }
 }
-#[doc = "Protocol Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [psr](index.html) module"]
+#[doc = "Protocol Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`psr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct PSR_SPEC;
 impl crate::RegisterSpec for PSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [psr::R](R) reader structure"]
-impl crate::Readable for PSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`psr::R`](R) reader structure"]
+impl crate::Readable for PSR_SPEC {}
 #[doc = "`reset()` method sets PSR to value 0"]
 impl crate::Resettable for PSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

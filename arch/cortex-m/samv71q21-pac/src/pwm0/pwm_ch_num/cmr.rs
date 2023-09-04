@@ -1,39 +1,7 @@
 #[doc = "Register `CMR` reader"]
-pub struct R(crate::R<CMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CMR_SPEC>;
 #[doc = "Register `CMR` writer"]
-pub struct W(crate::W<CMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CMR_SPEC>;
 #[doc = "Field `CPRE` reader - Channel Pre-scaler"]
 pub type CPRE_R = crate::FieldReader<CPRESELECT_A>;
 #[doc = "Channel Pre-scaler\n\nValue on reset: 0"]
@@ -97,138 +65,142 @@ impl CPRE_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `MCK`"]
+    #[doc = "Peripheral clock"]
     #[inline(always)]
     pub fn is_mck(&self) -> bool {
         *self == CPRESELECT_A::MCK
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_2`"]
+    #[doc = "Peripheral clock/2"]
     #[inline(always)]
     pub fn is_mck_div_2(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_2
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_4`"]
+    #[doc = "Peripheral clock/4"]
     #[inline(always)]
     pub fn is_mck_div_4(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_4
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_8`"]
+    #[doc = "Peripheral clock/8"]
     #[inline(always)]
     pub fn is_mck_div_8(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_8
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_16`"]
+    #[doc = "Peripheral clock/16"]
     #[inline(always)]
     pub fn is_mck_div_16(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_16
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_32`"]
+    #[doc = "Peripheral clock/32"]
     #[inline(always)]
     pub fn is_mck_div_32(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_32
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_64`"]
+    #[doc = "Peripheral clock/64"]
     #[inline(always)]
     pub fn is_mck_div_64(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_64
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_128`"]
+    #[doc = "Peripheral clock/128"]
     #[inline(always)]
     pub fn is_mck_div_128(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_128
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_256`"]
+    #[doc = "Peripheral clock/256"]
     #[inline(always)]
     pub fn is_mck_div_256(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_256
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_512`"]
+    #[doc = "Peripheral clock/512"]
     #[inline(always)]
     pub fn is_mck_div_512(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_512
     }
-    #[doc = "Checks if the value of the field is `MCK_DIV_1024`"]
+    #[doc = "Peripheral clock/1024"]
     #[inline(always)]
     pub fn is_mck_div_1024(&self) -> bool {
         *self == CPRESELECT_A::MCK_DIV_1024
     }
-    #[doc = "Checks if the value of the field is `CLKA`"]
+    #[doc = "Clock A"]
     #[inline(always)]
     pub fn is_clka(&self) -> bool {
         *self == CPRESELECT_A::CLKA
     }
-    #[doc = "Checks if the value of the field is `CLKB`"]
+    #[doc = "Clock B"]
     #[inline(always)]
     pub fn is_clkb(&self) -> bool {
         *self == CPRESELECT_A::CLKB
     }
 }
 #[doc = "Field `CPRE` writer - Channel Pre-scaler"]
-pub type CPRE_W<'a, const O: u8> = crate::FieldWriter<'a, CMR_SPEC, 4, O, CPRESELECT_A>;
-impl<'a, const O: u8> CPRE_W<'a, O> {
+pub type CPRE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 4, O, CPRESELECT_A>;
+impl<'a, REG, const O: u8> CPRE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Peripheral clock"]
     #[inline(always)]
-    pub fn mck(self) -> &'a mut W {
+    pub fn mck(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK)
     }
     #[doc = "Peripheral clock/2"]
     #[inline(always)]
-    pub fn mck_div_2(self) -> &'a mut W {
+    pub fn mck_div_2(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_2)
     }
     #[doc = "Peripheral clock/4"]
     #[inline(always)]
-    pub fn mck_div_4(self) -> &'a mut W {
+    pub fn mck_div_4(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_4)
     }
     #[doc = "Peripheral clock/8"]
     #[inline(always)]
-    pub fn mck_div_8(self) -> &'a mut W {
+    pub fn mck_div_8(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_8)
     }
     #[doc = "Peripheral clock/16"]
     #[inline(always)]
-    pub fn mck_div_16(self) -> &'a mut W {
+    pub fn mck_div_16(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_16)
     }
     #[doc = "Peripheral clock/32"]
     #[inline(always)]
-    pub fn mck_div_32(self) -> &'a mut W {
+    pub fn mck_div_32(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_32)
     }
     #[doc = "Peripheral clock/64"]
     #[inline(always)]
-    pub fn mck_div_64(self) -> &'a mut W {
+    pub fn mck_div_64(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_64)
     }
     #[doc = "Peripheral clock/128"]
     #[inline(always)]
-    pub fn mck_div_128(self) -> &'a mut W {
+    pub fn mck_div_128(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_128)
     }
     #[doc = "Peripheral clock/256"]
     #[inline(always)]
-    pub fn mck_div_256(self) -> &'a mut W {
+    pub fn mck_div_256(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_256)
     }
     #[doc = "Peripheral clock/512"]
     #[inline(always)]
-    pub fn mck_div_512(self) -> &'a mut W {
+    pub fn mck_div_512(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_512)
     }
     #[doc = "Peripheral clock/1024"]
     #[inline(always)]
-    pub fn mck_div_1024(self) -> &'a mut W {
+    pub fn mck_div_1024(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::MCK_DIV_1024)
     }
     #[doc = "Clock A"]
     #[inline(always)]
-    pub fn clka(self) -> &'a mut W {
+    pub fn clka(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::CLKA)
     }
     #[doc = "Clock B"]
     #[inline(always)]
-    pub fn clkb(self) -> &'a mut W {
+    pub fn clkb(self) -> &'a mut crate::W<REG> {
         self.variant(CPRESELECT_A::CLKB)
     }
 }
@@ -257,28 +229,31 @@ impl CALG_R {
             true => CALGSELECT_A::CENTER_ALIGNED,
         }
     }
-    #[doc = "Checks if the value of the field is `LEFT_ALIGNED`"]
+    #[doc = "Left aligned"]
     #[inline(always)]
     pub fn is_left_aligned(&self) -> bool {
         *self == CALGSELECT_A::LEFT_ALIGNED
     }
-    #[doc = "Checks if the value of the field is `CENTER_ALIGNED`"]
+    #[doc = "Center aligned"]
     #[inline(always)]
     pub fn is_center_aligned(&self) -> bool {
         *self == CALGSELECT_A::CENTER_ALIGNED
     }
 }
 #[doc = "Field `CALG` writer - Channel Alignment"]
-pub type CALG_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O, CALGSELECT_A>;
-impl<'a, const O: u8> CALG_W<'a, O> {
+pub type CALG_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CALGSELECT_A>;
+impl<'a, REG, const O: u8> CALG_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Left aligned"]
     #[inline(always)]
-    pub fn left_aligned(self) -> &'a mut W {
+    pub fn left_aligned(self) -> &'a mut crate::W<REG> {
         self.variant(CALGSELECT_A::LEFT_ALIGNED)
     }
     #[doc = "Center aligned"]
     #[inline(always)]
-    pub fn center_aligned(self) -> &'a mut W {
+    pub fn center_aligned(self) -> &'a mut crate::W<REG> {
         self.variant(CALGSELECT_A::CENTER_ALIGNED)
     }
 }
@@ -307,28 +282,31 @@ impl CPOL_R {
             true => CPOLSELECT_A::HIGH_POLARITY,
         }
     }
-    #[doc = "Checks if the value of the field is `LOW_POLARITY`"]
+    #[doc = "Waveform starts at low level"]
     #[inline(always)]
     pub fn is_low_polarity(&self) -> bool {
         *self == CPOLSELECT_A::LOW_POLARITY
     }
-    #[doc = "Checks if the value of the field is `HIGH_POLARITY`"]
+    #[doc = "Waveform starts at high level"]
     #[inline(always)]
     pub fn is_high_polarity(&self) -> bool {
         *self == CPOLSELECT_A::HIGH_POLARITY
     }
 }
 #[doc = "Field `CPOL` writer - Channel Polarity"]
-pub type CPOL_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O, CPOLSELECT_A>;
-impl<'a, const O: u8> CPOL_W<'a, O> {
+pub type CPOL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CPOLSELECT_A>;
+impl<'a, REG, const O: u8> CPOL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Waveform starts at low level"]
     #[inline(always)]
-    pub fn low_polarity(self) -> &'a mut W {
+    pub fn low_polarity(self) -> &'a mut crate::W<REG> {
         self.variant(CPOLSELECT_A::LOW_POLARITY)
     }
     #[doc = "Waveform starts at high level"]
     #[inline(always)]
-    pub fn high_polarity(self) -> &'a mut W {
+    pub fn high_polarity(self) -> &'a mut crate::W<REG> {
         self.variant(CPOLSELECT_A::HIGH_POLARITY)
     }
 }
@@ -357,28 +335,31 @@ impl CES_R {
             true => CESSELECT_A::DOUBLE_EVENT,
         }
     }
-    #[doc = "Checks if the value of the field is `SINGLE_EVENT`"]
+    #[doc = "At the end of PWM period"]
     #[inline(always)]
     pub fn is_single_event(&self) -> bool {
         *self == CESSELECT_A::SINGLE_EVENT
     }
-    #[doc = "Checks if the value of the field is `DOUBLE_EVENT`"]
+    #[doc = "At half of PWM period AND at the end of PWM period"]
     #[inline(always)]
     pub fn is_double_event(&self) -> bool {
         *self == CESSELECT_A::DOUBLE_EVENT
     }
 }
 #[doc = "Field `CES` writer - Counter Event Selection"]
-pub type CES_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O, CESSELECT_A>;
-impl<'a, const O: u8> CES_W<'a, O> {
+pub type CES_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CESSELECT_A>;
+impl<'a, REG, const O: u8> CES_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "At the end of PWM period"]
     #[inline(always)]
-    pub fn single_event(self) -> &'a mut W {
+    pub fn single_event(self) -> &'a mut crate::W<REG> {
         self.variant(CESSELECT_A::SINGLE_EVENT)
     }
     #[doc = "At half of PWM period AND at the end of PWM period"]
     #[inline(always)]
-    pub fn double_event(self) -> &'a mut W {
+    pub fn double_event(self) -> &'a mut crate::W<REG> {
         self.variant(CESSELECT_A::DOUBLE_EVENT)
     }
 }
@@ -407,55 +388,58 @@ impl UPDS_R {
             true => UPDSSELECT_A::UPDATE_AT_HALF_PERIOD,
         }
     }
-    #[doc = "Checks if the value of the field is `UPDATE_AT_PERIOD`"]
+    #[doc = "At the next end of PWM period"]
     #[inline(always)]
     pub fn is_update_at_period(&self) -> bool {
         *self == UPDSSELECT_A::UPDATE_AT_PERIOD
     }
-    #[doc = "Checks if the value of the field is `UPDATE_AT_HALF_PERIOD`"]
+    #[doc = "At the next end of Half PWM period"]
     #[inline(always)]
     pub fn is_update_at_half_period(&self) -> bool {
         *self == UPDSSELECT_A::UPDATE_AT_HALF_PERIOD
     }
 }
 #[doc = "Field `UPDS` writer - Update Selection"]
-pub type UPDS_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O, UPDSSELECT_A>;
-impl<'a, const O: u8> UPDS_W<'a, O> {
+pub type UPDS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, UPDSSELECT_A>;
+impl<'a, REG, const O: u8> UPDS_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "At the next end of PWM period"]
     #[inline(always)]
-    pub fn update_at_period(self) -> &'a mut W {
+    pub fn update_at_period(self) -> &'a mut crate::W<REG> {
         self.variant(UPDSSELECT_A::UPDATE_AT_PERIOD)
     }
     #[doc = "At the next end of Half PWM period"]
     #[inline(always)]
-    pub fn update_at_half_period(self) -> &'a mut W {
+    pub fn update_at_half_period(self) -> &'a mut crate::W<REG> {
         self.variant(UPDSSELECT_A::UPDATE_AT_HALF_PERIOD)
     }
 }
 #[doc = "Field `DPOLI` reader - Disabled Polarity Inverted"]
 pub type DPOLI_R = crate::BitReader;
 #[doc = "Field `DPOLI` writer - Disabled Polarity Inverted"]
-pub type DPOLI_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type DPOLI_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TCTS` reader - Timer Counter Trigger Selection"]
 pub type TCTS_R = crate::BitReader;
 #[doc = "Field `TCTS` writer - Timer Counter Trigger Selection"]
-pub type TCTS_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type TCTS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DTE` reader - Dead-Time Generator Enable"]
 pub type DTE_R = crate::BitReader;
 #[doc = "Field `DTE` writer - Dead-Time Generator Enable"]
-pub type DTE_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type DTE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DTHI` reader - Dead-Time PWMHx Output Inverted"]
 pub type DTHI_R = crate::BitReader;
 #[doc = "Field `DTHI` writer - Dead-Time PWMHx Output Inverted"]
-pub type DTHI_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type DTHI_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DTLI` reader - Dead-Time PWMLx Output Inverted"]
 pub type DTLI_R = crate::BitReader;
 #[doc = "Field `DTLI` writer - Dead-Time PWMLx Output Inverted"]
-pub type DTLI_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type DTLI_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PPM` reader - Push-Pull Mode"]
 pub type PPM_R = crate::BitReader;
 #[doc = "Field `PPM` writer - Push-Pull Mode"]
-pub type PPM_W<'a, const O: u8> = crate::BitWriter<'a, CMR_SPEC, O>;
+pub type PPM_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bits 0:3 - Channel Pre-scaler"]
     #[inline(always)]
@@ -517,88 +501,85 @@ impl W {
     #[doc = "Bits 0:3 - Channel Pre-scaler"]
     #[inline(always)]
     #[must_use]
-    pub fn cpre(&mut self) -> CPRE_W<0> {
+    pub fn cpre(&mut self) -> CPRE_W<CMR_SPEC, 0> {
         CPRE_W::new(self)
     }
     #[doc = "Bit 8 - Channel Alignment"]
     #[inline(always)]
     #[must_use]
-    pub fn calg(&mut self) -> CALG_W<8> {
+    pub fn calg(&mut self) -> CALG_W<CMR_SPEC, 8> {
         CALG_W::new(self)
     }
     #[doc = "Bit 9 - Channel Polarity"]
     #[inline(always)]
     #[must_use]
-    pub fn cpol(&mut self) -> CPOL_W<9> {
+    pub fn cpol(&mut self) -> CPOL_W<CMR_SPEC, 9> {
         CPOL_W::new(self)
     }
     #[doc = "Bit 10 - Counter Event Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn ces(&mut self) -> CES_W<10> {
+    pub fn ces(&mut self) -> CES_W<CMR_SPEC, 10> {
         CES_W::new(self)
     }
     #[doc = "Bit 11 - Update Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn upds(&mut self) -> UPDS_W<11> {
+    pub fn upds(&mut self) -> UPDS_W<CMR_SPEC, 11> {
         UPDS_W::new(self)
     }
     #[doc = "Bit 12 - Disabled Polarity Inverted"]
     #[inline(always)]
     #[must_use]
-    pub fn dpoli(&mut self) -> DPOLI_W<12> {
+    pub fn dpoli(&mut self) -> DPOLI_W<CMR_SPEC, 12> {
         DPOLI_W::new(self)
     }
     #[doc = "Bit 13 - Timer Counter Trigger Selection"]
     #[inline(always)]
     #[must_use]
-    pub fn tcts(&mut self) -> TCTS_W<13> {
+    pub fn tcts(&mut self) -> TCTS_W<CMR_SPEC, 13> {
         TCTS_W::new(self)
     }
     #[doc = "Bit 16 - Dead-Time Generator Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn dte(&mut self) -> DTE_W<16> {
+    pub fn dte(&mut self) -> DTE_W<CMR_SPEC, 16> {
         DTE_W::new(self)
     }
     #[doc = "Bit 17 - Dead-Time PWMHx Output Inverted"]
     #[inline(always)]
     #[must_use]
-    pub fn dthi(&mut self) -> DTHI_W<17> {
+    pub fn dthi(&mut self) -> DTHI_W<CMR_SPEC, 17> {
         DTHI_W::new(self)
     }
     #[doc = "Bit 18 - Dead-Time PWMLx Output Inverted"]
     #[inline(always)]
     #[must_use]
-    pub fn dtli(&mut self) -> DTLI_W<18> {
+    pub fn dtli(&mut self) -> DTLI_W<CMR_SPEC, 18> {
         DTLI_W::new(self)
     }
     #[doc = "Bit 19 - Push-Pull Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn ppm(&mut self) -> PPM_W<19> {
+    pub fn ppm(&mut self) -> PPM_W<CMR_SPEC, 19> {
         PPM_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "PWM Channel Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cmr](index.html) module"]
+#[doc = "PWM Channel Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cmr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cmr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CMR_SPEC;
 impl crate::RegisterSpec for CMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cmr::R](R) reader structure"]
-impl crate::Readable for CMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [cmr::W](W) writer structure"]
+#[doc = "`read()` method returns [`cmr::R`](R) reader structure"]
+impl crate::Readable for CMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`cmr::W`](W) writer structure"]
 impl crate::Writable for CMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

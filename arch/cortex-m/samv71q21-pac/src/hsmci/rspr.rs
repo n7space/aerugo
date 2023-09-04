@@ -1,18 +1,5 @@
 #[doc = "Register `RSPR[%s]` reader"]
-pub struct R(crate::R<RSPR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<RSPR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<RSPR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<RSPR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<RSPR_SPEC>;
 #[doc = "Field `RSP` reader - Response"]
 pub type RSP_R = crate::FieldReader<u32>;
 impl R {
@@ -22,15 +9,13 @@ impl R {
         RSP_R::new(self.bits)
     }
 }
-#[doc = "Response Register 0\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [rspr](index.html) module"]
+#[doc = "Response Register 0\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`rspr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct RSPR_SPEC;
 impl crate::RegisterSpec for RSPR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [rspr::R](R) reader structure"]
-impl crate::Readable for RSPR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`rspr::R`](R) reader structure"]
+impl crate::Readable for RSPR_SPEC {}
 #[doc = "`reset()` method sets RSPR[%s]
 to value 0"]
 impl crate::Resettable for RSPR_SPEC {

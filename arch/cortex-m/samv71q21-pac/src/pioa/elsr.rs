@@ -1,18 +1,5 @@
 #[doc = "Register `ELSR` reader"]
-pub struct R(crate::R<ELSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ELSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ELSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ELSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ELSR_SPEC>;
 #[doc = "Field `P0` reader - Edge/Level Interrupt Source Selection"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Edge/Level Interrupt Source Selection"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Edge/Level Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [elsr](index.html) module"]
+#[doc = "Edge/Level Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`elsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ELSR_SPEC;
 impl crate::RegisterSpec for ELSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [elsr::R](R) reader structure"]
-impl crate::Readable for ELSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`elsr::R`](R) reader structure"]
+impl crate::Readable for ELSR_SPEC {}
 #[doc = "`reset()` method sets ELSR to value 0"]
 impl crate::Resettable for ELSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

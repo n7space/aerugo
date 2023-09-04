@@ -1,59 +1,27 @@
 #[doc = "Register `GCFG` reader"]
-pub struct R(crate::R<GCFG_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GCFG_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GCFG_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GCFG_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GCFG_SPEC>;
 #[doc = "Register `GCFG` writer"]
-pub struct W(crate::W<GCFG_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<GCFG_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<GCFG_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<GCFG_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<GCFG_SPEC>;
 #[doc = "Field `CGDISREG` reader - Configuration Registers Clock Gating Disable"]
 pub type CGDISREG_R = crate::BitReader;
 #[doc = "Field `CGDISREG` writer - Configuration Registers Clock Gating Disable"]
-pub type CGDISREG_W<'a, const O: u8> = crate::BitWriter<'a, GCFG_SPEC, O>;
+pub type CGDISREG_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CGDISPIPE` reader - Pipeline Clock Gating Disable"]
 pub type CGDISPIPE_R = crate::BitReader;
 #[doc = "Field `CGDISPIPE` writer - Pipeline Clock Gating Disable"]
-pub type CGDISPIPE_W<'a, const O: u8> = crate::BitWriter<'a, GCFG_SPEC, O>;
+pub type CGDISPIPE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CGDISFIFO` reader - FIFO Clock Gating Disable"]
 pub type CGDISFIFO_R = crate::BitReader;
 #[doc = "Field `CGDISFIFO` writer - FIFO Clock Gating Disable"]
-pub type CGDISFIFO_W<'a, const O: u8> = crate::BitWriter<'a, GCFG_SPEC, O>;
+pub type CGDISFIFO_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CGDISIF` reader - Bus Interface Clock Gating Disable"]
 pub type CGDISIF_R = crate::BitReader;
 #[doc = "Field `CGDISIF` writer - Bus Interface Clock Gating Disable"]
-pub type CGDISIF_W<'a, const O: u8> = crate::BitWriter<'a, GCFG_SPEC, O>;
+pub type CGDISIF_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `BXKBEN` reader - Boundary X Kilobyte Enable"]
 pub type BXKBEN_R = crate::BitReader;
 #[doc = "Field `BXKBEN` writer - Boundary X Kilobyte Enable"]
-pub type BXKBEN_W<'a, const O: u8> = crate::BitWriter<'a, GCFG_SPEC, O>;
+pub type BXKBEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Configuration Registers Clock Gating Disable"]
     #[inline(always)]
@@ -85,52 +53,49 @@ impl W {
     #[doc = "Bit 0 - Configuration Registers Clock Gating Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn cgdisreg(&mut self) -> CGDISREG_W<0> {
+    pub fn cgdisreg(&mut self) -> CGDISREG_W<GCFG_SPEC, 0> {
         CGDISREG_W::new(self)
     }
     #[doc = "Bit 1 - Pipeline Clock Gating Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn cgdispipe(&mut self) -> CGDISPIPE_W<1> {
+    pub fn cgdispipe(&mut self) -> CGDISPIPE_W<GCFG_SPEC, 1> {
         CGDISPIPE_W::new(self)
     }
     #[doc = "Bit 2 - FIFO Clock Gating Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn cgdisfifo(&mut self) -> CGDISFIFO_W<2> {
+    pub fn cgdisfifo(&mut self) -> CGDISFIFO_W<GCFG_SPEC, 2> {
         CGDISFIFO_W::new(self)
     }
     #[doc = "Bit 3 - Bus Interface Clock Gating Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn cgdisif(&mut self) -> CGDISIF_W<3> {
+    pub fn cgdisif(&mut self) -> CGDISIF_W<GCFG_SPEC, 3> {
         CGDISIF_W::new(self)
     }
     #[doc = "Bit 8 - Boundary X Kilobyte Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn bxkben(&mut self) -> BXKBEN_W<8> {
+    pub fn bxkben(&mut self) -> BXKBEN_W<GCFG_SPEC, 8> {
         BXKBEN_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Global Configuration Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gcfg](index.html) module"]
+#[doc = "Global Configuration Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gcfg::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gcfg::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GCFG_SPEC;
 impl crate::RegisterSpec for GCFG_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gcfg::R](R) reader structure"]
-impl crate::Readable for GCFG_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [gcfg::W](W) writer structure"]
+#[doc = "`read()` method returns [`gcfg::R`](R) reader structure"]
+impl crate::Readable for GCFG_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`gcfg::W`](W) writer structure"]
 impl crate::Writable for GCFG_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

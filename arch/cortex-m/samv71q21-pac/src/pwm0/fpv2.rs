@@ -1,71 +1,39 @@
 #[doc = "Register `FPV2` reader"]
-pub struct R(crate::R<FPV2_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<FPV2_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<FPV2_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<FPV2_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<FPV2_SPEC>;
 #[doc = "Register `FPV2` writer"]
-pub struct W(crate::W<FPV2_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<FPV2_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<FPV2_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<FPV2_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<FPV2_SPEC>;
 #[doc = "Field `FPZH0` reader - Fault Protection to Hi-Z for PWMH output on channel 0"]
 pub type FPZH0_R = crate::BitReader;
 #[doc = "Field `FPZH0` writer - Fault Protection to Hi-Z for PWMH output on channel 0"]
-pub type FPZH0_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZH0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZH1` reader - Fault Protection to Hi-Z for PWMH output on channel 1"]
 pub type FPZH1_R = crate::BitReader;
 #[doc = "Field `FPZH1` writer - Fault Protection to Hi-Z for PWMH output on channel 1"]
-pub type FPZH1_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZH1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZH2` reader - Fault Protection to Hi-Z for PWMH output on channel 2"]
 pub type FPZH2_R = crate::BitReader;
 #[doc = "Field `FPZH2` writer - Fault Protection to Hi-Z for PWMH output on channel 2"]
-pub type FPZH2_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZH2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZH3` reader - Fault Protection to Hi-Z for PWMH output on channel 3"]
 pub type FPZH3_R = crate::BitReader;
 #[doc = "Field `FPZH3` writer - Fault Protection to Hi-Z for PWMH output on channel 3"]
-pub type FPZH3_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZH3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZL0` reader - Fault Protection to Hi-Z for PWML output on channel 0"]
 pub type FPZL0_R = crate::BitReader;
 #[doc = "Field `FPZL0` writer - Fault Protection to Hi-Z for PWML output on channel 0"]
-pub type FPZL0_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZL0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZL1` reader - Fault Protection to Hi-Z for PWML output on channel 1"]
 pub type FPZL1_R = crate::BitReader;
 #[doc = "Field `FPZL1` writer - Fault Protection to Hi-Z for PWML output on channel 1"]
-pub type FPZL1_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZL1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZL2` reader - Fault Protection to Hi-Z for PWML output on channel 2"]
 pub type FPZL2_R = crate::BitReader;
 #[doc = "Field `FPZL2` writer - Fault Protection to Hi-Z for PWML output on channel 2"]
-pub type FPZL2_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZL2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FPZL3` reader - Fault Protection to Hi-Z for PWML output on channel 3"]
 pub type FPZL3_R = crate::BitReader;
 #[doc = "Field `FPZL3` writer - Fault Protection to Hi-Z for PWML output on channel 3"]
-pub type FPZL3_W<'a, const O: u8> = crate::BitWriter<'a, FPV2_SPEC, O>;
+pub type FPZL3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Fault Protection to Hi-Z for PWMH output on channel 0"]
     #[inline(always)]
@@ -112,70 +80,67 @@ impl W {
     #[doc = "Bit 0 - Fault Protection to Hi-Z for PWMH output on channel 0"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzh0(&mut self) -> FPZH0_W<0> {
+    pub fn fpzh0(&mut self) -> FPZH0_W<FPV2_SPEC, 0> {
         FPZH0_W::new(self)
     }
     #[doc = "Bit 1 - Fault Protection to Hi-Z for PWMH output on channel 1"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzh1(&mut self) -> FPZH1_W<1> {
+    pub fn fpzh1(&mut self) -> FPZH1_W<FPV2_SPEC, 1> {
         FPZH1_W::new(self)
     }
     #[doc = "Bit 2 - Fault Protection to Hi-Z for PWMH output on channel 2"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzh2(&mut self) -> FPZH2_W<2> {
+    pub fn fpzh2(&mut self) -> FPZH2_W<FPV2_SPEC, 2> {
         FPZH2_W::new(self)
     }
     #[doc = "Bit 3 - Fault Protection to Hi-Z for PWMH output on channel 3"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzh3(&mut self) -> FPZH3_W<3> {
+    pub fn fpzh3(&mut self) -> FPZH3_W<FPV2_SPEC, 3> {
         FPZH3_W::new(self)
     }
     #[doc = "Bit 16 - Fault Protection to Hi-Z for PWML output on channel 0"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzl0(&mut self) -> FPZL0_W<16> {
+    pub fn fpzl0(&mut self) -> FPZL0_W<FPV2_SPEC, 16> {
         FPZL0_W::new(self)
     }
     #[doc = "Bit 17 - Fault Protection to Hi-Z for PWML output on channel 1"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzl1(&mut self) -> FPZL1_W<17> {
+    pub fn fpzl1(&mut self) -> FPZL1_W<FPV2_SPEC, 17> {
         FPZL1_W::new(self)
     }
     #[doc = "Bit 18 - Fault Protection to Hi-Z for PWML output on channel 2"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzl2(&mut self) -> FPZL2_W<18> {
+    pub fn fpzl2(&mut self) -> FPZL2_W<FPV2_SPEC, 18> {
         FPZL2_W::new(self)
     }
     #[doc = "Bit 19 - Fault Protection to Hi-Z for PWML output on channel 3"]
     #[inline(always)]
     #[must_use]
-    pub fn fpzl3(&mut self) -> FPZL3_W<19> {
+    pub fn fpzl3(&mut self) -> FPZL3_W<FPV2_SPEC, 19> {
         FPZL3_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "PWM Fault Protection Value 2 Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fpv2](index.html) module"]
+#[doc = "PWM Fault Protection Value 2 Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`fpv2::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`fpv2::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct FPV2_SPEC;
 impl crate::RegisterSpec for FPV2_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [fpv2::R](R) reader structure"]
-impl crate::Readable for FPV2_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [fpv2::W](W) writer structure"]
+#[doc = "`read()` method returns [`fpv2::R`](R) reader structure"]
+impl crate::Readable for FPV2_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`fpv2::W`](W) writer structure"]
 impl crate::Writable for FPV2_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }
