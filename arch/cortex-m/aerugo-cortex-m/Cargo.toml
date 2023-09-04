@@ -10,7 +10,6 @@ license.workspace = true
 description = "Cortex-M specific implementation for Aerugo"
 
 [dependencies]
-cortex-m = "0.7.7"
 rtt-target = "0.4.0"
 
 [features]

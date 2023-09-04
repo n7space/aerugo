@@ -18,6 +18,7 @@ mod execution_monitoring;
 mod executor;
 mod internal_list;
 mod message_queue;
+mod mutex;
 mod stubs;
 mod tasklet;
 mod time_manager;
@@ -33,13 +34,16 @@ pub use self::event::{EventEnabler, EventId};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
 pub use aerugo_hal::{time, Duration, Instant, SystemHardwareConfig};
+pub use mutex::Mutex;
 
 #[cfg(feature = "use-aerugo-cortex-m")]
+#[cfg(feature = "log")]
 pub(crate) use aerugo_cortex_m as arch;
 #[cfg(feature = "use-aerugo-cortex-m")]
 pub use aerugo_samv71_hal as hal;
 
 #[cfg(feature = "use-aerugo-x86")]
+#[cfg(feature = "log")]
 pub(crate) use aerugo_x86 as arch;
 #[cfg(feature = "use-aerugo-x86")]
 pub use aerugo_x86_hal as hal;

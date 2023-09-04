@@ -22,8 +22,6 @@ use samv71_hal::watchdog::{Watchdog, WatchdogConfig};
 /// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
 static mut HAL_SYSTEM_PERIPHERALS: Option<SystemPeripherals> = None;
 
-/// Global "restore state" that's used to manage
-
 /// HAL implementation for Cortex-M based SAMV71 MCU.
 pub struct Hal;
 
@@ -135,7 +133,7 @@ impl AerugoHal for Hal {
     /// # Return
     /// `()` on success, [`HalError`] if HAL was already initialized.
     fn configure_hardware(config: SystemHardwareConfig) -> Result<(), HalError> {
-        let result = critical_section::with(|_| {
+        critical_section::with(|_| {
             Hal::initialize()?;
 
             // SAFETY: Immutable access to system peripherals is safe, as we're in critical section
@@ -185,9 +183,7 @@ impl AerugoHal for Hal {
             peripherals.timer.trigger_all_channels();
 
             Ok(())
-        });
-
-        result
+        })
     }
 
     fn get_system_time() -> Instant {

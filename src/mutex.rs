@@ -6,8 +6,6 @@
 
 use core::cell::UnsafeCell;
 
-use cortex_m::interrupt;
-
 /// Mutex based on the critical section.
 ///
 /// # Generic Parameters
@@ -46,7 +44,7 @@ impl<T: ?Sized> Mutex<T> {
     #[inline(always)]
     #[allow(dead_code)]
     pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
-        unsafe { interrupt::free(|_| f(self.as_mut_ref())) }
+        unsafe { critical_section::with(|_| f(self.as_mut_ref())) }
     }
 
     /// Returns a mutable reference to the stored value.

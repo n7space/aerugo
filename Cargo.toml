@@ -61,7 +61,7 @@ assert_cmd = "2.0"
 [features]
 default = ["log"]
 use-aerugo-cortex-m = ["aerugo-cortex-m", "aerugo-samv71-hal"]
-use-aerugo-x86 = ["aerugo-x86", "aerugo-x86-hal"]
+use-aerugo-x86 = ["aerugo-x86", "aerugo-x86-hal", "critical-section/std"]
 test-aerugo-cortex-m = ["use-aerugo-x86"]
 rt = ["aerugo-samv71-hal?/rt"]
 log = ["aerugo-cortex-m?/log", "aerugo-x86?/log"]

@@ -28,10 +28,10 @@ use core::cell::{OnceCell, UnsafeCell};
 
 use crate::aerugo::AERUGO;
 use crate::api::{InitError, RuntimeApi};
-use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
 use crate::Instant;
+use crate::Mutex;
 
 /// Type of function that is executed by the tasklet in its step.
 pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);

@@ -7,8 +7,6 @@ x86 specific implementation for Aerugo.
 
 #[cfg(feature = "log")]
 mod logger;
-mod mutex;
 
 #[cfg(feature = "log")]
 pub use self::logger::{init_log, log, logln};
-pub use self::mutex::Mutex;

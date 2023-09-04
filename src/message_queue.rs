@@ -10,10 +10,10 @@ pub(crate) use self::message_queue_storage::QueueData;
 
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{InitError, RuntimeError, SystemApi};
-use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
+use crate::Mutex;
 
 /// List of tasklets registered to a queue
 type TaskletList = InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
