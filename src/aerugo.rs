@@ -16,7 +16,7 @@ use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
-use crate::event::{Event, EventEnabler, EventId};
+use crate::event::{EventEnabler, EventId};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
@@ -44,7 +44,7 @@ static EVENT_MANAGER: EventManager = EventManager::new();
 /// Time manager.
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
-/// structure.
+/// and [EventEnabler] structures.
 static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager::new();
 
 /// System structure.
@@ -490,7 +490,7 @@ impl InitApi for Aerugo {
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { tasklet.subscribe(event_set)? };
 
-        let event_subscriber = EventEnabler::new(event_set);
+        let event_subscriber = EventEnabler::new(event_set, &EVENT_MANAGER);
         Ok(event_subscriber)
     }
 
@@ -755,10 +755,6 @@ impl RuntimeApi for Aerugo {
 }
 
 impl SystemApi for Aerugo {
-    fn get_event(&'static self, event_id: EventId) -> Option<&'static Event> {
-        EVENT_MANAGER.get_event(event_id)
-    }
-
     fn wake_tasklet(&'static self, tasklet: &TaskletPtr) {
         EXECUTOR
             .schedule_tasklet(tasklet)
