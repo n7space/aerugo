@@ -1,14 +1,11 @@
-//! System time manager.
+//! Cyclic execution manager.
 //!
-//! This module contains a system time manager. It's responsibility is to keep track of tasklets
-//! and events that are based on time.
-
-mod cyclic_execution;
-
-use self::cyclic_execution::CyclicExecution;
+//! This module contains cyclic execution manager. It's responsibility is to keep track of tasklets
+//! that should be executed periodically.
 
 use crate::aerugo::Aerugo;
 use crate::api::InitError;
+use crate::cyclic_execution::CyclicExecution;
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 use crate::time::MillisDurationU32;
@@ -16,23 +13,23 @@ use crate::time::MillisDurationU32;
 /// List of cyclic executions registered in the system.
 type CyclicExecutions = InternalList<CyclicExecution, { Aerugo::TASKLET_COUNT }>;
 
-/// System time manager.
+/// Cyclic execution manager.
 ///
 /// This shouldn't be created by hand by the user or anywhere else in the code.
-/// It should be used as a singleton (crate::aerugo::TIME_MANAGER) and shouldn't be directly accessed
+/// It should be used as a singleton (crate::aerugo::CYCLIC_EXECUTION_MANAGER) and shouldn't be directly accessed
 /// by any other part of the system.
-pub(crate) struct TimeManager {
+pub(crate) struct CyclicExecutionManager {
     /// Registered cyclic executions.
     cyclic_executions: CyclicExecutions,
 }
 
-impl TimeManager {
-    /// Creates new time manager instance.
+impl CyclicExecutionManager {
+    /// Creates new cyclic execution manager instance.
     ///
     /// # Safety
     /// This shouldn't be called more than once.
     pub(crate) const fn new() -> Self {
-        TimeManager {
+        CyclicExecutionManager {
             cyclic_executions: CyclicExecutions::new(),
         }
     }
@@ -72,4 +69,4 @@ impl TimeManager {
     }
 }
 
-unsafe impl Sync for TimeManager {}
+unsafe impl Sync for CyclicExecutionManager {}

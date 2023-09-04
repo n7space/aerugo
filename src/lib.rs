@@ -11,6 +11,8 @@
 mod aerugo;
 mod api;
 mod boolean_condition;
+mod cyclic_execution;
+mod cyclic_execution_manager;
 mod data_provider;
 mod event;
 mod event_manager;
@@ -20,7 +22,6 @@ mod internal_list;
 mod message_queue;
 mod stubs;
 mod tasklet;
-mod time_manager;
 mod time_source;
 mod utils;
 

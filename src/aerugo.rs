@@ -14,6 +14,7 @@ use crate::arch::init_log;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
+use crate::cyclic_execution_manager::CyclicExecutionManager;
 use crate::event::{Event, EventEnabler, EventId};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
@@ -21,7 +22,6 @@ use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
-use crate::time_manager::TimeManager;
 use crate::time_source::TimeSource;
 use crate::{Duration, Instant};
 
@@ -44,7 +44,7 @@ static EVENT_MANAGER: EventManager = EventManager::new();
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
 /// structure.
-static TIME_MANAGER: TimeManager = TimeManager::new();
+static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager::new();
 
 /// System structure.
 ///
@@ -614,7 +614,8 @@ impl InitApi for Aerugo {
 
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
-            let cyclic_execution = TIME_MANAGER.create_cyclic_execution(tasklet.ptr(), period)?;
+            let cyclic_execution =
+                CYCLIC_EXECUTION_MANAGER.create_cyclic_execution(tasklet.ptr(), period)?;
             tasklet.subscribe(cyclic_execution)?;
         }
 
@@ -774,6 +775,6 @@ impl SystemApi for Aerugo {
 
     fn update(&'static self) {
         Hal::feed_watchdog();
-        TIME_MANAGER.wake_tasklets();
+        CYCLIC_EXECUTION_MANAGER.wake_tasklets();
     }
 }
