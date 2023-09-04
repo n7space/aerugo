@@ -40,7 +40,7 @@ pub trait RuntimeApi {
     ///
     /// # Parameters
     /// * `offset` - Time offset.
-    fn set_system_time_offset(&'static self, offset: Duration);
+    fn set_system_time_offset(&'static self, offset: Duration) -> Result<(), RuntimeError>;
 
     /// Returns time elapsed between system initialization and start of the scheduler.
     /// If called before scheduler's start, should return `None`.

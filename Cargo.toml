@@ -9,7 +9,6 @@ members = [
     "arch/x86/aerugo-x86-hal",
     "utils/env-parser",
     "utils/env-parser-tests",
-    "utils/internal_cell",
     "calldwell/calldwell-rs",
 ]
 exclude = ["examples", "testbins", "calldwell/examples"]
@@ -52,7 +51,6 @@ aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true 
 aerugo-x86-hal = { version = "0.1.0", path = "arch/x86/aerugo-x86-hal", optional = true }
 env-parser = { version = "1.0.0", path = "utils/env-parser" }
 heapless = "0.7"
-internal-cell = { version = "0.0.1", path = "utils/internal_cell" }
 samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
 
 [dev-dependencies]

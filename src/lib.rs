@@ -8,8 +8,6 @@
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-extern crate internal_cell;
-
 mod aerugo;
 mod api;
 mod boolean_condition;
@@ -18,6 +16,7 @@ mod event;
 mod event_manager;
 mod execution_monitoring;
 mod executor;
+mod internal_list;
 mod message_queue;
 mod stubs;
 mod tasklet;

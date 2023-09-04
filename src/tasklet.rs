@@ -24,14 +24,13 @@ pub use self::tasklet_config::TaskletConfig;
 pub use self::tasklet_handle::TaskletHandle;
 pub use self::tasklet_storage::TaskletStorage;
 
-use core::cell::OnceCell;
+use core::cell::{OnceCell, UnsafeCell};
 
 use crate::aerugo::AERUGO;
 use crate::api::{InitError, RuntimeApi};
 use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
-use crate::internal_cell::InternalCell;
 use crate::Instant;
 
 /// Type of function that is executed by the tasklet in its step.
@@ -59,7 +58,7 @@ pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     /// Step function.
     step_fn: StepFn<T, C>,
     /// Context data.
-    context: InternalCell<&'static mut C>,
+    context: UnsafeCell<&'static mut C>,
     /// Condition set.
     condition_set: &'static OnceCell<BooleanConditionSet<COND_COUNT>>,
     /// Source of the data.
@@ -80,7 +79,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             status: Mutex::new(TaskletStatus::Sleeping),
             last_execution_time: Mutex::new(Instant::from_ticks(0)),
             step_fn,
-            context: InternalCell::new(context),
+            context: UnsafeCell::new(context),
             condition_set,
             data_provider: OnceCell::new(),
         }
@@ -180,7 +179,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
                 if let Some(val) = value {
                     // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
                     // be executed only once at a given time.
-                    let context = unsafe { self.context.as_mut_ref() };
+                    let context: &mut C = unsafe { *self.context.get() };
                     (self.step_fn)(val, context, &AERUGO);
 
                     true

@@ -8,17 +8,15 @@ pub use self::message_queue_storage::MessageQueueStorage;
 
 pub(crate) use self::message_queue_storage::QueueData;
 
-use heapless::Vec;
-
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{InitError, RuntimeError, SystemApi};
 use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
-use crate::internal_cell::InternalCell;
+use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 
 /// List of tasklets registered to a queue
-type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
+type TaskletList = InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 
 /// Message queue used for exchanging data between tasklets.
 ///
@@ -28,17 +26,17 @@ type TaskletList = Vec<TaskletPtr, { Aerugo::TASKLET_COUNT }>;
 #[repr(C)]
 pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     /// Reference to the queue data storage.
-    data_queue: Mutex<&'static mut QueueData<T, N>>,
+    data_queue: &'static Mutex<QueueData<T, N>>,
     /// Tasklets registered to this queue.
-    registered_tasklets: InternalCell<TaskletList>,
+    registered_tasklets: TaskletList,
 }
 
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
-    pub(crate) fn new(data_queue: &'static mut QueueData<T, N>) -> Self {
+    pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
         MessageQueue {
-            data_queue: Mutex::new(data_queue),
-            registered_tasklets: TaskletList::new().into(),
+            data_queue,
+            registered_tasklets: TaskletList::new(),
         }
     }
 
@@ -54,7 +52,7 @@ impl<T, const N: usize> MessageQueue<T, N> {
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
     /// This is safe to call before the system initialization.
     pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
-        match self.registered_tasklets.as_mut_ref().push(tasklet) {
+        match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::TaskletListFull),
         }
@@ -62,8 +60,7 @@ impl<T, const N: usize> MessageQueue<T, N> {
 
     /// Wakes tasklets registered to this queue.
     fn wake_tasklets(&self) {
-        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
-        for t in unsafe { self.registered_tasklets.as_ref() } {
+        for t in &self.registered_tasklets {
             AERUGO.wake_tasklet(t);
         }
     }

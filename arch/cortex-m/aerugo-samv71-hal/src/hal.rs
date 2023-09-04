@@ -86,7 +86,7 @@ impl Hal {
         // This function can be successfully called only once, and we're in critical section,
         // so there's no possible way that this memory will accessed somewhere else until this
         // section is finished.
-        let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.as_ref().is_some() };
+        let is_hal_created = unsafe { HAL_SYSTEM_PERIPHERALS.is_some() };
         if is_hal_created {
             return Err(HalError::HalAlreadyInitialized);
         }

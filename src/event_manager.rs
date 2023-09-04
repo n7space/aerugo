@@ -4,18 +4,17 @@
 //! event sets that are assigned to the tasklets.
 
 use env_parser::read_env;
-use heapless::Vec;
-use internal_cell::InternalCell;
 
 use crate::aerugo::Aerugo;
 use crate::api::{InitError, RuntimeError};
 use crate::event::{Event, EventId, EventSet};
+use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 
 /// Type for list of events.
-type EventList = Vec<Event, { EventManager::EVENT_COUNT }>;
+type EventList = InternalList<Event, { EventManager::EVENT_COUNT }>;
 /// Type fo list of event sets.
-type EventSetList = Vec<EventSet, { Aerugo::TASKLET_COUNT }>;
+type EventSetList = InternalList<EventSet, { Aerugo::TASKLET_COUNT }>;
 
 /// System events manager.
 ///
@@ -24,9 +23,9 @@ type EventSetList = Vec<EventSet, { Aerugo::TASKLET_COUNT }>;
 /// by any other part of the system.
 pub(crate) struct EventManager {
     /// List of events in the system.
-    events: InternalCell<EventList>,
+    events: EventList,
     /// List of event sets.
-    event_sets: InternalCell<EventSetList>,
+    event_sets: EventSetList,
 }
 
 impl EventManager {
@@ -37,8 +36,8 @@ impl EventManager {
     /// Creates new EventManager instance.
     pub(crate) const fn new() -> Self {
         EventManager {
-            events: InternalCell::new(EventList::new()),
-            event_sets: InternalCell::new(EventSetList::new()),
+            events: EventList::new(),
+            event_sets: EventSetList::new(),
         }
     }
 
@@ -56,7 +55,7 @@ impl EventManager {
     pub(crate) unsafe fn create_event(&'static self, event_id: EventId) -> Result<(), InitError> {
         let event = Event::new(event_id);
 
-        match self.events.as_mut_ref().push(event) {
+        match self.events.add(event) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::EventListFull),
         }
@@ -79,7 +78,7 @@ impl EventManager {
     ) -> Result<&'static EventSet, InitError> {
         let event_set = EventSet::new(tasklet);
 
-        match self.event_sets.as_mut_ref().push(event_set) {
+        match self.event_sets.add(event_set) {
             Ok(_) => (),
             Err(_) => return Err(InitError::EventSetListFull),
         };
@@ -89,13 +88,7 @@ impl EventManager {
 
     /// Returns reference to the event with given ID.
     pub(crate) fn get_event(&'static self, event_id: EventId) -> Option<&'static Event> {
-        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
-        unsafe {
-            self.events
-                .as_ref()
-                .iter()
-                .find(|&event| event.id() == event_id)
-        }
+        self.events.iter().find(|&event| event.id() == event_id)
     }
 
     /// Emits event with the given ID.
@@ -128,9 +121,10 @@ impl EventManager {
 
     /// Clears event queue
     pub(crate) fn clear(&'static self) {
-        // SAFETY: This is safe, because no mutable references should be able to exist at the same time.
-        for event_set in unsafe { self.event_sets.as_ref() } {
+        for event_set in &self.event_sets {
             event_set.clear();
         }
     }
 }
+
+unsafe impl Sync for EventManager {}

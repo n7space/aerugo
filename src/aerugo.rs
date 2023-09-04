@@ -91,7 +91,9 @@ impl Aerugo {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
         unsafe {
-            self.time_source.mark_system_start();
+            self.time_source
+                .set_system_start()
+                .expect("Failed to set system start time");
         }
         Hal::exit_critical();
         EXECUTOR.run_scheduler()
@@ -717,12 +719,10 @@ impl RuntimeApi for Aerugo {
         }
     }
 
-    fn set_system_time_offset(&'static self, offset: Duration) {
+    fn set_system_time_offset(&'static self, offset: Duration) -> Result<(), RuntimeError> {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
-        unsafe {
-            self.time_source.set_user_offset(offset);
-        }
+        unsafe { self.time_source.set_user_offset(offset) }
     }
 
     /// Returns time elapsed between system initialization and start of the scheduler.
