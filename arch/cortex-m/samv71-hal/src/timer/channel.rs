@@ -8,6 +8,17 @@ use super::waveform_config::WaveformModeConfig;
 use super::TcMetadata;
 
 /// Structure representing a timer's channel.
+///
+/// This structure uses a typestate pattern, which means that in order to use it's instance
+/// you must convert it to a proper type using `into_*_channel`. Currently, only Waveform
+/// mode is supported. See [`Channel::into_waveform_channel`](Channel::into_waveform_channel) for more details.
+///
+/// # Safety
+/// [`Channel`] instances should never be created manually, they should only be taken
+/// from [`Timer`](crate::timer::Timer) instances.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Channel<Timer, ID, Mode> {
     /// Timer channel's registers.
     registers: *const TC_CHANNEL,
@@ -23,7 +34,7 @@ pub struct Channel<Timer, ID, Mode> {
 /// instances provided by HAL, it's safe to send channels to other threads, as there's only a single
 /// instance that can access hardware channel's registers at once, and it cannot be copied.
 ///
-/// Sharing references (`Sync`) to a channel between threads is not safe, and should be managed by the user.
+/// Sharing references ([`Sync`]) to a channel between threads is not safe, and should be managed by the user.
 ///
 /// If that invariant is broken by the user, any usage of cloned Channels from other thread's context (including
 /// interrupt context) can be considered unsafe.

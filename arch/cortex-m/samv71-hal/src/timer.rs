@@ -1,4 +1,10 @@
 //! Implementation of HAL Timer Counter driver.
+//!
+//! This driver provides two primary structures - [`Timer`] and [`Channel`].
+//! In typical scenario, you want to use PAC's TC instance (for example [`TC0`])
+//! to create a [`Timer`], and then use [`Channel`]s provided by [`Timer`] by taking them from
+//! it's instance.
+
 pub mod channel;
 pub mod channel_config;
 pub mod channel_waveform;
@@ -22,6 +28,15 @@ use core::marker::PhantomData;
 ///
 /// # Generic Parameters
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
+///
+/// # Safety
+/// Only a single instance of a [`Timer`] per physical timer should exist. Creating multiple instances
+/// may lead to unexpected behaviors.
+/// [`Channel`] instances should never be created manually, they should only be taken from
+/// [`Timer`] instances.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Timer<TimerMetadata> {
     /// Channel 0.
     pub channel_0: Option<Channel<TimerMetadata, Ch0, NotConfigured>>,

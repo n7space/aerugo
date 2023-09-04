@@ -9,14 +9,6 @@
 //! On SAMV71, Watchdog is enabled by default with duration of 16 seconds,
 //! and can only be configured ONCE. Consequent configurations will have no effect,
 //! until the MCU performs a hard reset (via reset controller or power cycle).
-//!
-//! This module will track whether the watchdog was configured by it's instance already, or not.
-//! Configuration tracking is provided only as convenient way of communicating the fact that
-//! watchdog was reconfigured to the user.
-//!
-//! If the user creates multiple instances of [`Watchdog`] structure for the same watchdog,
-//! each will track the configuration separately, so it's recommended to keep to a single instance
-//! per physical watchdog, in order to prevent unexpected behavior.
 
 pub mod watchdog_config;
 pub mod watchdog_error;
@@ -29,6 +21,18 @@ use crate::pac::WDT;
 use crate::Milliseconds;
 
 /// Structure representing a watchdog.
+///
+/// # Safety
+/// Instance of this structure will track if the watchdog was configured by it.
+/// Configuration tracking is provided only as convenient way of communicating the fact that
+/// watchdog was tried to be reconfigured to the user.
+///
+/// If the user creates multiple instances of [`Watchdog`] for the same physical watchdog,
+/// each will track the configuration separately, so it's recommended to keep to a single instance
+/// per physical watchdog, in order to prevent unexpected behavior.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Watchdog {
     /// Watchdog instance.
     wdt: WDT,
