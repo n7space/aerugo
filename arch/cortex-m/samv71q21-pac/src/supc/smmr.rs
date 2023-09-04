@@ -1,43 +1,11 @@
 #[doc = "Register `SMMR` reader"]
-pub struct R(crate::R<SMMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SMMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SMMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SMMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SMMR_SPEC>;
 #[doc = "Register `SMMR` writer"]
-pub struct W(crate::W<SMMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<SMMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<SMMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<SMMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<SMMR_SPEC>;
 #[doc = "Field `SMTH` reader - Supply Monitor Threshold"]
 pub type SMTH_R = crate::FieldReader;
 #[doc = "Field `SMTH` writer - Supply Monitor Threshold"]
-pub type SMTH_W<'a, const O: u8> = crate::FieldWriter<'a, SMMR_SPEC, 4, O>;
+pub type SMTH_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 4, O>;
 #[doc = "Field `SMSMPL` reader - Supply Monitor Sampling Period"]
 pub type SMSMPL_R = crate::FieldReader<SMSMPLSELECT_A>;
 #[doc = "Supply Monitor Sampling Period\n\nValue on reset: 0"]
@@ -77,58 +45,62 @@ impl SMSMPL_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `SMD`"]
+    #[doc = "Supply Monitor disabled"]
     #[inline(always)]
     pub fn is_smd(&self) -> bool {
         *self == SMSMPLSELECT_A::SMD
     }
-    #[doc = "Checks if the value of the field is `CSM`"]
+    #[doc = "Continuous Supply Monitor"]
     #[inline(always)]
     pub fn is_csm(&self) -> bool {
         *self == SMSMPLSELECT_A::CSM
     }
-    #[doc = "Checks if the value of the field is `_32SLCK`"]
+    #[doc = "Supply Monitor enabled one SLCK period every 32 SLCK periods"]
     #[inline(always)]
     pub fn is_32slck(&self) -> bool {
         *self == SMSMPLSELECT_A::_32SLCK
     }
-    #[doc = "Checks if the value of the field is `_256SLCK`"]
+    #[doc = "Supply Monitor enabled one SLCK period every 256 SLCK periods"]
     #[inline(always)]
     pub fn is_256slck(&self) -> bool {
         *self == SMSMPLSELECT_A::_256SLCK
     }
-    #[doc = "Checks if the value of the field is `_2048SLCK`"]
+    #[doc = "Supply Monitor enabled one SLCK period every 2,048 SLCK periods"]
     #[inline(always)]
     pub fn is_2048slck(&self) -> bool {
         *self == SMSMPLSELECT_A::_2048SLCK
     }
 }
 #[doc = "Field `SMSMPL` writer - Supply Monitor Sampling Period"]
-pub type SMSMPL_W<'a, const O: u8> = crate::FieldWriter<'a, SMMR_SPEC, 3, O, SMSMPLSELECT_A>;
-impl<'a, const O: u8> SMSMPL_W<'a, O> {
+pub type SMSMPL_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, SMSMPLSELECT_A>;
+impl<'a, REG, const O: u8> SMSMPL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Supply Monitor disabled"]
     #[inline(always)]
-    pub fn smd(self) -> &'a mut W {
+    pub fn smd(self) -> &'a mut crate::W<REG> {
         self.variant(SMSMPLSELECT_A::SMD)
     }
     #[doc = "Continuous Supply Monitor"]
     #[inline(always)]
-    pub fn csm(self) -> &'a mut W {
+    pub fn csm(self) -> &'a mut crate::W<REG> {
         self.variant(SMSMPLSELECT_A::CSM)
     }
     #[doc = "Supply Monitor enabled one SLCK period every 32 SLCK periods"]
     #[inline(always)]
-    pub fn _32slck(self) -> &'a mut W {
+    pub fn _32slck(self) -> &'a mut crate::W<REG> {
         self.variant(SMSMPLSELECT_A::_32SLCK)
     }
     #[doc = "Supply Monitor enabled one SLCK period every 256 SLCK periods"]
     #[inline(always)]
-    pub fn _256slck(self) -> &'a mut W {
+    pub fn _256slck(self) -> &'a mut crate::W<REG> {
         self.variant(SMSMPLSELECT_A::_256SLCK)
     }
     #[doc = "Supply Monitor enabled one SLCK period every 2,048 SLCK periods"]
     #[inline(always)]
-    pub fn _2048slck(self) -> &'a mut W {
+    pub fn _2048slck(self) -> &'a mut crate::W<REG> {
         self.variant(SMSMPLSELECT_A::_2048SLCK)
     }
 }
@@ -157,28 +129,31 @@ impl SMRSTEN_R {
             true => SMRSTENSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The core reset signal vddcore_nreset is not affected when a supply monitor detection occurs."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == SMRSTENSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The core reset signal, vddcore_nreset is asserted when a supply monitor detection occurs."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == SMRSTENSELECT_A::ENABLE
     }
 }
 #[doc = "Field `SMRSTEN` writer - Supply Monitor Reset Enable"]
-pub type SMRSTEN_W<'a, const O: u8> = crate::BitWriter<'a, SMMR_SPEC, O, SMRSTENSELECT_A>;
-impl<'a, const O: u8> SMRSTEN_W<'a, O> {
+pub type SMRSTEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SMRSTENSELECT_A>;
+impl<'a, REG, const O: u8> SMRSTEN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The core reset signal vddcore_nreset is not affected when a supply monitor detection occurs."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMRSTENSELECT_A::NOT_ENABLE)
     }
     #[doc = "The core reset signal, vddcore_nreset is asserted when a supply monitor detection occurs."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMRSTENSELECT_A::ENABLE)
     }
 }
@@ -207,28 +182,31 @@ impl SMIEN_R {
             true => SMIENSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The SUPC interrupt signal is not affected when a supply monitor detection occurs."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == SMIENSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The SUPC interrupt signal is asserted when a supply monitor detection occurs."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == SMIENSELECT_A::ENABLE
     }
 }
 #[doc = "Field `SMIEN` writer - Supply Monitor Interrupt Enable"]
-pub type SMIEN_W<'a, const O: u8> = crate::BitWriter<'a, SMMR_SPEC, O, SMIENSELECT_A>;
-impl<'a, const O: u8> SMIEN_W<'a, O> {
+pub type SMIEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SMIENSELECT_A>;
+impl<'a, REG, const O: u8> SMIEN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The SUPC interrupt signal is not affected when a supply monitor detection occurs."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMIENSELECT_A::NOT_ENABLE)
     }
     #[doc = "The SUPC interrupt signal is asserted when a supply monitor detection occurs."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMIENSELECT_A::ENABLE)
     }
 }
@@ -258,46 +236,43 @@ impl W {
     #[doc = "Bits 0:3 - Supply Monitor Threshold"]
     #[inline(always)]
     #[must_use]
-    pub fn smth(&mut self) -> SMTH_W<0> {
+    pub fn smth(&mut self) -> SMTH_W<SMMR_SPEC, 0> {
         SMTH_W::new(self)
     }
     #[doc = "Bits 8:10 - Supply Monitor Sampling Period"]
     #[inline(always)]
     #[must_use]
-    pub fn smsmpl(&mut self) -> SMSMPL_W<8> {
+    pub fn smsmpl(&mut self) -> SMSMPL_W<SMMR_SPEC, 8> {
         SMSMPL_W::new(self)
     }
     #[doc = "Bit 12 - Supply Monitor Reset Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn smrsten(&mut self) -> SMRSTEN_W<12> {
+    pub fn smrsten(&mut self) -> SMRSTEN_W<SMMR_SPEC, 12> {
         SMRSTEN_W::new(self)
     }
     #[doc = "Bit 13 - Supply Monitor Interrupt Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn smien(&mut self) -> SMIEN_W<13> {
+    pub fn smien(&mut self) -> SMIEN_W<SMMR_SPEC, 13> {
         SMIEN_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Supply Controller Supply Monitor Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [smmr](index.html) module"]
+#[doc = "Supply Controller Supply Monitor Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`smmr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`smmr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SMMR_SPEC;
 impl crate::RegisterSpec for SMMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [smmr::R](R) reader structure"]
-impl crate::Readable for SMMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [smmr::W](W) writer structure"]
+#[doc = "`read()` method returns [`smmr::R`](R) reader structure"]
+impl crate::Readable for SMMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`smmr::W`](W) writer structure"]
 impl crate::Writable for SMMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

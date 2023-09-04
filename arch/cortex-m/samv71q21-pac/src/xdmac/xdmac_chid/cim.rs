@@ -1,18 +1,5 @@
 #[doc = "Register `CIM` reader"]
-pub struct R(crate::R<CIM_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CIM_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CIM_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CIM_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CIM_SPEC>;
 #[doc = "Field `BIM` reader - End of Block Interrupt Mask Bit"]
 pub type BIM_R = crate::BitReader;
 #[doc = "Field `LIM` reader - End of Linked List Interrupt Mask Bit"]
@@ -64,15 +51,13 @@ impl R {
         ROIM_R::new(((self.bits >> 6) & 1) != 0)
     }
 }
-#[doc = "Channel Interrupt Mask Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cim](index.html) module"]
+#[doc = "Channel Interrupt Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cim::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CIM_SPEC;
 impl crate::RegisterSpec for CIM_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cim::R](R) reader structure"]
-impl crate::Readable for CIM_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`cim::R`](R) reader structure"]
+impl crate::Readable for CIM_SPEC {}
 #[doc = "`reset()` method sets CIM to value 0"]
 impl crate::Resettable for CIM_SPEC {
     const RESET_VALUE: Self::Ux = 0;

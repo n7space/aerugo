@@ -1,18 +1,5 @@
 #[doc = "Register `SR` reader"]
-pub struct R(crate::R<SR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SR_SPEC>;
 #[doc = "Field `URSTS` reader - User Reset Status"]
 pub type URSTS_R = crate::BitReader;
 #[doc = "Field `RSTTYP` reader - Reset Type"]
@@ -54,27 +41,27 @@ impl RSTTYP_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `GENERAL_RST`"]
+    #[doc = "First power-up reset"]
     #[inline(always)]
     pub fn is_general_rst(&self) -> bool {
         *self == RSTTYPSELECT_A::GENERAL_RST
     }
-    #[doc = "Checks if the value of the field is `BACKUP_RST`"]
+    #[doc = "Return from Backup Mode"]
     #[inline(always)]
     pub fn is_backup_rst(&self) -> bool {
         *self == RSTTYPSELECT_A::BACKUP_RST
     }
-    #[doc = "Checks if the value of the field is `WDT_RST`"]
+    #[doc = "Watchdog fault occurred"]
     #[inline(always)]
     pub fn is_wdt_rst(&self) -> bool {
         *self == RSTTYPSELECT_A::WDT_RST
     }
-    #[doc = "Checks if the value of the field is `SOFT_RST`"]
+    #[doc = "Processor reset required by the software"]
     #[inline(always)]
     pub fn is_soft_rst(&self) -> bool {
         *self == RSTTYPSELECT_A::SOFT_RST
     }
-    #[doc = "Checks if the value of the field is `USER_RST`"]
+    #[doc = "NRST pin detected low"]
     #[inline(always)]
     pub fn is_user_rst(&self) -> bool {
         *self == RSTTYPSELECT_A::USER_RST
@@ -106,15 +93,13 @@ impl R {
         SRCMP_R::new(((self.bits >> 17) & 1) != 0)
     }
 }
-#[doc = "Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [sr](index.html) module"]
+#[doc = "Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`sr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SR_SPEC;
 impl crate::RegisterSpec for SR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [sr::R](R) reader structure"]
-impl crate::Readable for SR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`sr::R`](R) reader structure"]
+impl crate::Readable for SR_SPEC {}
 #[doc = "`reset()` method sets SR to value 0"]
 impl crate::Resettable for SR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

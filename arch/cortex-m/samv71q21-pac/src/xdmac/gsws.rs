@@ -1,18 +1,5 @@
 #[doc = "Register `GSWS` reader"]
-pub struct R(crate::R<GSWS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GSWS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GSWS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GSWS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GSWS_SPEC>;
 #[doc = "Field `SWRS0` reader - XDMAC Channel 0 Software Request Status Bit"]
 pub type SWRS0_R = crate::BitReader;
 #[doc = "Field `SWRS1` reader - XDMAC Channel 1 Software Request Status Bit"]
@@ -183,15 +170,13 @@ impl R {
         SWRS23_R::new(((self.bits >> 23) & 1) != 0)
     }
 }
-#[doc = "Global Channel Software Request Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gsws](index.html) module"]
+#[doc = "Global Channel Software Request Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gsws::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GSWS_SPEC;
 impl crate::RegisterSpec for GSWS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gsws::R](R) reader structure"]
-impl crate::Readable for GSWS_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`gsws::R`](R) reader structure"]
+impl crate::Readable for GSWS_SPEC {}
 #[doc = "`reset()` method sets GSWS to value 0"]
 impl crate::Resettable for GSWS_SPEC {
     const RESET_VALUE: Self::Ux = 0;

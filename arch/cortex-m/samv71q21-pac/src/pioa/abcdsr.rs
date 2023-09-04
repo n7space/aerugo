@@ -1,167 +1,135 @@
 #[doc = "Register `ABCDSR[%s]` reader"]
-pub struct R(crate::R<ABCDSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ABCDSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ABCDSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ABCDSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ABCDSR_SPEC>;
 #[doc = "Register `ABCDSR[%s]` writer"]
-pub struct W(crate::W<ABCDSR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<ABCDSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<ABCDSR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<ABCDSR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<ABCDSR_SPEC>;
 #[doc = "Field `P0` reader - Peripheral Select"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P0` writer - Peripheral Select"]
-pub type P0_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P1` reader - Peripheral Select"]
 pub type P1_R = crate::BitReader;
 #[doc = "Field `P1` writer - Peripheral Select"]
-pub type P1_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P2` reader - Peripheral Select"]
 pub type P2_R = crate::BitReader;
 #[doc = "Field `P2` writer - Peripheral Select"]
-pub type P2_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P3` reader - Peripheral Select"]
 pub type P3_R = crate::BitReader;
 #[doc = "Field `P3` writer - Peripheral Select"]
-pub type P3_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P4` reader - Peripheral Select"]
 pub type P4_R = crate::BitReader;
 #[doc = "Field `P4` writer - Peripheral Select"]
-pub type P4_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P5` reader - Peripheral Select"]
 pub type P5_R = crate::BitReader;
 #[doc = "Field `P5` writer - Peripheral Select"]
-pub type P5_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P6` reader - Peripheral Select"]
 pub type P6_R = crate::BitReader;
 #[doc = "Field `P6` writer - Peripheral Select"]
-pub type P6_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P7` reader - Peripheral Select"]
 pub type P7_R = crate::BitReader;
 #[doc = "Field `P7` writer - Peripheral Select"]
-pub type P7_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P8` reader - Peripheral Select"]
 pub type P8_R = crate::BitReader;
 #[doc = "Field `P8` writer - Peripheral Select"]
-pub type P8_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P9` reader - Peripheral Select"]
 pub type P9_R = crate::BitReader;
 #[doc = "Field `P9` writer - Peripheral Select"]
-pub type P9_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P10` reader - Peripheral Select"]
 pub type P10_R = crate::BitReader;
 #[doc = "Field `P10` writer - Peripheral Select"]
-pub type P10_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P11` reader - Peripheral Select"]
 pub type P11_R = crate::BitReader;
 #[doc = "Field `P11` writer - Peripheral Select"]
-pub type P11_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P12` reader - Peripheral Select"]
 pub type P12_R = crate::BitReader;
 #[doc = "Field `P12` writer - Peripheral Select"]
-pub type P12_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P13` reader - Peripheral Select"]
 pub type P13_R = crate::BitReader;
 #[doc = "Field `P13` writer - Peripheral Select"]
-pub type P13_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P14` reader - Peripheral Select"]
 pub type P14_R = crate::BitReader;
 #[doc = "Field `P14` writer - Peripheral Select"]
-pub type P14_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P14_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P15` reader - Peripheral Select"]
 pub type P15_R = crate::BitReader;
 #[doc = "Field `P15` writer - Peripheral Select"]
-pub type P15_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P15_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P16` reader - Peripheral Select"]
 pub type P16_R = crate::BitReader;
 #[doc = "Field `P16` writer - Peripheral Select"]
-pub type P16_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P16_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P17` reader - Peripheral Select"]
 pub type P17_R = crate::BitReader;
 #[doc = "Field `P17` writer - Peripheral Select"]
-pub type P17_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P17_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P18` reader - Peripheral Select"]
 pub type P18_R = crate::BitReader;
 #[doc = "Field `P18` writer - Peripheral Select"]
-pub type P18_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P18_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P19` reader - Peripheral Select"]
 pub type P19_R = crate::BitReader;
 #[doc = "Field `P19` writer - Peripheral Select"]
-pub type P19_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P19_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P20` reader - Peripheral Select"]
 pub type P20_R = crate::BitReader;
 #[doc = "Field `P20` writer - Peripheral Select"]
-pub type P20_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P20_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P21` reader - Peripheral Select"]
 pub type P21_R = crate::BitReader;
 #[doc = "Field `P21` writer - Peripheral Select"]
-pub type P21_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P21_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P22` reader - Peripheral Select"]
 pub type P22_R = crate::BitReader;
 #[doc = "Field `P22` writer - Peripheral Select"]
-pub type P22_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P22_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P23` reader - Peripheral Select"]
 pub type P23_R = crate::BitReader;
 #[doc = "Field `P23` writer - Peripheral Select"]
-pub type P23_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P23_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P24` reader - Peripheral Select"]
 pub type P24_R = crate::BitReader;
 #[doc = "Field `P24` writer - Peripheral Select"]
-pub type P24_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P24_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P25` reader - Peripheral Select"]
 pub type P25_R = crate::BitReader;
 #[doc = "Field `P25` writer - Peripheral Select"]
-pub type P25_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P25_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P26` reader - Peripheral Select"]
 pub type P26_R = crate::BitReader;
 #[doc = "Field `P26` writer - Peripheral Select"]
-pub type P26_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P26_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P27` reader - Peripheral Select"]
 pub type P27_R = crate::BitReader;
 #[doc = "Field `P27` writer - Peripheral Select"]
-pub type P27_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P27_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P28` reader - Peripheral Select"]
 pub type P28_R = crate::BitReader;
 #[doc = "Field `P28` writer - Peripheral Select"]
-pub type P28_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P28_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P29` reader - Peripheral Select"]
 pub type P29_R = crate::BitReader;
 #[doc = "Field `P29` writer - Peripheral Select"]
-pub type P29_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P29_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P30` reader - Peripheral Select"]
 pub type P30_R = crate::BitReader;
 #[doc = "Field `P30` writer - Peripheral Select"]
-pub type P30_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P30_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `P31` reader - Peripheral Select"]
 pub type P31_R = crate::BitReader;
 #[doc = "Field `P31` writer - Peripheral Select"]
-pub type P31_W<'a, const O: u8> = crate::BitWriter<'a, ABCDSR_SPEC, O>;
+pub type P31_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Peripheral Select"]
     #[inline(always)]
@@ -328,214 +296,211 @@ impl W {
     #[doc = "Bit 0 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p0(&mut self) -> P0_W<0> {
+    pub fn p0(&mut self) -> P0_W<ABCDSR_SPEC, 0> {
         P0_W::new(self)
     }
     #[doc = "Bit 1 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p1(&mut self) -> P1_W<1> {
+    pub fn p1(&mut self) -> P1_W<ABCDSR_SPEC, 1> {
         P1_W::new(self)
     }
     #[doc = "Bit 2 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p2(&mut self) -> P2_W<2> {
+    pub fn p2(&mut self) -> P2_W<ABCDSR_SPEC, 2> {
         P2_W::new(self)
     }
     #[doc = "Bit 3 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p3(&mut self) -> P3_W<3> {
+    pub fn p3(&mut self) -> P3_W<ABCDSR_SPEC, 3> {
         P3_W::new(self)
     }
     #[doc = "Bit 4 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p4(&mut self) -> P4_W<4> {
+    pub fn p4(&mut self) -> P4_W<ABCDSR_SPEC, 4> {
         P4_W::new(self)
     }
     #[doc = "Bit 5 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p5(&mut self) -> P5_W<5> {
+    pub fn p5(&mut self) -> P5_W<ABCDSR_SPEC, 5> {
         P5_W::new(self)
     }
     #[doc = "Bit 6 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p6(&mut self) -> P6_W<6> {
+    pub fn p6(&mut self) -> P6_W<ABCDSR_SPEC, 6> {
         P6_W::new(self)
     }
     #[doc = "Bit 7 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p7(&mut self) -> P7_W<7> {
+    pub fn p7(&mut self) -> P7_W<ABCDSR_SPEC, 7> {
         P7_W::new(self)
     }
     #[doc = "Bit 8 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p8(&mut self) -> P8_W<8> {
+    pub fn p8(&mut self) -> P8_W<ABCDSR_SPEC, 8> {
         P8_W::new(self)
     }
     #[doc = "Bit 9 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p9(&mut self) -> P9_W<9> {
+    pub fn p9(&mut self) -> P9_W<ABCDSR_SPEC, 9> {
         P9_W::new(self)
     }
     #[doc = "Bit 10 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p10(&mut self) -> P10_W<10> {
+    pub fn p10(&mut self) -> P10_W<ABCDSR_SPEC, 10> {
         P10_W::new(self)
     }
     #[doc = "Bit 11 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p11(&mut self) -> P11_W<11> {
+    pub fn p11(&mut self) -> P11_W<ABCDSR_SPEC, 11> {
         P11_W::new(self)
     }
     #[doc = "Bit 12 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p12(&mut self) -> P12_W<12> {
+    pub fn p12(&mut self) -> P12_W<ABCDSR_SPEC, 12> {
         P12_W::new(self)
     }
     #[doc = "Bit 13 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p13(&mut self) -> P13_W<13> {
+    pub fn p13(&mut self) -> P13_W<ABCDSR_SPEC, 13> {
         P13_W::new(self)
     }
     #[doc = "Bit 14 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p14(&mut self) -> P14_W<14> {
+    pub fn p14(&mut self) -> P14_W<ABCDSR_SPEC, 14> {
         P14_W::new(self)
     }
     #[doc = "Bit 15 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p15(&mut self) -> P15_W<15> {
+    pub fn p15(&mut self) -> P15_W<ABCDSR_SPEC, 15> {
         P15_W::new(self)
     }
     #[doc = "Bit 16 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p16(&mut self) -> P16_W<16> {
+    pub fn p16(&mut self) -> P16_W<ABCDSR_SPEC, 16> {
         P16_W::new(self)
     }
     #[doc = "Bit 17 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p17(&mut self) -> P17_W<17> {
+    pub fn p17(&mut self) -> P17_W<ABCDSR_SPEC, 17> {
         P17_W::new(self)
     }
     #[doc = "Bit 18 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p18(&mut self) -> P18_W<18> {
+    pub fn p18(&mut self) -> P18_W<ABCDSR_SPEC, 18> {
         P18_W::new(self)
     }
     #[doc = "Bit 19 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p19(&mut self) -> P19_W<19> {
+    pub fn p19(&mut self) -> P19_W<ABCDSR_SPEC, 19> {
         P19_W::new(self)
     }
     #[doc = "Bit 20 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p20(&mut self) -> P20_W<20> {
+    pub fn p20(&mut self) -> P20_W<ABCDSR_SPEC, 20> {
         P20_W::new(self)
     }
     #[doc = "Bit 21 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p21(&mut self) -> P21_W<21> {
+    pub fn p21(&mut self) -> P21_W<ABCDSR_SPEC, 21> {
         P21_W::new(self)
     }
     #[doc = "Bit 22 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p22(&mut self) -> P22_W<22> {
+    pub fn p22(&mut self) -> P22_W<ABCDSR_SPEC, 22> {
         P22_W::new(self)
     }
     #[doc = "Bit 23 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p23(&mut self) -> P23_W<23> {
+    pub fn p23(&mut self) -> P23_W<ABCDSR_SPEC, 23> {
         P23_W::new(self)
     }
     #[doc = "Bit 24 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p24(&mut self) -> P24_W<24> {
+    pub fn p24(&mut self) -> P24_W<ABCDSR_SPEC, 24> {
         P24_W::new(self)
     }
     #[doc = "Bit 25 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p25(&mut self) -> P25_W<25> {
+    pub fn p25(&mut self) -> P25_W<ABCDSR_SPEC, 25> {
         P25_W::new(self)
     }
     #[doc = "Bit 26 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p26(&mut self) -> P26_W<26> {
+    pub fn p26(&mut self) -> P26_W<ABCDSR_SPEC, 26> {
         P26_W::new(self)
     }
     #[doc = "Bit 27 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p27(&mut self) -> P27_W<27> {
+    pub fn p27(&mut self) -> P27_W<ABCDSR_SPEC, 27> {
         P27_W::new(self)
     }
     #[doc = "Bit 28 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p28(&mut self) -> P28_W<28> {
+    pub fn p28(&mut self) -> P28_W<ABCDSR_SPEC, 28> {
         P28_W::new(self)
     }
     #[doc = "Bit 29 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p29(&mut self) -> P29_W<29> {
+    pub fn p29(&mut self) -> P29_W<ABCDSR_SPEC, 29> {
         P29_W::new(self)
     }
     #[doc = "Bit 30 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p30(&mut self) -> P30_W<30> {
+    pub fn p30(&mut self) -> P30_W<ABCDSR_SPEC, 30> {
         P30_W::new(self)
     }
     #[doc = "Bit 31 - Peripheral Select"]
     #[inline(always)]
     #[must_use]
-    pub fn p31(&mut self) -> P31_W<31> {
+    pub fn p31(&mut self) -> P31_W<ABCDSR_SPEC, 31> {
         P31_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Peripheral ABCD Select Register 0\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [abcdsr](index.html) module"]
+#[doc = "Peripheral ABCD Select Register 0\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`abcdsr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`abcdsr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ABCDSR_SPEC;
 impl crate::RegisterSpec for ABCDSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [abcdsr::R](R) reader structure"]
-impl crate::Readable for ABCDSR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [abcdsr::W](W) writer structure"]
+#[doc = "`read()` method returns [`abcdsr::R`](R) reader structure"]
+impl crate::Readable for ABCDSR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`abcdsr::W`](W) writer structure"]
 impl crate::Writable for ABCDSR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

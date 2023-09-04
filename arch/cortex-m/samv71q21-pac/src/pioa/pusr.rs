@@ -1,18 +1,5 @@
 #[doc = "Register `PUSR` reader"]
-pub struct R(crate::R<PUSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<PUSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<PUSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<PUSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<PUSR_SPEC>;
 #[doc = "Field `P0` reader - Pull-Up Status"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Pull-Up Status"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Pad Pull-up Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [pusr](index.html) module"]
+#[doc = "Pad Pull-up Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`pusr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct PUSR_SPEC;
 impl crate::RegisterSpec for PUSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [pusr::R](R) reader structure"]
-impl crate::Readable for PUSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`pusr::R`](R) reader structure"]
+impl crate::Readable for PUSR_SPEC {}
 #[doc = "`reset()` method sets PUSR to value 0"]
 impl crate::Resettable for PUSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

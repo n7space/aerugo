@@ -1,18 +1,5 @@
 #[doc = "Register `PCSR0` reader"]
-pub struct R(crate::R<PCSR0_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<PCSR0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<PCSR0_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<PCSR0_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<PCSR0_SPEC>;
 #[doc = "Field `PID7` reader - Peripheral Clock 7 Status"]
 pub type PID7_R = crate::BitReader;
 #[doc = "Field `PID8` reader - Peripheral Clock 8 Status"]
@@ -190,15 +177,13 @@ impl R {
         PID31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Peripheral Clock Status Register 0\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [pcsr0](index.html) module"]
+#[doc = "Peripheral Clock Status Register 0\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`pcsr0::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct PCSR0_SPEC;
 impl crate::RegisterSpec for PCSR0_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [pcsr0::R](R) reader structure"]
-impl crate::Readable for PCSR0_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`pcsr0::R`](R) reader structure"]
+impl crate::Readable for PCSR0_SPEC {}
 #[doc = "`reset()` method sets PCSR0 to value 0"]
 impl crate::Resettable for PCSR0_SPEC {
     const RESET_VALUE: Self::Ux = 0;

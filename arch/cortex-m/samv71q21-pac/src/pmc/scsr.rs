@@ -1,18 +1,5 @@
 #[doc = "Register `SCSR` reader"]
-pub struct R(crate::R<SCSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SCSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SCSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SCSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SCSR_SPEC>;
 #[doc = "Field `HCLKS` reader - HCLK Status"]
 pub type HCLKS_R = crate::BitReader;
 #[doc = "Field `USBCLK` reader - USB FS Clock Status"]
@@ -85,15 +72,13 @@ impl R {
         PCK7_R::new(((self.bits >> 15) & 1) != 0)
     }
 }
-#[doc = "System Clock Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [scsr](index.html) module"]
+#[doc = "System Clock Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`scsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SCSR_SPEC;
 impl crate::RegisterSpec for SCSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [scsr::R](R) reader structure"]
-impl crate::Readable for SCSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`scsr::R`](R) reader structure"]
+impl crate::Readable for SCSR_SPEC {}
 #[doc = "`reset()` method sets SCSR to value 0"]
 impl crate::Resettable for SCSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

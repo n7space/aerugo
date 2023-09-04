@@ -8,15 +8,18 @@ pub struct RegisterBlock {
     #[doc = "0x08 - Mode Register"]
     pub mr: MR,
 }
-#[doc = "CR (w) register accessor: an alias for `Reg<CR_SPEC>`"]
+#[doc = "CR (w) register accessor: Control Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cr::W`]. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`cr`]
+module"]
 pub type CR = crate::Reg<cr::CR_SPEC>;
 #[doc = "Control Register"]
 pub mod cr;
-#[doc = "SR (r) register accessor: an alias for `Reg<SR_SPEC>`"]
+#[doc = "SR (r) register accessor: Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`sr::R`].  See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`sr`]
+module"]
 pub type SR = crate::Reg<sr::SR_SPEC>;
 #[doc = "Status Register"]
 pub mod sr;
-#[doc = "MR (rw) register accessor: an alias for `Reg<MR_SPEC>`"]
+#[doc = "MR (rw) register accessor: Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mr::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mr::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mr`]
+module"]
 pub type MR = crate::Reg<mr::MR_SPEC>;
 #[doc = "Mode Register"]
 pub mod mr;

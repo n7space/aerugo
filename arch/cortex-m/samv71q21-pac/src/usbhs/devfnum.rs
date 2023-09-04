@@ -1,18 +1,5 @@
 #[doc = "Register `DEVFNUM` reader"]
-pub struct R(crate::R<DEVFNUM_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<DEVFNUM_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<DEVFNUM_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<DEVFNUM_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<DEVFNUM_SPEC>;
 #[doc = "Field `MFNUM` reader - Micro Frame Number"]
 pub type MFNUM_R = crate::FieldReader;
 #[doc = "Field `FNUM` reader - Frame Number"]
@@ -36,15 +23,13 @@ impl R {
         FNCERR_R::new(((self.bits >> 15) & 1) != 0)
     }
 }
-#[doc = "Device Frame Number Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [devfnum](index.html) module"]
+#[doc = "Device Frame Number Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`devfnum::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DEVFNUM_SPEC;
 impl crate::RegisterSpec for DEVFNUM_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [devfnum::R](R) reader structure"]
-impl crate::Readable for DEVFNUM_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`devfnum::R`](R) reader structure"]
+impl crate::Readable for DEVFNUM_SPEC {}
 #[doc = "`reset()` method sets DEVFNUM to value 0"]
 impl crate::Resettable for DEVFNUM_SPEC {
     const RESET_VALUE: Self::Ux = 0;

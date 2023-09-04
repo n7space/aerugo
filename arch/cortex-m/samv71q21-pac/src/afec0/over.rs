@@ -1,18 +1,5 @@
 #[doc = "Register `OVER` reader"]
-pub struct R(crate::R<OVER_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<OVER_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<OVER_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<OVER_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<OVER_SPEC>;
 #[doc = "Field `OVRE0` reader - Overrun Error 0"]
 pub type OVRE0_R = crate::BitReader;
 #[doc = "Field `OVRE1` reader - Overrun Error 1"]
@@ -99,15 +86,13 @@ impl R {
         OVRE11_R::new(((self.bits >> 11) & 1) != 0)
     }
 }
-#[doc = "AFEC Overrun Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [over](index.html) module"]
+#[doc = "AFEC Overrun Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`over::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct OVER_SPEC;
 impl crate::RegisterSpec for OVER_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [over::R](R) reader structure"]
-impl crate::Readable for OVER_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`over::R`](R) reader structure"]
+impl crate::Readable for OVER_SPEC {}
 #[doc = "`reset()` method sets OVER to value 0"]
 impl crate::Resettable for OVER_SPEC {
     const RESET_VALUE: Self::Ux = 0;

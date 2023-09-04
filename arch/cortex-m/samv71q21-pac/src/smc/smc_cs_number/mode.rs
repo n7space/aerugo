@@ -1,47 +1,15 @@
 #[doc = "Register `MODE` reader"]
-pub struct R(crate::R<MODE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<MODE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<MODE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<MODE_SPEC>;
 #[doc = "Register `MODE` writer"]
-pub struct W(crate::W<MODE_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<MODE_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<MODE_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<MODE_SPEC>;
 #[doc = "Field `READ_MODE` reader - Read Mode"]
 pub type READ_MODE_R = crate::BitReader;
 #[doc = "Field `READ_MODE` writer - Read Mode"]
-pub type READ_MODE_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O>;
+pub type READ_MODE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WRITE_MODE` reader - Write Mode"]
 pub type WRITE_MODE_R = crate::BitReader;
 #[doc = "Field `WRITE_MODE` writer - Write Mode"]
-pub type WRITE_MODE_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O>;
+pub type WRITE_MODE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `EXNW_MODE` reader - NWAIT Mode"]
 pub type EXNW_MODE_R = crate::FieldReader<EXNW_MODESELECT_A>;
 #[doc = "NWAIT Mode\n\nValue on reset: 0"]
@@ -75,38 +43,42 @@ impl EXNW_MODE_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Disabled-The NWAIT input signal is ignored on the corresponding chip select."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == EXNW_MODESELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `FROZEN`"]
+    #[doc = "Frozen Mode-If asserted, the NWAIT signal freezes the current read or write cycle. After deassertion, the read/write cycle is resumed from the point where it was stopped."]
     #[inline(always)]
     pub fn is_frozen(&self) -> bool {
         *self == EXNW_MODESELECT_A::FROZEN
     }
-    #[doc = "Checks if the value of the field is `READY`"]
+    #[doc = "Ready Mode-The NWAIT signal indicates the availability of the external device at the end of the pulse of the controlling read or write signal, to complete the access. If high, the access normally completes. If low, the access is extended until NWAIT returns high."]
     #[inline(always)]
     pub fn is_ready(&self) -> bool {
         *self == EXNW_MODESELECT_A::READY
     }
 }
 #[doc = "Field `EXNW_MODE` writer - NWAIT Mode"]
-pub type EXNW_MODE_W<'a, const O: u8> = crate::FieldWriter<'a, MODE_SPEC, 2, O, EXNW_MODESELECT_A>;
-impl<'a, const O: u8> EXNW_MODE_W<'a, O> {
+pub type EXNW_MODE_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, EXNW_MODESELECT_A>;
+impl<'a, REG, const O: u8> EXNW_MODE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Disabled-The NWAIT input signal is ignored on the corresponding chip select."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(EXNW_MODESELECT_A::DISABLED)
     }
     #[doc = "Frozen Mode-If asserted, the NWAIT signal freezes the current read or write cycle. After deassertion, the read/write cycle is resumed from the point where it was stopped."]
     #[inline(always)]
-    pub fn frozen(self) -> &'a mut W {
+    pub fn frozen(self) -> &'a mut crate::W<REG> {
         self.variant(EXNW_MODESELECT_A::FROZEN)
     }
     #[doc = "Ready Mode-The NWAIT signal indicates the availability of the external device at the end of the pulse of the controlling read or write signal, to complete the access. If high, the access normally completes. If low, the access is extended until NWAIT returns high."]
     #[inline(always)]
-    pub fn ready(self) -> &'a mut W {
+    pub fn ready(self) -> &'a mut crate::W<REG> {
         self.variant(EXNW_MODESELECT_A::READY)
     }
 }
@@ -135,28 +107,31 @@ impl BAT_R {
             true => BATSELECT_A::BYTE_WRITE,
         }
     }
-    #[doc = "Checks if the value of the field is `BYTE_SELECT`"]
+    #[doc = "Byte select access type:- Write operation is controlled using NCS, NWE, NBS0, NBS1.- Read operation is controlled using NCS, NRD, NBS0, NBS1."]
     #[inline(always)]
     pub fn is_byte_select(&self) -> bool {
         *self == BATSELECT_A::BYTE_SELECT
     }
-    #[doc = "Checks if the value of the field is `BYTE_WRITE`"]
+    #[doc = "Byte write access type:- Write operation is controlled using NCS, NWR0, NWR1.- Read operation is controlled using NCS and NRD."]
     #[inline(always)]
     pub fn is_byte_write(&self) -> bool {
         *self == BATSELECT_A::BYTE_WRITE
     }
 }
 #[doc = "Field `BAT` writer - Byte Access Type"]
-pub type BAT_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O, BATSELECT_A>;
-impl<'a, const O: u8> BAT_W<'a, O> {
+pub type BAT_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, BATSELECT_A>;
+impl<'a, REG, const O: u8> BAT_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Byte select access type:- Write operation is controlled using NCS, NWE, NBS0, NBS1.- Read operation is controlled using NCS, NRD, NBS0, NBS1."]
     #[inline(always)]
-    pub fn byte_select(self) -> &'a mut W {
+    pub fn byte_select(self) -> &'a mut crate::W<REG> {
         self.variant(BATSELECT_A::BYTE_SELECT)
     }
     #[doc = "Byte write access type:- Write operation is controlled using NCS, NWR0, NWR1.- Read operation is controlled using NCS and NRD."]
     #[inline(always)]
-    pub fn byte_write(self) -> &'a mut W {
+    pub fn byte_write(self) -> &'a mut crate::W<REG> {
         self.variant(BATSELECT_A::BYTE_WRITE)
     }
 }
@@ -185,43 +160,46 @@ impl DBW_R {
             true => DBWSELECT_A::_16_BIT,
         }
     }
-    #[doc = "Checks if the value of the field is `_8_BIT`"]
+    #[doc = "8-bit Data Bus"]
     #[inline(always)]
     pub fn is_8_bit(&self) -> bool {
         *self == DBWSELECT_A::_8_BIT
     }
-    #[doc = "Checks if the value of the field is `_16_BIT`"]
+    #[doc = "16-bit Data Bus"]
     #[inline(always)]
     pub fn is_16_bit(&self) -> bool {
         *self == DBWSELECT_A::_16_BIT
     }
 }
 #[doc = "Field `DBW` writer - Data Bus Width"]
-pub type DBW_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O, DBWSELECT_A>;
-impl<'a, const O: u8> DBW_W<'a, O> {
+pub type DBW_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, DBWSELECT_A>;
+impl<'a, REG, const O: u8> DBW_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "8-bit Data Bus"]
     #[inline(always)]
-    pub fn _8_bit(self) -> &'a mut W {
+    pub fn _8_bit(self) -> &'a mut crate::W<REG> {
         self.variant(DBWSELECT_A::_8_BIT)
     }
     #[doc = "16-bit Data Bus"]
     #[inline(always)]
-    pub fn _16_bit(self) -> &'a mut W {
+    pub fn _16_bit(self) -> &'a mut crate::W<REG> {
         self.variant(DBWSELECT_A::_16_BIT)
     }
 }
 #[doc = "Field `TDF_CYCLES` reader - Data Float Time"]
 pub type TDF_CYCLES_R = crate::FieldReader;
 #[doc = "Field `TDF_CYCLES` writer - Data Float Time"]
-pub type TDF_CYCLES_W<'a, const O: u8> = crate::FieldWriter<'a, MODE_SPEC, 4, O>;
+pub type TDF_CYCLES_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 4, O>;
 #[doc = "Field `TDF_MODE` reader - TDF Optimization"]
 pub type TDF_MODE_R = crate::BitReader;
 #[doc = "Field `TDF_MODE` writer - TDF Optimization"]
-pub type TDF_MODE_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O>;
+pub type TDF_MODE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PMEN` reader - Page Mode Enabled"]
 pub type PMEN_R = crate::BitReader;
 #[doc = "Field `PMEN` writer - Page Mode Enabled"]
-pub type PMEN_W<'a, const O: u8> = crate::BitWriter<'a, MODE_SPEC, O>;
+pub type PMEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PS` reader - Page Size"]
 pub type PS_R = crate::FieldReader<PSSELECT_A>;
 #[doc = "Page Size\n\nValue on reset: 0"]
@@ -258,48 +236,52 @@ impl PS_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `_4_BYTE`"]
+    #[doc = "4-byte page"]
     #[inline(always)]
     pub fn is_4_byte(&self) -> bool {
         *self == PSSELECT_A::_4_BYTE
     }
-    #[doc = "Checks if the value of the field is `_8_BYTE`"]
+    #[doc = "8-byte page"]
     #[inline(always)]
     pub fn is_8_byte(&self) -> bool {
         *self == PSSELECT_A::_8_BYTE
     }
-    #[doc = "Checks if the value of the field is `_16_BYTE`"]
+    #[doc = "16-byte page"]
     #[inline(always)]
     pub fn is_16_byte(&self) -> bool {
         *self == PSSELECT_A::_16_BYTE
     }
-    #[doc = "Checks if the value of the field is `_32_BYTE`"]
+    #[doc = "32-byte page"]
     #[inline(always)]
     pub fn is_32_byte(&self) -> bool {
         *self == PSSELECT_A::_32_BYTE
     }
 }
 #[doc = "Field `PS` writer - Page Size"]
-pub type PS_W<'a, const O: u8> = crate::FieldWriterSafe<'a, MODE_SPEC, 2, O, PSSELECT_A>;
-impl<'a, const O: u8> PS_W<'a, O> {
+pub type PS_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, PSSELECT_A>;
+impl<'a, REG, const O: u8> PS_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "4-byte page"]
     #[inline(always)]
-    pub fn _4_byte(self) -> &'a mut W {
+    pub fn _4_byte(self) -> &'a mut crate::W<REG> {
         self.variant(PSSELECT_A::_4_BYTE)
     }
     #[doc = "8-byte page"]
     #[inline(always)]
-    pub fn _8_byte(self) -> &'a mut W {
+    pub fn _8_byte(self) -> &'a mut crate::W<REG> {
         self.variant(PSSELECT_A::_8_BYTE)
     }
     #[doc = "16-byte page"]
     #[inline(always)]
-    pub fn _16_byte(self) -> &'a mut W {
+    pub fn _16_byte(self) -> &'a mut crate::W<REG> {
         self.variant(PSSELECT_A::_16_BYTE)
     }
     #[doc = "32-byte page"]
     #[inline(always)]
-    pub fn _32_byte(self) -> &'a mut W {
+    pub fn _32_byte(self) -> &'a mut crate::W<REG> {
         self.variant(PSSELECT_A::_32_BYTE)
     }
 }
@@ -354,76 +336,73 @@ impl W {
     #[doc = "Bit 0 - Read Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn read_mode(&mut self) -> READ_MODE_W<0> {
+    pub fn read_mode(&mut self) -> READ_MODE_W<MODE_SPEC, 0> {
         READ_MODE_W::new(self)
     }
     #[doc = "Bit 1 - Write Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn write_mode(&mut self) -> WRITE_MODE_W<1> {
+    pub fn write_mode(&mut self) -> WRITE_MODE_W<MODE_SPEC, 1> {
         WRITE_MODE_W::new(self)
     }
     #[doc = "Bits 4:5 - NWAIT Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn exnw_mode(&mut self) -> EXNW_MODE_W<4> {
+    pub fn exnw_mode(&mut self) -> EXNW_MODE_W<MODE_SPEC, 4> {
         EXNW_MODE_W::new(self)
     }
     #[doc = "Bit 8 - Byte Access Type"]
     #[inline(always)]
     #[must_use]
-    pub fn bat(&mut self) -> BAT_W<8> {
+    pub fn bat(&mut self) -> BAT_W<MODE_SPEC, 8> {
         BAT_W::new(self)
     }
     #[doc = "Bit 12 - Data Bus Width"]
     #[inline(always)]
     #[must_use]
-    pub fn dbw(&mut self) -> DBW_W<12> {
+    pub fn dbw(&mut self) -> DBW_W<MODE_SPEC, 12> {
         DBW_W::new(self)
     }
     #[doc = "Bits 16:19 - Data Float Time"]
     #[inline(always)]
     #[must_use]
-    pub fn tdf_cycles(&mut self) -> TDF_CYCLES_W<16> {
+    pub fn tdf_cycles(&mut self) -> TDF_CYCLES_W<MODE_SPEC, 16> {
         TDF_CYCLES_W::new(self)
     }
     #[doc = "Bit 20 - TDF Optimization"]
     #[inline(always)]
     #[must_use]
-    pub fn tdf_mode(&mut self) -> TDF_MODE_W<20> {
+    pub fn tdf_mode(&mut self) -> TDF_MODE_W<MODE_SPEC, 20> {
         TDF_MODE_W::new(self)
     }
     #[doc = "Bit 24 - Page Mode Enabled"]
     #[inline(always)]
     #[must_use]
-    pub fn pmen(&mut self) -> PMEN_W<24> {
+    pub fn pmen(&mut self) -> PMEN_W<MODE_SPEC, 24> {
         PMEN_W::new(self)
     }
     #[doc = "Bits 28:29 - Page Size"]
     #[inline(always)]
     #[must_use]
-    pub fn ps(&mut self) -> PS_W<28> {
+    pub fn ps(&mut self) -> PS_W<MODE_SPEC, 28> {
         PS_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "SMC Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [mode](index.html) module"]
+#[doc = "SMC Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mode::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mode::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct MODE_SPEC;
 impl crate::RegisterSpec for MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [mode::R](R) reader structure"]
-impl crate::Readable for MODE_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [mode::W](W) writer structure"]
+#[doc = "`read()` method returns [`mode::R`](R) reader structure"]
+impl crate::Readable for MODE_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`mode::W`](W) writer structure"]
 impl crate::Writable for MODE_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

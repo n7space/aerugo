@@ -1,18 +1,5 @@
 #[doc = "Register `LOCKSR` reader"]
-pub struct R(crate::R<LOCKSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<LOCKSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<LOCKSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<LOCKSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<LOCKSR_SPEC>;
 #[doc = "Field `P0` reader - Lock Status"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Lock Status"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Lock Status\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [locksr](index.html) module"]
+#[doc = "Lock Status\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`locksr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct LOCKSR_SPEC;
 impl crate::RegisterSpec for LOCKSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [locksr::R](R) reader structure"]
-impl crate::Readable for LOCKSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`locksr::R`](R) reader structure"]
+impl crate::Readable for LOCKSR_SPEC {}
 #[doc = "`reset()` method sets LOCKSR to value 0"]
 impl crate::Resettable for LOCKSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

@@ -1,56 +1,36 @@
 #[doc = "Register `CHDR` writer"]
-pub struct W(crate::W<CHDR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CHDR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CHDR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CHDR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CHDR_SPEC>;
 #[doc = "Field `CH0` writer - Channel 0 Disable"]
-pub type CH0_W<'a, const O: u8> = crate::BitWriter<'a, CHDR_SPEC, O>;
+pub type CH0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CH1` writer - Channel 1 Disable"]
-pub type CH1_W<'a, const O: u8> = crate::BitWriter<'a, CHDR_SPEC, O>;
+pub type CH1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl W {
     #[doc = "Bit 0 - Channel 0 Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn ch0(&mut self) -> CH0_W<0> {
+    pub fn ch0(&mut self) -> CH0_W<CHDR_SPEC, 0> {
         CH0_W::new(self)
     }
     #[doc = "Bit 1 - Channel 1 Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn ch1(&mut self) -> CH1_W<1> {
+    pub fn ch1(&mut self) -> CH1_W<CHDR_SPEC, 1> {
         CH1_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Channel Disable Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [chdr](index.html) module"]
+#[doc = "Channel Disable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`chdr::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CHDR_SPEC;
 impl crate::RegisterSpec for CHDR_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [chdr::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`chdr::W`](W) writer structure"]
 impl crate::Writable for CHDR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,18 +1,5 @@
 #[doc = "Register `ISR1` reader"]
-pub struct R(crate::R<ISR1_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ISR1_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ISR1_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ISR1_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ISR1_SPEC>;
 #[doc = "Field `CHID0` reader - Counter Event on Channel 0"]
 pub type CHID0_R = crate::BitReader;
 #[doc = "Field `CHID1` reader - Counter Event on Channel 1"]
@@ -71,15 +58,13 @@ impl R {
         FCHID3_R::new(((self.bits >> 19) & 1) != 0)
     }
 }
-#[doc = "PWM Interrupt Status Register 1\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [isr1](index.html) module"]
+#[doc = "PWM Interrupt Status Register 1\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`isr1::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ISR1_SPEC;
 impl crate::RegisterSpec for ISR1_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [isr1::R](R) reader structure"]
-impl crate::Readable for ISR1_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`isr1::R`](R) reader structure"]
+impl crate::Readable for ISR1_SPEC {}
 #[doc = "`reset()` method sets ISR1 to value 0"]
 impl crate::Resettable for ISR1_SPEC {
     const RESET_VALUE: Self::Ux = 0;

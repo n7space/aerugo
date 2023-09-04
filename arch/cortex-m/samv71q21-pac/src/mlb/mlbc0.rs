@@ -1,43 +1,11 @@
 #[doc = "Register `MLBC0` reader"]
-pub struct R(crate::R<MLBC0_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<MLBC0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<MLBC0_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<MLBC0_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<MLBC0_SPEC>;
 #[doc = "Register `MLBC0` writer"]
-pub struct W(crate::W<MLBC0_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<MLBC0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<MLBC0_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<MLBC0_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<MLBC0_SPEC>;
 #[doc = "Field `MLBEN` reader - MediaLB Enable"]
 pub type MLBEN_R = crate::BitReader;
 #[doc = "Field `MLBEN` writer - MediaLB Enable"]
-pub type MLBEN_W<'a, const O: u8> = crate::BitWriter<'a, MLBC0_SPEC, O>;
+pub type MLBEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `MLBCLK` reader - MLBCLK (MediaLB clock) Speed Select"]
 pub type MLBCLK_R = crate::FieldReader<MLBCLKSELECT_A>;
 #[doc = "MLBCLK (MediaLB clock) Speed Select\n\nValue on reset: 0"]
@@ -71,57 +39,61 @@ impl MLBCLK_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `_256_FS`"]
+    #[doc = "256xFs (for MLBPEN = 0)"]
     #[inline(always)]
     pub fn is_256_fs(&self) -> bool {
         *self == MLBCLKSELECT_A::_256_FS
     }
-    #[doc = "Checks if the value of the field is `_512_FS`"]
+    #[doc = "512xFs (for MLBPEN = 0)"]
     #[inline(always)]
     pub fn is_512_fs(&self) -> bool {
         *self == MLBCLKSELECT_A::_512_FS
     }
-    #[doc = "Checks if the value of the field is `_1024_FS`"]
+    #[doc = "1024xFs (for MLBPEN = 0)"]
     #[inline(always)]
     pub fn is_1024_fs(&self) -> bool {
         *self == MLBCLKSELECT_A::_1024_FS
     }
 }
 #[doc = "Field `MLBCLK` writer - MLBCLK (MediaLB clock) Speed Select"]
-pub type MLBCLK_W<'a, const O: u8> = crate::FieldWriter<'a, MLBC0_SPEC, 3, O, MLBCLKSELECT_A>;
-impl<'a, const O: u8> MLBCLK_W<'a, O> {
+pub type MLBCLK_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, MLBCLKSELECT_A>;
+impl<'a, REG, const O: u8> MLBCLK_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "256xFs (for MLBPEN = 0)"]
     #[inline(always)]
-    pub fn _256_fs(self) -> &'a mut W {
+    pub fn _256_fs(self) -> &'a mut crate::W<REG> {
         self.variant(MLBCLKSELECT_A::_256_FS)
     }
     #[doc = "512xFs (for MLBPEN = 0)"]
     #[inline(always)]
-    pub fn _512_fs(self) -> &'a mut W {
+    pub fn _512_fs(self) -> &'a mut crate::W<REG> {
         self.variant(MLBCLKSELECT_A::_512_FS)
     }
     #[doc = "1024xFs (for MLBPEN = 0)"]
     #[inline(always)]
-    pub fn _1024_fs(self) -> &'a mut W {
+    pub fn _1024_fs(self) -> &'a mut crate::W<REG> {
         self.variant(MLBCLKSELECT_A::_1024_FS)
     }
 }
 #[doc = "Field `ZERO` reader - Must be Written to 0"]
 pub type ZERO_R = crate::BitReader;
 #[doc = "Field `ZERO` writer - Must be Written to 0"]
-pub type ZERO_W<'a, const O: u8> = crate::BitWriter<'a, MLBC0_SPEC, O>;
+pub type ZERO_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `MLBLK` reader - MediaLB Lock Status (read-only)"]
 pub type MLBLK_R = crate::BitReader;
 #[doc = "Field `MLBLK` writer - MediaLB Lock Status (read-only)"]
-pub type MLBLK_W<'a, const O: u8> = crate::BitWriter<'a, MLBC0_SPEC, O>;
+pub type MLBLK_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `ASYRETRY` reader - Asynchronous Tx Packet Retry"]
 pub type ASYRETRY_R = crate::BitReader;
 #[doc = "Field `ASYRETRY` writer - Asynchronous Tx Packet Retry"]
-pub type ASYRETRY_W<'a, const O: u8> = crate::BitWriter<'a, MLBC0_SPEC, O>;
+pub type ASYRETRY_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CTLRETRY` reader - Control Tx Packet Retry"]
 pub type CTLRETRY_R = crate::BitReader;
 #[doc = "Field `CTLRETRY` writer - Control Tx Packet Retry"]
-pub type CTLRETRY_W<'a, const O: u8> = crate::BitWriter<'a, MLBC0_SPEC, O>;
+pub type CTLRETRY_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FCNT` reader - The number of frames per sub-buffer for synchronous channels"]
 pub type FCNT_R = crate::FieldReader<FCNTSELECT_A>;
 #[doc = "The number of frames per sub-buffer for synchronous channels\n\nValue on reset: 0"]
@@ -167,78 +139,82 @@ impl FCNT_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `_1_FRAME`"]
+    #[doc = "1 frame per sub-buffer (Operation is the same as Standard mode.)"]
     #[inline(always)]
     pub fn is_1_frame(&self) -> bool {
         *self == FCNTSELECT_A::_1_FRAME
     }
-    #[doc = "Checks if the value of the field is `_2_FRAMES`"]
+    #[doc = "2 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_2_frames(&self) -> bool {
         *self == FCNTSELECT_A::_2_FRAMES
     }
-    #[doc = "Checks if the value of the field is `_4_FRAMES`"]
+    #[doc = "4 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_4_frames(&self) -> bool {
         *self == FCNTSELECT_A::_4_FRAMES
     }
-    #[doc = "Checks if the value of the field is `_8_FRAMES`"]
+    #[doc = "8 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_8_frames(&self) -> bool {
         *self == FCNTSELECT_A::_8_FRAMES
     }
-    #[doc = "Checks if the value of the field is `_16_FRAMES`"]
+    #[doc = "16 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_16_frames(&self) -> bool {
         *self == FCNTSELECT_A::_16_FRAMES
     }
-    #[doc = "Checks if the value of the field is `_32_FRAMES`"]
+    #[doc = "32 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_32_frames(&self) -> bool {
         *self == FCNTSELECT_A::_32_FRAMES
     }
-    #[doc = "Checks if the value of the field is `_64_FRAMES`"]
+    #[doc = "64 frames per sub-buffer"]
     #[inline(always)]
     pub fn is_64_frames(&self) -> bool {
         *self == FCNTSELECT_A::_64_FRAMES
     }
 }
 #[doc = "Field `FCNT` writer - The number of frames per sub-buffer for synchronous channels"]
-pub type FCNT_W<'a, const O: u8> = crate::FieldWriter<'a, MLBC0_SPEC, 3, O, FCNTSELECT_A>;
-impl<'a, const O: u8> FCNT_W<'a, O> {
+pub type FCNT_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, FCNTSELECT_A>;
+impl<'a, REG, const O: u8> FCNT_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "1 frame per sub-buffer (Operation is the same as Standard mode.)"]
     #[inline(always)]
-    pub fn _1_frame(self) -> &'a mut W {
+    pub fn _1_frame(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_1_FRAME)
     }
     #[doc = "2 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _2_frames(self) -> &'a mut W {
+    pub fn _2_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_2_FRAMES)
     }
     #[doc = "4 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _4_frames(self) -> &'a mut W {
+    pub fn _4_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_4_FRAMES)
     }
     #[doc = "8 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _8_frames(self) -> &'a mut W {
+    pub fn _8_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_8_FRAMES)
     }
     #[doc = "16 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _16_frames(self) -> &'a mut W {
+    pub fn _16_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_16_FRAMES)
     }
     #[doc = "32 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _32_frames(self) -> &'a mut W {
+    pub fn _32_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_32_FRAMES)
     }
     #[doc = "64 frames per sub-buffer"]
     #[inline(always)]
-    pub fn _64_frames(self) -> &'a mut W {
+    pub fn _64_frames(self) -> &'a mut crate::W<REG> {
         self.variant(FCNTSELECT_A::_64_FRAMES)
     }
 }
@@ -283,64 +259,61 @@ impl W {
     #[doc = "Bit 0 - MediaLB Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn mlben(&mut self) -> MLBEN_W<0> {
+    pub fn mlben(&mut self) -> MLBEN_W<MLBC0_SPEC, 0> {
         MLBEN_W::new(self)
     }
     #[doc = "Bits 2:4 - MLBCLK (MediaLB clock) Speed Select"]
     #[inline(always)]
     #[must_use]
-    pub fn mlbclk(&mut self) -> MLBCLK_W<2> {
+    pub fn mlbclk(&mut self) -> MLBCLK_W<MLBC0_SPEC, 2> {
         MLBCLK_W::new(self)
     }
     #[doc = "Bit 5 - Must be Written to 0"]
     #[inline(always)]
     #[must_use]
-    pub fn zero(&mut self) -> ZERO_W<5> {
+    pub fn zero(&mut self) -> ZERO_W<MLBC0_SPEC, 5> {
         ZERO_W::new(self)
     }
     #[doc = "Bit 7 - MediaLB Lock Status (read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn mlblk(&mut self) -> MLBLK_W<7> {
+    pub fn mlblk(&mut self) -> MLBLK_W<MLBC0_SPEC, 7> {
         MLBLK_W::new(self)
     }
     #[doc = "Bit 12 - Asynchronous Tx Packet Retry"]
     #[inline(always)]
     #[must_use]
-    pub fn asyretry(&mut self) -> ASYRETRY_W<12> {
+    pub fn asyretry(&mut self) -> ASYRETRY_W<MLBC0_SPEC, 12> {
         ASYRETRY_W::new(self)
     }
     #[doc = "Bit 14 - Control Tx Packet Retry"]
     #[inline(always)]
     #[must_use]
-    pub fn ctlretry(&mut self) -> CTLRETRY_W<14> {
+    pub fn ctlretry(&mut self) -> CTLRETRY_W<MLBC0_SPEC, 14> {
         CTLRETRY_W::new(self)
     }
     #[doc = "Bits 15:17 - The number of frames per sub-buffer for synchronous channels"]
     #[inline(always)]
     #[must_use]
-    pub fn fcnt(&mut self) -> FCNT_W<15> {
+    pub fn fcnt(&mut self) -> FCNT_W<MLBC0_SPEC, 15> {
         FCNT_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "MediaLB Control 0 Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [mlbc0](index.html) module"]
+#[doc = "MediaLB Control 0 Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mlbc0::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mlbc0::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct MLBC0_SPEC;
 impl crate::RegisterSpec for MLBC0_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [mlbc0::R](R) reader structure"]
-impl crate::Readable for MLBC0_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [mlbc0::W](W) writer structure"]
+#[doc = "`read()` method returns [`mlbc0::R`](R) reader structure"]
+impl crate::Readable for MLBC0_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`mlbc0::W`](W) writer structure"]
 impl crate::Writable for MLBC0_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,39 +1,7 @@
 #[doc = "Register `CCCR` reader"]
-pub struct R(crate::R<CCCR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CCCR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CCCR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CCCR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CCCR_SPEC>;
 #[doc = "Register `CCCR` writer"]
-pub struct W(crate::W<CCCR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CCCR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CCCR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CCCR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CCCR_SPEC>;
 #[doc = "Field `INIT` reader - Initialization (read/write)"]
 pub type INIT_R = crate::BitReader<INITSELECT_A>;
 #[doc = "Initialization (read/write)\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl INIT_R {
             true => INITSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Normal operation."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == INITSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "Initialization is started."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == INITSELECT_A::ENABLED
     }
 }
 #[doc = "Field `INIT` writer - Initialization (read/write)"]
-pub type INIT_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, INITSELECT_A>;
-impl<'a, const O: u8> INIT_W<'a, O> {
+pub type INIT_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, INITSELECT_A>;
+impl<'a, REG, const O: u8> INIT_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Normal operation."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(INITSELECT_A::DISABLED)
     }
     #[doc = "Initialization is started."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(INITSELECT_A::ENABLED)
     }
 }
@@ -109,28 +80,31 @@ impl CCE_R {
             true => CCESELECT_A::CONFIGURABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `PROTECTED`"]
+    #[doc = "The processor has no write access to the protected configuration registers."]
     #[inline(always)]
     pub fn is_protected(&self) -> bool {
         *self == CCESELECT_A::PROTECTED
     }
-    #[doc = "Checks if the value of the field is `CONFIGURABLE`"]
+    #[doc = "The processor has write access to the protected configuration registers (while MCAN_CCCR.INIT = '1')."]
     #[inline(always)]
     pub fn is_configurable(&self) -> bool {
         *self == CCESELECT_A::CONFIGURABLE
     }
 }
 #[doc = "Field `CCE` writer - Configuration Change Enable (read/write, write protection)"]
-pub type CCE_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, CCESELECT_A>;
-impl<'a, const O: u8> CCE_W<'a, O> {
+pub type CCE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CCESELECT_A>;
+impl<'a, REG, const O: u8> CCE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The processor has no write access to the protected configuration registers."]
     #[inline(always)]
-    pub fn protected(self) -> &'a mut W {
+    pub fn protected(self) -> &'a mut crate::W<REG> {
         self.variant(CCESELECT_A::PROTECTED)
     }
     #[doc = "The processor has write access to the protected configuration registers (while MCAN_CCCR.INIT = '1')."]
     #[inline(always)]
-    pub fn configurable(self) -> &'a mut W {
+    pub fn configurable(self) -> &'a mut crate::W<REG> {
         self.variant(CCESELECT_A::CONFIGURABLE)
     }
 }
@@ -159,35 +133,38 @@ impl ASM_R {
             true => ASMSELECT_A::RESTRICTED,
         }
     }
-    #[doc = "Checks if the value of the field is `NORMAL`"]
+    #[doc = "Normal CAN operation."]
     #[inline(always)]
     pub fn is_normal(&self) -> bool {
         *self == ASMSELECT_A::NORMAL
     }
-    #[doc = "Checks if the value of the field is `RESTRICTED`"]
+    #[doc = "Restricted Operation mode active."]
     #[inline(always)]
     pub fn is_restricted(&self) -> bool {
         *self == ASMSELECT_A::RESTRICTED
     }
 }
 #[doc = "Field `ASM` writer - Restricted Operation Mode (read/write, write protection against '1')"]
-pub type ASM_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, ASMSELECT_A>;
-impl<'a, const O: u8> ASM_W<'a, O> {
+pub type ASM_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, ASMSELECT_A>;
+impl<'a, REG, const O: u8> ASM_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Normal CAN operation."]
     #[inline(always)]
-    pub fn normal(self) -> &'a mut W {
+    pub fn normal(self) -> &'a mut crate::W<REG> {
         self.variant(ASMSELECT_A::NORMAL)
     }
     #[doc = "Restricted Operation mode active."]
     #[inline(always)]
-    pub fn restricted(self) -> &'a mut W {
+    pub fn restricted(self) -> &'a mut crate::W<REG> {
         self.variant(ASMSELECT_A::RESTRICTED)
     }
 }
 #[doc = "Field `CSA` reader - Clock Stop Acknowledge (read-only)"]
 pub type CSA_R = crate::BitReader;
 #[doc = "Field `CSA` writer - Clock Stop Acknowledge (read-only)"]
-pub type CSA_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O>;
+pub type CSA_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CSR` reader - Clock Stop Request (read/write)"]
 pub type CSR_R = crate::BitReader<CSRSELECT_A>;
 #[doc = "Clock Stop Request (read/write)\n\nValue on reset: 0"]
@@ -213,28 +190,31 @@ impl CSR_R {
             true => CSRSELECT_A::CLOCK_STOP,
         }
     }
-    #[doc = "Checks if the value of the field is `NO_CLOCK_STOP`"]
+    #[doc = "No clock stop is requested."]
     #[inline(always)]
     pub fn is_no_clock_stop(&self) -> bool {
         *self == CSRSELECT_A::NO_CLOCK_STOP
     }
-    #[doc = "Checks if the value of the field is `CLOCK_STOP`"]
+    #[doc = "Clock stop requested. When clock stop is requested, first INIT and then CSA will be set after all pend-ing transfer requests have been completed and the CAN bus reached idle."]
     #[inline(always)]
     pub fn is_clock_stop(&self) -> bool {
         *self == CSRSELECT_A::CLOCK_STOP
     }
 }
 #[doc = "Field `CSR` writer - Clock Stop Request (read/write)"]
-pub type CSR_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, CSRSELECT_A>;
-impl<'a, const O: u8> CSR_W<'a, O> {
+pub type CSR_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CSRSELECT_A>;
+impl<'a, REG, const O: u8> CSR_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "No clock stop is requested."]
     #[inline(always)]
-    pub fn no_clock_stop(self) -> &'a mut W {
+    pub fn no_clock_stop(self) -> &'a mut crate::W<REG> {
         self.variant(CSRSELECT_A::NO_CLOCK_STOP)
     }
     #[doc = "Clock stop requested. When clock stop is requested, first INIT and then CSA will be set after all pend-ing transfer requests have been completed and the CAN bus reached idle."]
     #[inline(always)]
-    pub fn clock_stop(self) -> &'a mut W {
+    pub fn clock_stop(self) -> &'a mut crate::W<REG> {
         self.variant(CSRSELECT_A::CLOCK_STOP)
     }
 }
@@ -263,28 +243,31 @@ impl MON_R {
             true => MONSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Bus Monitoring mode is disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == MONSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "Bus Monitoring mode is enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == MONSELECT_A::ENABLED
     }
 }
 #[doc = "Field `MON` writer - Bus Monitoring Mode (read/write, write protection against '1')"]
-pub type MON_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, MONSELECT_A>;
-impl<'a, const O: u8> MON_W<'a, O> {
+pub type MON_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, MONSELECT_A>;
+impl<'a, REG, const O: u8> MON_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Bus Monitoring mode is disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(MONSELECT_A::DISABLED)
     }
     #[doc = "Bus Monitoring mode is enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(MONSELECT_A::ENABLED)
     }
 }
@@ -313,28 +296,31 @@ impl DAR_R {
             true => DARSELECT_A::NO_AUTO_RETX,
         }
     }
-    #[doc = "Checks if the value of the field is `AUTO_RETX`"]
+    #[doc = "Automatic retransmission of messages not transmitted successfully enabled."]
     #[inline(always)]
     pub fn is_auto_retx(&self) -> bool {
         *self == DARSELECT_A::AUTO_RETX
     }
-    #[doc = "Checks if the value of the field is `NO_AUTO_RETX`"]
+    #[doc = "Automatic retransmission disabled."]
     #[inline(always)]
     pub fn is_no_auto_retx(&self) -> bool {
         *self == DARSELECT_A::NO_AUTO_RETX
     }
 }
 #[doc = "Field `DAR` writer - Disable Automatic Retransmission (read/write, write protection)"]
-pub type DAR_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, DARSELECT_A>;
-impl<'a, const O: u8> DAR_W<'a, O> {
+pub type DAR_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, DARSELECT_A>;
+impl<'a, REG, const O: u8> DAR_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Automatic retransmission of messages not transmitted successfully enabled."]
     #[inline(always)]
-    pub fn auto_retx(self) -> &'a mut W {
+    pub fn auto_retx(self) -> &'a mut crate::W<REG> {
         self.variant(DARSELECT_A::AUTO_RETX)
     }
     #[doc = "Automatic retransmission disabled."]
     #[inline(always)]
-    pub fn no_auto_retx(self) -> &'a mut W {
+    pub fn no_auto_retx(self) -> &'a mut crate::W<REG> {
         self.variant(DARSELECT_A::NO_AUTO_RETX)
     }
 }
@@ -363,28 +349,31 @@ impl TEST_R {
             true => TESTSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Normal operation, MCAN_TEST register holds reset values."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == TESTSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "Test mode, write access to MCAN_TEST register enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == TESTSELECT_A::ENABLED
     }
 }
 #[doc = "Field `TEST` writer - Test Mode Enable (read/write, write protection against '1')"]
-pub type TEST_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, TESTSELECT_A>;
-impl<'a, const O: u8> TEST_W<'a, O> {
+pub type TEST_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, TESTSELECT_A>;
+impl<'a, REG, const O: u8> TEST_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Normal operation, MCAN_TEST register holds reset values."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(TESTSELECT_A::DISABLED)
     }
     #[doc = "Test mode, write access to MCAN_TEST register enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(TESTSELECT_A::ENABLED)
     }
 }
@@ -413,28 +402,31 @@ impl FDOE_R {
             true => FDOESELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "FD operation disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == FDOESELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "FD operation enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == FDOESELECT_A::ENABLED
     }
 }
 #[doc = "Field `FDOE` writer - CAN FD Operation Enable (read/write, write protection)"]
-pub type FDOE_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, FDOESELECT_A>;
-impl<'a, const O: u8> FDOE_W<'a, O> {
+pub type FDOE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, FDOESELECT_A>;
+impl<'a, REG, const O: u8> FDOE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "FD operation disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(FDOESELECT_A::DISABLED)
     }
     #[doc = "FD operation enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(FDOESELECT_A::ENABLED)
     }
 }
@@ -463,47 +455,50 @@ impl BRSE_R {
             true => BRSESELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Bit rate switching for transmissions disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == BRSESELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "Bit rate switching for transmissions enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == BRSESELECT_A::ENABLED
     }
 }
 #[doc = "Field `BRSE` writer - Bit Rate Switching Enable (read/write, write protection)"]
-pub type BRSE_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O, BRSESELECT_A>;
-impl<'a, const O: u8> BRSE_W<'a, O> {
+pub type BRSE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, BRSESELECT_A>;
+impl<'a, REG, const O: u8> BRSE_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Bit rate switching for transmissions disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(BRSESELECT_A::DISABLED)
     }
     #[doc = "Bit rate switching for transmissions enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(BRSESELECT_A::ENABLED)
     }
 }
 #[doc = "Field `PXHD` reader - Protocol Exception Event Handling (read/write, write protection)"]
 pub type PXHD_R = crate::BitReader;
 #[doc = "Field `PXHD` writer - Protocol Exception Event Handling (read/write, write protection)"]
-pub type PXHD_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O>;
+pub type PXHD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `EFBI` reader - Edge Filtering during Bus Integration (read/write, write protection)"]
 pub type EFBI_R = crate::BitReader;
 #[doc = "Field `EFBI` writer - Edge Filtering during Bus Integration (read/write, write protection)"]
-pub type EFBI_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O>;
+pub type EFBI_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TXP` reader - Transmit Pause (read/write, write protection)"]
 pub type TXP_R = crate::BitReader;
 #[doc = "Field `TXP` writer - Transmit Pause (read/write, write protection)"]
-pub type TXP_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O>;
+pub type TXP_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `NISO` reader - Non-ISO Operation"]
 pub type NISO_R = crate::BitReader;
 #[doc = "Field `NISO` writer - Non-ISO Operation"]
-pub type NISO_W<'a, const O: u8> = crate::BitWriter<'a, CCCR_SPEC, O>;
+pub type NISO_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Initialization (read/write)"]
     #[inline(always)]
@@ -580,106 +575,103 @@ impl W {
     #[doc = "Bit 0 - Initialization (read/write)"]
     #[inline(always)]
     #[must_use]
-    pub fn init(&mut self) -> INIT_W<0> {
+    pub fn init(&mut self) -> INIT_W<CCCR_SPEC, 0> {
         INIT_W::new(self)
     }
     #[doc = "Bit 1 - Configuration Change Enable (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn cce(&mut self) -> CCE_W<1> {
+    pub fn cce(&mut self) -> CCE_W<CCCR_SPEC, 1> {
         CCE_W::new(self)
     }
     #[doc = "Bit 2 - Restricted Operation Mode (read/write, write protection against '1')"]
     #[inline(always)]
     #[must_use]
-    pub fn asm(&mut self) -> ASM_W<2> {
+    pub fn asm(&mut self) -> ASM_W<CCCR_SPEC, 2> {
         ASM_W::new(self)
     }
     #[doc = "Bit 3 - Clock Stop Acknowledge (read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn csa(&mut self) -> CSA_W<3> {
+    pub fn csa(&mut self) -> CSA_W<CCCR_SPEC, 3> {
         CSA_W::new(self)
     }
     #[doc = "Bit 4 - Clock Stop Request (read/write)"]
     #[inline(always)]
     #[must_use]
-    pub fn csr(&mut self) -> CSR_W<4> {
+    pub fn csr(&mut self) -> CSR_W<CCCR_SPEC, 4> {
         CSR_W::new(self)
     }
     #[doc = "Bit 5 - Bus Monitoring Mode (read/write, write protection against '1')"]
     #[inline(always)]
     #[must_use]
-    pub fn mon(&mut self) -> MON_W<5> {
+    pub fn mon(&mut self) -> MON_W<CCCR_SPEC, 5> {
         MON_W::new(self)
     }
     #[doc = "Bit 6 - Disable Automatic Retransmission (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn dar(&mut self) -> DAR_W<6> {
+    pub fn dar(&mut self) -> DAR_W<CCCR_SPEC, 6> {
         DAR_W::new(self)
     }
     #[doc = "Bit 7 - Test Mode Enable (read/write, write protection against '1')"]
     #[inline(always)]
     #[must_use]
-    pub fn test(&mut self) -> TEST_W<7> {
+    pub fn test(&mut self) -> TEST_W<CCCR_SPEC, 7> {
         TEST_W::new(self)
     }
     #[doc = "Bit 8 - CAN FD Operation Enable (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn fdoe(&mut self) -> FDOE_W<8> {
+    pub fn fdoe(&mut self) -> FDOE_W<CCCR_SPEC, 8> {
         FDOE_W::new(self)
     }
     #[doc = "Bit 9 - Bit Rate Switching Enable (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn brse(&mut self) -> BRSE_W<9> {
+    pub fn brse(&mut self) -> BRSE_W<CCCR_SPEC, 9> {
         BRSE_W::new(self)
     }
     #[doc = "Bit 12 - Protocol Exception Event Handling (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn pxhd(&mut self) -> PXHD_W<12> {
+    pub fn pxhd(&mut self) -> PXHD_W<CCCR_SPEC, 12> {
         PXHD_W::new(self)
     }
     #[doc = "Bit 13 - Edge Filtering during Bus Integration (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn efbi(&mut self) -> EFBI_W<13> {
+    pub fn efbi(&mut self) -> EFBI_W<CCCR_SPEC, 13> {
         EFBI_W::new(self)
     }
     #[doc = "Bit 14 - Transmit Pause (read/write, write protection)"]
     #[inline(always)]
     #[must_use]
-    pub fn txp(&mut self) -> TXP_W<14> {
+    pub fn txp(&mut self) -> TXP_W<CCCR_SPEC, 14> {
         TXP_W::new(self)
     }
     #[doc = "Bit 15 - Non-ISO Operation"]
     #[inline(always)]
     #[must_use]
-    pub fn niso(&mut self) -> NISO_W<15> {
+    pub fn niso(&mut self) -> NISO_W<CCCR_SPEC, 15> {
         NISO_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "CC Control Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cccr](index.html) module"]
+#[doc = "CC Control Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cccr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cccr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CCCR_SPEC;
 impl crate::RegisterSpec for CCCR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cccr::R](R) reader structure"]
-impl crate::Readable for CCCR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [cccr::W](W) writer structure"]
+#[doc = "`read()` method returns [`cccr::R`](R) reader structure"]
+impl crate::Readable for CCCR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`cccr::W`](W) writer structure"]
 impl crate::Writable for CCCR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

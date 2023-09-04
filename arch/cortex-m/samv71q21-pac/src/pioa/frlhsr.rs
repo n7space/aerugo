@@ -1,18 +1,5 @@
 #[doc = "Register `FRLHSR` reader"]
-pub struct R(crate::R<FRLHSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<FRLHSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<FRLHSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<FRLHSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<FRLHSR_SPEC>;
 #[doc = "Field `P0` reader - Edge/Level Interrupt Source Selection"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Edge/Level Interrupt Source Selection"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Fall/Rise - Low/High Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [frlhsr](index.html) module"]
+#[doc = "Fall/Rise - Low/High Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`frlhsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct FRLHSR_SPEC;
 impl crate::RegisterSpec for FRLHSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [frlhsr::R](R) reader structure"]
-impl crate::Readable for FRLHSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`frlhsr::R`](R) reader structure"]
+impl crate::Readable for FRLHSR_SPEC {}
 #[doc = "`reset()` method sets FRLHSR to value 0"]
 impl crate::Resettable for FRLHSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

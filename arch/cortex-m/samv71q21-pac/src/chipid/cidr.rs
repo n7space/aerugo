@@ -1,18 +1,5 @@
 #[doc = "Register `CIDR` reader"]
-pub struct R(crate::R<CIDR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CIDR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CIDR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CIDR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CIDR_SPEC>;
 #[doc = "Field `VERSION` reader - Version of the Device"]
 pub type VERSION_R = crate::FieldReader;
 #[doc = "Field `EPROC` reader - Embedded Processor"]
@@ -63,42 +50,42 @@ impl EPROC_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `SAMX7`"]
+    #[doc = "Cortex-M7"]
     #[inline(always)]
     pub fn is_samx7(&self) -> bool {
         *self == EPROCSELECT_A::SAMX7
     }
-    #[doc = "Checks if the value of the field is `ARM946ES`"]
+    #[doc = "ARM946ES"]
     #[inline(always)]
     pub fn is_arm946es(&self) -> bool {
         *self == EPROCSELECT_A::ARM946ES
     }
-    #[doc = "Checks if the value of the field is `ARM7TDMI`"]
+    #[doc = "ARM7TDMI"]
     #[inline(always)]
     pub fn is_arm7tdmi(&self) -> bool {
         *self == EPROCSELECT_A::ARM7TDMI
     }
-    #[doc = "Checks if the value of the field is `CM3`"]
+    #[doc = "Cortex-M3"]
     #[inline(always)]
     pub fn is_cm3(&self) -> bool {
         *self == EPROCSELECT_A::CM3
     }
-    #[doc = "Checks if the value of the field is `ARM920T`"]
+    #[doc = "ARM920T"]
     #[inline(always)]
     pub fn is_arm920t(&self) -> bool {
         *self == EPROCSELECT_A::ARM920T
     }
-    #[doc = "Checks if the value of the field is `ARM926EJS`"]
+    #[doc = "ARM926EJS"]
     #[inline(always)]
     pub fn is_arm926ejs(&self) -> bool {
         *self == EPROCSELECT_A::ARM926EJS
     }
-    #[doc = "Checks if the value of the field is `CA5`"]
+    #[doc = "Cortex-A5"]
     #[inline(always)]
     pub fn is_ca5(&self) -> bool {
         *self == EPROCSELECT_A::CA5
     }
-    #[doc = "Checks if the value of the field is `CM4`"]
+    #[doc = "Cortex-M4"]
     #[inline(always)]
     pub fn is_cm4(&self) -> bool {
         *self == EPROCSELECT_A::CM4
@@ -161,57 +148,57 @@ impl NVPSIZ_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `NONE`"]
+    #[doc = "None"]
     #[inline(always)]
     pub fn is_none(&self) -> bool {
         *self == NVPSIZSELECT_A::NONE
     }
-    #[doc = "Checks if the value of the field is `_8K`"]
+    #[doc = "8 Kbytes"]
     #[inline(always)]
     pub fn is_8k(&self) -> bool {
         *self == NVPSIZSELECT_A::_8K
     }
-    #[doc = "Checks if the value of the field is `_16K`"]
+    #[doc = "16 Kbytes"]
     #[inline(always)]
     pub fn is_16k(&self) -> bool {
         *self == NVPSIZSELECT_A::_16K
     }
-    #[doc = "Checks if the value of the field is `_32K`"]
+    #[doc = "32 Kbytes"]
     #[inline(always)]
     pub fn is_32k(&self) -> bool {
         *self == NVPSIZSELECT_A::_32K
     }
-    #[doc = "Checks if the value of the field is `_64K`"]
+    #[doc = "64 Kbytes"]
     #[inline(always)]
     pub fn is_64k(&self) -> bool {
         *self == NVPSIZSELECT_A::_64K
     }
-    #[doc = "Checks if the value of the field is `_128K`"]
+    #[doc = "128 Kbytes"]
     #[inline(always)]
     pub fn is_128k(&self) -> bool {
         *self == NVPSIZSELECT_A::_128K
     }
-    #[doc = "Checks if the value of the field is `_160K`"]
+    #[doc = "160 Kbytes"]
     #[inline(always)]
     pub fn is_160k(&self) -> bool {
         *self == NVPSIZSELECT_A::_160K
     }
-    #[doc = "Checks if the value of the field is `_256K`"]
+    #[doc = "256 Kbytes"]
     #[inline(always)]
     pub fn is_256k(&self) -> bool {
         *self == NVPSIZSELECT_A::_256K
     }
-    #[doc = "Checks if the value of the field is `_512K`"]
+    #[doc = "512 Kbytes"]
     #[inline(always)]
     pub fn is_512k(&self) -> bool {
         *self == NVPSIZSELECT_A::_512K
     }
-    #[doc = "Checks if the value of the field is `_1024K`"]
+    #[doc = "1024 Kbytes"]
     #[inline(always)]
     pub fn is_1024k(&self) -> bool {
         *self == NVPSIZSELECT_A::_1024K
     }
-    #[doc = "Checks if the value of the field is `_2048K`"]
+    #[doc = "2048 Kbytes"]
     #[inline(always)]
     pub fn is_2048k(&self) -> bool {
         *self == NVPSIZSELECT_A::_2048K
@@ -271,52 +258,52 @@ impl NVPSIZ2_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `NONE`"]
+    #[doc = "None"]
     #[inline(always)]
     pub fn is_none(&self) -> bool {
         *self == NVPSIZ2SELECT_A::NONE
     }
-    #[doc = "Checks if the value of the field is `_8K`"]
+    #[doc = "8 Kbytes"]
     #[inline(always)]
     pub fn is_8k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_8K
     }
-    #[doc = "Checks if the value of the field is `_16K`"]
+    #[doc = "16 Kbytes"]
     #[inline(always)]
     pub fn is_16k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_16K
     }
-    #[doc = "Checks if the value of the field is `_32K`"]
+    #[doc = "32 Kbytes"]
     #[inline(always)]
     pub fn is_32k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_32K
     }
-    #[doc = "Checks if the value of the field is `_64K`"]
+    #[doc = "64 Kbytes"]
     #[inline(always)]
     pub fn is_64k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_64K
     }
-    #[doc = "Checks if the value of the field is `_128K`"]
+    #[doc = "128 Kbytes"]
     #[inline(always)]
     pub fn is_128k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_128K
     }
-    #[doc = "Checks if the value of the field is `_256K`"]
+    #[doc = "256 Kbytes"]
     #[inline(always)]
     pub fn is_256k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_256K
     }
-    #[doc = "Checks if the value of the field is `_512K`"]
+    #[doc = "512 Kbytes"]
     #[inline(always)]
     pub fn is_512k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_512K
     }
-    #[doc = "Checks if the value of the field is `_1024K`"]
+    #[doc = "1024 Kbytes"]
     #[inline(always)]
     pub fn is_1024k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_1024K
     }
-    #[doc = "Checks if the value of the field is `_2048K`"]
+    #[doc = "2048 Kbytes"]
     #[inline(always)]
     pub fn is_2048k(&self) -> bool {
         *self == NVPSIZ2SELECT_A::_2048K
@@ -394,82 +381,82 @@ impl SRAMSIZ_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `_48K`"]
+    #[doc = "48 Kbytes"]
     #[inline(always)]
     pub fn is_48k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_48K
     }
-    #[doc = "Checks if the value of the field is `_192K`"]
+    #[doc = "192 Kbytes"]
     #[inline(always)]
     pub fn is_192k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_192K
     }
-    #[doc = "Checks if the value of the field is `_384K`"]
+    #[doc = "384 Kbytes"]
     #[inline(always)]
     pub fn is_384k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_384K
     }
-    #[doc = "Checks if the value of the field is `_6K`"]
+    #[doc = "6 Kbytes"]
     #[inline(always)]
     pub fn is_6k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_6K
     }
-    #[doc = "Checks if the value of the field is `_24K`"]
+    #[doc = "24 Kbytes"]
     #[inline(always)]
     pub fn is_24k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_24K
     }
-    #[doc = "Checks if the value of the field is `_4K`"]
+    #[doc = "4 Kbytes"]
     #[inline(always)]
     pub fn is_4k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_4K
     }
-    #[doc = "Checks if the value of the field is `_80K`"]
+    #[doc = "80 Kbytes"]
     #[inline(always)]
     pub fn is_80k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_80K
     }
-    #[doc = "Checks if the value of the field is `_160K`"]
+    #[doc = "160 Kbytes"]
     #[inline(always)]
     pub fn is_160k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_160K
     }
-    #[doc = "Checks if the value of the field is `_8K`"]
+    #[doc = "8 Kbytes"]
     #[inline(always)]
     pub fn is_8k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_8K
     }
-    #[doc = "Checks if the value of the field is `_16K`"]
+    #[doc = "16 Kbytes"]
     #[inline(always)]
     pub fn is_16k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_16K
     }
-    #[doc = "Checks if the value of the field is `_32K`"]
+    #[doc = "32 Kbytes"]
     #[inline(always)]
     pub fn is_32k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_32K
     }
-    #[doc = "Checks if the value of the field is `_64K`"]
+    #[doc = "64 Kbytes"]
     #[inline(always)]
     pub fn is_64k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_64K
     }
-    #[doc = "Checks if the value of the field is `_128K`"]
+    #[doc = "128 Kbytes"]
     #[inline(always)]
     pub fn is_128k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_128K
     }
-    #[doc = "Checks if the value of the field is `_256K`"]
+    #[doc = "256 Kbytes"]
     #[inline(always)]
     pub fn is_256k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_256K
     }
-    #[doc = "Checks if the value of the field is `_96K`"]
+    #[doc = "96 Kbytes"]
     #[inline(always)]
     pub fn is_96k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_96K
     }
-    #[doc = "Checks if the value of the field is `_512K`"]
+    #[doc = "512 Kbytes"]
     #[inline(always)]
     pub fn is_512k(&self) -> bool {
         *self == SRAMSIZSELECT_A::_512K
@@ -511,22 +498,22 @@ impl ARCH_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `SAME70`"]
+    #[doc = "SAM E70"]
     #[inline(always)]
     pub fn is_same70(&self) -> bool {
         *self == ARCHSELECT_A::SAME70
     }
-    #[doc = "Checks if the value of the field is `SAMS70`"]
+    #[doc = "SAM S70"]
     #[inline(always)]
     pub fn is_sams70(&self) -> bool {
         *self == ARCHSELECT_A::SAMS70
     }
-    #[doc = "Checks if the value of the field is `SAMV71`"]
+    #[doc = "SAM V71"]
     #[inline(always)]
     pub fn is_samv71(&self) -> bool {
         *self == ARCHSELECT_A::SAMV71
     }
-    #[doc = "Checks if the value of the field is `SAMV70`"]
+    #[doc = "SAM V70"]
     #[inline(always)]
     pub fn is_samv70(&self) -> bool {
         *self == ARCHSELECT_A::SAMV70
@@ -571,27 +558,27 @@ impl NVPTYP_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `ROM`"]
+    #[doc = "ROM"]
     #[inline(always)]
     pub fn is_rom(&self) -> bool {
         *self == NVPTYPSELECT_A::ROM
     }
-    #[doc = "Checks if the value of the field is `ROMLESS`"]
+    #[doc = "ROMless or on-chip Flash"]
     #[inline(always)]
     pub fn is_romless(&self) -> bool {
         *self == NVPTYPSELECT_A::ROMLESS
     }
-    #[doc = "Checks if the value of the field is `FLASH`"]
+    #[doc = "Embedded Flash Memory"]
     #[inline(always)]
     pub fn is_flash(&self) -> bool {
         *self == NVPTYPSELECT_A::FLASH
     }
-    #[doc = "Checks if the value of the field is `ROM_FLASH`"]
+    #[doc = "ROM and Embedded Flash Memory- NVPSIZ is ROM size- NVPSIZ2 is Flash size"]
     #[inline(always)]
     pub fn is_rom_flash(&self) -> bool {
         *self == NVPTYPSELECT_A::ROM_FLASH
     }
-    #[doc = "Checks if the value of the field is `SRAM`"]
+    #[doc = "SRAM emulating ROM"]
     #[inline(always)]
     pub fn is_sram(&self) -> bool {
         *self == NVPTYPSELECT_A::SRAM
@@ -641,15 +628,13 @@ impl R {
         EXT_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Chip ID Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cidr](index.html) module"]
+#[doc = "Chip ID Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cidr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CIDR_SPEC;
 impl crate::RegisterSpec for CIDR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [cidr::R](R) reader structure"]
-impl crate::Readable for CIDR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`cidr::R`](R) reader structure"]
+impl crate::Readable for CIDR_SPEC {}
 #[doc = "`reset()` method sets CIDR to value 0"]
 impl crate::Resettable for CIDR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

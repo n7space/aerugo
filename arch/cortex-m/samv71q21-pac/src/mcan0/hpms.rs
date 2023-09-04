@@ -1,18 +1,5 @@
 #[doc = "Register `HPMS` reader"]
-pub struct R(crate::R<HPMS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<HPMS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<HPMS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<HPMS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<HPMS_SPEC>;
 #[doc = "Field `BIDX` reader - Buffer Index"]
 pub type BIDX_R = crate::FieldReader;
 #[doc = "Field `MSI` reader - Message Storage Indicator"]
@@ -51,22 +38,22 @@ impl MSI_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `NO_FIFO_SEL`"]
+    #[doc = "No FIFO selected."]
     #[inline(always)]
     pub fn is_no_fifo_sel(&self) -> bool {
         *self == MSISELECT_A::NO_FIFO_SEL
     }
-    #[doc = "Checks if the value of the field is `LOST`"]
+    #[doc = "FIFO message lost."]
     #[inline(always)]
     pub fn is_lost(&self) -> bool {
         *self == MSISELECT_A::LOST
     }
-    #[doc = "Checks if the value of the field is `FIFO_0`"]
+    #[doc = "Message stored in FIFO 0."]
     #[inline(always)]
     pub fn is_fifo_0(&self) -> bool {
         *self == MSISELECT_A::FIFO_0
     }
-    #[doc = "Checks if the value of the field is `FIFO_1`"]
+    #[doc = "Message stored in FIFO 1."]
     #[inline(always)]
     pub fn is_fifo_1(&self) -> bool {
         *self == MSISELECT_A::FIFO_1
@@ -98,15 +85,13 @@ impl R {
         FLST_R::new(((self.bits >> 15) & 1) != 0)
     }
 }
-#[doc = "High Priority Message Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [hpms](index.html) module"]
+#[doc = "High Priority Message Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`hpms::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct HPMS_SPEC;
 impl crate::RegisterSpec for HPMS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [hpms::R](R) reader structure"]
-impl crate::Readable for HPMS_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`hpms::R`](R) reader structure"]
+impl crate::Readable for HPMS_SPEC {}
 #[doc = "`reset()` method sets HPMS to value 0"]
 impl crate::Resettable for HPMS_SPEC {
     const RESET_VALUE: Self::Ux = 0;

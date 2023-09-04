@@ -1,39 +1,7 @@
 #[doc = "Register `TRIGR` reader"]
-pub struct R(crate::R<TRIGR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<TRIGR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<TRIGR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<TRIGR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<TRIGR_SPEC>;
 #[doc = "Register `TRIGR` writer"]
-pub struct W(crate::W<TRIGR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<TRIGR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<TRIGR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<TRIGR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<TRIGR_SPEC>;
 #[doc = "Field `TRGEN0` reader - Trigger Enable of Channel 0"]
 pub type TRGEN0_R = crate::BitReader<TRGEN0SELECT_A>;
 #[doc = "Trigger Enable of Channel 0\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl TRGEN0_R {
             true => TRGEN0SELECT_A::EN,
         }
     }
-    #[doc = "Checks if the value of the field is `DIS`"]
+    #[doc = "External trigger mode disabled. DACC is in Free-running mode or Max speed mode."]
     #[inline(always)]
     pub fn is_dis(&self) -> bool {
         *self == TRGEN0SELECT_A::DIS
     }
-    #[doc = "Checks if the value of the field is `EN`"]
+    #[doc = "External trigger mode enabled."]
     #[inline(always)]
     pub fn is_en(&self) -> bool {
         *self == TRGEN0SELECT_A::EN
     }
 }
 #[doc = "Field `TRGEN0` writer - Trigger Enable of Channel 0"]
-pub type TRGEN0_W<'a, const O: u8> = crate::BitWriter<'a, TRIGR_SPEC, O, TRGEN0SELECT_A>;
-impl<'a, const O: u8> TRGEN0_W<'a, O> {
+pub type TRGEN0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, TRGEN0SELECT_A>;
+impl<'a, REG, const O: u8> TRGEN0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "External trigger mode disabled. DACC is in Free-running mode or Max speed mode."]
     #[inline(always)]
-    pub fn dis(self) -> &'a mut W {
+    pub fn dis(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEN0SELECT_A::DIS)
     }
     #[doc = "External trigger mode enabled."]
     #[inline(always)]
-    pub fn en(self) -> &'a mut W {
+    pub fn en(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEN0SELECT_A::EN)
     }
 }
@@ -109,28 +80,31 @@ impl TRGEN1_R {
             true => TRGEN1SELECT_A::EN,
         }
     }
-    #[doc = "Checks if the value of the field is `DIS`"]
+    #[doc = "External trigger mode disabled. DACC is in Free-running mode or Max speed mode."]
     #[inline(always)]
     pub fn is_dis(&self) -> bool {
         *self == TRGEN1SELECT_A::DIS
     }
-    #[doc = "Checks if the value of the field is `EN`"]
+    #[doc = "External trigger mode enabled."]
     #[inline(always)]
     pub fn is_en(&self) -> bool {
         *self == TRGEN1SELECT_A::EN
     }
 }
 #[doc = "Field `TRGEN1` writer - Trigger Enable of Channel 1"]
-pub type TRGEN1_W<'a, const O: u8> = crate::BitWriter<'a, TRIGR_SPEC, O, TRGEN1SELECT_A>;
-impl<'a, const O: u8> TRGEN1_W<'a, O> {
+pub type TRGEN1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, TRGEN1SELECT_A>;
+impl<'a, REG, const O: u8> TRGEN1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "External trigger mode disabled. DACC is in Free-running mode or Max speed mode."]
     #[inline(always)]
-    pub fn dis(self) -> &'a mut W {
+    pub fn dis(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEN1SELECT_A::DIS)
     }
     #[doc = "External trigger mode enabled."]
     #[inline(always)]
-    pub fn en(self) -> &'a mut W {
+    pub fn en(self) -> &'a mut crate::W<REG> {
         self.variant(TRGEN1SELECT_A::EN)
     }
 }
@@ -182,88 +156,92 @@ impl TRGSEL0_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `TRGSEL0`"]
+    #[doc = "DAC External Trigger Input (DATRG)"]
     #[inline(always)]
     pub fn is_trgsel0(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL0
     }
-    #[doc = "Checks if the value of the field is `TRGSEL1`"]
+    #[doc = "TC0 Channel 0 Output (TIOA0)"]
     #[inline(always)]
     pub fn is_trgsel1(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL1
     }
-    #[doc = "Checks if the value of the field is `TRGSEL2`"]
+    #[doc = "TC0 Channel 1 Output (TIOA1)"]
     #[inline(always)]
     pub fn is_trgsel2(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL2
     }
-    #[doc = "Checks if the value of the field is `TRGSEL3`"]
+    #[doc = "TC0 Channel 2 Output (TIOA2)"]
     #[inline(always)]
     pub fn is_trgsel3(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL3
     }
-    #[doc = "Checks if the value of the field is `TRGSEL4`"]
+    #[doc = "PWM0 Event Line 0"]
     #[inline(always)]
     pub fn is_trgsel4(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL4
     }
-    #[doc = "Checks if the value of the field is `TRGSEL5`"]
+    #[doc = "PWM0 Event Line 1"]
     #[inline(always)]
     pub fn is_trgsel5(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL5
     }
-    #[doc = "Checks if the value of the field is `TRGSEL6`"]
+    #[doc = "PWM1 Event Line 0"]
     #[inline(always)]
     pub fn is_trgsel6(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL6
     }
-    #[doc = "Checks if the value of the field is `TRGSEL7`"]
+    #[doc = "PWM1 Event Line 1"]
     #[inline(always)]
     pub fn is_trgsel7(&self) -> bool {
         *self == TRGSEL0SELECT_A::TRGSEL7
     }
 }
 #[doc = "Field `TRGSEL0` writer - Trigger Selection of Channel 0"]
-pub type TRGSEL0_W<'a, const O: u8> = crate::FieldWriterSafe<'a, TRIGR_SPEC, 3, O, TRGSEL0SELECT_A>;
-impl<'a, const O: u8> TRGSEL0_W<'a, O> {
+pub type TRGSEL0_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 3, O, TRGSEL0SELECT_A>;
+impl<'a, REG, const O: u8> TRGSEL0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "DAC External Trigger Input (DATRG)"]
     #[inline(always)]
-    pub fn trgsel0(self) -> &'a mut W {
+    pub fn trgsel0(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL0)
     }
     #[doc = "TC0 Channel 0 Output (TIOA0)"]
     #[inline(always)]
-    pub fn trgsel1(self) -> &'a mut W {
+    pub fn trgsel1(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL1)
     }
     #[doc = "TC0 Channel 1 Output (TIOA1)"]
     #[inline(always)]
-    pub fn trgsel2(self) -> &'a mut W {
+    pub fn trgsel2(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL2)
     }
     #[doc = "TC0 Channel 2 Output (TIOA2)"]
     #[inline(always)]
-    pub fn trgsel3(self) -> &'a mut W {
+    pub fn trgsel3(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL3)
     }
     #[doc = "PWM0 Event Line 0"]
     #[inline(always)]
-    pub fn trgsel4(self) -> &'a mut W {
+    pub fn trgsel4(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL4)
     }
     #[doc = "PWM0 Event Line 1"]
     #[inline(always)]
-    pub fn trgsel5(self) -> &'a mut W {
+    pub fn trgsel5(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL5)
     }
     #[doc = "PWM1 Event Line 0"]
     #[inline(always)]
-    pub fn trgsel6(self) -> &'a mut W {
+    pub fn trgsel6(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL6)
     }
     #[doc = "PWM1 Event Line 1"]
     #[inline(always)]
-    pub fn trgsel7(self) -> &'a mut W {
+    pub fn trgsel7(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL0SELECT_A::TRGSEL7)
     }
 }
@@ -315,88 +293,92 @@ impl TRGSEL1_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `TRGSEL0`"]
+    #[doc = "DAC External Trigger Input (DATRG)"]
     #[inline(always)]
     pub fn is_trgsel0(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL0
     }
-    #[doc = "Checks if the value of the field is `TRGSEL1`"]
+    #[doc = "TC0 Channel 0 Output (TIOA0)"]
     #[inline(always)]
     pub fn is_trgsel1(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL1
     }
-    #[doc = "Checks if the value of the field is `TRGSEL2`"]
+    #[doc = "TC0 Channel 1 Output (TIOA1)"]
     #[inline(always)]
     pub fn is_trgsel2(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL2
     }
-    #[doc = "Checks if the value of the field is `TRGSEL3`"]
+    #[doc = "TC0 Channel 2 Output (TIOA2)"]
     #[inline(always)]
     pub fn is_trgsel3(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL3
     }
-    #[doc = "Checks if the value of the field is `TRGSEL4`"]
+    #[doc = "PWM0 Event Line 0"]
     #[inline(always)]
     pub fn is_trgsel4(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL4
     }
-    #[doc = "Checks if the value of the field is `TRGSEL5`"]
+    #[doc = "PWM0 Event Line 1"]
     #[inline(always)]
     pub fn is_trgsel5(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL5
     }
-    #[doc = "Checks if the value of the field is `TRGSEL6`"]
+    #[doc = "PWM1 Event Line 0"]
     #[inline(always)]
     pub fn is_trgsel6(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL6
     }
-    #[doc = "Checks if the value of the field is `TRGSEL7`"]
+    #[doc = "PWM1 Event Line 1"]
     #[inline(always)]
     pub fn is_trgsel7(&self) -> bool {
         *self == TRGSEL1SELECT_A::TRGSEL7
     }
 }
 #[doc = "Field `TRGSEL1` writer - Trigger Selection of Channel 1"]
-pub type TRGSEL1_W<'a, const O: u8> = crate::FieldWriterSafe<'a, TRIGR_SPEC, 3, O, TRGSEL1SELECT_A>;
-impl<'a, const O: u8> TRGSEL1_W<'a, O> {
+pub type TRGSEL1_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 3, O, TRGSEL1SELECT_A>;
+impl<'a, REG, const O: u8> TRGSEL1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "DAC External Trigger Input (DATRG)"]
     #[inline(always)]
-    pub fn trgsel0(self) -> &'a mut W {
+    pub fn trgsel0(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL0)
     }
     #[doc = "TC0 Channel 0 Output (TIOA0)"]
     #[inline(always)]
-    pub fn trgsel1(self) -> &'a mut W {
+    pub fn trgsel1(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL1)
     }
     #[doc = "TC0 Channel 1 Output (TIOA1)"]
     #[inline(always)]
-    pub fn trgsel2(self) -> &'a mut W {
+    pub fn trgsel2(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL2)
     }
     #[doc = "TC0 Channel 2 Output (TIOA2)"]
     #[inline(always)]
-    pub fn trgsel3(self) -> &'a mut W {
+    pub fn trgsel3(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL3)
     }
     #[doc = "PWM0 Event Line 0"]
     #[inline(always)]
-    pub fn trgsel4(self) -> &'a mut W {
+    pub fn trgsel4(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL4)
     }
     #[doc = "PWM0 Event Line 1"]
     #[inline(always)]
-    pub fn trgsel5(self) -> &'a mut W {
+    pub fn trgsel5(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL5)
     }
     #[doc = "PWM1 Event Line 0"]
     #[inline(always)]
-    pub fn trgsel6(self) -> &'a mut W {
+    pub fn trgsel6(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL6)
     }
     #[doc = "PWM1 Event Line 1"]
     #[inline(always)]
-    pub fn trgsel7(self) -> &'a mut W {
+    pub fn trgsel7(self) -> &'a mut crate::W<REG> {
         self.variant(TRGSEL1SELECT_A::TRGSEL7)
     }
 }
@@ -442,68 +424,72 @@ impl OSR0_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `OSR_1`"]
+    #[doc = "OSR = 1"]
     #[inline(always)]
     pub fn is_osr_1(&self) -> bool {
         *self == OSR0SELECT_A::OSR_1
     }
-    #[doc = "Checks if the value of the field is `OSR_2`"]
+    #[doc = "OSR = 2"]
     #[inline(always)]
     pub fn is_osr_2(&self) -> bool {
         *self == OSR0SELECT_A::OSR_2
     }
-    #[doc = "Checks if the value of the field is `OSR_4`"]
+    #[doc = "OSR = 4"]
     #[inline(always)]
     pub fn is_osr_4(&self) -> bool {
         *self == OSR0SELECT_A::OSR_4
     }
-    #[doc = "Checks if the value of the field is `OSR_8`"]
+    #[doc = "OSR = 8"]
     #[inline(always)]
     pub fn is_osr_8(&self) -> bool {
         *self == OSR0SELECT_A::OSR_8
     }
-    #[doc = "Checks if the value of the field is `OSR_16`"]
+    #[doc = "OSR = 16"]
     #[inline(always)]
     pub fn is_osr_16(&self) -> bool {
         *self == OSR0SELECT_A::OSR_16
     }
-    #[doc = "Checks if the value of the field is `OSR_32`"]
+    #[doc = "OSR = 32"]
     #[inline(always)]
     pub fn is_osr_32(&self) -> bool {
         *self == OSR0SELECT_A::OSR_32
     }
 }
 #[doc = "Field `OSR0` writer - Over Sampling Ratio of Channel 0"]
-pub type OSR0_W<'a, const O: u8> = crate::FieldWriter<'a, TRIGR_SPEC, 3, O, OSR0SELECT_A>;
-impl<'a, const O: u8> OSR0_W<'a, O> {
+pub type OSR0_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, OSR0SELECT_A>;
+impl<'a, REG, const O: u8> OSR0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "OSR = 1"]
     #[inline(always)]
-    pub fn osr_1(self) -> &'a mut W {
+    pub fn osr_1(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_1)
     }
     #[doc = "OSR = 2"]
     #[inline(always)]
-    pub fn osr_2(self) -> &'a mut W {
+    pub fn osr_2(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_2)
     }
     #[doc = "OSR = 4"]
     #[inline(always)]
-    pub fn osr_4(self) -> &'a mut W {
+    pub fn osr_4(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_4)
     }
     #[doc = "OSR = 8"]
     #[inline(always)]
-    pub fn osr_8(self) -> &'a mut W {
+    pub fn osr_8(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_8)
     }
     #[doc = "OSR = 16"]
     #[inline(always)]
-    pub fn osr_16(self) -> &'a mut W {
+    pub fn osr_16(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_16)
     }
     #[doc = "OSR = 32"]
     #[inline(always)]
-    pub fn osr_32(self) -> &'a mut W {
+    pub fn osr_32(self) -> &'a mut crate::W<REG> {
         self.variant(OSR0SELECT_A::OSR_32)
     }
 }
@@ -549,68 +535,72 @@ impl OSR1_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `OSR_1`"]
+    #[doc = "OSR = 1"]
     #[inline(always)]
     pub fn is_osr_1(&self) -> bool {
         *self == OSR1SELECT_A::OSR_1
     }
-    #[doc = "Checks if the value of the field is `OSR_2`"]
+    #[doc = "OSR = 2"]
     #[inline(always)]
     pub fn is_osr_2(&self) -> bool {
         *self == OSR1SELECT_A::OSR_2
     }
-    #[doc = "Checks if the value of the field is `OSR_4`"]
+    #[doc = "OSR = 4"]
     #[inline(always)]
     pub fn is_osr_4(&self) -> bool {
         *self == OSR1SELECT_A::OSR_4
     }
-    #[doc = "Checks if the value of the field is `OSR_8`"]
+    #[doc = "OSR = 8"]
     #[inline(always)]
     pub fn is_osr_8(&self) -> bool {
         *self == OSR1SELECT_A::OSR_8
     }
-    #[doc = "Checks if the value of the field is `OSR_16`"]
+    #[doc = "OSR = 16"]
     #[inline(always)]
     pub fn is_osr_16(&self) -> bool {
         *self == OSR1SELECT_A::OSR_16
     }
-    #[doc = "Checks if the value of the field is `OSR_32`"]
+    #[doc = "OSR = 32"]
     #[inline(always)]
     pub fn is_osr_32(&self) -> bool {
         *self == OSR1SELECT_A::OSR_32
     }
 }
 #[doc = "Field `OSR1` writer - Over Sampling Ratio of Channel 1"]
-pub type OSR1_W<'a, const O: u8> = crate::FieldWriter<'a, TRIGR_SPEC, 3, O, OSR1SELECT_A>;
-impl<'a, const O: u8> OSR1_W<'a, O> {
+pub type OSR1_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, OSR1SELECT_A>;
+impl<'a, REG, const O: u8> OSR1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "OSR = 1"]
     #[inline(always)]
-    pub fn osr_1(self) -> &'a mut W {
+    pub fn osr_1(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_1)
     }
     #[doc = "OSR = 2"]
     #[inline(always)]
-    pub fn osr_2(self) -> &'a mut W {
+    pub fn osr_2(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_2)
     }
     #[doc = "OSR = 4"]
     #[inline(always)]
-    pub fn osr_4(self) -> &'a mut W {
+    pub fn osr_4(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_4)
     }
     #[doc = "OSR = 8"]
     #[inline(always)]
-    pub fn osr_8(self) -> &'a mut W {
+    pub fn osr_8(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_8)
     }
     #[doc = "OSR = 16"]
     #[inline(always)]
-    pub fn osr_16(self) -> &'a mut W {
+    pub fn osr_16(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_16)
     }
     #[doc = "OSR = 32"]
     #[inline(always)]
-    pub fn osr_32(self) -> &'a mut W {
+    pub fn osr_32(self) -> &'a mut crate::W<REG> {
         self.variant(OSR1SELECT_A::OSR_32)
     }
 }
@@ -650,58 +640,55 @@ impl W {
     #[doc = "Bit 0 - Trigger Enable of Channel 0"]
     #[inline(always)]
     #[must_use]
-    pub fn trgen0(&mut self) -> TRGEN0_W<0> {
+    pub fn trgen0(&mut self) -> TRGEN0_W<TRIGR_SPEC, 0> {
         TRGEN0_W::new(self)
     }
     #[doc = "Bit 1 - Trigger Enable of Channel 1"]
     #[inline(always)]
     #[must_use]
-    pub fn trgen1(&mut self) -> TRGEN1_W<1> {
+    pub fn trgen1(&mut self) -> TRGEN1_W<TRIGR_SPEC, 1> {
         TRGEN1_W::new(self)
     }
     #[doc = "Bits 4:6 - Trigger Selection of Channel 0"]
     #[inline(always)]
     #[must_use]
-    pub fn trgsel0(&mut self) -> TRGSEL0_W<4> {
+    pub fn trgsel0(&mut self) -> TRGSEL0_W<TRIGR_SPEC, 4> {
         TRGSEL0_W::new(self)
     }
     #[doc = "Bits 8:10 - Trigger Selection of Channel 1"]
     #[inline(always)]
     #[must_use]
-    pub fn trgsel1(&mut self) -> TRGSEL1_W<8> {
+    pub fn trgsel1(&mut self) -> TRGSEL1_W<TRIGR_SPEC, 8> {
         TRGSEL1_W::new(self)
     }
     #[doc = "Bits 16:18 - Over Sampling Ratio of Channel 0"]
     #[inline(always)]
     #[must_use]
-    pub fn osr0(&mut self) -> OSR0_W<16> {
+    pub fn osr0(&mut self) -> OSR0_W<TRIGR_SPEC, 16> {
         OSR0_W::new(self)
     }
     #[doc = "Bits 20:22 - Over Sampling Ratio of Channel 1"]
     #[inline(always)]
     #[must_use]
-    pub fn osr1(&mut self) -> OSR1_W<20> {
+    pub fn osr1(&mut self) -> OSR1_W<TRIGR_SPEC, 20> {
         OSR1_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Trigger Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [trigr](index.html) module"]
+#[doc = "Trigger Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`trigr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`trigr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct TRIGR_SPEC;
 impl crate::RegisterSpec for TRIGR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [trigr::R](R) reader structure"]
-impl crate::Readable for TRIGR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [trigr::W](W) writer structure"]
+#[doc = "`read()` method returns [`trigr::R`](R) reader structure"]
+impl crate::Readable for TRIGR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`trigr::W`](W) writer structure"]
 impl crate::Writable for TRIGR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

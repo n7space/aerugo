@@ -1,18 +1,5 @@
 #[doc = "Register `EEFC_FSR` reader"]
-pub struct R(crate::R<EEFC_FSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<EEFC_FSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<EEFC_FSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<EEFC_FSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<EEFC_FSR_SPEC>;
 #[doc = "Field `FRDY` reader - Flash Ready Status (cleared when Flash is busy)"]
 pub type FRDY_R = crate::BitReader;
 #[doc = "Field `FCMDE` reader - Flash Command Error Status (cleared on read or by writing EEFC_FCR)"]
@@ -71,15 +58,13 @@ impl R {
         MECCEMSB_R::new(((self.bits >> 19) & 1) != 0)
     }
 }
-#[doc = "EEFC Flash Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [eefc_fsr](index.html) module"]
+#[doc = "EEFC Flash Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`eefc_fsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct EEFC_FSR_SPEC;
 impl crate::RegisterSpec for EEFC_FSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [eefc_fsr::R](R) reader structure"]
-impl crate::Readable for EEFC_FSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`eefc_fsr::R`](R) reader structure"]
+impl crate::Readable for EEFC_FSR_SPEC {}
 #[doc = "`reset()` method sets EEFC_FSR to value 0"]
 impl crate::Resettable for EEFC_FSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

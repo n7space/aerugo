@@ -1,39 +1,7 @@
 #[doc = "Register `WUMR` reader"]
-pub struct R(crate::R<WUMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<WUMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<WUMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<WUMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<WUMR_SPEC>;
 #[doc = "Register `WUMR` writer"]
-pub struct W(crate::W<WUMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<WUMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<WUMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<WUMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<WUMR_SPEC>;
 #[doc = "Field `SMEN` reader - Supply Monitor Wake-up Enable"]
 pub type SMEN_R = crate::BitReader<SMENSELECT_A>;
 #[doc = "Supply Monitor Wake-up Enable\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl SMEN_R {
             true => SMENSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The supply monitor detection has no wake-up effect."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == SMENSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The supply monitor detection forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == SMENSELECT_A::ENABLE
     }
 }
 #[doc = "Field `SMEN` writer - Supply Monitor Wake-up Enable"]
-pub type SMEN_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, SMENSELECT_A>;
-impl<'a, const O: u8> SMEN_W<'a, O> {
+pub type SMEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, SMENSELECT_A>;
+impl<'a, REG, const O: u8> SMEN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The supply monitor detection has no wake-up effect."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMENSELECT_A::NOT_ENABLE)
     }
     #[doc = "The supply monitor detection forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(SMENSELECT_A::ENABLE)
     }
 }
@@ -109,28 +80,31 @@ impl RTTEN_R {
             true => RTTENSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The RTT alarm signal has no wake-up effect."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == RTTENSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The RTT alarm signal forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == RTTENSELECT_A::ENABLE
     }
 }
 #[doc = "Field `RTTEN` writer - Real-time Timer Wake-up Enable"]
-pub type RTTEN_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, RTTENSELECT_A>;
-impl<'a, const O: u8> RTTEN_W<'a, O> {
+pub type RTTEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, RTTENSELECT_A>;
+impl<'a, REG, const O: u8> RTTEN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The RTT alarm signal has no wake-up effect."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(RTTENSELECT_A::NOT_ENABLE)
     }
     #[doc = "The RTT alarm signal forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(RTTENSELECT_A::ENABLE)
     }
 }
@@ -159,28 +133,31 @@ impl RTCEN_R {
             true => RTCENSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The RTC alarm signal has no wake-up effect."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == RTCENSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The RTC alarm signal forces the wake-up of the core power supply."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == RTCENSELECT_A::ENABLE
     }
 }
 #[doc = "Field `RTCEN` writer - Real-time Clock Wake-up Enable"]
-pub type RTCEN_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, RTCENSELECT_A>;
-impl<'a, const O: u8> RTCEN_W<'a, O> {
+pub type RTCEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, RTCENSELECT_A>;
+impl<'a, REG, const O: u8> RTCEN_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The RTC alarm signal has no wake-up effect."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(RTCENSELECT_A::NOT_ENABLE)
     }
     #[doc = "The RTC alarm signal forces the wake-up of the core power supply."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(RTCENSELECT_A::ENABLE)
     }
 }
@@ -209,28 +186,31 @@ impl LPDBCEN0_R {
             true => LPDBCEN0SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The WKUP0 input pin is not connected to the low-power debouncer."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == LPDBCEN0SELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The WKUP0 input pin is connected to the low-power debouncer and forces a system wake-up."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == LPDBCEN0SELECT_A::ENABLE
     }
 }
 #[doc = "Field `LPDBCEN0` writer - Low-power Debouncer Enable WKUP0"]
-pub type LPDBCEN0_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, LPDBCEN0SELECT_A>;
-impl<'a, const O: u8> LPDBCEN0_W<'a, O> {
+pub type LPDBCEN0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LPDBCEN0SELECT_A>;
+impl<'a, REG, const O: u8> LPDBCEN0_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The WKUP0 input pin is not connected to the low-power debouncer."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCEN0SELECT_A::NOT_ENABLE)
     }
     #[doc = "The WKUP0 input pin is connected to the low-power debouncer and forces a system wake-up."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCEN0SELECT_A::ENABLE)
     }
 }
@@ -259,28 +239,31 @@ impl LPDBCEN1_R {
             true => LPDBCEN1SELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "The WKUP1 input pin is not connected to the low-power debouncer."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == LPDBCEN1SELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "The WKUP1 input pin is connected to the low-power debouncer and forces a system wake-up."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == LPDBCEN1SELECT_A::ENABLE
     }
 }
 #[doc = "Field `LPDBCEN1` writer - Low-power Debouncer Enable WKUP1"]
-pub type LPDBCEN1_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, LPDBCEN1SELECT_A>;
-impl<'a, const O: u8> LPDBCEN1_W<'a, O> {
+pub type LPDBCEN1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LPDBCEN1SELECT_A>;
+impl<'a, REG, const O: u8> LPDBCEN1_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The WKUP1 input pin is not connected to the low-power debouncer."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCEN1SELECT_A::NOT_ENABLE)
     }
     #[doc = "The WKUP1 input pin is connected to the low-power debouncer and forces a system wake-up."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCEN1SELECT_A::ENABLE)
     }
 }
@@ -309,28 +292,31 @@ impl LPDBCCLR_R {
             true => LPDBCCLRSELECT_A::ENABLE,
         }
     }
-    #[doc = "Checks if the value of the field is `NOT_ENABLE`"]
+    #[doc = "A low-power debounce event does not create an immediate clear on the first half of GPBR registers."]
     #[inline(always)]
     pub fn is_not_enable(&self) -> bool {
         *self == LPDBCCLRSELECT_A::NOT_ENABLE
     }
-    #[doc = "Checks if the value of the field is `ENABLE`"]
+    #[doc = "A low-power debounce event on WKUP0 or WKUP1 generates an immediate clear on the first half of GPBR registers."]
     #[inline(always)]
     pub fn is_enable(&self) -> bool {
         *self == LPDBCCLRSELECT_A::ENABLE
     }
 }
 #[doc = "Field `LPDBCCLR` writer - Low-power Debouncer Clear"]
-pub type LPDBCCLR_W<'a, const O: u8> = crate::BitWriter<'a, WUMR_SPEC, O, LPDBCCLRSELECT_A>;
-impl<'a, const O: u8> LPDBCCLR_W<'a, O> {
+pub type LPDBCCLR_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LPDBCCLRSELECT_A>;
+impl<'a, REG, const O: u8> LPDBCCLR_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "A low-power debounce event does not create an immediate clear on the first half of GPBR registers."]
     #[inline(always)]
-    pub fn not_enable(self) -> &'a mut W {
+    pub fn not_enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCCLRSELECT_A::NOT_ENABLE)
     }
     #[doc = "A low-power debounce event on WKUP0 or WKUP1 generates an immediate clear on the first half of GPBR registers."]
     #[inline(always)]
-    pub fn enable(self) -> &'a mut W {
+    pub fn enable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCCLRSELECT_A::ENABLE)
     }
 }
@@ -376,68 +362,72 @@ impl WKUPDBC_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `IMMEDIATE`"]
+    #[doc = "Immediate, no debouncing, detected active at least on one Slow Clock edge."]
     #[inline(always)]
     pub fn is_immediate(&self) -> bool {
         *self == WKUPDBCSELECT_A::IMMEDIATE
     }
-    #[doc = "Checks if the value of the field is `_3_SLCK`"]
+    #[doc = "WKUPx shall be in its active state for at least 3 SLCK periods"]
     #[inline(always)]
     pub fn is_3_slck(&self) -> bool {
         *self == WKUPDBCSELECT_A::_3_SLCK
     }
-    #[doc = "Checks if the value of the field is `_32_SLCK`"]
+    #[doc = "WKUPx shall be in its active state for at least 32 SLCK periods"]
     #[inline(always)]
     pub fn is_32_slck(&self) -> bool {
         *self == WKUPDBCSELECT_A::_32_SLCK
     }
-    #[doc = "Checks if the value of the field is `_512_SLCK`"]
+    #[doc = "WKUPx shall be in its active state for at least 512 SLCK periods"]
     #[inline(always)]
     pub fn is_512_slck(&self) -> bool {
         *self == WKUPDBCSELECT_A::_512_SLCK
     }
-    #[doc = "Checks if the value of the field is `_4096_SLCK`"]
+    #[doc = "WKUPx shall be in its active state for at least 4,096 SLCK periods"]
     #[inline(always)]
     pub fn is_4096_slck(&self) -> bool {
         *self == WKUPDBCSELECT_A::_4096_SLCK
     }
-    #[doc = "Checks if the value of the field is `_32768_SLCK`"]
+    #[doc = "WKUPx shall be in its active state for at least 32,768 SLCK periods"]
     #[inline(always)]
     pub fn is_32768_slck(&self) -> bool {
         *self == WKUPDBCSELECT_A::_32768_SLCK
     }
 }
 #[doc = "Field `WKUPDBC` writer - Wake-up Inputs Debouncer Period"]
-pub type WKUPDBC_W<'a, const O: u8> = crate::FieldWriter<'a, WUMR_SPEC, 3, O, WKUPDBCSELECT_A>;
-impl<'a, const O: u8> WKUPDBC_W<'a, O> {
+pub type WKUPDBC_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, WKUPDBCSELECT_A>;
+impl<'a, REG, const O: u8> WKUPDBC_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Immediate, no debouncing, detected active at least on one Slow Clock edge."]
     #[inline(always)]
-    pub fn immediate(self) -> &'a mut W {
+    pub fn immediate(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::IMMEDIATE)
     }
     #[doc = "WKUPx shall be in its active state for at least 3 SLCK periods"]
     #[inline(always)]
-    pub fn _3_slck(self) -> &'a mut W {
+    pub fn _3_slck(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::_3_SLCK)
     }
     #[doc = "WKUPx shall be in its active state for at least 32 SLCK periods"]
     #[inline(always)]
-    pub fn _32_slck(self) -> &'a mut W {
+    pub fn _32_slck(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::_32_SLCK)
     }
     #[doc = "WKUPx shall be in its active state for at least 512 SLCK periods"]
     #[inline(always)]
-    pub fn _512_slck(self) -> &'a mut W {
+    pub fn _512_slck(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::_512_SLCK)
     }
     #[doc = "WKUPx shall be in its active state for at least 4,096 SLCK periods"]
     #[inline(always)]
-    pub fn _4096_slck(self) -> &'a mut W {
+    pub fn _4096_slck(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::_4096_SLCK)
     }
     #[doc = "WKUPx shall be in its active state for at least 32,768 SLCK periods"]
     #[inline(always)]
-    pub fn _32768_slck(self) -> &'a mut W {
+    pub fn _32768_slck(self) -> &'a mut crate::W<REG> {
         self.variant(WKUPDBCSELECT_A::_32768_SLCK)
     }
 }
@@ -489,88 +479,92 @@ impl LPDBC_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLE`"]
+    #[doc = "Disable the low-power debouncers."]
     #[inline(always)]
     pub fn is_disable(&self) -> bool {
         *self == LPDBCSELECT_A::DISABLE
     }
-    #[doc = "Checks if the value of the field is `_2_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 2 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_2_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_2_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_3_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 3 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_3_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_3_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_4_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 4 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_4_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_4_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_5_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 5 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_5_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_5_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_6_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 6 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_6_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_6_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_7_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 7 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_7_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_7_RTCOUT
     }
-    #[doc = "Checks if the value of the field is `_8_RTCOUT`"]
+    #[doc = "WKUP0/1 in active state for at least 8 RTCOUTx clock periods"]
     #[inline(always)]
     pub fn is_8_rtcout(&self) -> bool {
         *self == LPDBCSELECT_A::_8_RTCOUT
     }
 }
 #[doc = "Field `LPDBC` writer - Low-power Debouncer Period"]
-pub type LPDBC_W<'a, const O: u8> = crate::FieldWriterSafe<'a, WUMR_SPEC, 3, O, LPDBCSELECT_A>;
-impl<'a, const O: u8> LPDBC_W<'a, O> {
+pub type LPDBC_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 3, O, LPDBCSELECT_A>;
+impl<'a, REG, const O: u8> LPDBC_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Disable the low-power debouncers."]
     #[inline(always)]
-    pub fn disable(self) -> &'a mut W {
+    pub fn disable(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::DISABLE)
     }
     #[doc = "WKUP0/1 in active state for at least 2 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _2_rtcout(self) -> &'a mut W {
+    pub fn _2_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_2_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 3 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _3_rtcout(self) -> &'a mut W {
+    pub fn _3_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_3_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 4 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _4_rtcout(self) -> &'a mut W {
+    pub fn _4_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_4_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 5 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _5_rtcout(self) -> &'a mut W {
+    pub fn _5_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_5_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 6 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _6_rtcout(self) -> &'a mut W {
+    pub fn _6_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_6_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 7 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _7_rtcout(self) -> &'a mut W {
+    pub fn _7_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_7_RTCOUT)
     }
     #[doc = "WKUP0/1 in active state for at least 8 RTCOUTx clock periods"]
     #[inline(always)]
-    pub fn _8_rtcout(self) -> &'a mut W {
+    pub fn _8_rtcout(self) -> &'a mut crate::W<REG> {
         self.variant(LPDBCSELECT_A::_8_RTCOUT)
     }
 }
@@ -620,70 +614,67 @@ impl W {
     #[doc = "Bit 1 - Supply Monitor Wake-up Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn smen(&mut self) -> SMEN_W<1> {
+    pub fn smen(&mut self) -> SMEN_W<WUMR_SPEC, 1> {
         SMEN_W::new(self)
     }
     #[doc = "Bit 2 - Real-time Timer Wake-up Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn rtten(&mut self) -> RTTEN_W<2> {
+    pub fn rtten(&mut self) -> RTTEN_W<WUMR_SPEC, 2> {
         RTTEN_W::new(self)
     }
     #[doc = "Bit 3 - Real-time Clock Wake-up Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn rtcen(&mut self) -> RTCEN_W<3> {
+    pub fn rtcen(&mut self) -> RTCEN_W<WUMR_SPEC, 3> {
         RTCEN_W::new(self)
     }
     #[doc = "Bit 5 - Low-power Debouncer Enable WKUP0"]
     #[inline(always)]
     #[must_use]
-    pub fn lpdbcen0(&mut self) -> LPDBCEN0_W<5> {
+    pub fn lpdbcen0(&mut self) -> LPDBCEN0_W<WUMR_SPEC, 5> {
         LPDBCEN0_W::new(self)
     }
     #[doc = "Bit 6 - Low-power Debouncer Enable WKUP1"]
     #[inline(always)]
     #[must_use]
-    pub fn lpdbcen1(&mut self) -> LPDBCEN1_W<6> {
+    pub fn lpdbcen1(&mut self) -> LPDBCEN1_W<WUMR_SPEC, 6> {
         LPDBCEN1_W::new(self)
     }
     #[doc = "Bit 7 - Low-power Debouncer Clear"]
     #[inline(always)]
     #[must_use]
-    pub fn lpdbcclr(&mut self) -> LPDBCCLR_W<7> {
+    pub fn lpdbcclr(&mut self) -> LPDBCCLR_W<WUMR_SPEC, 7> {
         LPDBCCLR_W::new(self)
     }
     #[doc = "Bits 12:14 - Wake-up Inputs Debouncer Period"]
     #[inline(always)]
     #[must_use]
-    pub fn wkupdbc(&mut self) -> WKUPDBC_W<12> {
+    pub fn wkupdbc(&mut self) -> WKUPDBC_W<WUMR_SPEC, 12> {
         WKUPDBC_W::new(self)
     }
     #[doc = "Bits 16:18 - Low-power Debouncer Period"]
     #[inline(always)]
     #[must_use]
-    pub fn lpdbc(&mut self) -> LPDBC_W<16> {
+    pub fn lpdbc(&mut self) -> LPDBC_W<WUMR_SPEC, 16> {
         LPDBC_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Supply Controller Wake-up Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [wumr](index.html) module"]
+#[doc = "Supply Controller Wake-up Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`wumr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`wumr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct WUMR_SPEC;
 impl crate::RegisterSpec for WUMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [wumr::R](R) reader structure"]
-impl crate::Readable for WUMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [wumr::W](W) writer structure"]
+#[doc = "`read()` method returns [`wumr::R`](R) reader structure"]
+impl crate::Readable for WUMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`wumr::W`](W) writer structure"]
 impl crate::Writable for WUMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,18 +1,5 @@
 #[doc = "Register `AIMMR` reader"]
-pub struct R(crate::R<AIMMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<AIMMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<AIMMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<AIMMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<AIMMR_SPEC>;
 #[doc = "Field `P0` reader - IO Line Index"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - IO Line Index"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Additional Interrupt Modes Mask Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [aimmr](index.html) module"]
+#[doc = "Additional Interrupt Modes Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`aimmr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct AIMMR_SPEC;
 impl crate::RegisterSpec for AIMMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [aimmr::R](R) reader structure"]
-impl crate::Readable for AIMMR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`aimmr::R`](R) reader structure"]
+impl crate::Readable for AIMMR_SPEC {}
 #[doc = "`reset()` method sets AIMMR to value 0"]
 impl crate::Resettable for AIMMR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

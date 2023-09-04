@@ -1,18 +1,5 @@
 #[doc = "Register `IFSR` reader"]
-pub struct R(crate::R<IFSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<IFSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<IFSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<IFSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<IFSR_SPEC>;
 #[doc = "Field `P0` reader - Input Filter Status"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Input Filter Status"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Glitch Input Filter Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [ifsr](index.html) module"]
+#[doc = "Glitch Input Filter Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`ifsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct IFSR_SPEC;
 impl crate::RegisterSpec for IFSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [ifsr::R](R) reader structure"]
-impl crate::Readable for IFSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`ifsr::R`](R) reader structure"]
+impl crate::Readable for IFSR_SPEC {}
 #[doc = "`reset()` method sets IFSR to value 0"]
 impl crate::Resettable for IFSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

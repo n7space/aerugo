@@ -1,18 +1,5 @@
 #[doc = "Register `IFSCSR` reader"]
-pub struct R(crate::R<IFSCSR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<IFSCSR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<IFSCSR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<IFSCSR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<IFSCSR_SPEC>;
 #[doc = "Field `P0` reader - Glitch or Debouncing Filter Selection Status"]
 pub type P0_R = crate::BitReader;
 #[doc = "Field `P1` reader - Glitch or Debouncing Filter Selection Status"]
@@ -239,15 +226,13 @@ impl R {
         P31_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Input Filter Slow Clock Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [ifscsr](index.html) module"]
+#[doc = "Input Filter Slow Clock Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`ifscsr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct IFSCSR_SPEC;
 impl crate::RegisterSpec for IFSCSR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [ifscsr::R](R) reader structure"]
-impl crate::Readable for IFSCSR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`ifscsr::R`](R) reader structure"]
+impl crate::Readable for IFSCSR_SPEC {}
 #[doc = "`reset()` method sets IFSCSR to value 0"]
 impl crate::Resettable for IFSCSR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

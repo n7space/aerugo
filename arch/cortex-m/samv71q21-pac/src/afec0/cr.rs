@@ -1,56 +1,36 @@
 #[doc = "Register `CR` writer"]
-pub struct W(crate::W<CR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CR_SPEC>;
 #[doc = "Field `SWRST` writer - Software Reset"]
-pub type SWRST_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O>;
+pub type SWRST_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `START` writer - Start Conversion"]
-pub type START_W<'a, const O: u8> = crate::BitWriter<'a, CR_SPEC, O>;
+pub type START_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl W {
     #[doc = "Bit 0 - Software Reset"]
     #[inline(always)]
     #[must_use]
-    pub fn swrst(&mut self) -> SWRST_W<0> {
+    pub fn swrst(&mut self) -> SWRST_W<CR_SPEC, 0> {
         SWRST_W::new(self)
     }
     #[doc = "Bit 1 - Start Conversion"]
     #[inline(always)]
     #[must_use]
-    pub fn start(&mut self) -> START_W<1> {
+    pub fn start(&mut self) -> START_W<CR_SPEC, 1> {
         START_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "AFEC Control Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [cr](index.html) module"]
+#[doc = "AFEC Control Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cr::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CR_SPEC;
 impl crate::RegisterSpec for CR_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [cr::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`cr::W`](W) writer structure"]
 impl crate::Writable for CR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

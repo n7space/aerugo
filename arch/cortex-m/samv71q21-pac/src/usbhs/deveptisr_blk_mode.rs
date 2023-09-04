@@ -1,18 +1,5 @@
 #[doc = "Register `DEVEPTISR_BLK_MODE[%s]` reader"]
-pub struct R(crate::R<DEVEPTISR_BLK_MODE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<DEVEPTISR_BLK_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<DEVEPTISR_BLK_MODE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<DEVEPTISR_BLK_MODE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<DEVEPTISR_BLK_MODE_SPEC>;
 #[doc = "Field `TXINI` reader - Transmitted IN Data Interrupt"]
 pub type TXINI_R = crate::BitReader;
 #[doc = "Field `RXOUTI` reader - Received OUT Data Interrupt"]
@@ -65,22 +52,22 @@ impl DTSEQ_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `DATA0`"]
+    #[doc = "Data0 toggle sequence"]
     #[inline(always)]
     pub fn is_data0(&self) -> bool {
         *self == DTSEQSELECT_A::DATA0
     }
-    #[doc = "Checks if the value of the field is `DATA1`"]
+    #[doc = "Data1 toggle sequence"]
     #[inline(always)]
     pub fn is_data1(&self) -> bool {
         *self == DTSEQSELECT_A::DATA1
     }
-    #[doc = "Checks if the value of the field is `DATA2`"]
+    #[doc = "Reserved for high-bandwidth isochronous endpoint"]
     #[inline(always)]
     pub fn is_data2(&self) -> bool {
         *self == DTSEQSELECT_A::DATA2
     }
-    #[doc = "Checks if the value of the field is `MDATA`"]
+    #[doc = "Reserved for high-bandwidth isochronous endpoint"]
     #[inline(always)]
     pub fn is_mdata(&self) -> bool {
         *self == DTSEQSELECT_A::MDATA
@@ -122,22 +109,22 @@ impl NBUSYBK_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `_0_BUSY`"]
+    #[doc = "0 busy bank (all banks free)"]
     #[inline(always)]
     pub fn is_0_busy(&self) -> bool {
         *self == NBUSYBKSELECT_A::_0_BUSY
     }
-    #[doc = "Checks if the value of the field is `_1_BUSY`"]
+    #[doc = "1 busy bank"]
     #[inline(always)]
     pub fn is_1_busy(&self) -> bool {
         *self == NBUSYBKSELECT_A::_1_BUSY
     }
-    #[doc = "Checks if the value of the field is `_2_BUSY`"]
+    #[doc = "2 busy banks"]
     #[inline(always)]
     pub fn is_2_busy(&self) -> bool {
         *self == NBUSYBKSELECT_A::_2_BUSY
     }
-    #[doc = "Checks if the value of the field is `_3_BUSY`"]
+    #[doc = "3 busy banks"]
     #[inline(always)]
     pub fn is_3_busy(&self) -> bool {
         *self == NBUSYBKSELECT_A::_3_BUSY
@@ -176,17 +163,17 @@ impl CURRBK_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `BANK0`"]
+    #[doc = "Current bank is bank0"]
     #[inline(always)]
     pub fn is_bank0(&self) -> bool {
         *self == CURRBKSELECT_A::BANK0
     }
-    #[doc = "Checks if the value of the field is `BANK1`"]
+    #[doc = "Current bank is bank1"]
     #[inline(always)]
     pub fn is_bank1(&self) -> bool {
         *self == CURRBKSELECT_A::BANK1
     }
-    #[doc = "Checks if the value of the field is `BANK2`"]
+    #[doc = "Current bank is bank2"]
     #[inline(always)]
     pub fn is_bank2(&self) -> bool {
         *self == CURRBKSELECT_A::BANK2
@@ -277,15 +264,13 @@ impl R {
         BYCT_R::new(((self.bits >> 20) & 0x07ff) as u16)
     }
 }
-#[doc = "Device Endpoint Interrupt Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [deveptisr_blk_mode](index.html) module"]
+#[doc = "Device Endpoint Interrupt Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`deveptisr_blk_mode::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DEVEPTISR_BLK_MODE_SPEC;
 impl crate::RegisterSpec for DEVEPTISR_BLK_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [deveptisr_blk_mode::R](R) reader structure"]
-impl crate::Readable for DEVEPTISR_BLK_MODE_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`deveptisr_blk_mode::R`](R) reader structure"]
+impl crate::Readable for DEVEPTISR_BLK_MODE_SPEC {}
 #[doc = "`reset()` method sets DEVEPTISR_BLK_MODE[%s]
 to value 0"]
 impl crate::Resettable for DEVEPTISR_BLK_MODE_SPEC {

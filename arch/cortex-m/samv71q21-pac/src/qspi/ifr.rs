@@ -1,39 +1,7 @@
 #[doc = "Register `IFR` reader"]
-pub struct R(crate::R<IFR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<IFR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<IFR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<IFR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<IFR_SPEC>;
 #[doc = "Register `IFR` writer"]
-pub struct W(crate::W<IFR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<IFR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<IFR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<IFR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<IFR_SPEC>;
 #[doc = "Field `WIDTH` reader - Width of Instruction Code, Address, Option Code and Data"]
 pub type WIDTH_R = crate::FieldReader<WIDTHSELECT_A>;
 #[doc = "Width of Instruction Code, Address, Option Code and Data\n\nValue on reset: 0"]
@@ -79,97 +47,101 @@ impl WIDTH_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `SINGLE_BIT_SPI`"]
+    #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Single-bit SPI"]
     #[inline(always)]
     pub fn is_single_bit_spi(&self) -> bool {
         *self == WIDTHSELECT_A::SINGLE_BIT_SPI
     }
-    #[doc = "Checks if the value of the field is `DUAL_OUTPUT`"]
+    #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Dual SPI"]
     #[inline(always)]
     pub fn is_dual_output(&self) -> bool {
         *self == WIDTHSELECT_A::DUAL_OUTPUT
     }
-    #[doc = "Checks if the value of the field is `QUAD_OUTPUT`"]
+    #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Quad SPI"]
     #[inline(always)]
     pub fn is_quad_output(&self) -> bool {
         *self == WIDTHSELECT_A::QUAD_OUTPUT
     }
-    #[doc = "Checks if the value of the field is `DUAL_IO`"]
+    #[doc = "Instruction: Single-bit SPI / Address-Option: Dual SPI / Data: Dual SPI"]
     #[inline(always)]
     pub fn is_dual_io(&self) -> bool {
         *self == WIDTHSELECT_A::DUAL_IO
     }
-    #[doc = "Checks if the value of the field is `QUAD_IO`"]
+    #[doc = "Instruction: Single-bit SPI / Address-Option: Quad SPI / Data: Quad SPI"]
     #[inline(always)]
     pub fn is_quad_io(&self) -> bool {
         *self == WIDTHSELECT_A::QUAD_IO
     }
-    #[doc = "Checks if the value of the field is `DUAL_CMD`"]
+    #[doc = "Instruction: Dual SPI / Address-Option: Dual SPI / Data: Dual SPI"]
     #[inline(always)]
     pub fn is_dual_cmd(&self) -> bool {
         *self == WIDTHSELECT_A::DUAL_CMD
     }
-    #[doc = "Checks if the value of the field is `QUAD_CMD`"]
+    #[doc = "Instruction: Quad SPI / Address-Option: Quad SPI / Data: Quad SPI"]
     #[inline(always)]
     pub fn is_quad_cmd(&self) -> bool {
         *self == WIDTHSELECT_A::QUAD_CMD
     }
 }
 #[doc = "Field `WIDTH` writer - Width of Instruction Code, Address, Option Code and Data"]
-pub type WIDTH_W<'a, const O: u8> = crate::FieldWriter<'a, IFR_SPEC, 3, O, WIDTHSELECT_A>;
-impl<'a, const O: u8> WIDTH_W<'a, O> {
+pub type WIDTH_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O, WIDTHSELECT_A>;
+impl<'a, REG, const O: u8> WIDTH_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Single-bit SPI"]
     #[inline(always)]
-    pub fn single_bit_spi(self) -> &'a mut W {
+    pub fn single_bit_spi(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::SINGLE_BIT_SPI)
     }
     #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Dual SPI"]
     #[inline(always)]
-    pub fn dual_output(self) -> &'a mut W {
+    pub fn dual_output(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::DUAL_OUTPUT)
     }
     #[doc = "Instruction: Single-bit SPI / Address-Option: Single-bit SPI / Data: Quad SPI"]
     #[inline(always)]
-    pub fn quad_output(self) -> &'a mut W {
+    pub fn quad_output(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::QUAD_OUTPUT)
     }
     #[doc = "Instruction: Single-bit SPI / Address-Option: Dual SPI / Data: Dual SPI"]
     #[inline(always)]
-    pub fn dual_io(self) -> &'a mut W {
+    pub fn dual_io(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::DUAL_IO)
     }
     #[doc = "Instruction: Single-bit SPI / Address-Option: Quad SPI / Data: Quad SPI"]
     #[inline(always)]
-    pub fn quad_io(self) -> &'a mut W {
+    pub fn quad_io(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::QUAD_IO)
     }
     #[doc = "Instruction: Dual SPI / Address-Option: Dual SPI / Data: Dual SPI"]
     #[inline(always)]
-    pub fn dual_cmd(self) -> &'a mut W {
+    pub fn dual_cmd(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::DUAL_CMD)
     }
     #[doc = "Instruction: Quad SPI / Address-Option: Quad SPI / Data: Quad SPI"]
     #[inline(always)]
-    pub fn quad_cmd(self) -> &'a mut W {
+    pub fn quad_cmd(self) -> &'a mut crate::W<REG> {
         self.variant(WIDTHSELECT_A::QUAD_CMD)
     }
 }
 #[doc = "Field `INSTEN` reader - Instruction Enable"]
 pub type INSTEN_R = crate::BitReader;
 #[doc = "Field `INSTEN` writer - Instruction Enable"]
-pub type INSTEN_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O>;
+pub type INSTEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `ADDREN` reader - Address Enable"]
 pub type ADDREN_R = crate::BitReader;
 #[doc = "Field `ADDREN` writer - Address Enable"]
-pub type ADDREN_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O>;
+pub type ADDREN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `OPTEN` reader - Option Enable"]
 pub type OPTEN_R = crate::BitReader;
 #[doc = "Field `OPTEN` writer - Option Enable"]
-pub type OPTEN_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O>;
+pub type OPTEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DATAEN` reader - Data Enable"]
 pub type DATAEN_R = crate::BitReader;
 #[doc = "Field `DATAEN` writer - Data Enable"]
-pub type DATAEN_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O>;
+pub type DATAEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `OPTL` reader - Option Code Length"]
 pub type OPTL_R = crate::FieldReader<OPTLSELECT_A>;
 #[doc = "Option Code Length\n\nValue on reset: 0"]
@@ -206,48 +178,52 @@ impl OPTL_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `OPTION_1BIT`"]
+    #[doc = "The option code is 1 bit long."]
     #[inline(always)]
     pub fn is_option_1bit(&self) -> bool {
         *self == OPTLSELECT_A::OPTION_1BIT
     }
-    #[doc = "Checks if the value of the field is `OPTION_2BIT`"]
+    #[doc = "The option code is 2 bits long."]
     #[inline(always)]
     pub fn is_option_2bit(&self) -> bool {
         *self == OPTLSELECT_A::OPTION_2BIT
     }
-    #[doc = "Checks if the value of the field is `OPTION_4BIT`"]
+    #[doc = "The option code is 4 bits long."]
     #[inline(always)]
     pub fn is_option_4bit(&self) -> bool {
         *self == OPTLSELECT_A::OPTION_4BIT
     }
-    #[doc = "Checks if the value of the field is `OPTION_8BIT`"]
+    #[doc = "The option code is 8 bits long."]
     #[inline(always)]
     pub fn is_option_8bit(&self) -> bool {
         *self == OPTLSELECT_A::OPTION_8BIT
     }
 }
 #[doc = "Field `OPTL` writer - Option Code Length"]
-pub type OPTL_W<'a, const O: u8> = crate::FieldWriterSafe<'a, IFR_SPEC, 2, O, OPTLSELECT_A>;
-impl<'a, const O: u8> OPTL_W<'a, O> {
+pub type OPTL_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, OPTLSELECT_A>;
+impl<'a, REG, const O: u8> OPTL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "The option code is 1 bit long."]
     #[inline(always)]
-    pub fn option_1bit(self) -> &'a mut W {
+    pub fn option_1bit(self) -> &'a mut crate::W<REG> {
         self.variant(OPTLSELECT_A::OPTION_1BIT)
     }
     #[doc = "The option code is 2 bits long."]
     #[inline(always)]
-    pub fn option_2bit(self) -> &'a mut W {
+    pub fn option_2bit(self) -> &'a mut crate::W<REG> {
         self.variant(OPTLSELECT_A::OPTION_2BIT)
     }
     #[doc = "The option code is 4 bits long."]
     #[inline(always)]
-    pub fn option_4bit(self) -> &'a mut W {
+    pub fn option_4bit(self) -> &'a mut crate::W<REG> {
         self.variant(OPTLSELECT_A::OPTION_4BIT)
     }
     #[doc = "The option code is 8 bits long."]
     #[inline(always)]
-    pub fn option_8bit(self) -> &'a mut W {
+    pub fn option_8bit(self) -> &'a mut crate::W<REG> {
         self.variant(OPTLSELECT_A::OPTION_8BIT)
     }
 }
@@ -276,28 +252,31 @@ impl ADDRL_R {
             true => ADDRLSELECT_A::_32_BIT,
         }
     }
-    #[doc = "Checks if the value of the field is `_24_BIT`"]
+    #[doc = "The address is 24 bits long."]
     #[inline(always)]
     pub fn is_24_bit(&self) -> bool {
         *self == ADDRLSELECT_A::_24_BIT
     }
-    #[doc = "Checks if the value of the field is `_32_BIT`"]
+    #[doc = "The address is 32 bits long."]
     #[inline(always)]
     pub fn is_32_bit(&self) -> bool {
         *self == ADDRLSELECT_A::_32_BIT
     }
 }
 #[doc = "Field `ADDRL` writer - Address Length"]
-pub type ADDRL_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O, ADDRLSELECT_A>;
-impl<'a, const O: u8> ADDRL_W<'a, O> {
+pub type ADDRL_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, ADDRLSELECT_A>;
+impl<'a, REG, const O: u8> ADDRL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The address is 24 bits long."]
     #[inline(always)]
-    pub fn _24_bit(self) -> &'a mut W {
+    pub fn _24_bit(self) -> &'a mut crate::W<REG> {
         self.variant(ADDRLSELECT_A::_24_BIT)
     }
     #[doc = "The address is 32 bits long."]
     #[inline(always)]
-    pub fn _32_bit(self) -> &'a mut W {
+    pub fn _32_bit(self) -> &'a mut crate::W<REG> {
         self.variant(ADDRLSELECT_A::_32_BIT)
     }
 }
@@ -337,48 +316,52 @@ impl TFRTYP_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `TRSFR_READ`"]
+    #[doc = "Read transfer from the serial memory.Scrambling is not performed.Read at random location (fetch) in the serial Flash memory is not possible."]
     #[inline(always)]
     pub fn is_trsfr_read(&self) -> bool {
         *self == TFRTYPSELECT_A::TRSFR_READ
     }
-    #[doc = "Checks if the value of the field is `TRSFR_READ_MEMORY`"]
+    #[doc = "Read data transfer from the serial memory.If enabled, scrambling is performed.Read at random location (fetch) in the serial Flash memory is possible."]
     #[inline(always)]
     pub fn is_trsfr_read_memory(&self) -> bool {
         *self == TFRTYPSELECT_A::TRSFR_READ_MEMORY
     }
-    #[doc = "Checks if the value of the field is `TRSFR_WRITE`"]
+    #[doc = "Write transfer into the serial memory.Scrambling is not performed."]
     #[inline(always)]
     pub fn is_trsfr_write(&self) -> bool {
         *self == TFRTYPSELECT_A::TRSFR_WRITE
     }
-    #[doc = "Checks if the value of the field is `TRSFR_WRITE_MEMORY`"]
+    #[doc = "Write data transfer into the serial memory.If enabled, scrambling is performed."]
     #[inline(always)]
     pub fn is_trsfr_write_memory(&self) -> bool {
         *self == TFRTYPSELECT_A::TRSFR_WRITE_MEMORY
     }
 }
 #[doc = "Field `TFRTYP` writer - Data Transfer Type"]
-pub type TFRTYP_W<'a, const O: u8> = crate::FieldWriterSafe<'a, IFR_SPEC, 2, O, TFRTYPSELECT_A>;
-impl<'a, const O: u8> TFRTYP_W<'a, O> {
+pub type TFRTYP_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, TFRTYPSELECT_A>;
+impl<'a, REG, const O: u8> TFRTYP_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Read transfer from the serial memory.Scrambling is not performed.Read at random location (fetch) in the serial Flash memory is not possible."]
     #[inline(always)]
-    pub fn trsfr_read(self) -> &'a mut W {
+    pub fn trsfr_read(self) -> &'a mut crate::W<REG> {
         self.variant(TFRTYPSELECT_A::TRSFR_READ)
     }
     #[doc = "Read data transfer from the serial memory.If enabled, scrambling is performed.Read at random location (fetch) in the serial Flash memory is possible."]
     #[inline(always)]
-    pub fn trsfr_read_memory(self) -> &'a mut W {
+    pub fn trsfr_read_memory(self) -> &'a mut crate::W<REG> {
         self.variant(TFRTYPSELECT_A::TRSFR_READ_MEMORY)
     }
     #[doc = "Write transfer into the serial memory.Scrambling is not performed."]
     #[inline(always)]
-    pub fn trsfr_write(self) -> &'a mut W {
+    pub fn trsfr_write(self) -> &'a mut crate::W<REG> {
         self.variant(TFRTYPSELECT_A::TRSFR_WRITE)
     }
     #[doc = "Write data transfer into the serial memory.If enabled, scrambling is performed."]
     #[inline(always)]
-    pub fn trsfr_write_memory(self) -> &'a mut W {
+    pub fn trsfr_write_memory(self) -> &'a mut crate::W<REG> {
         self.variant(TFRTYPSELECT_A::TRSFR_WRITE_MEMORY)
     }
 }
@@ -407,35 +390,38 @@ impl CRM_R {
             true => CRMSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "The Continuous Read mode is disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == CRMSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "The Continuous Read mode is enabled."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == CRMSELECT_A::ENABLED
     }
 }
 #[doc = "Field `CRM` writer - Continuous Read Mode"]
-pub type CRM_W<'a, const O: u8> = crate::BitWriter<'a, IFR_SPEC, O, CRMSELECT_A>;
-impl<'a, const O: u8> CRM_W<'a, O> {
+pub type CRM_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, CRMSELECT_A>;
+impl<'a, REG, const O: u8> CRM_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "The Continuous Read mode is disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(CRMSELECT_A::DISABLED)
     }
     #[doc = "The Continuous Read mode is enabled."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(CRMSELECT_A::ENABLED)
     }
 }
 #[doc = "Field `NBDUM` reader - Number Of Dummy Cycles"]
 pub type NBDUM_R = crate::FieldReader;
 #[doc = "Field `NBDUM` writer - Number Of Dummy Cycles"]
-pub type NBDUM_W<'a, const O: u8> = crate::FieldWriter<'a, IFR_SPEC, 5, O>;
+pub type NBDUM_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 5, O>;
 impl R {
     #[doc = "Bits 0:2 - Width of Instruction Code, Address, Option Code and Data"]
     #[inline(always)]
@@ -492,82 +478,79 @@ impl W {
     #[doc = "Bits 0:2 - Width of Instruction Code, Address, Option Code and Data"]
     #[inline(always)]
     #[must_use]
-    pub fn width(&mut self) -> WIDTH_W<0> {
+    pub fn width(&mut self) -> WIDTH_W<IFR_SPEC, 0> {
         WIDTH_W::new(self)
     }
     #[doc = "Bit 4 - Instruction Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn insten(&mut self) -> INSTEN_W<4> {
+    pub fn insten(&mut self) -> INSTEN_W<IFR_SPEC, 4> {
         INSTEN_W::new(self)
     }
     #[doc = "Bit 5 - Address Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn addren(&mut self) -> ADDREN_W<5> {
+    pub fn addren(&mut self) -> ADDREN_W<IFR_SPEC, 5> {
         ADDREN_W::new(self)
     }
     #[doc = "Bit 6 - Option Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn opten(&mut self) -> OPTEN_W<6> {
+    pub fn opten(&mut self) -> OPTEN_W<IFR_SPEC, 6> {
         OPTEN_W::new(self)
     }
     #[doc = "Bit 7 - Data Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn dataen(&mut self) -> DATAEN_W<7> {
+    pub fn dataen(&mut self) -> DATAEN_W<IFR_SPEC, 7> {
         DATAEN_W::new(self)
     }
     #[doc = "Bits 8:9 - Option Code Length"]
     #[inline(always)]
     #[must_use]
-    pub fn optl(&mut self) -> OPTL_W<8> {
+    pub fn optl(&mut self) -> OPTL_W<IFR_SPEC, 8> {
         OPTL_W::new(self)
     }
     #[doc = "Bit 10 - Address Length"]
     #[inline(always)]
     #[must_use]
-    pub fn addrl(&mut self) -> ADDRL_W<10> {
+    pub fn addrl(&mut self) -> ADDRL_W<IFR_SPEC, 10> {
         ADDRL_W::new(self)
     }
     #[doc = "Bits 12:13 - Data Transfer Type"]
     #[inline(always)]
     #[must_use]
-    pub fn tfrtyp(&mut self) -> TFRTYP_W<12> {
+    pub fn tfrtyp(&mut self) -> TFRTYP_W<IFR_SPEC, 12> {
         TFRTYP_W::new(self)
     }
     #[doc = "Bit 14 - Continuous Read Mode"]
     #[inline(always)]
     #[must_use]
-    pub fn crm(&mut self) -> CRM_W<14> {
+    pub fn crm(&mut self) -> CRM_W<IFR_SPEC, 14> {
         CRM_W::new(self)
     }
     #[doc = "Bits 16:20 - Number Of Dummy Cycles"]
     #[inline(always)]
     #[must_use]
-    pub fn nbdum(&mut self) -> NBDUM_W<16> {
+    pub fn nbdum(&mut self) -> NBDUM_W<IFR_SPEC, 16> {
         NBDUM_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Instruction Frame Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [ifr](index.html) module"]
+#[doc = "Instruction Frame Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`ifr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`ifr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct IFR_SPEC;
 impl crate::RegisterSpec for IFR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [ifr::R](R) reader structure"]
-impl crate::Readable for IFR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [ifr::W](W) writer structure"]
+#[doc = "`read()` method returns [`ifr::R`](R) reader structure"]
+impl crate::Readable for IFR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`ifr::W`](W) writer structure"]
 impl crate::Writable for IFR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

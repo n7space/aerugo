@@ -1,39 +1,7 @@
 #[doc = "Register `TEST` reader"]
-pub struct R(crate::R<TEST_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<TEST_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<TEST_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<TEST_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<TEST_SPEC>;
 #[doc = "Register `TEST` writer"]
-pub struct W(crate::W<TEST_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<TEST_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<TEST_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<TEST_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<TEST_SPEC>;
 #[doc = "Field `LBCK` reader - Loop Back Mode (read/write)"]
 pub type LBCK_R = crate::BitReader<LBCKSELECT_A>;
 #[doc = "Loop Back Mode (read/write)\n\nValue on reset: 0"]
@@ -59,28 +27,31 @@ impl LBCK_R {
             true => LBCKSELECT_A::ENABLED,
         }
     }
-    #[doc = "Checks if the value of the field is `DISABLED`"]
+    #[doc = "Reset value. Loop Back mode is disabled."]
     #[inline(always)]
     pub fn is_disabled(&self) -> bool {
         *self == LBCKSELECT_A::DISABLED
     }
-    #[doc = "Checks if the value of the field is `ENABLED`"]
+    #[doc = "Loop Back mode is enabled (see Section 6.1.9)."]
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         *self == LBCKSELECT_A::ENABLED
     }
 }
 #[doc = "Field `LBCK` writer - Loop Back Mode (read/write)"]
-pub type LBCK_W<'a, const O: u8> = crate::BitWriter<'a, TEST_SPEC, O, LBCKSELECT_A>;
-impl<'a, const O: u8> LBCK_W<'a, O> {
+pub type LBCK_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O, LBCKSELECT_A>;
+impl<'a, REG, const O: u8> LBCK_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+{
     #[doc = "Reset value. Loop Back mode is disabled."]
     #[inline(always)]
-    pub fn disabled(self) -> &'a mut W {
+    pub fn disabled(self) -> &'a mut crate::W<REG> {
         self.variant(LBCKSELECT_A::DISABLED)
     }
     #[doc = "Loop Back mode is enabled (see Section 6.1.9)."]
     #[inline(always)]
-    pub fn enabled(self) -> &'a mut W {
+    pub fn enabled(self) -> &'a mut crate::W<REG> {
         self.variant(LBCKSELECT_A::ENABLED)
     }
 }
@@ -120,55 +91,59 @@ impl TX_R {
             _ => unreachable!(),
         }
     }
-    #[doc = "Checks if the value of the field is `RESET`"]
+    #[doc = "Reset value, CANTX controlled by the CAN Core, updated at the end of the CAN bit time."]
     #[inline(always)]
     pub fn is_reset(&self) -> bool {
         *self == TXSELECT_A::RESET
     }
-    #[doc = "Checks if the value of the field is `SAMPLE_POINT_MONITORING`"]
+    #[doc = "Sample Point can be monitored at pin CANTX."]
     #[inline(always)]
     pub fn is_sample_point_monitoring(&self) -> bool {
         *self == TXSELECT_A::SAMPLE_POINT_MONITORING
     }
-    #[doc = "Checks if the value of the field is `DOMINANT`"]
+    #[doc = "Dominant ('0') level at pin CANTX."]
     #[inline(always)]
     pub fn is_dominant(&self) -> bool {
         *self == TXSELECT_A::DOMINANT
     }
-    #[doc = "Checks if the value of the field is `RECESSIVE`"]
+    #[doc = "Recessive ('1') at pin CANTX."]
     #[inline(always)]
     pub fn is_recessive(&self) -> bool {
         *self == TXSELECT_A::RECESSIVE
     }
 }
 #[doc = "Field `TX` writer - Control of Transmit Pin (read/write)"]
-pub type TX_W<'a, const O: u8> = crate::FieldWriterSafe<'a, TEST_SPEC, 2, O, TXSELECT_A>;
-impl<'a, const O: u8> TX_W<'a, O> {
+pub type TX_W<'a, REG, const O: u8> = crate::FieldWriterSafe<'a, REG, 2, O, TXSELECT_A>;
+impl<'a, REG, const O: u8> TX_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Reset value, CANTX controlled by the CAN Core, updated at the end of the CAN bit time."]
     #[inline(always)]
-    pub fn reset(self) -> &'a mut W {
+    pub fn reset(self) -> &'a mut crate::W<REG> {
         self.variant(TXSELECT_A::RESET)
     }
     #[doc = "Sample Point can be monitored at pin CANTX."]
     #[inline(always)]
-    pub fn sample_point_monitoring(self) -> &'a mut W {
+    pub fn sample_point_monitoring(self) -> &'a mut crate::W<REG> {
         self.variant(TXSELECT_A::SAMPLE_POINT_MONITORING)
     }
     #[doc = "Dominant ('0') level at pin CANTX."]
     #[inline(always)]
-    pub fn dominant(self) -> &'a mut W {
+    pub fn dominant(self) -> &'a mut crate::W<REG> {
         self.variant(TXSELECT_A::DOMINANT)
     }
     #[doc = "Recessive ('1') at pin CANTX."]
     #[inline(always)]
-    pub fn recessive(self) -> &'a mut W {
+    pub fn recessive(self) -> &'a mut crate::W<REG> {
         self.variant(TXSELECT_A::RECESSIVE)
     }
 }
 #[doc = "Field `RX` reader - Receive Pin (read-only)"]
 pub type RX_R = crate::BitReader;
 #[doc = "Field `RX` writer - Receive Pin (read-only)"]
-pub type RX_W<'a, const O: u8> = crate::BitWriter<'a, TEST_SPEC, O>;
+pub type RX_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 4 - Loop Back Mode (read/write)"]
     #[inline(always)]
@@ -190,40 +165,37 @@ impl W {
     #[doc = "Bit 4 - Loop Back Mode (read/write)"]
     #[inline(always)]
     #[must_use]
-    pub fn lbck(&mut self) -> LBCK_W<4> {
+    pub fn lbck(&mut self) -> LBCK_W<TEST_SPEC, 4> {
         LBCK_W::new(self)
     }
     #[doc = "Bits 5:6 - Control of Transmit Pin (read/write)"]
     #[inline(always)]
     #[must_use]
-    pub fn tx(&mut self) -> TX_W<5> {
+    pub fn tx(&mut self) -> TX_W<TEST_SPEC, 5> {
         TX_W::new(self)
     }
     #[doc = "Bit 7 - Receive Pin (read-only)"]
     #[inline(always)]
     #[must_use]
-    pub fn rx(&mut self) -> RX_W<7> {
+    pub fn rx(&mut self) -> RX_W<TEST_SPEC, 7> {
         RX_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Test Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [test](index.html) module"]
+#[doc = "Test Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`test::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`test::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct TEST_SPEC;
 impl crate::RegisterSpec for TEST_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [test::R](R) reader structure"]
-impl crate::Readable for TEST_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [test::W](W) writer structure"]
+#[doc = "`read()` method returns [`test::R`](R) reader structure"]
+impl crate::Readable for TEST_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`test::W`](W) writer structure"]
 impl crate::Writable for TEST_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

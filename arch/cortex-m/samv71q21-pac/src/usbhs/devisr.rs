@@ -1,18 +1,5 @@
 #[doc = "Register `DEVISR` reader"]
-pub struct R(crate::R<DEVISR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<DEVISR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<DEVISR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<DEVISR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<DEVISR_SPEC>;
 #[doc = "Field `SUSP` reader - Suspend Interrupt"]
 pub type SUSP_R = crate::BitReader;
 #[doc = "Field `MSOF` reader - Micro Start of Frame Interrupt"]
@@ -183,15 +170,13 @@ impl R {
         DMA_7_R::new(((self.bits >> 31) & 1) != 0)
     }
 }
-#[doc = "Device Global Interrupt Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [devisr](index.html) module"]
+#[doc = "Device Global Interrupt Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`devisr::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DEVISR_SPEC;
 impl crate::RegisterSpec for DEVISR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [devisr::R](R) reader structure"]
-impl crate::Readable for DEVISR_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`devisr::R`](R) reader structure"]
+impl crate::Readable for DEVISR_SPEC {}
 #[doc = "`reset()` method sets DEVISR to value 0"]
 impl crate::Resettable for DEVISR_SPEC {
     const RESET_VALUE: Self::Ux = 0;

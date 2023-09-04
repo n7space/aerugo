@@ -1,59 +1,27 @@
 #[doc = "Register `ST1RPQ[%s]` reader"]
-pub struct R(crate::R<ST1RPQ_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<ST1RPQ_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<ST1RPQ_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<ST1RPQ_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<ST1RPQ_SPEC>;
 #[doc = "Register `ST1RPQ[%s]` writer"]
-pub struct W(crate::W<ST1RPQ_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<ST1RPQ_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<ST1RPQ_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<ST1RPQ_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<ST1RPQ_SPEC>;
 #[doc = "Field `QNB` reader - Queue Number (0-5)"]
 pub type QNB_R = crate::FieldReader;
 #[doc = "Field `QNB` writer - Queue Number (0-5)"]
-pub type QNB_W<'a, const O: u8> = crate::FieldWriter<'a, ST1RPQ_SPEC, 3, O>;
+pub type QNB_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 3, O>;
 #[doc = "Field `DSTCM` reader - Differentiated Services or Traffic Class Match"]
 pub type DSTCM_R = crate::FieldReader;
 #[doc = "Field `DSTCM` writer - Differentiated Services or Traffic Class Match"]
-pub type DSTCM_W<'a, const O: u8> = crate::FieldWriter<'a, ST1RPQ_SPEC, 8, O>;
+pub type DSTCM_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 8, O>;
 #[doc = "Field `UDPM` reader - UDP Port Match"]
 pub type UDPM_R = crate::FieldReader<u16>;
 #[doc = "Field `UDPM` writer - UDP Port Match"]
-pub type UDPM_W<'a, const O: u8> = crate::FieldWriter<'a, ST1RPQ_SPEC, 16, O, u16>;
+pub type UDPM_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 16, O, u16>;
 #[doc = "Field `DSTCE` reader - Differentiated Services or Traffic Class Match Enable"]
 pub type DSTCE_R = crate::BitReader;
 #[doc = "Field `DSTCE` writer - Differentiated Services or Traffic Class Match Enable"]
-pub type DSTCE_W<'a, const O: u8> = crate::BitWriter<'a, ST1RPQ_SPEC, O>;
+pub type DSTCE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `UDPE` reader - UDP Port Match Enable"]
 pub type UDPE_R = crate::BitReader;
 #[doc = "Field `UDPE` writer - UDP Port Match Enable"]
-pub type UDPE_W<'a, const O: u8> = crate::BitWriter<'a, ST1RPQ_SPEC, O>;
+pub type UDPE_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bits 0:2 - Queue Number (0-5)"]
     #[inline(always)]
@@ -85,52 +53,49 @@ impl W {
     #[doc = "Bits 0:2 - Queue Number (0-5)"]
     #[inline(always)]
     #[must_use]
-    pub fn qnb(&mut self) -> QNB_W<0> {
+    pub fn qnb(&mut self) -> QNB_W<ST1RPQ_SPEC, 0> {
         QNB_W::new(self)
     }
     #[doc = "Bits 4:11 - Differentiated Services or Traffic Class Match"]
     #[inline(always)]
     #[must_use]
-    pub fn dstcm(&mut self) -> DSTCM_W<4> {
+    pub fn dstcm(&mut self) -> DSTCM_W<ST1RPQ_SPEC, 4> {
         DSTCM_W::new(self)
     }
     #[doc = "Bits 12:27 - UDP Port Match"]
     #[inline(always)]
     #[must_use]
-    pub fn udpm(&mut self) -> UDPM_W<12> {
+    pub fn udpm(&mut self) -> UDPM_W<ST1RPQ_SPEC, 12> {
         UDPM_W::new(self)
     }
     #[doc = "Bit 28 - Differentiated Services or Traffic Class Match Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn dstce(&mut self) -> DSTCE_W<28> {
+    pub fn dstce(&mut self) -> DSTCE_W<ST1RPQ_SPEC, 28> {
         DSTCE_W::new(self)
     }
     #[doc = "Bit 29 - UDP Port Match Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn udpe(&mut self) -> UDPE_W<29> {
+    pub fn udpe(&mut self) -> UDPE_W<ST1RPQ_SPEC, 29> {
         UDPE_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Screening Type 1 Register Priority Queue\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [st1rpq](index.html) module"]
+#[doc = "Screening Type 1 Register Priority Queue\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`st1rpq::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`st1rpq::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct ST1RPQ_SPEC;
 impl crate::RegisterSpec for ST1RPQ_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [st1rpq::R](R) reader structure"]
-impl crate::Readable for ST1RPQ_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [st1rpq::W](W) writer structure"]
+#[doc = "`read()` method returns [`st1rpq::R`](R) reader structure"]
+impl crate::Readable for ST1RPQ_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`st1rpq::W`](W) writer structure"]
 impl crate::Writable for ST1RPQ_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

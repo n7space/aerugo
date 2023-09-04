@@ -1,39 +1,7 @@
 #[doc = "Register `SDCR` reader"]
-pub struct R(crate::R<SDCR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SDCR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SDCR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SDCR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SDCR_SPEC>;
 #[doc = "Register `SDCR` writer"]
-pub struct W(crate::W<SDCR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<SDCR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<SDCR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<SDCR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<SDCR_SPEC>;
 #[doc = "Field `SDCSEL` reader - SDCard/SDIO Slot"]
 pub type SDCSEL_R = crate::FieldReader<SDCSELSELECT_A>;
 #[doc = "SDCard/SDIO Slot\n\nValue on reset: 0"]
@@ -61,18 +29,22 @@ impl SDCSEL_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `SLOTA`"]
+    #[doc = "Slot A is selected."]
     #[inline(always)]
     pub fn is_slota(&self) -> bool {
         *self == SDCSELSELECT_A::SLOTA
     }
 }
 #[doc = "Field `SDCSEL` writer - SDCard/SDIO Slot"]
-pub type SDCSEL_W<'a, const O: u8> = crate::FieldWriter<'a, SDCR_SPEC, 2, O, SDCSELSELECT_A>;
-impl<'a, const O: u8> SDCSEL_W<'a, O> {
+pub type SDCSEL_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, SDCSELSELECT_A>;
+impl<'a, REG, const O: u8> SDCSEL_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "Slot A is selected."]
     #[inline(always)]
-    pub fn slota(self) -> &'a mut W {
+    pub fn slota(self) -> &'a mut crate::W<REG> {
         self.variant(SDCSELSELECT_A::SLOTA)
     }
 }
@@ -109,38 +81,42 @@ impl SDCBUS_R {
             _ => None,
         }
     }
-    #[doc = "Checks if the value of the field is `_1`"]
+    #[doc = "1 bit"]
     #[inline(always)]
     pub fn is_1(&self) -> bool {
         *self == SDCBUSSELECT_A::_1
     }
-    #[doc = "Checks if the value of the field is `_4`"]
+    #[doc = "4 bits"]
     #[inline(always)]
     pub fn is_4(&self) -> bool {
         *self == SDCBUSSELECT_A::_4
     }
-    #[doc = "Checks if the value of the field is `_8`"]
+    #[doc = "8 bits"]
     #[inline(always)]
     pub fn is_8(&self) -> bool {
         *self == SDCBUSSELECT_A::_8
     }
 }
 #[doc = "Field `SDCBUS` writer - SDCard/SDIO Bus Width"]
-pub type SDCBUS_W<'a, const O: u8> = crate::FieldWriter<'a, SDCR_SPEC, 2, O, SDCBUSSELECT_A>;
-impl<'a, const O: u8> SDCBUS_W<'a, O> {
+pub type SDCBUS_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 2, O, SDCBUSSELECT_A>;
+impl<'a, REG, const O: u8> SDCBUS_W<'a, REG, O>
+where
+    REG: crate::Writable + crate::RegisterSpec,
+    REG::Ux: From<u8>,
+{
     #[doc = "1 bit"]
     #[inline(always)]
-    pub fn _1(self) -> &'a mut W {
+    pub fn _1(self) -> &'a mut crate::W<REG> {
         self.variant(SDCBUSSELECT_A::_1)
     }
     #[doc = "4 bits"]
     #[inline(always)]
-    pub fn _4(self) -> &'a mut W {
+    pub fn _4(self) -> &'a mut crate::W<REG> {
         self.variant(SDCBUSSELECT_A::_4)
     }
     #[doc = "8 bits"]
     #[inline(always)]
-    pub fn _8(self) -> &'a mut W {
+    pub fn _8(self) -> &'a mut crate::W<REG> {
         self.variant(SDCBUSSELECT_A::_8)
     }
 }
@@ -160,34 +136,31 @@ impl W {
     #[doc = "Bits 0:1 - SDCard/SDIO Slot"]
     #[inline(always)]
     #[must_use]
-    pub fn sdcsel(&mut self) -> SDCSEL_W<0> {
+    pub fn sdcsel(&mut self) -> SDCSEL_W<SDCR_SPEC, 0> {
         SDCSEL_W::new(self)
     }
     #[doc = "Bits 6:7 - SDCard/SDIO Bus Width"]
     #[inline(always)]
     #[must_use]
-    pub fn sdcbus(&mut self) -> SDCBUS_W<6> {
+    pub fn sdcbus(&mut self) -> SDCBUS_W<SDCR_SPEC, 6> {
         SDCBUS_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "SD/SDIO Card Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [sdcr](index.html) module"]
+#[doc = "SD/SDIO Card Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`sdcr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`sdcr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SDCR_SPEC;
 impl crate::RegisterSpec for SDCR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [sdcr::R](R) reader structure"]
-impl crate::Readable for SDCR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [sdcr::W](W) writer structure"]
+#[doc = "`read()` method returns [`sdcr::R`](R) reader structure"]
+impl crate::Readable for SDCR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`sdcr::W`](W) writer structure"]
 impl crate::Writable for SDCR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

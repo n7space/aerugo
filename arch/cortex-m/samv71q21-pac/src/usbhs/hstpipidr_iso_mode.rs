@@ -1,136 +1,116 @@
 #[doc = "Register `HSTPIPIDR_ISO_MODE[%s]` writer"]
-pub struct W(crate::W<HSTPIPIDR_ISO_MODE_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<HSTPIPIDR_ISO_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<HSTPIPIDR_ISO_MODE_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<HSTPIPIDR_ISO_MODE_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<HSTPIPIDR_ISO_MODE_SPEC>;
 #[doc = "Field `RXINEC` writer - Received IN Data Interrupt Disable"]
-pub type RXINEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type RXINEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TXOUTEC` writer - Transmitted OUT Data Interrupt Disable"]
-pub type TXOUTEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type TXOUTEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `UNDERFIEC` writer - Underflow Interrupt Disable"]
-pub type UNDERFIEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type UNDERFIEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PERREC` writer - Pipe Error Interrupt Disable"]
-pub type PERREC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type PERREC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `NAKEDEC` writer - NAKed Interrupt Disable"]
-pub type NAKEDEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type NAKEDEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `OVERFIEC` writer - Overflow Interrupt Disable"]
-pub type OVERFIEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type OVERFIEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `CRCERREC` writer - CRC Error Interrupt Disable"]
-pub type CRCERREC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type CRCERREC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SHORTPACKETIEC` writer - Short Packet Interrupt Disable"]
-pub type SHORTPACKETIEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type SHORTPACKETIEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `NBUSYBKEC` writer - Number of Busy Banks Disable"]
-pub type NBUSYBKEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type NBUSYBKEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `FIFOCONC` writer - FIFO Control Disable"]
-pub type FIFOCONC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type FIFOCONC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PDISHDMAC` writer - Pipe Interrupts Disable HDMA Request Disable"]
-pub type PDISHDMAC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type PDISHDMAC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `PFREEZEC` writer - Pipe Freeze Disable"]
-pub type PFREEZEC_W<'a, const O: u8> = crate::BitWriter<'a, HSTPIPIDR_ISO_MODE_SPEC, O>;
+pub type PFREEZEC_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl W {
     #[doc = "Bit 0 - Received IN Data Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn rxinec(&mut self) -> RXINEC_W<0> {
+    pub fn rxinec(&mut self) -> RXINEC_W<HSTPIPIDR_ISO_MODE_SPEC, 0> {
         RXINEC_W::new(self)
     }
     #[doc = "Bit 1 - Transmitted OUT Data Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn txoutec(&mut self) -> TXOUTEC_W<1> {
+    pub fn txoutec(&mut self) -> TXOUTEC_W<HSTPIPIDR_ISO_MODE_SPEC, 1> {
         TXOUTEC_W::new(self)
     }
     #[doc = "Bit 2 - Underflow Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn underfiec(&mut self) -> UNDERFIEC_W<2> {
+    pub fn underfiec(&mut self) -> UNDERFIEC_W<HSTPIPIDR_ISO_MODE_SPEC, 2> {
         UNDERFIEC_W::new(self)
     }
     #[doc = "Bit 3 - Pipe Error Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn perrec(&mut self) -> PERREC_W<3> {
+    pub fn perrec(&mut self) -> PERREC_W<HSTPIPIDR_ISO_MODE_SPEC, 3> {
         PERREC_W::new(self)
     }
     #[doc = "Bit 4 - NAKed Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn nakedec(&mut self) -> NAKEDEC_W<4> {
+    pub fn nakedec(&mut self) -> NAKEDEC_W<HSTPIPIDR_ISO_MODE_SPEC, 4> {
         NAKEDEC_W::new(self)
     }
     #[doc = "Bit 5 - Overflow Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn overfiec(&mut self) -> OVERFIEC_W<5> {
+    pub fn overfiec(&mut self) -> OVERFIEC_W<HSTPIPIDR_ISO_MODE_SPEC, 5> {
         OVERFIEC_W::new(self)
     }
     #[doc = "Bit 6 - CRC Error Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn crcerrec(&mut self) -> CRCERREC_W<6> {
+    pub fn crcerrec(&mut self) -> CRCERREC_W<HSTPIPIDR_ISO_MODE_SPEC, 6> {
         CRCERREC_W::new(self)
     }
     #[doc = "Bit 7 - Short Packet Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn shortpacketiec(&mut self) -> SHORTPACKETIEC_W<7> {
+    pub fn shortpacketiec(&mut self) -> SHORTPACKETIEC_W<HSTPIPIDR_ISO_MODE_SPEC, 7> {
         SHORTPACKETIEC_W::new(self)
     }
     #[doc = "Bit 12 - Number of Busy Banks Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn nbusybkec(&mut self) -> NBUSYBKEC_W<12> {
+    pub fn nbusybkec(&mut self) -> NBUSYBKEC_W<HSTPIPIDR_ISO_MODE_SPEC, 12> {
         NBUSYBKEC_W::new(self)
     }
     #[doc = "Bit 14 - FIFO Control Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn fifoconc(&mut self) -> FIFOCONC_W<14> {
+    pub fn fifoconc(&mut self) -> FIFOCONC_W<HSTPIPIDR_ISO_MODE_SPEC, 14> {
         FIFOCONC_W::new(self)
     }
     #[doc = "Bit 16 - Pipe Interrupts Disable HDMA Request Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn pdishdmac(&mut self) -> PDISHDMAC_W<16> {
+    pub fn pdishdmac(&mut self) -> PDISHDMAC_W<HSTPIPIDR_ISO_MODE_SPEC, 16> {
         PDISHDMAC_W::new(self)
     }
     #[doc = "Bit 17 - Pipe Freeze Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn pfreezec(&mut self) -> PFREEZEC_W<17> {
+    pub fn pfreezec(&mut self) -> PFREEZEC_W<HSTPIPIDR_ISO_MODE_SPEC, 17> {
         PFREEZEC_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Host Pipe Disable Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [hstpipidr_iso_mode](index.html) module"]
+#[doc = "Host Pipe Disable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`hstpipidr_iso_mode::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct HSTPIPIDR_ISO_MODE_SPEC;
 impl crate::RegisterSpec for HSTPIPIDR_ISO_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [hstpipidr_iso_mode::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`hstpipidr_iso_mode::W`](W) writer structure"]
 impl crate::Writable for HSTPIPIDR_ISO_MODE_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,135 +1,103 @@
 #[doc = "Register `GWS` reader"]
-pub struct R(crate::R<GWS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GWS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GWS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GWS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GWS_SPEC>;
 #[doc = "Register `GWS` writer"]
-pub struct W(crate::W<GWS_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<GWS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<GWS_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<GWS_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<GWS_SPEC>;
 #[doc = "Field `WS0` reader - XDMAC Channel 0 Write Suspend Bit"]
 pub type WS0_R = crate::BitReader;
 #[doc = "Field `WS0` writer - XDMAC Channel 0 Write Suspend Bit"]
-pub type WS0_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS1` reader - XDMAC Channel 1 Write Suspend Bit"]
 pub type WS1_R = crate::BitReader;
 #[doc = "Field `WS1` writer - XDMAC Channel 1 Write Suspend Bit"]
-pub type WS1_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS2` reader - XDMAC Channel 2 Write Suspend Bit"]
 pub type WS2_R = crate::BitReader;
 #[doc = "Field `WS2` writer - XDMAC Channel 2 Write Suspend Bit"]
-pub type WS2_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS3` reader - XDMAC Channel 3 Write Suspend Bit"]
 pub type WS3_R = crate::BitReader;
 #[doc = "Field `WS3` writer - XDMAC Channel 3 Write Suspend Bit"]
-pub type WS3_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS4` reader - XDMAC Channel 4 Write Suspend Bit"]
 pub type WS4_R = crate::BitReader;
 #[doc = "Field `WS4` writer - XDMAC Channel 4 Write Suspend Bit"]
-pub type WS4_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS5` reader - XDMAC Channel 5 Write Suspend Bit"]
 pub type WS5_R = crate::BitReader;
 #[doc = "Field `WS5` writer - XDMAC Channel 5 Write Suspend Bit"]
-pub type WS5_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS6` reader - XDMAC Channel 6 Write Suspend Bit"]
 pub type WS6_R = crate::BitReader;
 #[doc = "Field `WS6` writer - XDMAC Channel 6 Write Suspend Bit"]
-pub type WS6_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS7` reader - XDMAC Channel 7 Write Suspend Bit"]
 pub type WS7_R = crate::BitReader;
 #[doc = "Field `WS7` writer - XDMAC Channel 7 Write Suspend Bit"]
-pub type WS7_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS8` reader - XDMAC Channel 8 Write Suspend Bit"]
 pub type WS8_R = crate::BitReader;
 #[doc = "Field `WS8` writer - XDMAC Channel 8 Write Suspend Bit"]
-pub type WS8_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS9` reader - XDMAC Channel 9 Write Suspend Bit"]
 pub type WS9_R = crate::BitReader;
 #[doc = "Field `WS9` writer - XDMAC Channel 9 Write Suspend Bit"]
-pub type WS9_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS10` reader - XDMAC Channel 10 Write Suspend Bit"]
 pub type WS10_R = crate::BitReader;
 #[doc = "Field `WS10` writer - XDMAC Channel 10 Write Suspend Bit"]
-pub type WS10_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS11` reader - XDMAC Channel 11 Write Suspend Bit"]
 pub type WS11_R = crate::BitReader;
 #[doc = "Field `WS11` writer - XDMAC Channel 11 Write Suspend Bit"]
-pub type WS11_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS12` reader - XDMAC Channel 12 Write Suspend Bit"]
 pub type WS12_R = crate::BitReader;
 #[doc = "Field `WS12` writer - XDMAC Channel 12 Write Suspend Bit"]
-pub type WS12_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS13` reader - XDMAC Channel 13 Write Suspend Bit"]
 pub type WS13_R = crate::BitReader;
 #[doc = "Field `WS13` writer - XDMAC Channel 13 Write Suspend Bit"]
-pub type WS13_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS14` reader - XDMAC Channel 14 Write Suspend Bit"]
 pub type WS14_R = crate::BitReader;
 #[doc = "Field `WS14` writer - XDMAC Channel 14 Write Suspend Bit"]
-pub type WS14_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS14_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS15` reader - XDMAC Channel 15 Write Suspend Bit"]
 pub type WS15_R = crate::BitReader;
 #[doc = "Field `WS15` writer - XDMAC Channel 15 Write Suspend Bit"]
-pub type WS15_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS15_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS16` reader - XDMAC Channel 16 Write Suspend Bit"]
 pub type WS16_R = crate::BitReader;
 #[doc = "Field `WS16` writer - XDMAC Channel 16 Write Suspend Bit"]
-pub type WS16_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS16_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS17` reader - XDMAC Channel 17 Write Suspend Bit"]
 pub type WS17_R = crate::BitReader;
 #[doc = "Field `WS17` writer - XDMAC Channel 17 Write Suspend Bit"]
-pub type WS17_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS17_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS18` reader - XDMAC Channel 18 Write Suspend Bit"]
 pub type WS18_R = crate::BitReader;
 #[doc = "Field `WS18` writer - XDMAC Channel 18 Write Suspend Bit"]
-pub type WS18_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS18_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS19` reader - XDMAC Channel 19 Write Suspend Bit"]
 pub type WS19_R = crate::BitReader;
 #[doc = "Field `WS19` writer - XDMAC Channel 19 Write Suspend Bit"]
-pub type WS19_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS19_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS20` reader - XDMAC Channel 20 Write Suspend Bit"]
 pub type WS20_R = crate::BitReader;
 #[doc = "Field `WS20` writer - XDMAC Channel 20 Write Suspend Bit"]
-pub type WS20_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS20_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS21` reader - XDMAC Channel 21 Write Suspend Bit"]
 pub type WS21_R = crate::BitReader;
 #[doc = "Field `WS21` writer - XDMAC Channel 21 Write Suspend Bit"]
-pub type WS21_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS21_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS22` reader - XDMAC Channel 22 Write Suspend Bit"]
 pub type WS22_R = crate::BitReader;
 #[doc = "Field `WS22` writer - XDMAC Channel 22 Write Suspend Bit"]
-pub type WS22_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS22_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `WS23` reader - XDMAC Channel 23 Write Suspend Bit"]
 pub type WS23_R = crate::BitReader;
 #[doc = "Field `WS23` writer - XDMAC Channel 23 Write Suspend Bit"]
-pub type WS23_W<'a, const O: u8> = crate::BitWriter<'a, GWS_SPEC, O>;
+pub type WS23_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - XDMAC Channel 0 Write Suspend Bit"]
     #[inline(always)]
@@ -256,166 +224,163 @@ impl W {
     #[doc = "Bit 0 - XDMAC Channel 0 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws0(&mut self) -> WS0_W<0> {
+    pub fn ws0(&mut self) -> WS0_W<GWS_SPEC, 0> {
         WS0_W::new(self)
     }
     #[doc = "Bit 1 - XDMAC Channel 1 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws1(&mut self) -> WS1_W<1> {
+    pub fn ws1(&mut self) -> WS1_W<GWS_SPEC, 1> {
         WS1_W::new(self)
     }
     #[doc = "Bit 2 - XDMAC Channel 2 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws2(&mut self) -> WS2_W<2> {
+    pub fn ws2(&mut self) -> WS2_W<GWS_SPEC, 2> {
         WS2_W::new(self)
     }
     #[doc = "Bit 3 - XDMAC Channel 3 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws3(&mut self) -> WS3_W<3> {
+    pub fn ws3(&mut self) -> WS3_W<GWS_SPEC, 3> {
         WS3_W::new(self)
     }
     #[doc = "Bit 4 - XDMAC Channel 4 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws4(&mut self) -> WS4_W<4> {
+    pub fn ws4(&mut self) -> WS4_W<GWS_SPEC, 4> {
         WS4_W::new(self)
     }
     #[doc = "Bit 5 - XDMAC Channel 5 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws5(&mut self) -> WS5_W<5> {
+    pub fn ws5(&mut self) -> WS5_W<GWS_SPEC, 5> {
         WS5_W::new(self)
     }
     #[doc = "Bit 6 - XDMAC Channel 6 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws6(&mut self) -> WS6_W<6> {
+    pub fn ws6(&mut self) -> WS6_W<GWS_SPEC, 6> {
         WS6_W::new(self)
     }
     #[doc = "Bit 7 - XDMAC Channel 7 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws7(&mut self) -> WS7_W<7> {
+    pub fn ws7(&mut self) -> WS7_W<GWS_SPEC, 7> {
         WS7_W::new(self)
     }
     #[doc = "Bit 8 - XDMAC Channel 8 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws8(&mut self) -> WS8_W<8> {
+    pub fn ws8(&mut self) -> WS8_W<GWS_SPEC, 8> {
         WS8_W::new(self)
     }
     #[doc = "Bit 9 - XDMAC Channel 9 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws9(&mut self) -> WS9_W<9> {
+    pub fn ws9(&mut self) -> WS9_W<GWS_SPEC, 9> {
         WS9_W::new(self)
     }
     #[doc = "Bit 10 - XDMAC Channel 10 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws10(&mut self) -> WS10_W<10> {
+    pub fn ws10(&mut self) -> WS10_W<GWS_SPEC, 10> {
         WS10_W::new(self)
     }
     #[doc = "Bit 11 - XDMAC Channel 11 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws11(&mut self) -> WS11_W<11> {
+    pub fn ws11(&mut self) -> WS11_W<GWS_SPEC, 11> {
         WS11_W::new(self)
     }
     #[doc = "Bit 12 - XDMAC Channel 12 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws12(&mut self) -> WS12_W<12> {
+    pub fn ws12(&mut self) -> WS12_W<GWS_SPEC, 12> {
         WS12_W::new(self)
     }
     #[doc = "Bit 13 - XDMAC Channel 13 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws13(&mut self) -> WS13_W<13> {
+    pub fn ws13(&mut self) -> WS13_W<GWS_SPEC, 13> {
         WS13_W::new(self)
     }
     #[doc = "Bit 14 - XDMAC Channel 14 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws14(&mut self) -> WS14_W<14> {
+    pub fn ws14(&mut self) -> WS14_W<GWS_SPEC, 14> {
         WS14_W::new(self)
     }
     #[doc = "Bit 15 - XDMAC Channel 15 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws15(&mut self) -> WS15_W<15> {
+    pub fn ws15(&mut self) -> WS15_W<GWS_SPEC, 15> {
         WS15_W::new(self)
     }
     #[doc = "Bit 16 - XDMAC Channel 16 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws16(&mut self) -> WS16_W<16> {
+    pub fn ws16(&mut self) -> WS16_W<GWS_SPEC, 16> {
         WS16_W::new(self)
     }
     #[doc = "Bit 17 - XDMAC Channel 17 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws17(&mut self) -> WS17_W<17> {
+    pub fn ws17(&mut self) -> WS17_W<GWS_SPEC, 17> {
         WS17_W::new(self)
     }
     #[doc = "Bit 18 - XDMAC Channel 18 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws18(&mut self) -> WS18_W<18> {
+    pub fn ws18(&mut self) -> WS18_W<GWS_SPEC, 18> {
         WS18_W::new(self)
     }
     #[doc = "Bit 19 - XDMAC Channel 19 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws19(&mut self) -> WS19_W<19> {
+    pub fn ws19(&mut self) -> WS19_W<GWS_SPEC, 19> {
         WS19_W::new(self)
     }
     #[doc = "Bit 20 - XDMAC Channel 20 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws20(&mut self) -> WS20_W<20> {
+    pub fn ws20(&mut self) -> WS20_W<GWS_SPEC, 20> {
         WS20_W::new(self)
     }
     #[doc = "Bit 21 - XDMAC Channel 21 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws21(&mut self) -> WS21_W<21> {
+    pub fn ws21(&mut self) -> WS21_W<GWS_SPEC, 21> {
         WS21_W::new(self)
     }
     #[doc = "Bit 22 - XDMAC Channel 22 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws22(&mut self) -> WS22_W<22> {
+    pub fn ws22(&mut self) -> WS22_W<GWS_SPEC, 22> {
         WS22_W::new(self)
     }
     #[doc = "Bit 23 - XDMAC Channel 23 Write Suspend Bit"]
     #[inline(always)]
     #[must_use]
-    pub fn ws23(&mut self) -> WS23_W<23> {
+    pub fn ws23(&mut self) -> WS23_W<GWS_SPEC, 23> {
         WS23_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Global Channel Write Suspend Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gws](index.html) module"]
+#[doc = "Global Channel Write Suspend Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gws::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`gws::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GWS_SPEC;
 impl crate::RegisterSpec for GWS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gws::R](R) reader structure"]
-impl crate::Readable for GWS_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [gws::W](W) writer structure"]
+#[doc = "`read()` method returns [`gws::R`](R) reader structure"]
+impl crate::Readable for GWS_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`gws::W`](W) writer structure"]
 impl crate::Writable for GWS_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

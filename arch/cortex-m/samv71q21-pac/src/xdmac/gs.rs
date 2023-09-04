@@ -1,18 +1,5 @@
 #[doc = "Register `GS` reader"]
-pub struct R(crate::R<GS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GS_SPEC>;
 #[doc = "Field `ST0` reader - XDMAC Channel 0 Status Bit"]
 pub type ST0_R = crate::BitReader;
 #[doc = "Field `ST1` reader - XDMAC Channel 1 Status Bit"]
@@ -183,15 +170,13 @@ impl R {
         ST23_R::new(((self.bits >> 23) & 1) != 0)
     }
 }
-#[doc = "Global Channel Status Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gs](index.html) module"]
+#[doc = "Global Channel Status Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gs::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GS_SPEC;
 impl crate::RegisterSpec for GS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gs::R](R) reader structure"]
-impl crate::Readable for GS_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`gs::R`](R) reader structure"]
+impl crate::Readable for GS_SPEC {}
 #[doc = "`reset()` method sets GS to value 0"]
 impl crate::Resettable for GS_SPEC {
     const RESET_VALUE: Self::Ux = 0;

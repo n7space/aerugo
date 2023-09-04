@@ -1,18 +1,5 @@
 #[doc = "Register `GTYPE` reader"]
-pub struct R(crate::R<GTYPE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<GTYPE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<GTYPE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<GTYPE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<GTYPE_SPEC>;
 #[doc = "Field `NB_CH` reader - Number of Channels Minus One"]
 pub type NB_CH_R = crate::FieldReader;
 #[doc = "Field `FIFO_SZ` reader - Number of Bytes"]
@@ -36,15 +23,13 @@ impl R {
         NB_REQ_R::new(((self.bits >> 16) & 0x7f) as u8)
     }
 }
-#[doc = "Global Type Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [gtype](index.html) module"]
+#[doc = "Global Type Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`gtype::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct GTYPE_SPEC;
 impl crate::RegisterSpec for GTYPE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [gtype::R](R) reader structure"]
-impl crate::Readable for GTYPE_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`gtype::R`](R) reader structure"]
+impl crate::Readable for GTYPE_SPEC {}
 #[doc = "`reset()` method sets GTYPE to value 0"]
 impl crate::Resettable for GTYPE_SPEC {
     const RESET_VALUE: Self::Ux = 0;

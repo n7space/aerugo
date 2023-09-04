@@ -1,79 +1,47 @@
 #[doc = "Register `SMR` reader"]
-pub struct R(crate::R<SMR_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<SMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<SMR_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<SMR_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<SMR_SPEC>;
 #[doc = "Register `SMR` writer"]
-pub struct W(crate::W<SMR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<SMR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<SMR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<SMR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<SMR_SPEC>;
 #[doc = "Field `NACKEN` reader - Slave Receiver Data Phase NACK enable"]
 pub type NACKEN_R = crate::BitReader;
 #[doc = "Field `NACKEN` writer - Slave Receiver Data Phase NACK enable"]
-pub type NACKEN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type NACKEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SMDA` reader - SMBus Default Address"]
 pub type SMDA_R = crate::BitReader;
 #[doc = "Field `SMDA` writer - SMBus Default Address"]
-pub type SMDA_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SMDA_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SMHH` reader - SMBus Host Header"]
 pub type SMHH_R = crate::BitReader;
 #[doc = "Field `SMHH` writer - SMBus Host Header"]
-pub type SMHH_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SMHH_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SCLWSDIS` reader - Clock Wait State Disable"]
 pub type SCLWSDIS_R = crate::BitReader;
 #[doc = "Field `SCLWSDIS` writer - Clock Wait State Disable"]
-pub type SCLWSDIS_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SCLWSDIS_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `MASK` reader - Slave Address Mask"]
 pub type MASK_R = crate::FieldReader;
 #[doc = "Field `MASK` writer - Slave Address Mask"]
-pub type MASK_W<'a, const O: u8> = crate::FieldWriter<'a, SMR_SPEC, 7, O>;
+pub type MASK_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 7, O>;
 #[doc = "Field `SADR` reader - Slave Address"]
 pub type SADR_R = crate::FieldReader;
 #[doc = "Field `SADR` writer - Slave Address"]
-pub type SADR_W<'a, const O: u8> = crate::FieldWriter<'a, SMR_SPEC, 7, O>;
+pub type SADR_W<'a, REG, const O: u8> = crate::FieldWriter<'a, REG, 7, O>;
 #[doc = "Field `SADR1EN` reader - Slave Address 1 Enable"]
 pub type SADR1EN_R = crate::BitReader;
 #[doc = "Field `SADR1EN` writer - Slave Address 1 Enable"]
-pub type SADR1EN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SADR1EN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SADR2EN` reader - Slave Address 2 Enable"]
 pub type SADR2EN_R = crate::BitReader;
 #[doc = "Field `SADR2EN` writer - Slave Address 2 Enable"]
-pub type SADR2EN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SADR2EN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `SADR3EN` reader - Slave Address 3 Enable"]
 pub type SADR3EN_R = crate::BitReader;
 #[doc = "Field `SADR3EN` writer - Slave Address 3 Enable"]
-pub type SADR3EN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type SADR3EN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `DATAMEN` reader - Data Matching Enable"]
 pub type DATAMEN_R = crate::BitReader;
 #[doc = "Field `DATAMEN` writer - Data Matching Enable"]
-pub type DATAMEN_W<'a, const O: u8> = crate::BitWriter<'a, SMR_SPEC, O>;
+pub type DATAMEN_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Slave Receiver Data Phase NACK enable"]
     #[inline(always)]
@@ -130,82 +98,79 @@ impl W {
     #[doc = "Bit 0 - Slave Receiver Data Phase NACK enable"]
     #[inline(always)]
     #[must_use]
-    pub fn nacken(&mut self) -> NACKEN_W<0> {
+    pub fn nacken(&mut self) -> NACKEN_W<SMR_SPEC, 0> {
         NACKEN_W::new(self)
     }
     #[doc = "Bit 2 - SMBus Default Address"]
     #[inline(always)]
     #[must_use]
-    pub fn smda(&mut self) -> SMDA_W<2> {
+    pub fn smda(&mut self) -> SMDA_W<SMR_SPEC, 2> {
         SMDA_W::new(self)
     }
     #[doc = "Bit 3 - SMBus Host Header"]
     #[inline(always)]
     #[must_use]
-    pub fn smhh(&mut self) -> SMHH_W<3> {
+    pub fn smhh(&mut self) -> SMHH_W<SMR_SPEC, 3> {
         SMHH_W::new(self)
     }
     #[doc = "Bit 6 - Clock Wait State Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn sclwsdis(&mut self) -> SCLWSDIS_W<6> {
+    pub fn sclwsdis(&mut self) -> SCLWSDIS_W<SMR_SPEC, 6> {
         SCLWSDIS_W::new(self)
     }
     #[doc = "Bits 8:14 - Slave Address Mask"]
     #[inline(always)]
     #[must_use]
-    pub fn mask(&mut self) -> MASK_W<8> {
+    pub fn mask(&mut self) -> MASK_W<SMR_SPEC, 8> {
         MASK_W::new(self)
     }
     #[doc = "Bits 16:22 - Slave Address"]
     #[inline(always)]
     #[must_use]
-    pub fn sadr(&mut self) -> SADR_W<16> {
+    pub fn sadr(&mut self) -> SADR_W<SMR_SPEC, 16> {
         SADR_W::new(self)
     }
     #[doc = "Bit 28 - Slave Address 1 Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn sadr1en(&mut self) -> SADR1EN_W<28> {
+    pub fn sadr1en(&mut self) -> SADR1EN_W<SMR_SPEC, 28> {
         SADR1EN_W::new(self)
     }
     #[doc = "Bit 29 - Slave Address 2 Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn sadr2en(&mut self) -> SADR2EN_W<29> {
+    pub fn sadr2en(&mut self) -> SADR2EN_W<SMR_SPEC, 29> {
         SADR2EN_W::new(self)
     }
     #[doc = "Bit 30 - Slave Address 3 Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn sadr3en(&mut self) -> SADR3EN_W<30> {
+    pub fn sadr3en(&mut self) -> SADR3EN_W<SMR_SPEC, 30> {
         SADR3EN_W::new(self)
     }
     #[doc = "Bit 31 - Data Matching Enable"]
     #[inline(always)]
     #[must_use]
-    pub fn datamen(&mut self) -> DATAMEN_W<31> {
+    pub fn datamen(&mut self) -> DATAMEN_W<SMR_SPEC, 31> {
         DATAMEN_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Slave Mode Register\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [smr](index.html) module"]
+#[doc = "Slave Mode Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`smr::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`smr::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct SMR_SPEC;
 impl crate::RegisterSpec for SMR_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [smr::R](R) reader structure"]
-impl crate::Readable for SMR_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [smr::W](W) writer structure"]
+#[doc = "`read()` method returns [`smr::R`](R) reader structure"]
+impl crate::Readable for SMR_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`smr::W`](W) writer structure"]
 impl crate::Writable for SMR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

@@ -1,18 +1,5 @@
 #[doc = "Register `DEVEPTIMR_ISO_MODE[%s]` reader"]
-pub struct R(crate::R<DEVEPTIMR_ISO_MODE_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<DEVEPTIMR_ISO_MODE_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<DEVEPTIMR_ISO_MODE_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<DEVEPTIMR_ISO_MODE_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<DEVEPTIMR_ISO_MODE_SPEC>;
 #[doc = "Field `TXINE` reader - Transmitted IN Data Interrupt"]
 pub type TXINE_R = crate::BitReader;
 #[doc = "Field `RXOUTE` reader - Received OUT Data Interrupt"]
@@ -127,15 +114,13 @@ impl R {
         RSTDT_R::new(((self.bits >> 18) & 1) != 0)
     }
 }
-#[doc = "Device Endpoint Interrupt Mask Register\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [deveptimr_iso_mode](index.html) module"]
+#[doc = "Device Endpoint Interrupt Mask Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`deveptimr_iso_mode::R`](R).  See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct DEVEPTIMR_ISO_MODE_SPEC;
 impl crate::RegisterSpec for DEVEPTIMR_ISO_MODE_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [deveptimr_iso_mode::R](R) reader structure"]
-impl crate::Readable for DEVEPTIMR_ISO_MODE_SPEC {
-    type Reader = R;
-}
+#[doc = "`read()` method returns [`deveptimr_iso_mode::R`](R) reader structure"]
+impl crate::Readable for DEVEPTIMR_ISO_MODE_SPEC {}
 #[doc = "`reset()` method sets DEVEPTIMR_ISO_MODE[%s]
 to value 0"]
 impl crate::Resettable for DEVEPTIMR_ISO_MODE_SPEC {

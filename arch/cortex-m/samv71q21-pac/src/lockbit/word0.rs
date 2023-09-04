@@ -1,167 +1,135 @@
 #[doc = "Register `WORD0` reader"]
-pub struct R(crate::R<WORD0_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<WORD0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<WORD0_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<WORD0_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<WORD0_SPEC>;
 #[doc = "Register `WORD0` writer"]
-pub struct W(crate::W<WORD0_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<WORD0_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<WORD0_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<WORD0_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<WORD0_SPEC>;
 #[doc = "Field `LOCK_REGION_0` reader - Lock Region 0"]
 pub type LOCK_REGION_0_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_0` writer - Lock Region 0"]
-pub type LOCK_REGION_0_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_0_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_1` reader - Lock Region 1"]
 pub type LOCK_REGION_1_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_1` writer - Lock Region 1"]
-pub type LOCK_REGION_1_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_1_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_2` reader - Lock Region 2"]
 pub type LOCK_REGION_2_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_2` writer - Lock Region 2"]
-pub type LOCK_REGION_2_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_2_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_3` reader - Lock Region 3"]
 pub type LOCK_REGION_3_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_3` writer - Lock Region 3"]
-pub type LOCK_REGION_3_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_3_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_4` reader - Lock Region 4"]
 pub type LOCK_REGION_4_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_4` writer - Lock Region 4"]
-pub type LOCK_REGION_4_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_4_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_5` reader - Lock Region 5"]
 pub type LOCK_REGION_5_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_5` writer - Lock Region 5"]
-pub type LOCK_REGION_5_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_5_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_6` reader - Lock Region 6"]
 pub type LOCK_REGION_6_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_6` writer - Lock Region 6"]
-pub type LOCK_REGION_6_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_6_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_7` reader - Lock Region 7"]
 pub type LOCK_REGION_7_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_7` writer - Lock Region 7"]
-pub type LOCK_REGION_7_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_7_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_8` reader - Lock Region 8"]
 pub type LOCK_REGION_8_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_8` writer - Lock Region 8"]
-pub type LOCK_REGION_8_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_8_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_9` reader - Lock Region 9"]
 pub type LOCK_REGION_9_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_9` writer - Lock Region 9"]
-pub type LOCK_REGION_9_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_9_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_10` reader - Lock Region 10"]
 pub type LOCK_REGION_10_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_10` writer - Lock Region 10"]
-pub type LOCK_REGION_10_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_10_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_11` reader - Lock Region 11"]
 pub type LOCK_REGION_11_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_11` writer - Lock Region 11"]
-pub type LOCK_REGION_11_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_11_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_12` reader - Lock Region 12"]
 pub type LOCK_REGION_12_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_12` writer - Lock Region 12"]
-pub type LOCK_REGION_12_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_12_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_13` reader - Lock Region 13"]
 pub type LOCK_REGION_13_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_13` writer - Lock Region 13"]
-pub type LOCK_REGION_13_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_13_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_14` reader - Lock Region 14"]
 pub type LOCK_REGION_14_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_14` writer - Lock Region 14"]
-pub type LOCK_REGION_14_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_14_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_15` reader - Lock Region 15"]
 pub type LOCK_REGION_15_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_15` writer - Lock Region 15"]
-pub type LOCK_REGION_15_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_15_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_16` reader - Lock Region 16"]
 pub type LOCK_REGION_16_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_16` writer - Lock Region 16"]
-pub type LOCK_REGION_16_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_16_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_17` reader - Lock Region 17"]
 pub type LOCK_REGION_17_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_17` writer - Lock Region 17"]
-pub type LOCK_REGION_17_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_17_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_18` reader - Lock Region 18"]
 pub type LOCK_REGION_18_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_18` writer - Lock Region 18"]
-pub type LOCK_REGION_18_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_18_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_19` reader - Lock Region 19"]
 pub type LOCK_REGION_19_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_19` writer - Lock Region 19"]
-pub type LOCK_REGION_19_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_19_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_20` reader - Lock Region 20"]
 pub type LOCK_REGION_20_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_20` writer - Lock Region 20"]
-pub type LOCK_REGION_20_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_20_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_21` reader - Lock Region 21"]
 pub type LOCK_REGION_21_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_21` writer - Lock Region 21"]
-pub type LOCK_REGION_21_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_21_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_22` reader - Lock Region 22"]
 pub type LOCK_REGION_22_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_22` writer - Lock Region 22"]
-pub type LOCK_REGION_22_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_22_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_23` reader - Lock Region 23"]
 pub type LOCK_REGION_23_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_23` writer - Lock Region 23"]
-pub type LOCK_REGION_23_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_23_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_24` reader - Lock Region 24"]
 pub type LOCK_REGION_24_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_24` writer - Lock Region 24"]
-pub type LOCK_REGION_24_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_24_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_25` reader - Lock Region 25"]
 pub type LOCK_REGION_25_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_25` writer - Lock Region 25"]
-pub type LOCK_REGION_25_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_25_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_26` reader - Lock Region 26"]
 pub type LOCK_REGION_26_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_26` writer - Lock Region 26"]
-pub type LOCK_REGION_26_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_26_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_27` reader - Lock Region 27"]
 pub type LOCK_REGION_27_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_27` writer - Lock Region 27"]
-pub type LOCK_REGION_27_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_27_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_28` reader - Lock Region 28"]
 pub type LOCK_REGION_28_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_28` writer - Lock Region 28"]
-pub type LOCK_REGION_28_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_28_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_29` reader - Lock Region 29"]
 pub type LOCK_REGION_29_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_29` writer - Lock Region 29"]
-pub type LOCK_REGION_29_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_29_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_30` reader - Lock Region 30"]
 pub type LOCK_REGION_30_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_30` writer - Lock Region 30"]
-pub type LOCK_REGION_30_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_30_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `LOCK_REGION_31` reader - Lock Region 31"]
 pub type LOCK_REGION_31_R = crate::BitReader;
 #[doc = "Field `LOCK_REGION_31` writer - Lock Region 31"]
-pub type LOCK_REGION_31_W<'a, const O: u8> = crate::BitWriter<'a, WORD0_SPEC, O>;
+pub type LOCK_REGION_31_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl R {
     #[doc = "Bit 0 - Lock Region 0"]
     #[inline(always)]
@@ -328,214 +296,211 @@ impl W {
     #[doc = "Bit 0 - Lock Region 0"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_0(&mut self) -> LOCK_REGION_0_W<0> {
+    pub fn lock_region_0(&mut self) -> LOCK_REGION_0_W<WORD0_SPEC, 0> {
         LOCK_REGION_0_W::new(self)
     }
     #[doc = "Bit 1 - Lock Region 1"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_1(&mut self) -> LOCK_REGION_1_W<1> {
+    pub fn lock_region_1(&mut self) -> LOCK_REGION_1_W<WORD0_SPEC, 1> {
         LOCK_REGION_1_W::new(self)
     }
     #[doc = "Bit 2 - Lock Region 2"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_2(&mut self) -> LOCK_REGION_2_W<2> {
+    pub fn lock_region_2(&mut self) -> LOCK_REGION_2_W<WORD0_SPEC, 2> {
         LOCK_REGION_2_W::new(self)
     }
     #[doc = "Bit 3 - Lock Region 3"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_3(&mut self) -> LOCK_REGION_3_W<3> {
+    pub fn lock_region_3(&mut self) -> LOCK_REGION_3_W<WORD0_SPEC, 3> {
         LOCK_REGION_3_W::new(self)
     }
     #[doc = "Bit 4 - Lock Region 4"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_4(&mut self) -> LOCK_REGION_4_W<4> {
+    pub fn lock_region_4(&mut self) -> LOCK_REGION_4_W<WORD0_SPEC, 4> {
         LOCK_REGION_4_W::new(self)
     }
     #[doc = "Bit 5 - Lock Region 5"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_5(&mut self) -> LOCK_REGION_5_W<5> {
+    pub fn lock_region_5(&mut self) -> LOCK_REGION_5_W<WORD0_SPEC, 5> {
         LOCK_REGION_5_W::new(self)
     }
     #[doc = "Bit 6 - Lock Region 6"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_6(&mut self) -> LOCK_REGION_6_W<6> {
+    pub fn lock_region_6(&mut self) -> LOCK_REGION_6_W<WORD0_SPEC, 6> {
         LOCK_REGION_6_W::new(self)
     }
     #[doc = "Bit 7 - Lock Region 7"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_7(&mut self) -> LOCK_REGION_7_W<7> {
+    pub fn lock_region_7(&mut self) -> LOCK_REGION_7_W<WORD0_SPEC, 7> {
         LOCK_REGION_7_W::new(self)
     }
     #[doc = "Bit 8 - Lock Region 8"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_8(&mut self) -> LOCK_REGION_8_W<8> {
+    pub fn lock_region_8(&mut self) -> LOCK_REGION_8_W<WORD0_SPEC, 8> {
         LOCK_REGION_8_W::new(self)
     }
     #[doc = "Bit 9 - Lock Region 9"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_9(&mut self) -> LOCK_REGION_9_W<9> {
+    pub fn lock_region_9(&mut self) -> LOCK_REGION_9_W<WORD0_SPEC, 9> {
         LOCK_REGION_9_W::new(self)
     }
     #[doc = "Bit 10 - Lock Region 10"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_10(&mut self) -> LOCK_REGION_10_W<10> {
+    pub fn lock_region_10(&mut self) -> LOCK_REGION_10_W<WORD0_SPEC, 10> {
         LOCK_REGION_10_W::new(self)
     }
     #[doc = "Bit 11 - Lock Region 11"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_11(&mut self) -> LOCK_REGION_11_W<11> {
+    pub fn lock_region_11(&mut self) -> LOCK_REGION_11_W<WORD0_SPEC, 11> {
         LOCK_REGION_11_W::new(self)
     }
     #[doc = "Bit 12 - Lock Region 12"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_12(&mut self) -> LOCK_REGION_12_W<12> {
+    pub fn lock_region_12(&mut self) -> LOCK_REGION_12_W<WORD0_SPEC, 12> {
         LOCK_REGION_12_W::new(self)
     }
     #[doc = "Bit 13 - Lock Region 13"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_13(&mut self) -> LOCK_REGION_13_W<13> {
+    pub fn lock_region_13(&mut self) -> LOCK_REGION_13_W<WORD0_SPEC, 13> {
         LOCK_REGION_13_W::new(self)
     }
     #[doc = "Bit 14 - Lock Region 14"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_14(&mut self) -> LOCK_REGION_14_W<14> {
+    pub fn lock_region_14(&mut self) -> LOCK_REGION_14_W<WORD0_SPEC, 14> {
         LOCK_REGION_14_W::new(self)
     }
     #[doc = "Bit 15 - Lock Region 15"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_15(&mut self) -> LOCK_REGION_15_W<15> {
+    pub fn lock_region_15(&mut self) -> LOCK_REGION_15_W<WORD0_SPEC, 15> {
         LOCK_REGION_15_W::new(self)
     }
     #[doc = "Bit 16 - Lock Region 16"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_16(&mut self) -> LOCK_REGION_16_W<16> {
+    pub fn lock_region_16(&mut self) -> LOCK_REGION_16_W<WORD0_SPEC, 16> {
         LOCK_REGION_16_W::new(self)
     }
     #[doc = "Bit 17 - Lock Region 17"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_17(&mut self) -> LOCK_REGION_17_W<17> {
+    pub fn lock_region_17(&mut self) -> LOCK_REGION_17_W<WORD0_SPEC, 17> {
         LOCK_REGION_17_W::new(self)
     }
     #[doc = "Bit 18 - Lock Region 18"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_18(&mut self) -> LOCK_REGION_18_W<18> {
+    pub fn lock_region_18(&mut self) -> LOCK_REGION_18_W<WORD0_SPEC, 18> {
         LOCK_REGION_18_W::new(self)
     }
     #[doc = "Bit 19 - Lock Region 19"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_19(&mut self) -> LOCK_REGION_19_W<19> {
+    pub fn lock_region_19(&mut self) -> LOCK_REGION_19_W<WORD0_SPEC, 19> {
         LOCK_REGION_19_W::new(self)
     }
     #[doc = "Bit 20 - Lock Region 20"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_20(&mut self) -> LOCK_REGION_20_W<20> {
+    pub fn lock_region_20(&mut self) -> LOCK_REGION_20_W<WORD0_SPEC, 20> {
         LOCK_REGION_20_W::new(self)
     }
     #[doc = "Bit 21 - Lock Region 21"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_21(&mut self) -> LOCK_REGION_21_W<21> {
+    pub fn lock_region_21(&mut self) -> LOCK_REGION_21_W<WORD0_SPEC, 21> {
         LOCK_REGION_21_W::new(self)
     }
     #[doc = "Bit 22 - Lock Region 22"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_22(&mut self) -> LOCK_REGION_22_W<22> {
+    pub fn lock_region_22(&mut self) -> LOCK_REGION_22_W<WORD0_SPEC, 22> {
         LOCK_REGION_22_W::new(self)
     }
     #[doc = "Bit 23 - Lock Region 23"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_23(&mut self) -> LOCK_REGION_23_W<23> {
+    pub fn lock_region_23(&mut self) -> LOCK_REGION_23_W<WORD0_SPEC, 23> {
         LOCK_REGION_23_W::new(self)
     }
     #[doc = "Bit 24 - Lock Region 24"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_24(&mut self) -> LOCK_REGION_24_W<24> {
+    pub fn lock_region_24(&mut self) -> LOCK_REGION_24_W<WORD0_SPEC, 24> {
         LOCK_REGION_24_W::new(self)
     }
     #[doc = "Bit 25 - Lock Region 25"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_25(&mut self) -> LOCK_REGION_25_W<25> {
+    pub fn lock_region_25(&mut self) -> LOCK_REGION_25_W<WORD0_SPEC, 25> {
         LOCK_REGION_25_W::new(self)
     }
     #[doc = "Bit 26 - Lock Region 26"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_26(&mut self) -> LOCK_REGION_26_W<26> {
+    pub fn lock_region_26(&mut self) -> LOCK_REGION_26_W<WORD0_SPEC, 26> {
         LOCK_REGION_26_W::new(self)
     }
     #[doc = "Bit 27 - Lock Region 27"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_27(&mut self) -> LOCK_REGION_27_W<27> {
+    pub fn lock_region_27(&mut self) -> LOCK_REGION_27_W<WORD0_SPEC, 27> {
         LOCK_REGION_27_W::new(self)
     }
     #[doc = "Bit 28 - Lock Region 28"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_28(&mut self) -> LOCK_REGION_28_W<28> {
+    pub fn lock_region_28(&mut self) -> LOCK_REGION_28_W<WORD0_SPEC, 28> {
         LOCK_REGION_28_W::new(self)
     }
     #[doc = "Bit 29 - Lock Region 29"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_29(&mut self) -> LOCK_REGION_29_W<29> {
+    pub fn lock_region_29(&mut self) -> LOCK_REGION_29_W<WORD0_SPEC, 29> {
         LOCK_REGION_29_W::new(self)
     }
     #[doc = "Bit 30 - Lock Region 30"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_30(&mut self) -> LOCK_REGION_30_W<30> {
+    pub fn lock_region_30(&mut self) -> LOCK_REGION_30_W<WORD0_SPEC, 30> {
         LOCK_REGION_30_W::new(self)
     }
     #[doc = "Bit 31 - Lock Region 31"]
     #[inline(always)]
     #[must_use]
-    pub fn lock_region_31(&mut self) -> LOCK_REGION_31_W<31> {
+    pub fn lock_region_31(&mut self) -> LOCK_REGION_31_W<WORD0_SPEC, 31> {
         LOCK_REGION_31_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Lock Bits Word 0\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [word0](index.html) module"]
+#[doc = "Lock Bits Word 0\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`word0::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`word0::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct WORD0_SPEC;
 impl crate::RegisterSpec for WORD0_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [word0::R](R) reader structure"]
-impl crate::Readable for WORD0_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [word0::W](W) writer structure"]
+#[doc = "`read()` method returns [`word0::R`](R) reader structure"]
+impl crate::Readable for WORD0_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`word0::W`](W) writer structure"]
 impl crate::Writable for WORD0_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }

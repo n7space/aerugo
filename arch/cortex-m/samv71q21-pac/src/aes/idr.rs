@@ -1,64 +1,44 @@
 #[doc = "Register `IDR` writer"]
-pub struct W(crate::W<IDR_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<IDR_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<IDR_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<IDR_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<IDR_SPEC>;
 #[doc = "Field `DATRDY` writer - Data Ready Interrupt Disable"]
-pub type DATRDY_W<'a, const O: u8> = crate::BitWriter<'a, IDR_SPEC, O>;
+pub type DATRDY_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `URAD` writer - Unspecified Register Access Detection Interrupt Disable"]
-pub type URAD_W<'a, const O: u8> = crate::BitWriter<'a, IDR_SPEC, O>;
+pub type URAD_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 #[doc = "Field `TAGRDY` writer - GCM Tag Ready Interrupt Disable"]
-pub type TAGRDY_W<'a, const O: u8> = crate::BitWriter<'a, IDR_SPEC, O>;
+pub type TAGRDY_W<'a, REG, const O: u8> = crate::BitWriter<'a, REG, O>;
 impl W {
     #[doc = "Bit 0 - Data Ready Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn datrdy(&mut self) -> DATRDY_W<0> {
+    pub fn datrdy(&mut self) -> DATRDY_W<IDR_SPEC, 0> {
         DATRDY_W::new(self)
     }
     #[doc = "Bit 8 - Unspecified Register Access Detection Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn urad(&mut self) -> URAD_W<8> {
+    pub fn urad(&mut self) -> URAD_W<IDR_SPEC, 8> {
         URAD_W::new(self)
     }
     #[doc = "Bit 16 - GCM Tag Ready Interrupt Disable"]
     #[inline(always)]
     #[must_use]
-    pub fn tagrdy(&mut self) -> TAGRDY_W<16> {
+    pub fn tagrdy(&mut self) -> TAGRDY_W<IDR_SPEC, 16> {
         TAGRDY_W::new(self)
     }
     #[doc = "Writes raw bits to the register."]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "Interrupt Disable Register\n\nThis register you can [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [idr](index.html) module"]
+#[doc = "Interrupt Disable Register\n\nYou can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`idr::W`](W). See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct IDR_SPEC;
 impl crate::RegisterSpec for IDR_SPEC {
     type Ux = u32;
 }
-#[doc = "`write(|w| ..)` method takes [idr::W](W) writer structure"]
+#[doc = "`write(|w| ..)` method takes [`idr::W`](W) writer structure"]
 impl crate::Writable for IDR_SPEC {
-    type Writer = W;
     const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
     const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }
