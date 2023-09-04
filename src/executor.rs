@@ -9,8 +9,8 @@ use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{RuntimeApi, RuntimeError, SystemApi};
+use crate::mutex::Mutex;
 use crate::tasklet::{TaskletPtr, TaskletStatus};
-use crate::Mutex;
 
 /// Type for the tasklet execution queue
 type TaskletQueue<const N: usize> = BinaryHeap<TaskletPtr, Max, N>;

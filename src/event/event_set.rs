@@ -7,9 +7,9 @@ use crate::api::{RuntimeError, SystemApi};
 use crate::data_provider::DataProvider;
 use crate::event::EventId;
 use crate::event_manager::EventManager;
+use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
 use crate::utils::max;
-use crate::Mutex;
 
 /// Type for event queue.
 type EventQueue = Queue<EventId, { max(EventManager::EVENT_COUNT, 2) }>;

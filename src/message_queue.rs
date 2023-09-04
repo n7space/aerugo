@@ -12,8 +12,8 @@ use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{InitError, RuntimeError, SystemApi};
 use crate::data_provider::DataProvider;
 use crate::internal_list::InternalList;
+use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
-use crate::Mutex;
 
 /// List of tasklets registered to a queue
 type TaskletList = InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>;

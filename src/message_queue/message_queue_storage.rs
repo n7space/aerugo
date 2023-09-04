@@ -11,7 +11,7 @@ use heapless::Vec;
 
 use crate::api::InitError;
 use crate::message_queue::MessageQueueHandle;
-use crate::Mutex;
+use crate::mutex::Mutex;
 
 /// Type of the queue buffer storage.
 pub(crate) type QueueBuffer = Vec<u8, { core::mem::size_of::<MessageQueue<(), 0>>() }>;
