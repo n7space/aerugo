@@ -11,6 +11,7 @@ description = "Crate with AerugoHal implementation for SAMV71"
 
 [dependencies]
 aerugo-hal = { version = "0.1.0", path = "../../../aerugo-hal" }
+critical-section = "1.1.2"
 samv71-hal = { version = "0.1.0", path = "../samv71-hal" }
 
 [features]

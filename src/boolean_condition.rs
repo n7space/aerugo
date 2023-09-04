@@ -11,9 +11,9 @@ pub use self::boolean_condition_storage::BooleanConditionStorage;
 
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{InitError, SystemApi};
-use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::internal_list::InternalList;
+use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
 
 /// List of tasklets registered to a condition

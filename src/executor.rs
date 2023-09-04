@@ -9,7 +9,7 @@ use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::{Aerugo, AERUGO};
 use crate::api::{RuntimeApi, RuntimeError, SystemApi};
-use crate::arch::Mutex;
+use crate::mutex::Mutex;
 use crate::tasklet::{TaskletPtr, TaskletStatus};
 
 /// Type for the tasklet execution queue

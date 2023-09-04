@@ -10,5 +10,4 @@ license.workspace = true
 description = "Hardware Abstraction Layer for Aerugo system"
 
 [dependencies]
-critical-section = "1.1.2"
 fugit = "0.3.6"

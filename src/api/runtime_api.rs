@@ -2,7 +2,7 @@
 //!
 //! This API can be used by the user in tasklet functions to interact with the system.
 
-use aerugo_hal::CriticalSection;
+use critical_section::CriticalSection;
 
 use crate::api::RuntimeError;
 use crate::event::EventId;
@@ -61,16 +61,6 @@ pub trait RuntimeApi {
     /// # Return
     /// Execution statistics for this tasklet.
     fn get_execution_statistics(&'static self, task_id: TaskletId) -> ExecutionStats;
-
-    /// Enters critical section
-    fn enter_critical()
-    where
-        Self: Sized;
-
-    /// Exits critical section
-    fn exit_critical()
-    where
-        Self: Sized;
 
     /// Executes closure `f` in an interrupt-free context.
     ///

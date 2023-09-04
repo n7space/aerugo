@@ -28,9 +28,9 @@ use core::cell::{OnceCell, UnsafeCell};
 
 use crate::aerugo::AERUGO;
 use crate::api::{InitError, RuntimeApi};
-use crate::arch::Mutex;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
+use crate::mutex::Mutex;
 use crate::Instant;
 
 /// Type of function that is executed by the tasklet in its step.

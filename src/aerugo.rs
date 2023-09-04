@@ -5,7 +5,8 @@
 //!
 //! This module also contains singleton instances of all system parts.
 
-use aerugo_hal::{AerugoHal, CriticalSection, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, SystemHardwareConfig};
+use critical_section::CriticalSection;
 use env_parser::read_env;
 
 use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
@@ -95,7 +96,6 @@ impl Aerugo {
                 .set_system_start()
                 .expect("Failed to set system start time");
         }
-        Hal::exit_critical();
         EXECUTOR.run_scheduler()
     }
 }
@@ -746,19 +746,11 @@ impl RuntimeApi for Aerugo {
         todo!()
     }
 
-    fn enter_critical() {
-        Hal::enter_critical();
-    }
-
-    fn exit_critical() {
-        Hal::exit_critical();
-    }
-
     fn execute_critical<F, R>(f: F) -> R
     where
         F: FnOnce(CriticalSection) -> R,
     {
-        Hal::execute_critical(f)
+        critical_section::with(f)
     }
 }
 

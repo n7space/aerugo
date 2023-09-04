@@ -49,6 +49,7 @@ aerugo-hal = { version = "0.1.0", path = "aerugo-hal" }
 aerugo-samv71-hal = { version = "0.1.0", path = "arch/cortex-m/aerugo-samv71-hal", optional = true }
 aerugo-x86 = { version = "0.1.0", path = "arch/x86/aerugo-x86", optional = true }
 aerugo-x86-hal = { version = "0.1.0", path = "arch/x86/aerugo-x86-hal", optional = true }
+critical-section = "1.1.2"
 env-parser = { version = "1.0.0", path = "utils/env-parser" }
 heapless = "0.7"
 samv71-hal = { version = "0.1.0", path = "arch/cortex-m/samv71-hal", optional = true }
@@ -60,7 +61,7 @@ assert_cmd = "2.0"
 [features]
 default = ["log"]
 use-aerugo-cortex-m = ["aerugo-cortex-m", "aerugo-samv71-hal"]
-use-aerugo-x86 = ["aerugo-x86", "aerugo-x86-hal"]
+use-aerugo-x86 = ["aerugo-x86", "aerugo-x86-hal", "critical-section/std"]
 test-aerugo-cortex-m = ["use-aerugo-x86"]
 rt = ["aerugo-samv71-hal?/rt"]
 log = ["aerugo-cortex-m?/log", "aerugo-x86?/log"]

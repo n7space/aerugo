@@ -11,8 +11,6 @@ HAL (Hardware Abstract Layer) for Aerugo system.
 mod config;
 
 pub use config::SystemHardwareConfig;
-pub use critical_section;
-pub use critical_section::CriticalSection;
 pub use fugit as time;
 
 /// Constant representing system timer frequency.
@@ -42,25 +40,4 @@ pub trait AerugoHal {
 
     /// Feeds the system watchdog.
     fn feed_watchdog();
-
-    /// Enters critical section
-    fn enter_critical();
-
-    /// Exits critical section
-    fn exit_critical();
-
-    /// Executes closure `f` in an interrupt-free context.
-    ///
-    /// # Generic Parameters
-    /// * `F` - Closure type.
-    /// * `R` - Closure return type.
-    ///
-    /// # Parameters
-    /// * `f` - Closure to execute.
-    ///
-    /// # Return
-    /// Closure result.
-    fn execute_critical<F, R>(f: F) -> R
-    where
-        F: FnOnce(CriticalSection) -> R;
 }

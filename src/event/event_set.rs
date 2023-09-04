@@ -4,10 +4,10 @@ use heapless::spsc::Queue;
 
 use crate::aerugo::AERUGO;
 use crate::api::{RuntimeError, SystemApi};
-use crate::arch::Mutex;
 use crate::data_provider::DataProvider;
 use crate::event::EventId;
 use crate::event_manager::EventManager;
+use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
 use crate::utils::max;
 
