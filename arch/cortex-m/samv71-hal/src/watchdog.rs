@@ -13,12 +13,12 @@
 pub mod watchdog_config;
 pub mod watchdog_error;
 
-use crate::pac::WDT;
-use crate::Milliseconds;
 pub use watchdog_config::WatchdogConfig;
 pub use watchdog_error::WatchdogError;
 
 use self::watchdog_config::MAXIMUM_WATCHDOG_DURATION;
+use crate::pac::WDT;
+use crate::Milliseconds;
 
 /// Structure representing a watchdog.
 pub struct Watchdog {

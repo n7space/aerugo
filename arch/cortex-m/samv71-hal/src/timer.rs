@@ -2,21 +2,21 @@
 pub mod channel;
 pub mod channel_config;
 pub mod channel_waveform;
-mod tc_metadata;
 pub mod timer_config;
 pub mod timer_error;
 pub mod waveform_config;
+
+mod tc_metadata;
 
 pub use channel::*;
 pub use tc_metadata::*;
 pub use timer_error::*;
 
-use core::marker::PhantomData;
-
 use self::{
     timer_config::{ExternalClock, ExternalClockSource},
     timer_error::TimerConfigurationError,
 };
+use core::marker::PhantomData;
 
 /// Structure representing a Timer instance.
 ///
