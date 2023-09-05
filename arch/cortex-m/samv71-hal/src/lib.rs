@@ -16,5 +16,6 @@ pub type Milliseconds = time::MillisDurationU32;
 #[cfg(feature = "rt")]
 pub use pac::interrupt;
 
+pub mod clock_controller;
 pub mod timer;
 pub mod watchdog;
