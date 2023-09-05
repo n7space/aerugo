@@ -201,7 +201,10 @@ where
     /// critical section has ended will not know about events that happened between critical section start and
     /// reading status register. Same scenario can happen in interrupt handlers, if timer interrupt has lower priority
     /// than currently handled interrupt.
-    pub fn read_and_clear_status(&self) -> ChannelStatus {
+    ///
+    /// For this reason, this function is marked as mutable (it does not mutate the structure, but it might mutate
+    /// status register).
+    pub fn read_and_clear_status(&mut self) -> ChannelStatus {
         let sr = self.registers_ref().sr.read();
 
         ChannelStatus {

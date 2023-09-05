@@ -52,7 +52,7 @@ fn init_pmc(pmc: PMC) {
 }
 
 fn init_timer(timer: &mut Timer<TC1>) {
-    let ch0 = timer
+    let mut ch0 = timer
         .channel_0
         .take()
         .expect("Channel 0 of Timer 1 already taken")

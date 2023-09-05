@@ -139,8 +139,8 @@ fn change_channels_clock_source() {
 
 fn clear_channel_irq_flags() {
     irq_free(|cs| {
-        let channel_ref = TIMER_CHANNEL.borrow(cs).borrow();
-        let channel = channel_ref.as_ref().unwrap();
+        let mut channel_ref = TIMER_CHANNEL.borrow(cs).borrow_mut();
+        let channel = channel_ref.as_mut().unwrap();
         channel.read_and_clear_status();
     });
 }
