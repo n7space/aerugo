@@ -91,7 +91,7 @@ fn initialize_pmc(pmc: PMC) {
 
 fn initialize_timer(mut timer: Timer<TC1>) {
     // Enable waveform mode
-    let channel = timer
+    let mut channel = timer
         .channel_0
         .take()
         .expect("TC1 Ch0 already taken")
@@ -131,8 +131,8 @@ fn disable_channel() {
 
 fn change_channels_clock_source() {
     irq_free(|cs| {
-        let channel_ref = TIMER_CHANNEL.borrow(cs).borrow();
-        let channel = channel_ref.as_ref().unwrap();
+        let mut channel_ref = TIMER_CHANNEL.borrow(cs).borrow_mut();
+        let channel = channel_ref.as_mut().unwrap();
         channel.set_clock_source(ChannelClock::MckDividedBy32);
     });
 }
@@ -141,7 +141,7 @@ fn clear_channel_irq_flags() {
     irq_free(|cs| {
         let mut channel_ref = TIMER_CHANNEL.borrow(cs).borrow_mut();
         let channel = channel_ref.as_mut().unwrap();
-        channel.read_and_clear_status();
+        channel.status();
     });
 }
 

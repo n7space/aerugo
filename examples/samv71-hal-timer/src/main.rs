@@ -61,7 +61,7 @@ fn init_timer(timer: &mut Timer<TC1>) {
     ch0.enable();
     ch0.trigger();
 
-    let status = ch0.read_and_clear_status().clock_enabled;
+    let status = ch0.status().clock_enabled;
     logln!("Clock is {}", if status { "enabled" } else { "disabled" });
 
     irq_free(|cs| {

@@ -105,7 +105,7 @@ where
     ///
     /// # Parameters
     /// * `clock` - New clock source for current channel.
-    pub fn set_clock_source(&self, clock: ChannelClock) {
+    pub fn set_clock_source(&mut self, clock: ChannelClock) {
         match clock {
             // Timer peripheral clock setting is configured via different register
             // than the rest of the clocks.
@@ -188,7 +188,7 @@ where
     /// # Implementation notes
     /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
-    pub fn set_rc(&self, rc: u16) {
+    pub fn set_rc(&mut self, rc: u16) {
         self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
     }
 
@@ -204,7 +204,7 @@ where
     ///
     /// For this reason, this function is marked as mutable (it does not mutate the structure, but it might mutate
     /// status register).
-    pub fn read_and_clear_status(&mut self) -> ChannelStatus {
+    pub fn status(&mut self) -> ChannelStatus {
         let sr = self.registers_ref().sr.read();
 
         ChannelStatus {
@@ -231,7 +231,7 @@ where
     /// # Parameters
     /// * `interrupts` - Structure with interrupts to be enabled. All interrupts set
     ///                  to `true` will be enabled.
-    pub fn enable_interrupts(&self, interrupts: ChannelInterrupts) {
+    pub fn enable_interrupts(&mut self, interrupts: ChannelInterrupts) {
         self.registers_ref().ier.write(|w| {
             w.covfs()
                 .variant(interrupts.counter_overflow)
@@ -259,7 +259,7 @@ where
     /// # Parameters
     /// * `interrupts` - Structure with interrupts to be disabled. All interrupts set
     ///                  to `true` will be disabled.
-    pub fn disable_interrupts(&self, interrupts: ChannelInterrupts) {
+    pub fn disable_interrupts(&mut self, interrupts: ChannelInterrupts) {
         self.registers_ref().idr.write(|w| {
             w.covfs()
                 .variant(interrupts.counter_overflow)

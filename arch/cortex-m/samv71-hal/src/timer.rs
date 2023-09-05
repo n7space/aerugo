@@ -70,7 +70,7 @@ where
     }
 
     /// Triggers all channels, starting them if they are enabled.
-    pub fn trigger_all_channels(&self) {
+    pub fn trigger_all_channels(&mut self) {
         self.registers_ref().bcr.write(|w| w.sync().set_bit());
     }
 
@@ -89,7 +89,7 @@ where
     /// This function directly modifies the registers of a timer in an unsafe manner, but values put in these
     /// registers come from PAC and are validated before using, so they should be valid.
     pub fn configure_external_clock_source(
-        &self,
+        &mut self,
         clock: ExternalClock,
         source: ExternalClockSource,
     ) -> Result<(), TimerConfigurationError> {

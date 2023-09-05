@@ -276,9 +276,9 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
         ..Default::default()
     };
 
-    let ch0 = ch0.into_waveform_channel(waveform_config);
-    let ch1 = ch1.into_waveform_channel(waveform_config);
-    let ch2 = ch2.into_waveform_channel(waveform_config);
+    let mut ch0 = ch0.into_waveform_channel(waveform_config);
+    let mut ch1 = ch1.into_waveform_channel(waveform_config);
+    let mut ch2 = ch2.into_waveform_channel(waveform_config);
 
     // Set RC values for all channels to max, so we can achieve full 48-bit resolution
     ch0.set_rc(u16::MAX);
