@@ -1,6 +1,6 @@
 use aerugo::{
-    logln, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage, AERUGO,
+    logln, Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
+    SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 
 struct TaskAContext {
@@ -59,12 +59,12 @@ static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 static QUEUE_Y: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    AERUGO
+    aerugo
         .create_message_queue(&QUEUE_X)
         .expect("Unable to create QueueX");
-    AERUGO
+    aerugo
         .create_message_queue(&QUEUE_Y)
         .expect("Unable to create QueueY");
 
@@ -84,7 +84,7 @@ fn main() -> ! {
         queue_x_handle,
         queue_y_handle,
     };
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
 
@@ -93,7 +93,7 @@ fn main() -> ! {
         priority: 1,
     };
     let task_b_context = TaskBContext { cnt: 0 };
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
 
@@ -102,7 +102,7 @@ fn main() -> ! {
         priority: 0,
     };
     let task_c_context = TaskCContext { cnt: 0 };
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_c_config, task_c, task_c_context, &TASK_C_STORAGE)
         .expect("Unable to create TaskC");
 
@@ -116,15 +116,15 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create TaskC handle");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&task_a_handle, None)
         .expect("Unable to set cyclic on TaskA");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
         .expect("Unable to subscribe TaskB to QueueX");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&task_c_handle, &queue_y_handle)
         .expect("Unable to subscribe TaskC to QueueY");
 
-    AERUGO.start();
+    aerugo.start();
 }

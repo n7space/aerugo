@@ -187,4 +187,7 @@ pub trait InitApi {
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         condition_set: BooleanConditionSet<COND_COUNT>,
     ) -> Result<(), InitError>;
+
+    /// Starts the system.
+    fn start(&'static self) -> !;
 }

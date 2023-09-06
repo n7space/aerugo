@@ -15,7 +15,7 @@ use aerugo::{
         drivers::interrupt, drivers::pac::NVIC, drivers::pac::PMC,
         drivers::timer::channel_config::ChannelInterrupts,
     },
-    InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 use calldwell::with_rtt_out;
 use core::{cell::RefCell, fmt::Write, ops::AddAssign};
@@ -51,7 +51,7 @@ fn timer_test_task(_: (), context: &mut TimerTestTaskContext, _: &dyn RuntimeApi
 
 static TIMER_TEST_TASK_STORAGE: TaskletStorage<(), TimerTestTaskContext, 0> = TaskletStorage::new();
 
-fn initialize_tasks() {
+fn initialize_tasks(aerugo: &'static impl InitApi) {
     let timer_test_task_config = TaskletConfig {
         name: "TimerTestTask",
         ..Default::default()
@@ -59,7 +59,7 @@ fn initialize_tasks() {
 
     let timer_test_task_context = TimerTestTaskContext::default();
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             timer_test_task_config,
             timer_test_task,
@@ -72,7 +72,7 @@ fn initialize_tasks() {
         .create_handle()
         .expect("Unable to create timer test task handle!");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&timer_test_task_handle, None)
         .expect("Unable to subscribe timer test task to cyclic execution!");
 }
@@ -153,7 +153,7 @@ fn get_irq_count() -> u32 {
 fn main() -> ! {
     calldwell::start_session();
 
-    let peripherals = AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
 
@@ -161,10 +161,10 @@ fn main() -> ! {
     initialize_pmc(peripherals.pmc.expect("PMC already taken!"));
     initialize_timer(timer);
 
-    initialize_tasks();
+    initialize_tasks(aerugo);
     enable_and_trigger_channel();
 
-    AERUGO.start();
+    aerugo.start();
 }
 
 #[interrupt]

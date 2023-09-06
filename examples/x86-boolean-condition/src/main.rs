@@ -1,7 +1,7 @@
 use aerugo::{
-    logln, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, InitApi,
+    logln, Aerugo, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, InitApi,
     MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    TaskletStorage,
 };
 
 struct TaskAContext {
@@ -40,9 +40,9 @@ static QUEUE_X_STORAGE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new()
 static ENABLE_CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    AERUGO
+    aerugo
         .create_message_queue(&QUEUE_X_STORAGE)
         .expect("Unable to create QueueX");
 
@@ -50,7 +50,7 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create QueueX handle");
 
-    AERUGO
+    aerugo
         .create_boolean_condition(&ENABLE_CONDITION_STORAGE, true)
         .expect("Unable to create EnableCondition");
 
@@ -75,10 +75,10 @@ fn main() -> ! {
         condition_handle: enable_condition_handle,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
 
@@ -89,17 +89,17 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create TaskB handle");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&task_a_handle, None)
         .expect("Unable to subscribe TaskA to cyclic");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
         .expect("Unable to subscribe TaskB to QueueX");
 
     let task_a_condition_set = BooleanConditionSet::from(enable_condition_handle);
-    AERUGO
+    aerugo
         .set_tasklet_conditions(&task_a_handle, task_a_condition_set)
         .expect("Unable to set TaskA condition set");
 
-    AERUGO.start();
+    aerugo.start();
 }

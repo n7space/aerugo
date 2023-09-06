@@ -1,6 +1,6 @@
 use aerugo::{
-    logln, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
-    AERUGO,
+    logln, Aerugo, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage,
 };
 
 enum MyEvents {
@@ -80,12 +80,12 @@ static TASK_C_STORAGE: TaskletStorage<EventId, TaskCContext, 0> = TaskletStorage
 static TASK_D_STORAGE: TaskletStorage<EventId, TaskDContext, 0> = TaskletStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    AERUGO
+    aerugo
         .create_event(MyEvents::SmallEvent.into())
         .expect("Unable to create SmallEvent");
-    AERUGO
+    aerugo
         .create_event(MyEvents::BigEvent.into())
         .expect("Unable to create BigEvent");
 
@@ -95,7 +95,7 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext { acc: 0 };
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
 
@@ -104,7 +104,7 @@ fn main() -> ! {
         priority: 3,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(task_b_config, task_b, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
 
@@ -113,7 +113,7 @@ fn main() -> ! {
         priority: 2,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(task_c_config, task_c, &TASK_C_STORAGE)
         .expect("Unable to create TaskC");
 
@@ -122,7 +122,7 @@ fn main() -> ! {
         priority: 1,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(task_d_config, task_d, &TASK_D_STORAGE)
         .expect("Unable to create TaskD");
 
@@ -139,24 +139,24 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create handle to TaskD");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&task_a_handle, None)
         .expect("Unable to set cyclic on TaskA");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&task_b_handle)
         .expect("Unable to subscribe TaskB to events")
         .enable(MyEvents::SmallEvent.into())
         .expect("Unable to enable SmallEvent for TaskB")
         .enable(MyEvents::BigEvent.into())
         .expect("Unable to enable BigEvent for TaskB");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&task_c_handle)
         .expect("Unable to subscribe TaskC to events")
         .enable(MyEvents::SmallEvent.into())
         .expect("Unable to enable SmallEvent for TaskC")
         .enable(MyEvents::BigEvent.into())
         .expect("Unable to enable BigEvent for TaskC");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&task_d_handle)
         .expect("Unable to subscribe TaskD to events")
         .enable(MyEvents::SmallEvent.into())
@@ -164,5 +164,5 @@ fn main() -> ! {
         .enable(MyEvents::BigEvent.into())
         .expect("Unable to enable BigEvent for TaskD");
 
-    AERUGO.start();
+    aerugo.start();
 }

@@ -1,6 +1,6 @@
 use aerugo::{
-    logln, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
-    AERUGO,
+    logln, Aerugo, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage,
 };
 
 enum MyEvents {
@@ -64,15 +64,15 @@ static TASK_B_STORAGE: TaskletStorage<EventId, TaskBContext, 0> = TaskletStorage
 static TASK_C_STORAGE: TaskletStorage<EventId, TaskCContext, 0> = TaskletStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    AERUGO
+    aerugo
         .create_event(MyEvents::Event1.into())
         .expect("Unable to create Event1");
-    AERUGO
+    aerugo
         .create_event(MyEvents::Event42.into())
         .expect("Unable to create Event42");
-    AERUGO
+    aerugo
         .create_event(MyEvents::Event255.into())
         .expect("Unable to create Event255");
 
@@ -82,7 +82,7 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext { acc: 0 };
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
 
@@ -91,7 +91,7 @@ fn main() -> ! {
         ..Default::default()
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(task_b_config, task_b, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
 
@@ -100,7 +100,7 @@ fn main() -> ! {
         ..Default::default()
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(task_c_config, task_c, &TASK_C_STORAGE)
         .expect("Unable to create TaskC");
 
@@ -114,17 +114,17 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create handle to TaskC");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&task_a_handle, None)
         .expect("Unable to set cyclic on TaskA");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&task_b_handle)
         .expect("Unable to subscribe TaskB to events")
         .enable(MyEvents::Event1.into())
         .expect("Unable to enable Event1 for TaskB")
         .enable(MyEvents::Event42.into())
         .expect("Unable to enable Event42 for TaskB");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&task_c_handle)
         .expect("Unable to subscribe TaskC to events")
         .enable(MyEvents::Event42.into())
@@ -132,5 +132,5 @@ fn main() -> ! {
         .enable(MyEvents::Event255.into())
         .expect("Unable to enable Event255 for TaskC");
 
-    AERUGO.start();
+    aerugo.start();
 }

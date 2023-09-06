@@ -15,8 +15,8 @@ use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
 
 use aerugo::{
-    hal::drivers::timer::Timer, logln, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    hal::drivers::timer::Timer, logln, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage,
 };
 use rt::entry;
 
@@ -69,7 +69,7 @@ fn init_timer(timer: &mut Timer<TC1>) {
     });
 }
 
-fn init_tasks() {
+fn init_tasks(aerugo: &'static impl InitApi) {
     logln!("Creating tasks...");
     let dummy_task_config = TaskletConfig {
         name: "DummyTask",
@@ -77,7 +77,7 @@ fn init_tasks() {
     };
     let dummy_task_context = DummyTaskContext::default();
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             dummy_task_config,
             dummy_task,
@@ -92,14 +92,14 @@ fn init_tasks() {
 
     logln!("Subscribing tasks...");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&dummy_task_handle, None)
         .expect("Unable to subscribe dummy task to cyclic execution!");
 }
 
 #[entry]
 fn main() -> ! {
-    let peripherals = AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
     logln!("Hello, world! Aerugo initialized!");
 
@@ -110,8 +110,8 @@ fn main() -> ! {
     init_pmc(pmc);
     init_timer(&mut timer);
 
-    init_tasks();
+    init_tasks(aerugo);
 
     logln!("Starting the system!");
-    AERUGO.start();
+    aerugo.start();
 }

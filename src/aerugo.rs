@@ -9,7 +9,7 @@ use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use critical_section::CriticalSection;
 use env_parser::read_env;
 
-use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError, SystemApi};
+use crate::api::{InitApi, InitError, RuntimeApi, RuntimeError};
 #[cfg(feature = "log")]
 use crate::arch::init_log;
 use crate::boolean_condition::{
@@ -29,13 +29,13 @@ use crate::{Duration, Instant};
 /// Core system.
 ///
 /// This is used to access the system API, both by the user and by the internal system parts.
-pub static AERUGO: Aerugo = Aerugo::new();
+static AERUGO: Aerugo = Aerugo::new();
 
 /// System scheduler.
 ///
 /// Singleton instance of the scheduler. Used directly only by the [Aerugo]
 /// structure, which exposes some functionality via it's API.
-static EXECUTOR: Executor = Executor::new();
+static EXECUTOR: Executor = Executor::new(AERUGO.time_source());
 /// Event manager.
 ///
 /// Singleton instance of the event manager. Used directly only by the [Aerugo]
@@ -72,31 +72,48 @@ impl Aerugo {
         }
     }
 
-    /// Initialize the system runtime and hardware.
-    pub fn initialize(&'static self, config: SystemHardwareConfig) -> UserPeripherals {
-        #[cfg(feature = "log")]
-        init_log();
-        Hal::configure_hardware(config)
-            .expect("HAL initialization or hardware configuration failed");
-        Hal::create_user_peripherals().expect("Cannot create user peripherals instance")
+    /// Returns reference to the system time source.
+    pub(crate) const fn time_source(&'static self) -> &'static TimeSource {
+        &self.time_source
     }
 
-    /// Starts the system.
+    /// Initialize the system runtime and hardware.
+    pub fn initialize(config: SystemHardwareConfig) -> (&'static impl InitApi, UserPeripherals) {
+        #[cfg(feature = "log")]
+        init_log();
+
+        Hal::configure_hardware(config)
+            .expect("HAL initialization or hardware configuration failed");
+        let user_peripherals =
+            Hal::create_user_peripherals().expect("Cannot create user peripherals instance");
+
+        (&AERUGO, user_peripherals)
+    }
+
+    /// Wakes given tasklet by scheduling it for execution.
     ///
-    /// This starts an executor that never returns, executing ready tasklets in a loop.
-    /// It also enables global interrupts.
+    /// # Parameters
+    /// * `tasklet` - Tasklet to wake
+    pub(crate) fn wake_tasklet(tasklet: &TaskletPtr) {
+        EXECUTOR
+            .schedule_tasklet(tasklet)
+            .expect("Unable to schedule tasklet");
+    }
+
+    /// Runs the system.
     ///
-    /// # Safety
-    /// This shouldn't be called more than once.
-    pub fn start(&'static self) -> ! {
-        // SAFETY: This is safe, because it's called from non-IRQ context, and
-        // system time cannot be accessed from IRQ context
-        unsafe {
-            self.time_source
-                .set_system_start()
-                .expect("Failed to set system start time");
+    /// The system works in a loop. On each pass one tasklet is executed and then system updates
+    /// its internal components and hardware.
+    fn run(&'static self) -> ! {
+        loop {
+            EXECUTOR
+                .execute_next_tasklet()
+                .expect("Failure in tasklet execution");
+
+            Hal::feed_watchdog();
+
+            CYCLIC_EXECUTION_MANAGER.wake_tasklets();
         }
-        EXECUTOR.run_scheduler()
     }
 }
 
@@ -125,7 +142,7 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
     /// #[derive(Default)]
     /// struct TaskCtx;
     ///
@@ -134,8 +151,12 @@ impl InitApi for Aerugo {
     /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
     /// fn main() {
+    ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///     #
+    ///     # assert!(!TASK_STORAGE.is_initialized());
+    ///     #
     ///     let task_config = TaskletConfig::default();
-    ///     AERUGO.create_tasklet(task_config, task, &TASK_STORAGE).expect("Unable to create Tasklet");
+    ///     aerugo.create_tasklet(task_config, task, &TASK_STORAGE).expect("Unable to create Tasklet");
     ///     #
     ///     # assert!(TASK_STORAGE.is_initialized());
     ///
@@ -145,6 +166,48 @@ impl InitApi for Aerugo {
     ///     # assert!(task_handle.is_some())
     /// }
     /// ```
+    ///
+    /// # Notes
+    /// ## Given storage cannot be used to create more than one tasklet.
+    ///
+    /// ```
+    /// # use aerugo::{Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
+    /// #[derive(Default)]
+    /// struct TaskCtx;
+    ///
+    /// fn task(_: u8, _: &mut TaskCtx, _: &dyn RuntimeApi) {}
+    ///
+    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
+    ///
+    /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///     #
+    ///     let task_config = TaskletConfig::default();
+    ///
+    ///     // First call is successful.
+    ///     assert!(aerugo.create_tasklet(task_config.clone(), task, &TASK_STORAGE).is_ok());
+    ///
+    ///     // But second is not.
+    ///     assert!(aerugo.create_tasklet(task_config.clone(), task, &TASK_STORAGE).is_err());
+    /// }
+    /// ```
+    ///
+    /// ## Storage has to be initialized to create a handle to tasklet.
+    /// ```
+    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage};
+    /// #[derive(Default)]
+    /// struct TaskCtx;
+    ///
+    /// fn task(_: u8, _: &mut TaskCtx, _: &dyn RuntimeApi) {}
+    ///
+    /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
+    ///
+    /// fn main() {
+    ///     let task_config = TaskletConfig::default();
+    ///
+    ///     assert!(TASK_STORAGE.create_handle().is_none());
+    /// }
+    /// ```
     fn create_tasklet<T, C: Default, const COND_COUNT: usize>(
         &'static self,
         config: TaskletConfig,
@@ -152,7 +215,7 @@ impl InitApi for Aerugo {
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) -> Result<(), InitError> {
         // SAFETY: This is safe, as long as this function is called only during system initialization.
-        unsafe { storage.init(config, step_fn, C::default()) }
+        unsafe { storage.init(config, step_fn, C::default(), self) }
     }
 
     /// Creates new tasklet in the system with initialized context data.
@@ -180,7 +243,7 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
     /// struct TaskCtx {
     ///     value: u8,
     /// }
@@ -190,9 +253,11 @@ impl InitApi for Aerugo {
     /// static TASK_STORAGE: TaskletStorage<u8, TaskCtx, 0> = TaskletStorage::new();
     ///
     /// fn main() {
+    ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///     #
     ///     let task_config = TaskletConfig::default();
     ///     let task_context = TaskCtx { value: 42 };
-    ///     AERUGO.create_tasklet_with_context(task_config, task, task_context, &TASK_STORAGE);
+    ///     aerugo.create_tasklet_with_context(task_config, task, task_context, &TASK_STORAGE);
     ///     #
     ///     # assert!(TASK_STORAGE.is_initialized());
     ///
@@ -210,7 +275,7 @@ impl InitApi for Aerugo {
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) -> Result<(), InitError> {
         // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe { storage.init(config, step_fn, context) }
+        unsafe { storage.init(config, step_fn, context, self) }
     }
 
     /// Creates new message queue in the system.
@@ -234,11 +299,15 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, MessageQueueStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, MessageQueueStorage, SystemHardwareConfig};
     /// static QUEUE_STORAGE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
     ///
     /// fn main() {
-    ///     AERUGO.create_message_queue(&QUEUE_STORAGE);
+    ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///     #
+    ///     # assert!(!QUEUE_STORAGE.is_initialized());
+    ///     #
+    ///     aerugo.create_message_queue(&QUEUE_STORAGE);
     ///     #
     ///     # assert!(QUEUE_STORAGE.is_initialized());
     ///
@@ -273,7 +342,7 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{EventId, InitApi, AERUGO};
+    /// # use aerugo::{Aerugo, EventId, InitApi, SystemHardwareConfig};
     ///
     /// enum Events {
     ///     MyEvent,
@@ -288,7 +357,9 @@ impl InitApi for Aerugo {
     /// }
     ///
     /// fn main() {
-    ///     AERUGO.create_event(Events::MyEvent.into());
+    ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///
+    ///     aerugo.create_event(Events::MyEvent.into());
     /// }
     /// ```
     fn create_event(&'static self, event_id: EventId) -> Result<(), InitError> {
@@ -317,11 +388,15 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, BooleanConditionStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, BooleanConditionStorage, SystemHardwareConfig};
     /// static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
     ///
     /// fn main() {
-    ///     AERUGO.create_boolean_condition(&CONDITION_STORAGE, true);
+    ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
+    ///     #
+    ///     # assert!(!CONDITION_STORAGE.is_initialized());
+    ///     #
+    ///     aerugo.create_boolean_condition(&CONDITION_STORAGE, true);
     ///     #
     ///     # assert!(CONDITION_STORAGE.is_initialized());
     ///
@@ -371,7 +446,8 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, MessageQueueStorage, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, MessageQueueStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    /// #   TaskletStorage};
     /// #
     /// # fn task(_: u8, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
@@ -379,17 +455,18 @@ impl InitApi for Aerugo {
     /// # static QUEUE_STORAGE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
     /// #
     /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_message_queue(&QUEUE_STORAGE)
     ///     #   .expect("Unable to create MessageQueue");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
     ///     let queue_handle = QUEUE_STORAGE.create_handle().expect("Failed to create Queue handle");
     ///
-    ///     AERUGO
+    ///     aerugo
     ///         .subscribe_tasklet_to_queue(&task_handle, &queue_handle)
     ///         .expect("Failed to subscribe Task to Queue");
     /// }
@@ -447,7 +524,7 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{EventId, InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
     /// #
     /// # fn task(_: EventId, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
@@ -464,16 +541,17 @@ impl InitApi for Aerugo {
     ///     }
     /// }
     /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_event(Events::MyEvent.into())
     ///     #   .expect("Unable to create MyEvent");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
     ///
-    ///     AERUGO
+    ///     aerugo
     ///         .subscribe_tasklet_to_events(&task_handle)
     ///         .expect("Failed to subscribe Task to events")
     ///         .enable(Events::MyEvent.into())
@@ -521,7 +599,8 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, BooleanConditionStorage, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, BooleanConditionStorage, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    ///     TaskletStorage};
     /// #
     /// # fn task(_: bool, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
@@ -529,17 +608,18 @@ impl InitApi for Aerugo {
     /// # static CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
     /// #
     /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_boolean_condition(&CONDITION_STORAGE, true)
     ///     #   .expect("Unable to create BooleanCondition");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
     ///     let condition_handle = CONDITION_STORAGE.create_handle().expect("Failed to create Condition handle");
     ///
-    ///     AERUGO
+    ///     aerugo
     ///         .subscribe_tasklet_to_condition(&task_handle, &condition_handle)
     ///         .expect("Failed to subscribe Task to Condition");
     /// }
@@ -587,20 +667,21 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{InitApi, RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
     /// #
     /// # fn task(_: (), _: &mut (), _: &dyn RuntimeApi) {}
     /// #
     /// # static TASK_STORAGE: TaskletStorage<(), (), 0> = TaskletStorage::new();
     /// #
     /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
     ///
-    ///     AERUGO
+    ///     aerugo
     ///         .subscribe_tasklet_to_cyclic(&task_handle, None)
     ///         .expect("Failed to subscribe Task to cyclic execution");
     /// }
@@ -647,8 +728,8 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage, InitApi,
-    ///     RuntimeApi, TaskletConfig, TaskletStorage, AERUGO};
+    /// # use aerugo::{Aerugo, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage, InitApi,
+    ///     RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
     /// #
     /// # fn task(_: (), _: &mut (), _: &dyn RuntimeApi) {}
     /// #
@@ -657,14 +738,15 @@ impl InitApi for Aerugo {
     /// # static CONDITION_Y_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
     /// #
     /// fn main() {
+    ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_boolean_condition(&CONDITION_X_STORAGE, true)
     ///     #   .expect("Unable to create BooleanConditionX");
-    ///     # AERUGO
+    ///     # aerugo
     ///     #   .create_boolean_condition(&CONDITION_Y_STORAGE, true)
     ///     #   .expect("Unable to create BooleanConditionY");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
@@ -679,7 +761,7 @@ impl InitApi for Aerugo {
     ///     condition_set.add(&condition_x_handle);
     ///     condition_set.add(&condition_y_handle);
     ///
-    ///     AERUGO
+    ///     aerugo
     ///         .set_tasklet_conditions(&task_handle, condition_set)
     ///         .expect("Unable to set Task condition set");
     /// }
@@ -698,6 +780,25 @@ impl InitApi for Aerugo {
 
         Ok(())
     }
+
+    /// Starts the system.
+    ///
+    /// This starts an executor that never returns, executing ready tasklets in a loop.
+    /// It also enables global interrupts.
+    ///
+    /// # Safety
+    /// This shouldn't be called more than once.
+    fn start(&'static self) -> ! {
+        // SAFETY: This is safe, because it's called from non-IRQ context, and
+        // system time cannot be accessed from IRQ context
+        unsafe {
+            self.time_source
+                .set_system_start()
+                .expect("Failed to set system start time");
+        }
+
+        self.run()
+    }
 }
 
 impl RuntimeApi for Aerugo {
@@ -714,10 +815,7 @@ impl RuntimeApi for Aerugo {
     }
 
     fn get_system_time(&'static self) -> Instant {
-        match self.time_source.time_since_user_offset() {
-            Some(system_time) => system_time,
-            None => TimeSource::time_since_init(),
-        }
+        self.time_source.system_time()
     }
 
     fn set_system_time_offset(&'static self, offset: Duration) -> Result<(), RuntimeError> {
@@ -751,18 +849,5 @@ impl RuntimeApi for Aerugo {
         F: FnOnce(CriticalSection) -> R,
     {
         critical_section::with(f)
-    }
-}
-
-impl SystemApi for Aerugo {
-    fn wake_tasklet(&'static self, tasklet: &TaskletPtr) {
-        EXECUTOR
-            .schedule_tasklet(tasklet)
-            .expect("Unable to schedule tasklet");
-    }
-
-    fn update(&'static self) {
-        Hal::feed_watchdog();
-        CYCLIC_EXECUTION_MANAGER.wake_tasklets();
     }
 }

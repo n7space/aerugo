@@ -2,8 +2,8 @@
 
 use heapless::spsc::Queue;
 
-use crate::aerugo::AERUGO;
-use crate::api::{RuntimeError, SystemApi};
+use crate::aerugo::Aerugo;
+use crate::api::RuntimeError;
 use crate::data_provider::DataProvider;
 use crate::event::EventId;
 use crate::event_manager::EventManager;
@@ -55,7 +55,7 @@ impl EventSet {
         })?;
 
         if event_activated {
-            AERUGO.wake_tasklet(&self.tasklet);
+            Aerugo::wake_tasklet(&self.tasklet);
         }
 
         Ok(event_activated)

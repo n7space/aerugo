@@ -7,6 +7,7 @@
 #![warn(missing_docs)]
 #![warn(clippy::missing_docs_in_private_items)]
 #![warn(rustdoc::missing_crate_level_docs)]
+#![feature(const_mut_refs)]
 
 mod aerugo;
 mod api;
@@ -26,7 +27,10 @@ mod tasklet;
 mod time_source;
 mod utils;
 
-pub use self::aerugo::{Aerugo, AERUGO};
+#[cfg(any(doc, test))]
+mod tests;
+
+pub use self::aerugo::Aerugo;
 pub use self::api::{InitApi, RuntimeApi};
 pub use self::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,

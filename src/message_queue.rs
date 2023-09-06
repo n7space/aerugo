@@ -8,8 +8,8 @@ pub use self::message_queue_storage::MessageQueueStorage;
 
 pub(crate) use self::message_queue_storage::QueueData;
 
-use crate::aerugo::{Aerugo, AERUGO};
-use crate::api::{InitError, RuntimeError, SystemApi};
+use crate::aerugo::Aerugo;
+use crate::api::{InitError, RuntimeError};
 use crate::data_provider::DataProvider;
 use crate::internal_list::InternalList;
 use crate::mutex::Mutex;
@@ -61,7 +61,7 @@ impl<T, const N: usize> MessageQueue<T, N> {
     /// Wakes tasklets registered to this queue.
     fn wake_tasklets(&self) {
         for t in &self.registered_tasklets {
-            AERUGO.wake_tasklet(t);
+            Aerugo::wake_tasklet(t);
         }
     }
 

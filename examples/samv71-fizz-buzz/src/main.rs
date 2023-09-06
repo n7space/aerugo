@@ -6,9 +6,9 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 use aerugo::{
-    log, logln, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage, EventId,
-    InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage, AERUGO,
+    log, logln, Aerugo, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
+    EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage,
 };
 
 use rt::entry;
@@ -114,25 +114,25 @@ impl From<EventId> for FizzBuzzEvents {
 
 #[entry]
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
     logln!("Hello, world! Aerugo initialized!");
 
-    AERUGO
+    aerugo
         .create_message_queue(&ELEM_QUEUE)
         .expect("Unable to create ElemQueue");
 
-    AERUGO
+    aerugo
         .create_event(FizzBuzzEvents::Fizz.into())
         .expect("Unable to create Fizz event");
-    AERUGO
+    aerugo
         .create_event(FizzBuzzEvents::Buzz.into())
         .expect("Unable to create Buzz event");
-    AERUGO
+    aerugo
         .create_event(FizzBuzzEvents::FizzBuzz.into())
         .expect("Unable to create FizzBuzz event");
 
-    AERUGO
+    aerugo
         .create_boolean_condition(&GENERATE_NUMBERS_CONDITION_STORAGE, true)
         .expect("Unable to create GenerateNumbersCondition");
 
@@ -154,7 +154,7 @@ fn main() -> ! {
         generate_numbers_condition_handle,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             producer_config,
             producer,
@@ -168,7 +168,7 @@ fn main() -> ! {
         priority: 1,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(distributor_config, distributor, &DISTRIBUTOR_STORAGE)
         .expect("Unable to create Distributor");
 
@@ -177,7 +177,7 @@ fn main() -> ! {
         priority: 3,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(fizz_config, fizz, &FIZZ_STORAGE)
         .expect("Unable to create Fizz");
 
@@ -186,7 +186,7 @@ fn main() -> ! {
         priority: 2,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(buzz_config, buzz, &BUZZ_STORAGE)
         .expect("Unable to create Buzz");
 
@@ -195,7 +195,7 @@ fn main() -> ! {
         ..Default::default()
     };
 
-    AERUGO
+    aerugo
         .create_tasklet(done_config, done, &DONE_STORAGE)
         .expect("Unable to create Done");
 
@@ -204,24 +204,24 @@ fn main() -> ! {
     let producer_handle = PRODUCER_STORAGE
         .create_handle()
         .expect("Unable to create handle to Producer");
-    AERUGO
+    aerugo
         .set_tasklet_conditions(&producer_handle, producer_condition_set)
         .expect("Unable to set Producer condition set");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&producer_handle, None)
         .expect("Unable to set cyclic on Producer");
 
     let distributor_handle = DISTRIBUTOR_STORAGE
         .create_handle()
         .expect("Unable to create handle to Distributor");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&distributor_handle, &elem_queue_handle)
         .expect("Unable to subscribe Distributor to ElemQueue");
 
     let fizz_handle = FIZZ_STORAGE
         .create_handle()
         .expect("Unable to create handle to Fizz");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&fizz_handle)
         .expect("Unable to subscribe Fizz to events")
         .enable(FizzBuzzEvents::Fizz.into())
@@ -232,7 +232,7 @@ fn main() -> ! {
     let buzz_handle = BUZZ_STORAGE
         .create_handle()
         .expect("Unable to create handle to Buzz");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_events(&buzz_handle)
         .expect("Unable to subscribe Buzz to events")
         .enable(FizzBuzzEvents::Buzz.into())
@@ -243,9 +243,9 @@ fn main() -> ! {
     let done_handle = DONE_STORAGE
         .create_handle()
         .expect("Unable to create handle to Done");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_condition(&done_handle, &generate_numbers_condition_handle)
         .expect("Unable to subscribe Done to GenerateNumbersCondition");
 
-    AERUGO.start();
+    aerugo.start();
 }
