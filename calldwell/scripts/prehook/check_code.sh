@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached -- './*.py')" ]]; then
+if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached -- 'calldwell/*.py')" ]]; then
     poetry run isort --check ./*.py
     poetry run black --check ./*.py
     poetry run flake8 ./*.py
@@ -10,7 +10,7 @@ if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached -- './*.
 fi
 
 # Check examples if changed
-if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached)" =~ "examples/" ]]; then
+if [[ "$(git diff --diff-filter=d --dirstat=files,0,cumulative --cached)" =~ "calldwell/examples/" ]]; then
     poetry run isort --check ./examples/**/*.py
     poetry run black --check ./examples/**/*.py
     poetry run flake8 ./examples/**/*.py
