@@ -29,15 +29,15 @@ pub use status::Status;
 ///
 /// This structure is not thread/interrupt-safe, as it uses shared state (registers).
 /// If you need to share it, wrap it in a proper container that implements [`Sync`].
-pub struct ClockController {
+pub struct ClocksController {
     /// PMC instance.
     pmc: pac::PMC,
 }
 
-impl ClockController {
+impl ClocksController {
     /// Create new Clock controller instance
     pub const fn new(pmc: pac::PMC) -> Self {
-        ClockController { pmc }
+        ClocksController { pmc }
     }
 
     /// Returns current PMC status.
