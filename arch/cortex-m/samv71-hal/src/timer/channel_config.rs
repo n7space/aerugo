@@ -3,7 +3,7 @@
 use crate::pac::tc0::tc_channel::cmr_waveform_mode::TCCLKSSELECT_A as PacClockId;
 
 /// Structure representing available channel interrupts.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ChannelInterrupts {
     /// Counter overflow
     pub counter_overflow: bool,
@@ -61,7 +61,7 @@ impl Default for ChannelInterrupts {
 }
 
 /// Structure representing channel status register content.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct ChannelStatus {
     /// Status of interrupts. Note that these flags are cleared when status register is read.
     pub interrupts: ChannelInterrupts,
@@ -74,7 +74,7 @@ pub struct ChannelStatus {
 }
 
 /// Enumeration listing available channel's clock sources.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum ChannelClock {
     /// PCK6 (or PCK7 for TC0 Ch0, if configured in PMC) clock signal from PMC.
     /// Default per datasheet.

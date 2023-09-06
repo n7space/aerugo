@@ -36,6 +36,7 @@ pub enum RcCompareEffect {
 
 /// Intermediate helper struct used for explicit conversions between enum value and it's flags in TC registers.
 /// To be used internally by HAL, not by the end user.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(super) struct RcCompareEffectFlags {
     /// Indicates that RC Compare stops the counter.
     pub stops: bool,
