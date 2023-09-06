@@ -14,7 +14,7 @@ use crate::{Duration, Instant};
 ///
 /// Allows time tracking/timestamp generation since three points in time:
 /// * Hardware initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize))
-/// * Start of Aerugo scheduler (call to [`Aerugo::start`](crate::Aerugo::start))
+/// * Start of Aerugo scheduler (call to [`Aerugo::start`](crate::InitApi::start))
 /// * User-defined offset
 ///
 /// For safety, instance of TimeSource should never pass interrupt boundary.
@@ -43,7 +43,7 @@ impl TimeSource {
         Hal::get_system_time()
     }
 
-    /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::Aerugo::start)),
+    /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::InitApi::start)),
     /// or `None` if system hasn't started yet.
     ///
     /// # Safety
@@ -57,8 +57,7 @@ impl TimeSource {
         }
     }
 
-    /// Returns time since user-defined offset, or `None` if offset is not defined, or cannot be subtracted from
-    /// system time.
+    /// Return system time with offset if it was defined.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
@@ -87,13 +86,13 @@ impl TimeSource {
     /// Sets user-defined offset.
     ///
     /// Specified duration will be subtracted from time since system initialization when a timestamp
-    /// is generated using [`TimeSource::time_since_user_offset`].
+    /// is generated using [`TimeSource::system_time`].
     ///
     /// See [`TimeSource::time_since_init`] for details about time since system initialization.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::time_since_user_offset`] in parallel with this function (interrupt is treated as different
+    /// Calling [`TimeSource::system_time`] in parallel with this function (interrupt is treated as different
     /// thread) is an undefined behavior.
     ///
     /// # Parameters

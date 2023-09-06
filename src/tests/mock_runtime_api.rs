@@ -29,14 +29,10 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    /// Returns time elapsed between system initialization and start of the scheduler.
-    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
     fn get_startup_time(&'static self) -> Option<Duration> {
         todo!()
     }
 
-    /// Returns time elapsed since scheduler's start.
-    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
     fn get_time_since_startup(&'static self) -> Option<Instant> {
         todo!()
     }

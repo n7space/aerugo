@@ -50,8 +50,6 @@ static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager
 /// System structure.
 ///
 /// This shouldn't be created by hand by the user or anywhere else in the code.
-/// It should be used as a [singleton](crate::aerugo::AERUGO) that acts as a system API,
-/// both for user and for the internal system parts.
 pub struct Aerugo {
     /// Time source, responsible for creating timestamps.
     time_source: TimeSource,
