@@ -26,7 +26,6 @@ pub use self::tasklet_storage::TaskletStorage;
 
 use core::cell::{OnceCell, UnsafeCell};
 
-use crate::aerugo::AERUGO;
 use crate::api::{InitError, RuntimeApi};
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
@@ -63,15 +62,18 @@ pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     condition_set: &'static OnceCell<BooleanConditionSet<COND_COUNT>>,
     /// Source of the data.
     data_provider: OnceCell<&'static dyn DataProvider<T>>,
+    /// Runtime API.
+    runtime_api: &'static dyn RuntimeApi,
 }
 
 impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Creates new `Tasklet`.
-    pub(crate) fn new(
+    pub(crate) const fn new(
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: &'static mut C,
         condition_set: &'static OnceCell<BooleanConditionSet<COND_COUNT>>,
+        runtime_api: &'static dyn RuntimeApi,
     ) -> Self {
         Tasklet {
             name: config.name,
@@ -82,6 +84,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             context: UnsafeCell::new(context),
             condition_set,
             data_provider: OnceCell::new(),
+            runtime_api,
         }
     }
 
@@ -180,7 +183,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
                     // SAFETY: This is safe, because this field is only accessed here, and given tasklet can
                     // be executed only once at a given time.
                     let context: &mut C = unsafe { *self.context.get() };
-                    (self.step_fn)(val, context, &AERUGO);
+                    (self.step_fn)(val, context, self.runtime_api);
 
                     true
                 } else {
@@ -198,4 +201,34 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
 }
 
 #[cfg(any(doc, test))]
-mod tests;
+mod tests {
+    use super::*;
+
+    #[test]
+    fn const_size() {
+        type TaskletStub = Tasklet<(), (), 0>;
+        let stub_size = core::mem::size_of::<TaskletStub>();
+
+        struct NoCtx;
+        type TaskletNoCtx = Tasklet<u8, NoCtx, 1>;
+        let noctx_size = core::mem::size_of::<TaskletNoCtx>();
+
+        struct SmallCtx {
+            _a: u16,
+        }
+        type TaskletSmallCtx = Tasklet<u16, SmallCtx, 2>;
+        let smallctx_size = core::mem::size_of::<TaskletSmallCtx>();
+
+        struct BigCtx {
+            _a: u64,
+            _b: f64,
+            _c: u16,
+        }
+        type TaskletBigCtx = Tasklet<u32, BigCtx, 5>;
+        let bigctx_size = core::mem::size_of::<TaskletBigCtx>();
+
+        assert_eq!(noctx_size, stub_size);
+        assert_eq!(smallctx_size, stub_size);
+        assert_eq!(bigctx_size, stub_size);
+    }
+}

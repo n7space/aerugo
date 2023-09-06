@@ -9,8 +9,8 @@ pub use self::boolean_condition_set::BooleanConditionSet;
 pub use self::boolean_condition_set::BooleanConditionSetType;
 pub use self::boolean_condition_storage::BooleanConditionStorage;
 
-use crate::aerugo::{Aerugo, AERUGO};
-use crate::api::{InitError, SystemApi};
+use crate::aerugo::Aerugo;
+use crate::api::InitError;
 use crate::data_provider::DataProvider;
 use crate::internal_list::InternalList;
 use crate::mutex::Mutex;
@@ -79,7 +79,7 @@ impl BooleanCondition {
     /// Wakes tasklets registered to this condition.
     fn wake_tasklets(&self) {
         for t in &self.registered_tasklets {
-            AERUGO.wake_tasklet(t);
+            Aerugo::wake_tasklet(t);
         }
     }
 }

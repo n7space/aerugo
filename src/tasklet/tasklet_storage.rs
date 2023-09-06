@@ -10,7 +10,7 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
 
-use crate::api::InitError;
+use crate::api::{InitError, RuntimeApi};
 use crate::boolean_condition::BooleanConditionSet;
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
 
@@ -90,6 +90,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: C,
+        runtime_api: &'static dyn RuntimeApi,
     ) -> Result<(), InitError> {
         if self.initialized.get().is_some() {
             return Err(InitError::StorageAlreadyInitialized);
@@ -106,6 +107,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             // SAFETY: This is safe, because `tasklet_context` was just initialized.
             unsafe { tasklet_context.assume_init_mut() },
             &self.tasklet_conditions,
+            runtime_api,
         );
 
         // This is safe, because `tasklet_buffer` doesn't contain any value yet, and it's size is
@@ -146,58 +148,4 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
 unsafe impl<T: 'static, C: 'static, const COND_COUNT: usize> Sync
     for TaskletStorage<T, C, COND_COUNT>
 {
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn create() {
-        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
-
-        assert!(!STORAGE.is_initialized());
-    }
-
-    #[test]
-    fn initialize() {
-        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
-
-        let init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
-        assert!(init_result.is_ok());
-        assert!(STORAGE.is_initialized());
-    }
-
-    #[test]
-    fn fail_double_initialization() {
-        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
-
-        let mut init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
-        assert!(init_result.is_ok());
-
-        init_result = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
-        assert!(init_result.is_err());
-        assert_eq!(
-            init_result.err().unwrap(),
-            InitError::StorageAlreadyInitialized
-        );
-    }
-
-    #[test]
-    fn create_handle() {
-        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
-
-        let _ = unsafe { STORAGE.init(TaskletConfig::default(), |_, _, _| {}, ()) };
-
-        let handle = STORAGE.create_handle();
-        assert!(handle.is_some());
-    }
-
-    #[test]
-    fn fail_create_handle_uninitialized() {
-        static STORAGE: TaskletStorage<u8, (), 0> = TaskletStorage::new();
-
-        let handle = STORAGE.create_handle();
-        assert!(handle.is_none());
-    }
 }

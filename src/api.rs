@@ -5,11 +5,7 @@ pub mod init_error;
 pub mod runtime_api;
 pub mod runtime_error;
 
-pub(crate) mod system_api;
-
 pub use self::init_api::InitApi;
 pub use self::init_error::InitError;
 pub use self::runtime_api::RuntimeApi;
 pub use self::runtime_error::RuntimeError;
-
-pub(crate) use self::system_api::SystemApi;

@@ -1,6 +1,7 @@
 //! Configuration for creating tasklets.
 
 /// Configuration for tasklets.
+#[derive(Copy, Clone)]
 pub struct TaskletConfig {
     /// Name of the tasklet.
     pub name: &'static str,

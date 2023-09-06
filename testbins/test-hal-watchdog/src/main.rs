@@ -7,8 +7,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
 use aerugo::{
-    hal::drivers::Milliseconds, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage, AERUGO,
+    hal::drivers::Milliseconds, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage,
 };
 use calldwell::with_rtt_out;
 use cortex_m::asm;
@@ -49,7 +49,7 @@ fn long_task(_: (), context: &mut LongTaskContext, _: &dyn RuntimeApi) {
 static SHORT_TASK_STORAGE: TaskletStorage<(), ShortTaskContext, 0> = TaskletStorage::new();
 static LONG_TASK_STORAGE: TaskletStorage<(), LongTaskContext, 0> = TaskletStorage::new();
 
-fn initialize_tasks() {
+fn initialize_tasks(aerugo: &'static impl InitApi) {
     let short_task_config = TaskletConfig {
         name: "ShortTask",
         ..Default::default()
@@ -63,7 +63,7 @@ fn initialize_tasks() {
     let short_task_context = ShortTaskContext::default();
     let long_task_context = LongTaskContext::default();
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             short_task_config,
             short_task,
@@ -72,7 +72,7 @@ fn initialize_tasks() {
         )
         .expect("Unable to create short task!");
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             long_task_config,
             long_task,
@@ -89,10 +89,10 @@ fn initialize_tasks() {
         .create_handle()
         .expect("Unable to create short task handle!");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&short_task_handle, None)
         .expect("Unable to subscribe short task to cyclic execution!");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&long_task_handle, None)
         .expect("Unable to subscribe long task to cyclic execution!");
 }
@@ -101,11 +101,11 @@ fn initialize_tasks() {
 fn main() -> ! {
     calldwell::start_session();
 
-    AERUGO.initialize(SystemHardwareConfig {
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig {
         watchdog_timeout: Milliseconds::secs(5),
     });
 
-    initialize_tasks();
+    initialize_tasks(aerugo);
 
-    AERUGO.start();
+    aerugo.start();
 }

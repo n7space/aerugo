@@ -6,7 +6,7 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 use aerugo::{
-    logln, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage, AERUGO,
+    logln, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 use rt::entry;
 
@@ -43,7 +43,7 @@ static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStor
 
 #[entry]
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
     logln!("Hello, world! Aerugo initialized!");
 
@@ -54,7 +54,7 @@ fn main() -> ! {
     };
     let dummy_task_context = DummyTaskContext::default();
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(
             dummy_task_config,
             dummy_task,
@@ -69,11 +69,11 @@ fn main() -> ! {
 
     logln!("Subscribing tasks...");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_cyclic(&dummy_task_handle, None)
         .expect("Unable to subscribe dummy task to cyclic execution!");
 
     logln!("Starting the system!");
 
-    AERUGO.start();
+    aerugo.start();
 }

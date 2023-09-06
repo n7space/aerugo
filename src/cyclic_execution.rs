@@ -2,8 +2,7 @@
 //!
 //! This module contains a structure which holds information about cyclic execution of tasklets.
 
-use crate::aerugo::AERUGO;
-use crate::api::SystemApi;
+use crate::aerugo::Aerugo;
 use crate::data_provider::DataProvider;
 use crate::tasklet::TaskletPtr;
 use crate::time::MillisDurationU32;
@@ -24,7 +23,7 @@ impl CyclicExecution {
 
     /// Wakes that stored tasklet.
     pub(crate) fn wake_tasklet(&self) {
-        AERUGO.wake_tasklet(&self.tasklet);
+        Aerugo::wake_tasklet(&self.tasklet);
     }
 }
 

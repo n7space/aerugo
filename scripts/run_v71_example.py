@@ -3,15 +3,6 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Tuple
 
-from calldwell import init_default_logger
-from calldwell.gdb_client import GDBClient
-from calldwell.rtt_client import RTTClient
-from calldwell.rust_helpers import (
-    RTT_SECTION_ID,
-    RTT_SECTION_SEARCHED_MEMORY_LENGTH,
-    RTT_SECTION_SYMBOL_NAME,
-)
-from calldwell.ssh_client import SSHClient
 from tests.requirements.test.test_utils import (
     BOARD_GDB_PORT,
     BOARD_HOSTNAME,
@@ -21,6 +12,16 @@ from tests.requirements.test.test_utils import (
     GDB_EXECUTABLE,
     build_cargo_app,
 )
+
+from calldwell import init_default_logger
+from calldwell.gdb_client import GDBClient
+from calldwell.rtt_client import RTTClient
+from calldwell.rust_helpers import (
+    RTT_SECTION_ID,
+    RTT_SECTION_SEARCHED_MEMORY_LENGTH,
+    RTT_SECTION_SYMBOL_NAME,
+)
+from calldwell.ssh_client import SSHClient
 
 # This script should be run from project's root dir, not from `scripts/`!
 EXAMPLES_DIR_PATH = Path("./examples")

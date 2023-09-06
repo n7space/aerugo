@@ -2,9 +2,9 @@
 //!
 //! This is used to create an API for the user to enable particular events for a tasklet.
 
-use crate::aerugo::AERUGO;
-use crate::api::{InitError, SystemApi};
+use crate::api::InitError;
 use crate::event::{EventId, EventSet};
+use crate::event_manager::EventManager;
 
 /// Helper struct to subscribe tasklet to particular events.
 ///
@@ -17,6 +17,8 @@ use crate::event::{EventId, EventSet};
 pub struct EventEnabler {
     /// Set to which events will be added.
     event_set: &'static EventSet,
+    /// Event manager.
+    event_manager: &'static EventManager,
 }
 
 impl EventEnabler {
@@ -24,8 +26,11 @@ impl EventEnabler {
     ///
     /// # Parameters
     /// * `event_set` - Set to which events will be added.
-    pub(crate) fn new(event_set: &'static EventSet) -> Self {
-        EventEnabler { event_set }
+    pub(crate) fn new(event_set: &'static EventSet, event_manager: &'static EventManager) -> Self {
+        EventEnabler {
+            event_set,
+            event_manager,
+        }
     }
 
     /// Enabled given event.
@@ -38,7 +43,7 @@ impl EventEnabler {
     /// # Return
     /// `Self` reference if successful, `InitError` otherwise.
     pub fn enable(&self, event_id: EventId) -> Result<&Self, InitError> {
-        let event = match AERUGO.get_event(event_id) {
+        let event = match self.event_manager.get_event(event_id) {
             Some(event) => event,
             None => return Err(InitError::EventNotFound(event_id)),
         };

@@ -1,6 +1,6 @@
 use aerugo::{
-    logln, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage, AERUGO,
+    logln, Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
+    SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 
 struct TaskAContext {
@@ -35,9 +35,9 @@ static TASK_B_STORAGE: TaskletStorage<u8, TaskBContext, 0> = TaskletStorage::new
 static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 
 fn main() -> ! {
-    AERUGO.initialize(SystemHardwareConfig::default());
+    let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    AERUGO
+    aerugo
         .create_message_queue(&QUEUE_X)
         .expect("Unable to create QueueX");
 
@@ -61,10 +61,10 @@ fn main() -> ! {
         queue_handle: queue_x_handle,
     };
 
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
         .expect("Unable to create TaskA");
-    AERUGO
+    aerugo
         .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
         .expect("Unable to create TaskB");
 
@@ -75,10 +75,10 @@ fn main() -> ! {
         .create_handle()
         .expect("Unable to create TaskB handle");
 
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&task_a_handle, &queue_x_handle)
         .expect("Unable to subscribe TaskA to QueueX");
-    AERUGO
+    aerugo
         .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
         .expect("Unable to subscribe TaskB to QueueX");
 
@@ -86,5 +86,5 @@ fn main() -> ! {
         .send_data(0)
         .expect("Unable to send data to QueueX");
 
-    AERUGO.start();
+    aerugo.start();
 }
