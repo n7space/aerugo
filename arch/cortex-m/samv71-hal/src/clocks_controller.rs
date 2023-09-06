@@ -14,9 +14,14 @@ pub mod config;
 pub mod interrupt;
 pub mod status;
 
-use crate::pac;
 pub use interrupt::Interrupts;
 pub use status::Status;
+
+use self::config::main_rc::*;
+use self::config::master_clock::*;
+use self::config::pck::*;
+use crate::pac;
+use cortex_m::asm;
 
 /// Structure representing Power Management Controller (PMC).
 ///
@@ -187,5 +192,105 @@ impl ClocksController {
             mco_failure_event_detected: masks.cfdev().bit_is_set(),
             slow_oscillator_error: masks.xt32kerr().bit_is_set(),
         }
+    }
+
+    /// Changes main internal RC oscillator frequency.
+    /// Will block until the frequency is changed by watching main RC status bit in
+    /// PMC status register (effectively clearing some of it's flags, read "Safety" for more details).
+    ///
+    /// # Parameters
+    /// * `frequency` - Target frequency of internal RC oscillator.
+    ///                 Can be created from fugit's Megahertz type.
+    ///
+    /// # Safety
+    /// If you'll call this function while crystal oscillator's clock failure detection is active,
+    /// and you're not using interrupts to catch clock failure events, and if clock failure happens
+    /// during this function, then it's possible that this function will clear it's bit in status register
+    /// by reading it, and your code will never know about it. To prevent that issue, use interrupts to
+    /// catch clock failure events, and you'll always read status register first.
+    pub fn set_main_rc_frequency(&mut self, frequency: MainRcFrequency) {
+        // Wait until main RC oscillator is stabilized
+        // to make sure it's safe to modify the frequency
+        while !self.status().main_rc_stabilized {
+            asm::nop();
+        }
+
+        self.pmc
+            .ckgr_mor
+            .modify(|_, w| w.moscrcf().variant(frequency.into()));
+
+        // Wait until main RC oscillator is stabilized
+        // to make sure the frequency is stabilized
+        while !self.status().main_rc_stabilized {
+            asm::nop();
+        }
+    }
+
+    /// Returns configured internal RC oscillator frequency.
+    /// This function does not perform actual clock measurement, it returns the value from the register.
+    ///
+    /// # Returns
+    /// Main RC frequency value. This type can be converted to fugit's Megahertz type
+    pub fn main_rc_frequency(&self) -> MainRcFrequency {
+        todo!()
+    }
+
+    /// Configures master clock (MCK) source, frequency and divider.
+    ///
+    /// Master clock changes affects:
+    /// * Free running clock (FCLK), which has frequency equal to undivided MCK frequency,
+    /// * Processor clock (HCLK), which has frequency equal to FCLK,
+    /// * SysTick external clock, which has frequency equal to FCLK divided by 8,
+    /// * Peripheral clocks, which have frequency equal to MCK.
+    ///
+    /// For details, consult SAMV71 datasheet, chapter 31 - Power Management Controller.
+    ///
+    /// # Safety
+    /// You **should** follow Recommended Programming Sequence of PMC, described in section 31.17
+    /// of SAMV71 datasheet.
+    ///
+    /// In summary:
+    /// * If MAINCK will be used as MCK source, it must be correctly configured.
+    ///   If you intend to use crystal oscillator, you must switch MAINCK source to it before calling this function.
+    /// * If PLLA will be used as MCK source, it must be correctly configured before calling this function.
+    pub fn configure_master_clock(&mut self, _config: MasterClockConfig) {
+        todo!()
+    }
+
+    /// Returns current master clock configuration.
+    pub fn master_clock_config(&self) -> MasterClockConfig {
+        todo!()
+    }
+
+    /// Returns `true` if processor clock (HCLK) is currently enabled, `false` otherwise.
+    pub fn processor_clock_enabled(&self) -> bool {
+        todo!()
+    }
+
+    /// Returns programmable clocks (PCKs) status in form of a [list](PCKList).
+    /// If `self.programmable_clocks_status()[x]` is `true`, then PCKx is enabled.
+    pub fn programmable_clocks_status(&self) -> PCKList {
+        todo!()
+    }
+
+    /// Enables provided programmable clocks (PCKs).
+    /// Clocks set to `true` will be enabled, the rest will not be modified.
+    pub fn enable_programmable_clocks(&mut self, _clocks: PCKList) {
+        todo!()
+    }
+
+    /// Disables provided programmable clocks (PCKs).
+    /// Clocks set to `true` will be disabled, the rest will not be modified.
+    pub fn disable_programmable_clocks(&mut self, _clocks: PCKList) {
+        todo!()
+    }
+
+    /// Configures a programmable clock (PCK).
+    ///
+    /// # Parameters
+    /// * `clock` - Clock to be configured, only integers in inclusive range [0, 7] are valid.
+    /// * `config` - Programmable clock's configuration.
+    pub fn configure_programmable_clock(&mut self, _clock: PCK, _config: PCKConfig) {
+        todo!()
     }
 }
