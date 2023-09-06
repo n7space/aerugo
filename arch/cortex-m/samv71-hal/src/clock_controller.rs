@@ -9,6 +9,8 @@
 //! peripheral's clocks.
 //!
 //! This module can also calculate some of the clock's frequencies.
+
+pub mod config;
 pub mod interrupt;
 pub mod status;
 

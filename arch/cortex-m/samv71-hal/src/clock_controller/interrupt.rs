@@ -4,7 +4,7 @@
 ///
 /// Since it contains a lot of booleans that won't be packed, it's not automatically
 /// deriving `Copy`. Clone it manually instead.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct Interrupts {
     /// Main crystal oscillator status interrupt.
     pub mco_stabilized: bool,
