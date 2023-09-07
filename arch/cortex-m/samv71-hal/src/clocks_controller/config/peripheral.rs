@@ -1,8 +1,10 @@
 //! This module contains structures related to peripheral clocks configuration.
 
+use crate::pac::pmc::pcr::GCLKCSSSELECT_A;
+
 /// Enumeration representing list of all peripherals that use peripheral clocks managed by Clock Controller.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Peripheral {
+pub enum PeripheralId {
     /// UART 0
     UART0 = 7,
     /// UART 1
@@ -106,3 +108,69 @@ pub enum Peripheral {
     /// Inter-IC Sound controller 1
     I2SC1 = 70,
 }
+
+/// Structure representing peripheral clock configuration.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct PeripheralClockConfig {
+    /// True, if peripheral clock is/should be enabled.
+    pub enabled: bool,
+    /// Generic clock configuration.
+    pub generic_clock: GenericClockConfig,
+}
+
+/// Structure representing generic clock configuration.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct GenericClockConfig {
+    /// True, if generic clock is/should be enabled.
+    pub enabled: bool,
+    /// Generic clock source
+    pub source: GenericClockSource,
+    /// Generic clock divider.
+    pub divider: GenericClockDivider,
+}
+
+/// Enumeration representing available generic clock sources.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum GenericClockSource {
+    /// Slow clock (SLCK).
+    SlowClock,
+    /// Main clock (MAINCK).
+    MainClock,
+    /// PLL A clock.
+    PLLA,
+    /// USB UTMI PLL clock.
+    USBPLL,
+    /// Master clock (MCK).
+    MasterClock,
+}
+
+impl From<GCLKCSSSELECT_A> for GenericClockSource {
+    fn from(value: GCLKCSSSELECT_A) -> Self {
+        match value {
+            GCLKCSSSELECT_A::SLOW_CLK => GenericClockSource::SlowClock,
+            GCLKCSSSELECT_A::MAIN_CLK => GenericClockSource::MainClock,
+            GCLKCSSSELECT_A::PLLA_CLK => GenericClockSource::PLLA,
+            GCLKCSSSELECT_A::UPLL_CLK => GenericClockSource::USBPLL,
+            GCLKCSSSELECT_A::MCK_CLK => GenericClockSource::MasterClock,
+        }
+    }
+}
+
+impl From<GenericClockSource> for GCLKCSSSELECT_A {
+    fn from(value: GenericClockSource) -> Self {
+        match value {
+            GenericClockSource::SlowClock => GCLKCSSSELECT_A::SLOW_CLK,
+            GenericClockSource::MainClock => GCLKCSSSELECT_A::MAIN_CLK,
+            GenericClockSource::PLLA => GCLKCSSSELECT_A::PLLA_CLK,
+            GenericClockSource::USBPLL => GCLKCSSSELECT_A::UPLL_CLK,
+            GenericClockSource::MasterClock => GCLKCSSSELECT_A::MCK_CLK,
+        }
+    }
+}
+
+/// Type representing generic clock divider.
+/// Since this prescaler works exactly the same as PCK prescaler,
+/// it's going to be re-used.
+///
+/// For more info, go to [`PCKPrescaler`](super::pck::PCKPrescaler) documentation.
+pub type GenericClockDivider = super::pck::PCKPrescaler;

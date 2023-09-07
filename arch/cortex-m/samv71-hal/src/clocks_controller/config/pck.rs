@@ -1,11 +1,19 @@
 //! This module contains structures related to Programmable Clocks (PCK) configuration.
 
+use crate::pac::pmc::pck::CSSSELECT_A;
+
 /// Constant indicating the amount of PCKs supported by SAMV71 MCU.
 pub const PROGRAMMABLE_CLOCKS_SUPPORTED: usize = 8;
 
 /// Structure representing Programmable Clock (PCK) configuration.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct PCKConfig {}
+pub struct PCKConfig {
+    /// Programmable clock's source
+    pub source: PCKSource,
+    /// Programmable clock's prescaler. Source clock is divided by this value.
+    /// Valid range for prescaler is [2; 256], inclusive.
+    pub prescaler: PCKPrescaler,
+}
 
 /// Type alias for list of programmable clock statuses
 pub type PCKList = [bool; PROGRAMMABLE_CLOCKS_SUPPORTED];
@@ -64,5 +72,119 @@ impl From<PCK> for usize {
             PCK::PCK6 => 6,
             PCK::PCK7 => 7,
         }
+    }
+}
+
+/// Enumeration listing available Programmable Clock sources.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PCKSource {
+    /// Slow clock (SLCK).
+    SlowClock,
+    /// Main clock (MAINCK).
+    MainClock,
+    /// PLL A clock.
+    PLLA,
+    /// USB UTMI PLL clock.
+    USBPLL,
+    /// Master clock (MCK).
+    MasterClock,
+}
+
+impl From<CSSSELECT_A> for PCKSource {
+    fn from(value: CSSSELECT_A) -> Self {
+        match value {
+            CSSSELECT_A::SLOW_CLK => PCKSource::SlowClock,
+            CSSSELECT_A::MAIN_CLK => PCKSource::MainClock,
+            CSSSELECT_A::PLLA_CLK => PCKSource::PLLA,
+            CSSSELECT_A::UPLL_CLK => PCKSource::USBPLL,
+            CSSSELECT_A::MCK => PCKSource::MasterClock,
+        }
+    }
+}
+
+impl From<PCKSource> for CSSSELECT_A {
+    fn from(value: PCKSource) -> Self {
+        match value {
+            PCKSource::SlowClock => CSSSELECT_A::SLOW_CLK,
+            PCKSource::MainClock => CSSSELECT_A::MAIN_CLK,
+            PCKSource::PLLA => CSSSELECT_A::PLLA_CLK,
+            PCKSource::USBPLL => CSSSELECT_A::UPLL_CLK,
+            PCKSource::MasterClock => CSSSELECT_A::MCK,
+        }
+    }
+}
+
+/// Structure representing PCK prescaler.
+/// Valid range of PCK prescaler is [2, 256], inclusive.
+///
+/// This is a convenience structure that makes it impossible to create invalid prescaler values,
+/// as prescaler value in the register is shifted by 1, and it's not reasonable to set the prescaler
+/// to 0, as it stops the timer (it should be disabled instead, or dedicated function should be provided
+/// for that, if needed).
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct PCKPrescaler {
+    /// User value of the prescaler.
+    value: u16,
+}
+
+/// Enumeration representing prescaler errors.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PrescalerError {
+    /// Tried to create prescaler which value is out of range.
+    /// Value is provided along error code.
+    OutOfRange(u16),
+}
+
+impl PCKPrescaler {
+    /// Create new instance of PCKPrescaler.
+    ///
+    /// # Parameters
+    /// * `prescaler` - Value of the prescaler. Valid range is [2, 256], inclusive.
+    ///
+    /// # Returns
+    /// Ok(PCKPrescaler) if value is correct, Err(()) otherwise.
+    pub fn new(prescaler: u16) -> Result<Self, PrescalerError> {
+        if !(2..=256).contains(&prescaler) {
+            Err(PrescalerError::OutOfRange(prescaler))
+        } else {
+            Ok(PCKPrescaler { value: prescaler })
+        }
+    }
+
+    /// Returns current, user-provided value of the prescaler.
+    pub fn value(&self) -> u16 {
+        self.value
+    }
+
+    /// Converts the user value of prescaler into value that can be put into PCK register.
+    ///
+    /// # Safety
+    /// Usage of this function is safe as long as the value invariant (it must be in [2, 256]
+    /// inclusive range) is enforced.
+    pub(crate) fn into_register_value(self) -> u8 {
+        // We're converting [2, 256] range into [1, 255], which
+        // always fits in 8-bit unsigned, so it's safe to convert.
+        (self.value - 1) as u8
+    }
+
+    /// Converts value read from the register into PCKPrescaler.
+    /// Will panic if an invalid value is read.
+    pub(crate) fn from_register_value(value: u8) -> PCKPrescaler {
+        PCKPrescaler::new((value as u16) + 1)
+            .expect("Invalid prescaler value read from PMC registers")
+    }
+}
+
+impl TryFrom<u16> for PCKPrescaler {
+    type Error = PrescalerError;
+
+    fn try_from(prescaler: u16) -> Result<Self, Self::Error> {
+        PCKPrescaler::new(prescaler)
+    }
+}
+
+impl From<PCKPrescaler> for u16 {
+    fn from(prescaler: PCKPrescaler) -> Self {
+        prescaler.value
     }
 }

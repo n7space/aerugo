@@ -20,7 +20,8 @@ pub use status::Status;
 use self::config::main_rc::*;
 use self::config::master_clock::*;
 use self::config::pck::*;
-use crate::pac;
+use self::config::peripheral::*;
+use crate::pac::PMC;
 use cortex_m::asm;
 
 /// Structure representing Power Management Controller (PMC).
@@ -36,12 +37,12 @@ use cortex_m::asm;
 /// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct ClocksController {
     /// PMC instance.
-    pmc: pac::PMC,
+    pmc: PMC,
 }
 
 impl ClocksController {
     /// Create new Clock controller instance
-    pub const fn new(pmc: pac::PMC) -> Self {
+    pub const fn new(pmc: PMC) -> Self {
         ClocksController { pmc }
     }
 
@@ -209,21 +210,15 @@ impl ClocksController {
     /// by reading it, and your code will never know about it. To prevent that issue, use interrupts to
     /// catch clock failure events, and you'll always read status register first.
     pub fn set_main_rc_frequency(&mut self, frequency: MainRcFrequency) {
-        // Wait until main RC oscillator is stabilized
-        // to make sure it's safe to modify the frequency
-        while !self.status().main_rc_stabilized {
-            asm::nop();
-        }
+        // Make sure that main RC oscillator is ready to be changed
+        self.wait_until_main_rc_stabilizes();
 
         self.pmc
             .ckgr_mor
             .modify(|_, w| w.moscrcf().variant(frequency.into()));
 
-        // Wait until main RC oscillator is stabilized
-        // to make sure the frequency is stabilized
-        while !self.status().main_rc_stabilized {
-            asm::nop();
-        }
+        // Wait until the changes take effect
+        self.wait_until_main_rc_stabilizes();
     }
 
     /// Returns configured internal RC oscillator frequency.
@@ -231,8 +226,22 @@ impl ClocksController {
     ///
     /// # Returns
     /// Main RC frequency value. This type can be converted to fugit's Megahertz type
+    ///
+    /// # Remarks
+    /// This function will panic if an unexpected value is read from register. It should never
+    /// happen under normal circumstances, assuming that user doesn't try to manually write
+    /// an invalid value to this register and that there's no unexpected hardware issue.
     pub fn main_rc_frequency(&self) -> MainRcFrequency {
-        todo!()
+        // If an invalid value is read from here, it's either a very nasty user error or
+        // possible hardware bug/issue, so it should crash program as it's not intended to
+        // ever happen.
+        self.pmc
+            .ckgr_mor
+            .read()
+            .moscrcf()
+            .variant()
+            .expect("invalid value of main RC oscillator frequency read from PMC main oscillator register")
+            .into()
     }
 
     /// Configures master clock (MCK) source, frequency and divider.
@@ -253,36 +262,74 @@ impl ClocksController {
     /// * If MAINCK will be used as MCK source, it must be correctly configured.
     ///   If you intend to use crystal oscillator, you must switch MAINCK source to it before calling this function.
     /// * If PLLA will be used as MCK source, it must be correctly configured before calling this function.
-    pub fn configure_master_clock(&mut self, _config: MasterClockConfig) {
-        todo!()
+    pub fn configure_master_clock(&mut self, config: MasterClockConfig) {
+        // Make sure that master clock is ready for changes
+        self.wait_until_master_clock_is_ready();
+
+        self.pmc.mckr.modify(|_, w| {
+            w.css()
+                .variant(config.source.into())
+                .pres()
+                .variant(config.prescaler.into())
+                .mdiv()
+                .variant(config.divider.into())
+        });
+
+        // Wait until the changes take effect
+        self.wait_until_master_clock_is_ready();
     }
 
     /// Returns current master clock configuration.
     pub fn master_clock_config(&self) -> MasterClockConfig {
-        todo!()
+        let reg = self.pmc.mckr.read();
+
+        MasterClockConfig {
+            source: reg.css().variant().into(),
+            prescaler: reg.pres().variant().into(),
+            divider: reg.mdiv().variant().into(),
+        }
     }
 
     /// Returns `true` if processor clock (HCLK) is currently enabled, `false` otherwise.
     pub fn processor_clock_enabled(&self) -> bool {
-        todo!()
+        self.pmc.scsr.read().hclks().bit_is_set()
     }
 
     /// Returns programmable clocks (PCKs) status in form of a [list](PCKList).
     /// If `self.programmable_clocks_status()[x]` is `true`, then PCKx is enabled.
     pub fn programmable_clocks_status(&self) -> PCKList {
-        todo!()
+        let reg = self.pmc.scsr.read();
+
+        [
+            reg.pck0().bit_is_set(),
+            reg.pck1().bit_is_set(),
+            reg.pck2().bit_is_set(),
+            reg.pck3().bit_is_set(),
+            reg.pck4().bit_is_set(),
+            reg.pck5().bit_is_set(),
+            reg.pck6().bit_is_set(),
+            reg.pck7().bit_is_set(),
+        ]
     }
 
-    /// Enables provided programmable clocks (PCKs).
-    /// Clocks set to `true` will be enabled, the rest will not be modified.
-    pub fn enable_programmable_clocks(&mut self, _clocks: PCKList) {
-        todo!()
+    /// Enables provided programmable clock (PCK).
+    pub fn enable_programmable_clock(&mut self, clock: PCK) {
+        /// PMC bits in System Clock Enable Register start at 8th bit
+        const PMC_BITS_START: u32 = 8;
+        // Since `clock` has PCK type, it's underlying value is always an index of PCK,
+        // so we can safely shift the bit to the left using it as an offset.
+        let pck_mask = 1u32 << (PMC_BITS_START + (clock as u32));
+        self.pmc.scer.write(|w| unsafe { w.bits(pck_mask) });
     }
 
-    /// Disables provided programmable clocks (PCKs).
-    /// Clocks set to `true` will be disabled, the rest will not be modified.
-    pub fn disable_programmable_clocks(&mut self, _clocks: PCKList) {
-        todo!()
+    /// Disables provided programmable clock (PCK).
+    pub fn disable_programmable_clock(&mut self, clock: PCK) {
+        /// PMC bits in System Clock Disable Register start at 8th bit
+        const PMC_BITS_START: u32 = 8;
+        // Since `clock` has PCK type, it's underlying value is always an index of PCK,
+        // so we can safely shift the bit to the left using it as an offset.
+        let pck_mask = 1u32 << (PMC_BITS_START + (clock as u32));
+        self.pmc.scdr.write(|w| unsafe { w.bits(pck_mask) });
     }
 
     /// Configures a programmable clock (PCK).
@@ -290,7 +337,135 @@ impl ClocksController {
     /// # Parameters
     /// * `clock` - Clock to be configured, only integers in inclusive range [0, 7] are valid.
     /// * `config` - Programmable clock's configuration.
-    pub fn configure_programmable_clock(&mut self, _clock: PCK, _config: PCKConfig) {
-        todo!()
+    pub fn configure_programmable_clock(&mut self, clock: PCK, config: PCKConfig) {
+        self.pmc.pck[clock as usize].write(|w| {
+            w.css()
+                .variant(config.source.into())
+                .pres()
+                .variant(config.prescaler.into_register_value())
+        });
+    }
+
+    /// Configures peripheral clock.
+    /// Can be used to disable or enable peripheral and generic clocks,
+    /// and to configure generic clock's source and divider.
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral which clocks will be configured.
+    /// * `config` - Clock configuration.
+    pub fn configure_peripheral_clocks(
+        &mut self,
+        peripheral: PeripheralId,
+        config: PeripheralClockConfig,
+    ) {
+        let clock_id = peripheral as u8;
+
+        // If the clock needs to be disabled, do it without modifying the rest of configuration.
+        // as we don't want to accidentally break something by writing potentially invalid configuration.
+        if !config.enabled {
+            self.pmc
+                .pcr
+                .modify(|_, w| w.pid().variant(clock_id).cmd().set_bit().en().clear_bit());
+            return;
+        }
+
+        // If not, we're doing a full config. Since changing generic clock divider along with
+        // other generic clock parameters is unsafe, it needs to be done smart.
+        let current_config = self.peripheral_clocks_config(peripheral);
+        // If either the clock state or source is supposed to change, two-step operation will
+        // be needed to configure the clocks.
+        let second_write_needed = (current_config.generic_clock.enabled
+            != config.generic_clock.enabled)
+            || (current_config.generic_clock.source != config.generic_clock.source);
+
+        self.pmc.pcr.write(|w| {
+            let w = w
+                .pid()
+                .variant(clock_id)
+                .gclkcss()
+                .variant(config.generic_clock.source.into())
+                .cmd()
+                .set_bit()
+                .en()
+                .set_bit()
+                .gclken()
+                .variant(config.generic_clock.enabled);
+
+            // If both generic clock source and state is unchanged, then generic clock
+            // divider can be safely set in this operation.
+            if !second_write_needed {
+                w.gclkdiv()
+                    .variant(config.generic_clock.divider.into_register_value())
+            } else {
+                w
+            }
+        });
+
+        // If either generic clock or source has changed, and clock divider is supposed to
+        // change too, perform second write.
+        //
+        // `modify` cannot be used here, because in order to read correct values from this register,
+        // it must be written with "CMD" bit equal to 0 first, so an explicit read + conversion
+        // would have to be applied. It's shorter to copy the previous call and add the divider
+        // setting without check :)
+        if second_write_needed {
+            self.pmc.pcr.write(|w| {
+                w.pid()
+                    .variant(clock_id)
+                    .gclkcss()
+                    .variant(config.generic_clock.source.into())
+                    .cmd()
+                    .set_bit()
+                    .gclkdiv()
+                    .variant(config.generic_clock.divider.into_register_value())
+                    .en()
+                    .set_bit()
+                    .gclken()
+                    .variant(config.generic_clock.enabled)
+            });
+        }
+    }
+
+    /// Returns configuration of clocks for specified peripheral.
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral which clocks configuration will be returned.
+    ///
+    /// # Remarks
+    /// This function will panic if an unexpected value is read from register. It should never
+    /// happen under normal circumstances, assuming that user doesn't try to manually write
+    /// an invalid value to this register and that there's no unexpected hardware issue.
+    pub fn peripheral_clocks_config(&self, peripheral: PeripheralId) -> PeripheralClockConfig {
+        let clock_id = peripheral as u8;
+        // This register needs to be written with peripheral ID and command bit set to 0,
+        // to fill it's content with configuration for specified peripheral.
+        self.pmc
+            .pcr
+            .write(|w| w.pid().variant(clock_id).cmd().clear_bit());
+
+        let reg = self.pmc.pcr.read();
+
+        PeripheralClockConfig {
+            enabled: reg.en().bit_is_set(),
+            generic_clock: GenericClockConfig {
+                enabled: reg.gclken().bit_is_set(),
+                source: reg.gclkcss().variant().expect("invalid value of generic clock source read from PMC peripheral clocks configuration register").into(),
+                divider: GenericClockDivider::from_register_value(reg.gclkdiv().bits()),
+            }
+        }
+    }
+
+    /// Blocks current thread until main RC oscillator is stabilized.
+    fn wait_until_main_rc_stabilizes(&mut self) {
+        while !self.status().main_rc_stabilized {
+            asm::nop();
+        }
+    }
+
+    /// Blocks current thread until Master Clock becomes ready.
+    fn wait_until_master_clock_is_ready(&mut self) {
+        while !self.status().master_clock_ready {
+            asm::nop();
+        }
     }
 }

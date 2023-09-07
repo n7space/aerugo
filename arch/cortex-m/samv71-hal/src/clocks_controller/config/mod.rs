@@ -5,4 +5,4 @@ pub mod master_clock;
 pub mod pck;
 pub mod peripheral;
 
-pub use peripheral::Peripheral;
+pub use peripheral::PeripheralId;

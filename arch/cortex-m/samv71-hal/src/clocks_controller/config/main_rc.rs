@@ -1,6 +1,6 @@
 //! This module contains configuration structures related to Main RC oscillator.
 
-use samv71q21_pac::pmc::ckgr_mor::MOSCRCFSELECT_A;
+use crate::pac::pmc::ckgr_mor::MOSCRCFSELECT_A;
 
 use crate::time::{self, RateExtU32};
 
