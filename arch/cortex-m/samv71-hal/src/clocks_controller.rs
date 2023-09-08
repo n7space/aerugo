@@ -335,7 +335,7 @@ impl ClocksController {
     /// Configures a programmable clock (PCK).
     ///
     /// # Parameters
-    /// * `clock` - Clock to be configured, only integers in inclusive range [0, 7] are valid.
+    /// * `clock` - Clock to be configured.
     /// * `config` - Programmable clock's configuration.
     pub fn configure_programmable_clock(&mut self, clock: PCK, config: PCKConfig) {
         self.pmc.pck[clock as usize].write(|w| {
@@ -344,6 +344,11 @@ impl ClocksController {
                 .pres()
                 .variant(config.prescaler.into_register_value())
         });
+
+        // Wait until it's ready
+        while !self.programmable_clocks_status()[clock as usize] {
+            asm::nop();
+        }
     }
 
     /// Configures peripheral clock.
