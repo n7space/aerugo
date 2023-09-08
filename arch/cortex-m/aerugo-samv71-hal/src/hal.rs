@@ -1,12 +1,14 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
 use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
+use samv71_hal::clocks_controller::config::pck::{PCKConfig, PCKPrescaler, PCKSource, PCK};
+use samv71_hal::clocks_controller::config::PeripheralId;
 
-use crate::cortex_m;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
-use samv71_hal::pac::{self, PMC, TC0};
+use samv71_hal::clocks_controller::ClocksController;
+use samv71_hal::pac::{self, TC0};
 use samv71_hal::timer::channel_config::ChannelClock;
 use samv71_hal::timer::timer_config::{ExternalClock, ExternalClockSource};
 use samv71_hal::timer::waveform_config::{
@@ -51,15 +53,15 @@ impl Hal {
                 let mcu_peripherals = unsafe { pac::Peripherals::steal() };
                 let core_peripherals = unsafe { pac::CorePeripherals::steal() };
 
-                // Check if PMC is available, return `None` if it's not.
-                system_peripherals.pmc.as_ref()?;
+                // Check if Clocks Controller is available, return `None` if it's not.
+                system_peripherals.clocks_controller.as_ref()?;
 
                 Some(UserPeripherals {
                     chip_id: Some(mcu_peripherals.CHIPID),
                     timer_counter1: Some(mcu_peripherals.TC1),
                     timer_counter2: Some(mcu_peripherals.TC2),
                     timer_counter3: Some(mcu_peripherals.TC3),
-                    pmc: system_peripherals.pmc.take(),
+                    clocks_controller: system_peripherals.clocks_controller.take(),
                     nvic: Some(core_peripherals.NVIC),
                 })
             } else {
@@ -113,7 +115,7 @@ impl Hal {
             timer_ch0: None,
             timer_ch1: None,
             timer_ch2: None,
-            pmc: Some(mcu_peripherals.PMC),
+            clocks_controller: Some(ClocksController::new(mcu_peripherals.PMC)),
         }
     }
 }
@@ -152,16 +154,16 @@ impl AerugoHal for Hal {
                     .expect("HAL is not initialized")
             };
 
-            if peripherals.pmc.is_none() {
-                // If PMC is not available, it means that system has already been initialized,
+            if peripherals.clocks_controller.is_none() {
+                // If clocks controller is not available, it means that system has already been initialized,
                 // so this function cannot proceed.
                 return Err(HalError::HardwareAlreadyInitialized);
             }
-            // This should realistically never panic, as we checked the existence of PMC earlier.
-            let pmc = peripherals
-                .pmc
-                .as_ref()
-                .expect("PMC is missing from system peripherals");
+            // This should realistically never panic, as we checked the existence of clocks controller earlier.
+            let clocks_controller = peripherals
+                .clocks_controller
+                .as_mut()
+                .expect("Clocks controller is missing from system peripherals");
 
             // Configure watchdog
             match peripherals.watchdog.configure(WatchdogConfig {
@@ -173,7 +175,7 @@ impl AerugoHal for Hal {
             };
 
             // Configure system timer
-            let (ch0, ch1, ch2) = configure_timer(&mut peripherals.timer, pmc);
+            let (ch0, ch1, ch2) = configure_timer(&mut peripherals.timer, clocks_controller);
 
             peripherals.timer_ch0.replace(ch0);
             peripherals.timer_ch1.replace(ch1);
@@ -239,7 +241,7 @@ type Tc0Channels = (
 /// Configures a timer for HAL usage.
 ///
 /// This function configures Timer (using hardware TC0 instance) in Waveform mode with proper
-/// input clocks (configured via PMC), and chains it's channels to achieve high-resolution
+/// input clocks (configured via Clocks Controller), and chains it's channels to achieve high-resolution
 /// time source for the system.
 ///
 /// Timer's source clock first goes into channel 0, which generates RC compare events that
@@ -249,9 +251,12 @@ type Tc0Channels = (
 ///
 /// # Parameters
 /// * `timer` - HAL Timer instance
-/// * `pmc` - PAC PMC instance
-fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
-    configure_timer_pmc(pmc);
+/// * `clocks_controller` - HAL clocks controller instance
+fn configure_timer(
+    timer: &mut Timer<TC0>,
+    clocks_controller: &mut ClocksController,
+) -> Tc0Channels {
+    configure_timer_clocks(clocks_controller);
 
     // If any of the configurations is not available, user cannot do anything about it and it
     // certainly should not pass any tests, so just hard fault it.
@@ -304,23 +309,26 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
 /// PCK6 uses MAINCK clock source (which is 12MHz by default), and divides it by 12 to get
 /// 1MHz input clock, used by the timer to achieve 1ns resolution.
 ///
-fn configure_timer_pmc(pmc: &PMC) {
+fn configure_timer_clocks(clocks_controller: &mut ClocksController) {
     // Configure PCK6 for 1MHz TC0 output
     // Source: MAINCK (12MHz by default)
-    // Divider: /6 (TODO: is there a hidden /2 prescaler somewhere?)
-    pmc.pck[6].write(|w| w.css().main_clk().pres().variant(5));
+    // Divider: /12
+    // Unwrap, since 12 is a valid prescaler.
+    clocks_controller.configure_programmable_clock(
+        PCK::PCK6,
+        PCKConfig {
+            source: PCKSource::MainClock,
+            prescaler: PCKPrescaler::new(12).unwrap(),
+        },
+    );
 
     // Enable TC0 CH0, CH1 and CH2 peripheral clocks
-    pmc.pcer0
-        .write(|w| w.pid23().set_bit().pid24().set_bit().pid25().set_bit());
+    clocks_controller.enable_peripheral_clock(PeripheralId::TC0CH0);
+    clocks_controller.enable_peripheral_clock(PeripheralId::TC0CH1);
+    clocks_controller.enable_peripheral_clock(PeripheralId::TC0CH2);
 
     // Enable PCK6
-    pmc.scer.write(|w| w.pck6().set_bit());
-
-    // Wait until PCK6 is ready
-    while pmc.sr.read().pckrdy6().bit_is_clear() {
-        cortex_m::asm::nop();
-    }
+    clocks_controller.enable_programmable_clock(PCK::PCK6);
 }
 
 /// Converts three 16-bit values into single 48-bit value.

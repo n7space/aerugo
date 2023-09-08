@@ -1,6 +1,7 @@
 //! Module representing peripherals internally used by Aerugo.
 
-use samv71_hal::pac::{PMC, TC0};
+use samv71_hal::clocks_controller::ClocksController;
+use samv71_hal::pac::TC0;
 use samv71_hal::{
     timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform},
     watchdog::Watchdog,
@@ -21,5 +22,5 @@ pub struct SystemPeripherals {
     /// Timer's channel 2 instance.
     pub timer_ch2: Option<Channel<TC0, Ch2, Waveform>>,
     /// PMC instance. This will be stored only temporarily here, between HAL init and system config
-    pub pmc: Option<PMC>,
+    pub clocks_controller: Option<ClocksController>,
 }
