@@ -364,24 +364,17 @@ impl ClocksController {
         config: PeripheralClockConfig,
     ) {
         let clock_id = peripheral as u8;
-
-        // If the clock needs to be disabled, do it without modifying the rest of configuration.
-        // as we don't want to accidentally break something by writing potentially invalid configuration.
-        if !config.enabled {
-            self.pmc
-                .pcr
-                .modify(|_, w| w.pid().variant(clock_id).cmd().set_bit().en().clear_bit());
-            return;
-        }
-
-        // If not, we're doing a full config. Since changing generic clock divider along with
-        // other generic clock parameters is unsafe, it needs to be done smart.
         let current_config = self.peripheral_clocks_config(peripheral);
-        // If either the clock state or source is supposed to change, two-step operation will
-        // be needed to configure the clocks.
-        let second_write_needed = (current_config.generic_clock.enabled
-            != config.generic_clock.enabled)
-            || (current_config.generic_clock.source != config.generic_clock.source);
+
+        // Since changing generic clock divider along with other generic clock parameters is unsafe,
+        // it needs to be done smart.
+        let state_changed = current_config.generic_clock.enabled != config.generic_clock.enabled;
+        let source_changed = current_config.generic_clock.source != config.generic_clock.source;
+        let divider_changed = current_config.generic_clock.divider != config.generic_clock.divider;
+
+        // If either generic clock's state or source changes is changed with the divider,
+        // divider must be configured in second write operation according to datasheet.
+        let second_write_needed = (state_changed || source_changed) && divider_changed;
 
         self.pmc.pcr.write(|w| {
             let w = w
@@ -392,7 +385,7 @@ impl ClocksController {
                 .cmd()
                 .set_bit()
                 .en()
-                .set_bit()
+                .variant(config.enabled)
                 .gclken()
                 .variant(config.generic_clock.enabled);
 
@@ -402,7 +395,8 @@ impl ClocksController {
                 w.gclkdiv()
                     .variant(config.generic_clock.divider.into_register_value())
             } else {
-                w
+                w.gclkdiv()
+                    .variant(current_config.generic_clock.divider.into_register_value())
             }
         });
 
@@ -411,8 +405,8 @@ impl ClocksController {
         //
         // `modify` cannot be used here, because in order to read correct values from this register,
         // it must be written with "CMD" bit equal to 0 first, so an explicit read + conversion
-        // would have to be applied. It's shorter to copy the previous call and add the divider
-        // setting without check :)
+        // would have to be applied, and according to datasheet "All configuration fields must be
+        // correctly set". It's shorter to copy the previous call and add the divider setting without check :)
         if second_write_needed {
             self.pmc.pcr.write(|w| {
                 w.pid()
@@ -424,7 +418,7 @@ impl ClocksController {
                     .gclkdiv()
                     .variant(config.generic_clock.divider.into_register_value())
                     .en()
-                    .set_bit()
+                    .variant(config.enabled)
                     .gclken()
                     .variant(config.generic_clock.enabled)
             });
