@@ -7,13 +7,15 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
 use aerugo::{
-    hal::drivers::timer::{
-        channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Timer,
-        Waveform, TC1,
+    hal::drivers::{
+        clocks_controller::{config::PeripheralId, ClocksController},
+        timer::{
+            channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Timer,
+            Waveform, TC1,
+        },
     },
     hal::{
-        drivers::interrupt, drivers::pac::NVIC, drivers::pac::PMC,
-        drivers::timer::channel_config::ChannelInterrupts,
+        drivers::interrupt, drivers::pac::NVIC, drivers::timer::channel_config::ChannelInterrupts,
     },
     Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
@@ -84,9 +86,9 @@ fn initialize_nvic() {
     }
 }
 
-fn initialize_pmc(pmc: PMC) {
+fn initialize_clocks(mut clocks_controller: ClocksController) {
     // Enable TC1 CH0 clock
-    pmc.pcer0.write(|w| w.pid26().set_bit());
+    clocks_controller.enable_peripheral_clock(PeripheralId::TC1CH0);
 }
 
 fn initialize_timer(mut timer: Timer<TC1>) {
@@ -158,7 +160,11 @@ fn main() -> ! {
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
 
     initialize_nvic();
-    initialize_pmc(peripherals.pmc.expect("PMC already taken!"));
+    initialize_clocks(
+        peripherals
+            .clocks_controller
+            .expect("Clocks controller already taken!"),
+    );
     initialize_timer(timer);
 
     initialize_tasks(aerugo);
