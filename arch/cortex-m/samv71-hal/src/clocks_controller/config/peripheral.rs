@@ -35,18 +35,18 @@ pub enum PeripheralId {
     SPI0 = 21,
     /// Synchronous Serial Controller
     SSC = 22,
-    /// Timer/Counter 0
-    TC0 = 23,
-    /// Timer/Counter 1
-    TC1 = 24,
-    /// Timer/Counter 2
-    TC2 = 25,
-    /// Timer/Counter 3
-    TC3 = 26,
-    /// Timer/Counter 4
-    TC4 = 27,
-    /// Timer/Counter 5
-    TC5 = 28,
+    /// Timer/Counter 0, Channel 0
+    TC0CH0 = 23,
+    /// Timer/Counter 0, Channel 1
+    TC0CH1 = 24,
+    /// Timer/Counter 0, Channel 2
+    TC0CH2 = 25,
+    /// Timer/Counter 1, Channel 0
+    TC1CH1 = 26,
+    /// Timer/Counter 1, Channel 1
+    TC1CH2 = 27,
+    /// Timer/Counter 1, Channel 2
+    TC1CH3 = 28,
     /// Analog Front End 0
     AFEC0 = 29,
     /// Digital To Analog Converter
@@ -79,18 +79,18 @@ pub enum PeripheralId {
     UART3 = 45,
     /// UART 4
     UART4 = 46,
-    /// Timer/Counter 6
-    TC6 = 47,
-    /// Timer/Counter 7
-    TC7 = 48,
-    /// Timer/Counter 8
-    TC8 = 49,
-    /// Timer/Counter 9
-    TC9 = 50,
-    /// Timer/Counter 10
-    TC10 = 51,
-    /// Timer/Counter 11
-    TC11 = 52,
+    /// Timer/Counter 2, Channel 0
+    TC2CH0 = 47,
+    /// Timer/Counter 2, Channel 1
+    TC2CH1 = 48,
+    /// Timer/Counter 2, Channel 2
+    TC2CH2 = 49,
+    /// Timer/Counter 3, Channel 0
+    TC3CH0 = 50,
+    /// Timer/Counter 3, Channel 1
+    TC3CH1 = 51,
+    /// Timer/Counter 3, Channel 2
+    TC3CH2 = 52,
     /// MediaLB
     MLB = 53,
     /// AES
