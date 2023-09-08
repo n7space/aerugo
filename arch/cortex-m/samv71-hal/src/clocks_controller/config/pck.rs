@@ -115,7 +115,7 @@ impl From<PCKSource> for CSSSELECT_A {
 }
 
 /// Structure representing PCK prescaler.
-/// Valid range of PCK prescaler is [2, 256], inclusive.
+/// Valid range of PCK prescaler is (2..=256).
 ///
 /// This is a convenience structure that makes it impossible to create invalid prescaler values,
 /// as prescaler value in the register is shifted by 1, and it's not reasonable to set the prescaler
@@ -139,7 +139,7 @@ impl PCKPrescaler {
     /// Create new instance of PCKPrescaler.
     ///
     /// # Parameters
-    /// * `prescaler` - Value of the prescaler. Valid range is [2, 256], inclusive.
+    /// * `prescaler` - Value of the prescaler. Valid range is (2..=256).
     ///
     /// # Returns
     /// Ok(PCKPrescaler) if value is correct, Err(()) otherwise.
@@ -159,10 +159,10 @@ impl PCKPrescaler {
     /// Converts the user value of prescaler into value that can be put into PCK register.
     ///
     /// # Safety
-    /// Usage of this function is safe as long as the value invariant (it must be in [2, 256]
-    /// inclusive range) is enforced.
+    /// Usage of this function is safe as long as the value invariant (it must be in (2..=256) range)
+    /// is enforced.
     pub(crate) fn into_register_value(self) -> u8 {
-        // We're converting [2, 256] range into [1, 255], which
+        // We're converting (2..=256) range into (1..=255), which
         // always fits in 8-bit unsigned, so it's safe to convert.
         (self.value - 1) as u8
     }
