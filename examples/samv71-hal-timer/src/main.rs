@@ -106,7 +106,9 @@ fn main() -> ! {
 
     logln!("Doing stuff with timers...");
     let timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
-    let clocks_controller = peripherals.clocks_controller.expect("PMC already used");
+    let clocks_controller = peripherals
+        .clocks_controller
+        .expect("Clocks controller already used");
     init_clocks(clocks_controller);
     init_timer(timer);
 
