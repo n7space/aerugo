@@ -42,11 +42,11 @@ pub enum PeripheralId {
     /// Timer/Counter 0, Channel 2
     TC0CH2 = 25,
     /// Timer/Counter 1, Channel 0
-    TC1CH1 = 26,
+    TC1CH0 = 26,
     /// Timer/Counter 1, Channel 1
-    TC1CH2 = 27,
+    TC1CH1 = 27,
     /// Timer/Counter 1, Channel 2
-    TC1CH3 = 28,
+    TC1CH2 = 28,
     /// Analog Front End 0
     AFEC0 = 29,
     /// Digital To Analog Converter

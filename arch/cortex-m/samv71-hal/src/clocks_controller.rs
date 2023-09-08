@@ -313,6 +313,9 @@ impl ClocksController {
     }
 
     /// Enables provided programmable clock (PCK).
+    ///
+    /// This function waits until PCK is ready after enabling it, so there's no need
+    /// to call [`ClocksController::wait_until_programmable_clock_is_ready`] again.
     pub fn enable_programmable_clock(&mut self, clock: PCK) {
         /// PMC bits in System Clock Enable Register start at 8th bit
         const PMC_BITS_START: u32 = 8;
@@ -320,6 +323,9 @@ impl ClocksController {
         // so we can safely shift the bit to the left using it as an offset.
         let pck_mask = 1u32 << (PMC_BITS_START + (clock as u32));
         self.pmc.scer.write(|w| unsafe { w.bits(pck_mask) });
+
+        // Wait until it's ready
+        self.wait_until_programmable_clock_is_ready(clock);
     }
 
     /// Disables provided programmable clock (PCK).
@@ -344,11 +350,6 @@ impl ClocksController {
                 .pres()
                 .variant(config.prescaler.into_register_value())
         });
-
-        // Wait until it's ready
-        while !self.programmable_clocks_status()[clock as usize] {
-            asm::nop();
-        }
     }
 
     /// Enables clock of specified peripheral
@@ -505,15 +506,25 @@ impl ClocksController {
     }
 
     /// Blocks current thread until main RC oscillator is stabilized.
-    fn wait_until_main_rc_stabilizes(&mut self) {
+    pub fn wait_until_main_rc_stabilizes(&mut self) {
         while !self.status().main_rc_stabilized {
             asm::nop();
         }
     }
 
     /// Blocks current thread until Master Clock becomes ready.
-    fn wait_until_master_clock_is_ready(&mut self) {
+    pub fn wait_until_master_clock_is_ready(&mut self) {
         while !self.status().master_clock_ready {
+            asm::nop();
+        }
+    }
+
+    /// Blocks current thread until specified Programmable Clock becomes ready.
+    ///
+    /// # Parameters
+    /// * `clock` - Programmable clock to wait for.
+    pub fn wait_until_programmable_clock_is_ready(&self, clock: PCK) {
+        while !self.programmable_clocks_status()[clock as usize] {
             asm::nop();
         }
     }
