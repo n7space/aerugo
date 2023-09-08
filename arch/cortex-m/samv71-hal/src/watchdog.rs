@@ -18,7 +18,7 @@ pub use watchdog_error::WatchdogError;
 
 use self::watchdog_config::MAXIMUM_WATCHDOG_DURATION;
 use crate::pac::WDT;
-use crate::Milliseconds;
+use crate::time::MillisDurationU32 as Milliseconds;
 
 /// Structure representing a watchdog.
 ///

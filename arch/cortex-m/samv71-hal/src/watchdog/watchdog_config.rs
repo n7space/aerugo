@@ -1,6 +1,6 @@
 //! Module containing watchdog configuration types.
 
-use crate::Milliseconds;
+use crate::time::MillisDurationU32 as Milliseconds;
 
 /// Maximum duration that watchdog can wait before triggering an event.
 pub const MAXIMUM_WATCHDOG_DURATION: Milliseconds = Milliseconds::secs(16);

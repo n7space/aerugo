@@ -7,8 +7,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
 use aerugo::{
-    hal::drivers::Milliseconds, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage,
+    time::MillisDurationU32 as Milliseconds, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage,
 };
 use calldwell::with_rtt_out;
 use cortex_m::asm;

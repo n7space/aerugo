@@ -22,6 +22,7 @@ use self::config::master_clock::*;
 use self::config::pck::*;
 use self::config::peripheral::*;
 use crate::pac::PMC;
+use crate::time;
 use cortex_m::asm;
 
 /// Structure representing Power Management Controller (PMC).
@@ -233,8 +234,8 @@ impl ClocksController {
     /// an invalid value to this register and that there's no unexpected hardware issue.
     pub fn main_rc_frequency(&self) -> MainRcFrequency {
         // If an invalid value is read from here, it's either a very nasty user error or
-        // possible hardware bug/issue, so it should crash program as it's not intended to
-        // ever happen.
+        // possible hardware bug/issue, so it should crash the program as it's not intended
+        // to ever happen.
         self.pmc
             .ckgr_mor
             .read()
@@ -242,6 +243,39 @@ impl ClocksController {
             .variant()
             .expect("invalid value of main RC oscillator frequency read from PMC main oscillator register")
             .into()
+    }
+
+    /// Performs Main RC oscillator frequency measurement and returns it's value.
+    ///
+    /// # Returns
+    /// Measured frequency in hertz (as `fugit` type)
+    ///
+    /// # Measurement's precision
+    /// Frequency is calculated by multiplying the counter value by slow clock frequency.
+    /// Slow clock frequency is assumed to be exactly 32.768kHz, however, the internal slow
+    /// RC oscillator's frequency can vary between 20 and 57kHz. While having typical
+    /// frequency of 32kHz, it's still very inaccurate, so is it's used as slow clock
+    /// source during this measurement, frequency measurement may also be very inaccurate.
+    ///
+    /// In other words - use external crystal 32.768kHz oscillator for slow clock source
+    /// to perform accurate measurement, otherwise - assume very large error margin.
+    pub fn measure_main_rc_frequency(&mut self) -> time::HertzU32 {
+        /// Slow clock frequency.
+        const SLOW_CLOCK_FREQUENCY: u32 = 32768;
+
+        // Start the measurement process
+        self.pmc
+            .ckgr_mcfr
+            .write(|w| w.rcmeas().set_bit().ccss().clear_bit());
+
+        // Wait until it's finished
+        while self.pmc.ckgr_mcfr.read().mainfrdy().bit_is_clear() {
+            asm::nop();
+        }
+
+        // Calculate and return measured frequency
+        let slow_clock_ticks = self.pmc.ckgr_mcfr.read().mainf().bits() as u32;
+        time::HertzU32::Hz((slow_clock_ticks * SLOW_CLOCK_FREQUENCY) / 16)
     }
 
     /// Configures master clock (MCK) source, frequency and divider.
