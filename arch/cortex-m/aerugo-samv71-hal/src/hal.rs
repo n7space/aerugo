@@ -244,10 +244,19 @@ type Tc0Channels = (
 /// input clocks (configured via Clocks Controller), and chains it's channels to achieve high-resolution
 /// time source for the system.
 ///
-/// Timer's source clock first goes into channel 0, which generates RC compare events that
+/// Timer's source clock first goes into channel 0, which generates RA and RC compare events that
 /// toggle it's TIOA0 output, effectively dividing the input frequency by the value of RC register.
 /// TIOA0 is connected via XC1 to channel 1, which does the same thing for TIOA1 output, which is
 /// connected via XC2 to channel 2.
+///
+/// Since each channel increases it's counter value at each positive edge of input clock, to
+/// prevent unwanted clock divisions, TIOA outputs of all channels are cleared when their counter
+/// reaches some arbitrarily small value, and they are set when the counter reaches RC value, which
+/// is set to maximum.
+///
+/// Effectively, each channel drives next one with the same frequency as itself, allowing us to
+/// take raw values of each channel's counter and convert them into current time, giving us
+/// 48 bits of precision.
 ///
 /// # Parameters
 /// * `timer` - HAL Timer instance
@@ -258,8 +267,7 @@ fn configure_timer(
 ) -> Tc0Channels {
     configure_timer_clocks(clocks_controller);
 
-    // If any of the configurations is not available, user cannot do anything about it and it
-    // certainly should not pass any tests, so just hard fault it.
+    // If any of the configurations is not available, it's a panic as it's an internal bug in Aerugo.
     timer
         .configure_external_clock_source(ExternalClock::XC1, ExternalClockSource::TIOA0)
         .expect("Cannot connect TIOA0 to XC1");
@@ -267,15 +275,18 @@ fn configure_timer(
         .configure_external_clock_source(ExternalClock::XC2, ExternalClockSource::TIOA1)
         .expect("Cannot connect TIOA1 to XC2");
 
-    // If any of the channels is not available, it's a hard fault as it's an internal bug in Aerugo
+    // If any of the channels is not available, it's a panic as it's an internal bug in Aerugo.
     let ch0 = timer.channel_0.take().expect("TC0 CH0 already taken");
     let ch1 = timer.channel_1.take().expect("TC0 CH1 already taken");
     let ch2 = timer.channel_2.take().expect("TC0 CH2 already taken");
 
+    // Set channels to clear their TIOA on RA compare, and set on RC compare.
+    // Also clear them on software trigger to prevent unexpected behaviors.
     let waveform_config = WaveformModeConfig {
         tioa_effects: OutputSignalEffects {
             software_trigger: ComparisonEffect::Clear,
-            rc_comparison: ComparisonEffect::Toggle,
+            rx_comparison: ComparisonEffect::Clear,
+            rc_comparison: ComparisonEffect::Set,
             ..Default::default()
         },
         ..Default::default()
@@ -284,6 +295,12 @@ fn configure_timer(
     let mut ch0 = ch0.into_waveform_channel(waveform_config);
     let mut ch1 = ch1.into_waveform_channel(waveform_config);
     let mut ch2 = ch2.into_waveform_channel(waveform_config);
+
+    // Set RA values for all channels to some arbitrary value that's smaller than RC,
+    // to reset TIOA outputs before next overflow happens.
+    ch0.set_ra(u16::MAX / 2);
+    ch1.set_ra(u16::MAX / 2);
+    ch2.set_ra(u16::MAX / 2);
 
     // Set RC values for all channels to max, so we can achieve full 48-bit resolution
     ch0.set_rc(u16::MAX);
