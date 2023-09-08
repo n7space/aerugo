@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import List, Tuple
 
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import CalldwellRTTClient
@@ -48,8 +48,21 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
 
 
 def finish_test(ssh: SSHClient):
-    logging.info("TEST SUCCESSFUL!")
     logging.info("Finishing the test, cleaning up environment...")
     ssh.execute("pkill openocd")
     ssh.close()
     logging.info("Environment cleaned up!")
+
+
+def wait_for_messages(rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: List[str]):
+    for message in expected_messages:
+        logging.info(f"Expecting '{message}'")
+        received_message = rtt.receive_string_stream()
+        logging.info(f"Received '{received_message}'")
+        if received_message != message:
+            logging.critical(
+                "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
+                f"(expected '{message}', got '{received_message}')"
+            )
+            finish_test(ssh)
+            exit(2)
