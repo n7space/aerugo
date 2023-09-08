@@ -351,9 +351,59 @@ impl ClocksController {
         }
     }
 
-    /// Configures peripheral clock.
+    /// Enables clock of specified peripheral
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral to enable clock for.
+    pub fn enable_peripheral_clock(&mut self, peripheral: PeripheralId) {
+        let clock_id = peripheral as u8;
+        let current_config = self.peripheral_clocks_config(peripheral);
+
+        self.pmc.pcr.write(|w| {
+            w.pid()
+                .variant(clock_id)
+                .gclkcss()
+                .variant(current_config.generic_clock.source.into())
+                .cmd()
+                .set_bit()
+                .en()
+                .set_bit()
+                .gclken()
+                .variant(current_config.generic_clock.enabled)
+                .gclkdiv()
+                .variant(current_config.generic_clock.divider.into_register_value())
+        })
+    }
+
+    /// Disables clock of specified peripheral
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral to disable clock for.
+    pub fn disable_peripheral_clock(&mut self, peripheral: PeripheralId) {
+        let clock_id = peripheral as u8;
+        let current_config = self.peripheral_clocks_config(peripheral);
+
+        self.pmc.pcr.write(|w| {
+            w.pid()
+                .variant(clock_id)
+                .gclkcss()
+                .variant(current_config.generic_clock.source.into())
+                .cmd()
+                .set_bit()
+                .en()
+                .clear_bit()
+                .gclken()
+                .variant(current_config.generic_clock.enabled)
+                .gclkdiv()
+                .variant(current_config.generic_clock.divider.into_register_value())
+        })
+    }
+
+    /// Configures peripheral clocks.
     /// Can be used to disable or enable peripheral and generic clocks,
     /// and to configure generic clock's source and divider.
+    ///
+    /// If you just want to
     ///
     /// # Parameters
     /// * `peripheral` - Peripheral which clocks will be configured.
