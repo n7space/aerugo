@@ -76,7 +76,7 @@ pub struct ChannelStatus {
 /// Enumeration listing available channel's clock sources.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum ChannelClock {
-    /// PCK6 (or PCK7 for TC0 Ch0, if configured in PMC) clock signal from PMC.
+    /// Programmable Clock 6 (or 7 for TC0 Ch0, if configured manually) signal.
     /// Default per datasheet.
     #[default]
     PmcPeripheralClock,
@@ -94,7 +94,7 @@ pub enum ChannelClock {
     XC1,
     /// External clock 2
     XC2,
-    /// Timer peripheral clock (see PMC_PCR register in MCU manual)
+    /// Timer peripheral clock (see [`ClocksController`](crate::clocks_controller::ClocksController) for details)
     TimerPeripheralClock,
 }
 

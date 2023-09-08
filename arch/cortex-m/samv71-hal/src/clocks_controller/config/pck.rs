@@ -143,7 +143,7 @@ impl PCKPrescaler {
     /// * `prescaler` - Value of the prescaler. Valid range is (2..=256).
     ///
     /// # Returns
-    /// Ok(PCKPrescaler) if value is correct, Err(()) otherwise.
+    /// `Ok(PCKPrescaler)` if value is correct, `Err(())` otherwise.
     pub fn new(prescaler: u16) -> Result<Self, PrescalerError> {
         if !(2..=256).contains(&prescaler) {
             Err(PrescalerError::OutOfRange(prescaler))
@@ -170,7 +170,7 @@ impl PCKPrescaler {
         self.value
     }
 
-    /// Converts value read from the register into PCKPrescaler.
+    /// Converts value read from the register into `PCKPrescaler`.
     pub(crate) fn from_register_value(value: u8) -> PCKPrescaler {
         PCKPrescaler { value }
     }

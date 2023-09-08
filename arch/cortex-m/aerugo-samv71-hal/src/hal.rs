@@ -318,7 +318,7 @@ fn configure_timer(
     (ch0, ch1, ch2)
 }
 
-/// Configures PMC for TC0 operation with 3 chained channels
+/// Configures MCU clocks for TC0 operation with 3 chained channels
 ///
 /// Enables TC0 CH0, CH1 and CH2 peripheral clocks, and configures PCK6
 /// to generate proper clock for the timers.
