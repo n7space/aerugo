@@ -523,8 +523,8 @@ impl ClocksController {
     ///
     /// # Parameters
     /// * `clock` - Programmable clock to wait for.
-    pub fn wait_until_programmable_clock_is_ready(&self, clock: PCK) {
-        while !self.programmable_clocks_status()[clock as usize] {
+    pub fn wait_until_programmable_clock_is_ready(&mut self, clock: PCK) {
+        while !self.status().pck_ready[clock as usize] {
             asm::nop();
         }
     }
