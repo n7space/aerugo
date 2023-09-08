@@ -123,8 +123,9 @@ impl From<PCKSource> for CSSSELECT_A {
 /// for that, if needed).
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct PCKPrescaler {
-    /// User value of the prescaler.
-    value: u16,
+    /// "Hardware" value of the prescaler.
+    /// This can be written directly into the register.
+    value: u8,
 }
 
 /// Enumeration representing prescaler errors.
@@ -147,31 +148,31 @@ impl PCKPrescaler {
         if !(2..=256).contains(&prescaler) {
             Err(PrescalerError::OutOfRange(prescaler))
         } else {
-            Ok(PCKPrescaler { value: prescaler })
+            Ok(PCKPrescaler {
+                // We're converting (2..=256) range into (1..=255), which
+                // always fits in 8-bit unsigned, so it's safe to cast.
+                value: (prescaler - 1) as u8,
+            })
         }
     }
 
-    /// Returns current, user-provided value of the prescaler.
+    /// Returns user-provided value of the prescaler.
     pub fn value(&self) -> u16 {
+        (self.value as u16) + 1
+    }
+
+    /// Returns "hardware" value of the prescaler, that can be written directly into the register.
+    ///
+    /// # Safety
+    /// Usage of this function is safe as long as the value invariant (it must not be 0)
+    /// is enforced.
+    pub(crate) fn into_register_value(self) -> u8 {
         self.value
     }
 
-    /// Converts the user value of prescaler into value that can be put into PCK register.
-    ///
-    /// # Safety
-    /// Usage of this function is safe as long as the value invariant (it must be in (2..=256) range)
-    /// is enforced.
-    pub(crate) fn into_register_value(self) -> u8 {
-        // We're converting (2..=256) range into (1..=255), which
-        // always fits in 8-bit unsigned, so it's safe to convert.
-        (self.value - 1) as u8
-    }
-
     /// Converts value read from the register into PCKPrescaler.
-    /// Will panic if an invalid value is read.
     pub(crate) fn from_register_value(value: u8) -> PCKPrescaler {
-        PCKPrescaler::new((value as u16) + 1)
-            .expect("Invalid prescaler value read from PMC registers")
+        PCKPrescaler { value }
     }
 }
 
@@ -185,6 +186,6 @@ impl TryFrom<u16> for PCKPrescaler {
 
 impl From<PCKPrescaler> for u16 {
     fn from(prescaler: PCKPrescaler) -> Self {
-        prescaler.value
+        prescaler.value()
     }
 }
