@@ -1,6 +1,7 @@
 //! Module representing peripherals internally used by Aerugo.
 
-use samv71_hal::pac::{PMC, TC0};
+use samv71_hal::pac::TC0;
+use samv71_hal::pmc::PMC;
 use samv71_hal::{
     timer::{Ch0, Ch1, Ch2, Channel, Timer, Waveform},
     watchdog::Watchdog,

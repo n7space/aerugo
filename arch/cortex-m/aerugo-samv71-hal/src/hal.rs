@@ -1,12 +1,14 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
 use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
+use samv71_hal::pmc::config::pck::{PCKConfig, PCKPrescaler, PCKSource, PCK};
+use samv71_hal::pmc::config::PeripheralId;
 
-use crate::cortex_m;
 use crate::error::HalError;
 use crate::system_peripherals::SystemPeripherals;
 use crate::user_peripherals::UserPeripherals;
-use samv71_hal::pac::{self, PMC, TC0};
+use samv71_hal::pac::{self, TC0};
+use samv71_hal::pmc::PMC;
 use samv71_hal::timer::channel_config::ChannelClock;
 use samv71_hal::timer::timer_config::{ExternalClock, ExternalClockSource};
 use samv71_hal::timer::waveform_config::{
@@ -113,7 +115,7 @@ impl Hal {
             timer_ch0: None,
             timer_ch1: None,
             timer_ch2: None,
-            pmc: Some(mcu_peripherals.PMC),
+            pmc: Some(PMC::new(mcu_peripherals.PMC)),
         }
     }
 }
@@ -160,7 +162,7 @@ impl AerugoHal for Hal {
             // This should realistically never panic, as we checked the existence of PMC earlier.
             let pmc = peripherals
                 .pmc
-                .as_ref()
+                .as_mut()
                 .expect("PMC is missing from system peripherals");
 
             // Configure watchdog
@@ -242,19 +244,27 @@ type Tc0Channels = (
 /// input clocks (configured via PMC), and chains it's channels to achieve high-resolution
 /// time source for the system.
 ///
-/// Timer's source clock first goes into channel 0, which generates RC compare events that
+/// Timer's source clock first goes into channel 0, which generates RA and RC compare events that
 /// toggle it's TIOA0 output, effectively dividing the input frequency by the value of RC register.
 /// TIOA0 is connected via XC1 to channel 1, which does the same thing for TIOA1 output, which is
 /// connected via XC2 to channel 2.
 ///
+/// Since each channel increases it's counter value at each positive edge of input clock, to
+/// prevent unwanted clock divisions, TIOA outputs of all channels are cleared when their counter
+/// reaches some arbitrarily small value, and they are set when the counter reaches RC value, which
+/// is set to maximum.
+///
+/// Effectively, each channel drives next one with the same frequency as itself, allowing us to
+/// take raw values of each channel's counter and convert them into current time, giving us
+/// 48 bits of precision.
+///
 /// # Parameters
 /// * `timer` - HAL Timer instance
-/// * `pmc` - PAC PMC instance
-fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
-    configure_timer_pmc(pmc);
+/// * `pmc` - HAL PMC instance
+fn configure_timer(timer: &mut Timer<TC0>, pmc: &mut PMC) -> Tc0Channels {
+    configure_timer_clocks(pmc);
 
-    // If any of the configurations is not available, user cannot do anything about it and it
-    // certainly should not pass any tests, so just hard fault it.
+    // If any of the configurations is not available, it's a panic as it's an internal bug in Aerugo.
     timer
         .configure_external_clock_source(ExternalClock::XC1, ExternalClockSource::TIOA0)
         .expect("Cannot connect TIOA0 to XC1");
@@ -262,23 +272,32 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
         .configure_external_clock_source(ExternalClock::XC2, ExternalClockSource::TIOA1)
         .expect("Cannot connect TIOA1 to XC2");
 
-    // If any of the channels is not available, it's a hard fault as it's an internal bug in Aerugo
+    // If any of the channels is not available, it's a panic as it's an internal bug in Aerugo.
     let ch0 = timer.channel_0.take().expect("TC0 CH0 already taken");
     let ch1 = timer.channel_1.take().expect("TC0 CH1 already taken");
     let ch2 = timer.channel_2.take().expect("TC0 CH2 already taken");
 
+    // Set channels to clear their TIOA on RA compare, and set on RC compare.
+    // Also clear them on software trigger to prevent unexpected behaviors.
     let waveform_config = WaveformModeConfig {
         tioa_effects: OutputSignalEffects {
             software_trigger: ComparisonEffect::Clear,
-            rc_comparison: ComparisonEffect::Toggle,
+            rx_comparison: ComparisonEffect::Clear,
+            rc_comparison: ComparisonEffect::Set,
             ..Default::default()
         },
         ..Default::default()
     };
 
-    let ch0 = ch0.into_waveform_channel(waveform_config);
-    let ch1 = ch1.into_waveform_channel(waveform_config);
-    let ch2 = ch2.into_waveform_channel(waveform_config);
+    let mut ch0 = ch0.into_waveform_channel(waveform_config);
+    let mut ch1 = ch1.into_waveform_channel(waveform_config);
+    let mut ch2 = ch2.into_waveform_channel(waveform_config);
+
+    // Set RA values for all channels to some arbitrary value that's smaller than RC,
+    // to reset TIOA outputs before next overflow happens.
+    ch0.set_ra(u16::MAX / 2);
+    ch1.set_ra(u16::MAX / 2);
+    ch2.set_ra(u16::MAX / 2);
 
     // Set RC values for all channels to max, so we can achieve full 48-bit resolution
     ch0.set_rc(u16::MAX);
@@ -296,7 +315,7 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
     (ch0, ch1, ch2)
 }
 
-/// Configures PMC for TC0 operation with 3 chained channels
+/// Configures MCU clocks for TC0 operation with 3 chained channels
 ///
 /// Enables TC0 CH0, CH1 and CH2 peripheral clocks, and configures PCK6
 /// to generate proper clock for the timers.
@@ -304,23 +323,28 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &PMC) -> Tc0Channels {
 /// PCK6 uses MAINCK clock source (which is 12MHz by default), and divides it by 12 to get
 /// 1MHz input clock, used by the timer to achieve 1ns resolution.
 ///
-fn configure_timer_pmc(pmc: &PMC) {
+/// # Parameters
+/// * `pmc` - HAL PMC instance
+fn configure_timer_clocks(pmc: &mut PMC) {
     // Configure PCK6 for 1MHz TC0 output
     // Source: MAINCK (12MHz by default)
-    // Divider: /6 (TODO: is there a hidden /2 prescaler somewhere?)
-    pmc.pck[6].write(|w| w.css().main_clk().pres().variant(5));
+    // Divider: /12
+    // Unwrap, since 12 is a valid prescaler.
+    pmc.configure_programmable_clock(
+        PCK::PCK6,
+        PCKConfig {
+            source: PCKSource::MainClock,
+            prescaler: PCKPrescaler::new(12).unwrap(),
+        },
+    );
 
     // Enable TC0 CH0, CH1 and CH2 peripheral clocks
-    pmc.pcer0
-        .write(|w| w.pid23().set_bit().pid24().set_bit().pid25().set_bit());
+    pmc.enable_peripheral_clock(PeripheralId::TC0CH0);
+    pmc.enable_peripheral_clock(PeripheralId::TC0CH1);
+    pmc.enable_peripheral_clock(PeripheralId::TC0CH2);
 
     // Enable PCK6
-    pmc.scer.write(|w| w.pck6().set_bit());
-
-    // Wait until PCK6 is ready
-    while pmc.sr.read().pckrdy6().bit_is_clear() {
-        cortex_m::asm::nop();
-    }
+    pmc.enable_programmable_clock(PCK::PCK6);
 }
 
 /// Converts three 16-bit values into single 48-bit value.

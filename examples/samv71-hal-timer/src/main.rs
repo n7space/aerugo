@@ -7,7 +7,8 @@ extern crate panic_rtt_target;
 
 use core::cell::RefCell;
 
-use aerugo::hal::drivers::pac::PMC;
+use aerugo::hal::drivers::pmc::config::PeripheralId;
+use aerugo::hal::drivers::pmc::PMC;
 use aerugo::hal::drivers::timer::{
     channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Waveform, TC1,
 };
@@ -46,13 +47,13 @@ fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi)
 
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
 
-fn init_pmc(pmc: PMC) {
+fn init_clocks(mut pmc: PMC) {
     // Enable TC1 CH0 clock
-    pmc.pcer0.write(|w| w.pid26().set_bit());
+    pmc.enable_peripheral_clock(PeripheralId::TC1CH0);
 }
 
-fn init_timer(timer: &mut Timer<TC1>) {
-    let ch0 = timer
+fn init_timer(mut timer: Timer<TC1>) {
+    let mut ch0 = timer
         .channel_0
         .take()
         .expect("Channel 0 of Timer 1 already taken")
@@ -61,7 +62,7 @@ fn init_timer(timer: &mut Timer<TC1>) {
     ch0.enable();
     ch0.trigger();
 
-    let status = ch0.read_and_clear_status().clock_enabled;
+    let status = ch0.status().clock_enabled;
     logln!("Clock is {}", if status { "enabled" } else { "disabled" });
 
     irq_free(|cs| {
@@ -104,11 +105,10 @@ fn main() -> ! {
     logln!("Hello, world! Aerugo initialized!");
 
     logln!("Doing stuff with timers...");
-    let mut timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
-    // TODO: Change this to use proper PMC driver when it's done
-    let pmc = peripherals.pmc.expect("PMC already used");
-    init_pmc(pmc);
-    init_timer(&mut timer);
+    let timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
+    let pmc = peripherals.pmc.expect("PMC already taken");
+    init_clocks(pmc);
+    init_timer(timer);
 
     init_tasks(aerugo);
 

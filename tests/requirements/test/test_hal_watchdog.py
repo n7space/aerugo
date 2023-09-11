@@ -1,6 +1,6 @@
 import logging
 
-from test_utils import finish_test, init_test
+from test_utils import finish_test, init_test, wait_for_messages
 
 from calldwell import init_default_logger
 
@@ -10,22 +10,15 @@ TEST_NAME = "test-hal-watchdog"
 def main():
     gdb, rtt, ssh = init_test(TEST_NAME)
 
-    expected_messages = [
-        "short task started",
-        "short task ended",
-        "long task started",
-    ]
-
-    for message in expected_messages:
-        received_message = rtt.receive_string_stream()
-        logging.info(f"RTT> {received_message}")
-        if received_message != message:
-            logging.critical(
-                "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
-                f"(expecting {message}, got {received_message})"
-            )
-            finish_test(ssh)
-            exit(2)
+    wait_for_messages(
+        rtt,
+        ssh,
+        [
+            "short task started",
+            "short task ended",
+            "long task started",
+        ],
+    )
 
     logging.info("Expecting a watchdog-induced MCU reset now...")
     # Default watchdog timeout is 16s. Watchdog in this test is set to 5s, but timeout must be

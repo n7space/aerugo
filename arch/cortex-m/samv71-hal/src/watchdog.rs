@@ -13,14 +13,26 @@
 pub mod watchdog_config;
 pub mod watchdog_error;
 
-use crate::pac::WDT;
-use crate::Milliseconds;
 pub use watchdog_config::WatchdogConfig;
 pub use watchdog_error::WatchdogError;
 
 use self::watchdog_config::MAXIMUM_WATCHDOG_DURATION;
+use crate::pac::WDT;
+use crate::time::MillisDurationU32 as Milliseconds;
 
 /// Structure representing a watchdog.
+///
+/// # Safety
+/// Instance of this structure will track if the watchdog was configured by it.
+/// Configuration tracking is provided only as convenient way of communicating the fact that
+/// watchdog was tried to be reconfigured to the user.
+///
+/// If the user creates multiple instances of [`Watchdog`] for the same physical watchdog,
+/// each will track the configuration separately, so it's recommended to keep to a single instance
+/// per physical watchdog, in order to prevent unexpected behavior.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Watchdog {
     /// Watchdog instance.
     wdt: WDT,

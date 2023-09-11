@@ -10,11 +10,9 @@ pub use embedded_hal;
 pub use fugit as time;
 pub use samv71q21_pac as pac;
 
-/// Type representing millisecond duration used by this crate.
-pub type Milliseconds = time::MillisDurationU32;
-
 #[cfg(feature = "rt")]
 pub use pac::interrupt;
 
+pub mod pmc;
 pub mod timer;
 pub mod watchdog;

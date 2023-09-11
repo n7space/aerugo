@@ -1,27 +1,42 @@
 //! Implementation of HAL Timer Counter driver.
+//!
+//! This driver provides two primary structures - [`Timer`] and [`Channel`].
+//! In typical scenario, you want to use PAC's TC instance (for example [`TC0`])
+//! to create a [`Timer`], and then use [`Channel`]s provided by [`Timer`] by taking them from
+//! it's instance.
+
 pub mod channel;
 pub mod channel_config;
 pub mod channel_waveform;
-mod tc_metadata;
 pub mod timer_config;
 pub mod timer_error;
 pub mod waveform_config;
+
+mod tc_metadata;
 
 pub use channel::*;
 pub use tc_metadata::*;
 pub use timer_error::*;
 
-use core::marker::PhantomData;
-
 use self::{
     timer_config::{ExternalClock, ExternalClockSource},
     timer_error::TimerConfigurationError,
 };
+use core::marker::PhantomData;
 
 /// Structure representing a Timer instance.
 ///
 /// # Generic Parameters
 /// * `TimerMetadata` - PAC timer counter instance metadata, see `TcMetadata` private trait.
+///
+/// # Safety
+/// Only a single instance of a [`Timer`] per physical timer should exist. Creating multiple instances
+/// may lead to unexpected behaviors.
+/// [`Channel`] instances should never be created manually, they should only be taken from
+/// [`Timer`] instances.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Timer<TimerMetadata> {
     /// Channel 0.
     pub channel_0: Option<Channel<TimerMetadata, Ch0, NotConfigured>>,
@@ -55,7 +70,7 @@ where
     }
 
     /// Triggers all channels, starting them if they are enabled.
-    pub fn trigger_all_channels(&self) {
+    pub fn trigger_all_channels(&mut self) {
         self.registers_ref().bcr.write(|w| w.sync().set_bit());
     }
 
@@ -74,7 +89,7 @@ where
     /// This function directly modifies the registers of a timer in an unsafe manner, but values put in these
     /// registers come from PAC and are validated before using, so they should be valid.
     pub fn configure_external_clock_source(
-        &self,
+        &mut self,
         clock: ExternalClock,
         source: ExternalClockSource,
     ) -> Result<(), TimerConfigurationError> {

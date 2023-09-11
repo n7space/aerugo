@@ -8,6 +8,17 @@ use super::waveform_config::WaveformModeConfig;
 use super::TcMetadata;
 
 /// Structure representing a timer's channel.
+///
+/// This structure uses a typestate pattern, which means that in order to use it's instance
+/// you must convert it to a proper type using `into_*_channel`. Currently, only Waveform
+/// mode is supported. See [`Channel::into_waveform_channel`](Channel::into_waveform_channel) for more details.
+///
+/// # Safety
+/// [`Channel`] instances should never be created manually, they should only be taken
+/// from [`Timer`](crate::timer::Timer) instances.
+///
+/// This structure is not thread/interrupt-safe, as it uses shared state (registers).
+/// If you need to share it, wrap it in a proper container that implements [`Sync`].
 pub struct Channel<Timer, ID, Mode> {
     /// Timer channel's registers.
     registers: *const TC_CHANNEL,
@@ -23,7 +34,7 @@ pub struct Channel<Timer, ID, Mode> {
 /// instances provided by HAL, it's safe to send channels to other threads, as there's only a single
 /// instance that can access hardware channel's registers at once, and it cannot be copied.
 ///
-/// Sharing references (`Sync`) to a channel between threads is not safe, and should be managed by the user.
+/// Sharing references ([`Sync`]) to a channel between threads is not safe, and should be managed by the user.
 ///
 /// If that invariant is broken by the user, any usage of cloned Channels from other thread's context (including
 /// interrupt context) can be considered unsafe.
@@ -94,7 +105,7 @@ where
     ///
     /// # Parameters
     /// * `clock` - New clock source for current channel.
-    pub fn set_clock_source(&self, clock: ChannelClock) {
+    pub fn set_clock_source(&mut self, clock: ChannelClock) {
         match clock {
             // Timer peripheral clock setting is configured via different register
             // than the rest of the clocks.
@@ -177,7 +188,7 @@ where
     /// # Implementation notes
     /// RC register is 32-bit, but all timer counters of SAMV71 MCUs are 16-bit, therefore
     /// this function accepts only u16 to avoid confusion (or increase it, and make the user read MCU manual).
-    pub fn set_rc(&self, rc: u16) {
+    pub fn set_rc(&mut self, rc: u16) {
         self.registers_ref().rc.write(|w| w.rc().variant(rc as u32));
     }
 
@@ -190,7 +201,10 @@ where
     /// critical section has ended will not know about events that happened between critical section start and
     /// reading status register. Same scenario can happen in interrupt handlers, if timer interrupt has lower priority
     /// than currently handled interrupt.
-    pub fn read_and_clear_status(&self) -> ChannelStatus {
+    ///
+    /// For this reason, this function is marked as mutable (it does not mutate the structure, but it might mutate
+    /// status register).
+    pub fn status(&mut self) -> ChannelStatus {
         let sr = self.registers_ref().sr.read();
 
         ChannelStatus {
@@ -217,7 +231,7 @@ where
     /// # Parameters
     /// * `interrupts` - Structure with interrupts to be enabled. All interrupts set
     ///                  to `true` will be enabled.
-    pub fn enable_interrupts(&self, interrupts: ChannelInterrupts) {
+    pub fn enable_interrupts(&mut self, interrupts: ChannelInterrupts) {
         self.registers_ref().ier.write(|w| {
             w.covfs()
                 .variant(interrupts.counter_overflow)
@@ -245,7 +259,7 @@ where
     /// # Parameters
     /// * `interrupts` - Structure with interrupts to be disabled. All interrupts set
     ///                  to `true` will be disabled.
-    pub fn disable_interrupts(&self, interrupts: ChannelInterrupts) {
+    pub fn disable_interrupts(&mut self, interrupts: ChannelInterrupts) {
         self.registers_ref().idr.write(|w| {
             w.covfs()
                 .variant(interrupts.counter_overflow)
