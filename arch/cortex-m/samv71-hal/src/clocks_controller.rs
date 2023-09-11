@@ -216,7 +216,7 @@ impl ClocksController {
 
         self.pmc
             .ckgr_mor
-            .modify(|_, w| w.moscrcf().variant(frequency.into()));
+            .modify(|_, w| w.key().passwd().moscrcf().variant(frequency.into()));
 
         // Wait until the changes take effect
         self.wait_until_main_rc_stabilizes();
@@ -346,6 +346,14 @@ impl ClocksController {
         ]
     }
 
+    /// Returns `true` if programmable clock (PCK) is enabled, `false` otherwise.
+    ///
+    /// # Parameters
+    /// * `clock` - Selected clock.
+    pub fn programmable_clock_enabled(&self, clock: PCK) -> bool {
+        self.programmable_clocks_status()[clock as usize]
+    }
+
     /// Enables provided programmable clock (PCK).
     ///
     /// This function waits until PCK is ready after enabling it, so there's no need
@@ -384,6 +392,31 @@ impl ClocksController {
                 .pres()
                 .variant(config.prescaler.into_register_value())
         });
+
+        // Wait until it's ready
+        self.wait_until_programmable_clock_is_ready(clock);
+    }
+
+    /// Returns programmable clock's (PCK) current configuration.
+    ///
+    /// # Parameters
+    /// * `clock` - Selected clock
+    ///
+    /// # Remarks
+    /// This function will panic if an unexpected value is read from register. It should never
+    /// happen under normal circumstances, assuming that user doesn't try to manually write
+    /// an invalid value to this register and that there's no unexpected hardware issue.
+    pub fn programmable_clock_config(&self, clock: PCK) -> PCKConfig {
+        let reg = self.pmc.pck[clock as usize].read();
+
+        PCKConfig {
+            source: reg
+                .css()
+                .variant()
+                .expect("invalid clock source for PCK")
+                .into(),
+            prescaler: PCKPrescaler::from_register_value(reg.pres().bits()),
+        }
     }
 
     /// Enables clock of specified peripheral

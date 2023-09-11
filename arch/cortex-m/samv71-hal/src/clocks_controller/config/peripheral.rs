@@ -118,6 +118,16 @@ pub struct PeripheralClockConfig {
     pub generic_clock: GenericClockConfig,
 }
 
+impl Default for PeripheralClockConfig {
+    /// Returns default, power-up configuration of peripheral clocks.
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            generic_clock: Default::default(),
+        }
+    }
+}
+
 /// Structure representing generic clock configuration.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct GenericClockConfig {
@@ -127,6 +137,17 @@ pub struct GenericClockConfig {
     pub source: GenericClockSource,
     /// Generic clock divider.
     pub divider: GenericClockDivider,
+}
+
+impl Default for GenericClockConfig {
+    /// Returns default, power-up configuration of generic clocks for peripherals.
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            source: GenericClockSource::SlowClock,
+            divider: GenericClockDivider::from_register_value(0),
+        }
+    }
 }
 
 /// Enumeration representing available generic clock sources.

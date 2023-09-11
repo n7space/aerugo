@@ -157,8 +157,25 @@ impl PCKPrescaler {
     }
 
     /// Returns user-provided value of the prescaler.
-    pub fn value(&self) -> u16 {
-        (self.value as u16) + 1
+    /// Returns `None` if prescaler is invalid (outside of (2..=256) range).
+    ///
+    /// # Remarks
+    /// Prescaler created by user cannot be invalid, as [`PCKPrescaler::new`] checks the
+    /// validity of provided value. The only case when prescaler would be invalid is if
+    /// it's read from the register after power-up.
+    pub fn value(self) -> Option<u16> {
+        if self.is_valid() {
+            Some((self.value as u16) + 1)
+        } else {
+            None
+        }
+    }
+
+    /// Returns `true` if stored prescaler is valid (in range (2..=256)), `false` otherwise.
+    /// Prescaler can be invalid if read from the register (for example, as default value after power-up).
+    /// User should not be able to create invalid prescaler using it's API.
+    pub fn is_valid(&self) -> bool {
+        self.value != 0
     }
 
     /// Returns "hardware" value of the prescaler, that can be written directly into the register.
@@ -179,13 +196,19 @@ impl PCKPrescaler {
 impl TryFrom<u16> for PCKPrescaler {
     type Error = PrescalerError;
 
+    /// Returns new [`PCKPrescaler`] or [`PrescalerError`] if provided value would make an invalid prescaler.
     fn try_from(prescaler: u16) -> Result<Self, Self::Error> {
         PCKPrescaler::new(prescaler)
     }
 }
 
-impl From<PCKPrescaler> for u16 {
-    fn from(prescaler: PCKPrescaler) -> Self {
-        prescaler.value()
+impl TryFrom<PCKPrescaler> for u16 {
+    type Error = PrescalerError;
+
+    /// Returns value of prescaler as u16, or [`PrescalerError`] if stored value was invalid.
+    fn try_from(prescaler: PCKPrescaler) -> Result<Self, Self::Error> {
+        prescaler
+            .value()
+            .ok_or(PrescalerError::OutOfRange(prescaler.value as u16))
     }
 }
