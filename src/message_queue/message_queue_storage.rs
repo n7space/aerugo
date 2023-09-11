@@ -56,17 +56,7 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// # Return
     /// `handle` if this storage has been initialized.
     pub fn create_handle(&'static self) -> Option<MessageQueueHandle<T, N>> {
-        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
-        // the `init` function.
-        match self.initialized.get() {
-            Some(_) => {
-                let message_queue = self
-                    .message_queue()
-                    .expect("Failed to get reference to the stored MessageQueue");
-                Some(MessageQueueHandle::new(message_queue))
-            }
-            None => None,
-        }
+        self.message_queue().map(MessageQueueHandle::new)
     }
 
     /// Initializes this storage.
@@ -106,12 +96,12 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Returns a reference to the stored MessageQueue structure.
     #[inline(always)]
     fn message_queue(&'static self) -> Option<&'static MessageQueue<T, N>> {
-        match self.queue_buffer.get() {
-            Some(buffer) => {
-                // This is safe, because buffer is initialized
-                unsafe { Some(&*(buffer.as_ptr() as *const MessageQueue<T, N>)) }
-            }
-            None => None,
+        match (self.initialized.get(), self.queue_buffer.get()) {
+            // This is safe, because buffer is initialized
+            (Some(_), Some(buffer)) => unsafe {
+                Some(&*(buffer.as_ptr() as *const MessageQueue<T, N>))
+            },
+            (_, _) => None,
         }
     }
 }
