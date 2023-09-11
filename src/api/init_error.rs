@@ -13,6 +13,8 @@ pub enum InitError {
     TaskletAlreadySubscribed,
     /// Tasklet list was full when tried to register.
     TaskletListFull,
+    /// Event already exists in the system.
+    EventAlreadyExists(EventId),
     /// Event with given ID was not found.
     EventNotFound(EventId),
     /// Event list was full when tried to create a new one.

@@ -64,17 +64,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
     /// # Return
     /// `handle` if this storage has been initialized.
     pub fn create_handle(&'static self) -> Option<TaskletHandle<T, C, COND_COUNT>> {
-        // SAFETY: This is safe, because it can't be borrowed externally and is only modified in
-        // the `init` function.
-        match self.initialized.get() {
-            Some(_) => {
-                let tasklet = self
-                    .tasklet()
-                    .expect("Failed to get reference to the stored Tasklet");
-                Some(TaskletHandle::new(tasklet))
-            }
-            None => None,
-        }
+        self.tasklet().map(TaskletHandle::new)
     }
 
     /// Initializes this storage.
@@ -135,12 +125,12 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
     /// This is safe to call only when this storage has been initialized.
     #[inline(always)]
     fn tasklet(&'static self) -> Option<&'static Tasklet<T, C, COND_COUNT>> {
-        match self.tasklet_buffer.get() {
-            Some(buffer) => {
-                // This is safe, because buffer is initialized
-                unsafe { Some(&*(buffer.as_ptr() as *const Tasklet<T, C, COND_COUNT>)) }
-            }
-            None => None,
+        match (self.initialized.get(), self.tasklet_buffer.get()) {
+            // This is safe, because buffer is initialized
+            (Some(_), Some(buffer)) => unsafe {
+                Some(&*(buffer.as_ptr() as *const Tasklet<T, C, COND_COUNT>))
+            },
+            (_, _) => None,
         }
     }
 }

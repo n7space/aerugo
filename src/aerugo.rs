@@ -16,7 +16,7 @@ use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
-use crate::event::{EventEnabler, EventId};
+use crate::event::{EventId, EventStorage};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
@@ -44,7 +44,7 @@ static EVENT_MANAGER: EventManager = EventManager::new();
 /// Time manager.
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
-/// and [EventEnabler] structures.
+/// structure.
 static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager::new();
 
 /// System structure.
@@ -340,7 +340,7 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{Aerugo, EventId, InitApi, SystemHardwareConfig};
+    /// # use aerugo::{Aerugo, EventId, EventStorage, InitApi, SystemHardwareConfig};
     ///
     /// enum Events {
     ///     MyEvent,
@@ -354,16 +354,35 @@ impl InitApi for Aerugo {
     ///     }
     /// }
     ///
+    /// static MY_EVENT_STORAGE: EventStorage = EventStorage::new();
+    ///
     /// fn main() {
     ///     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///
-    ///     aerugo.create_event(Events::MyEvent.into());
+    ///     aerugo.create_event(Events::MyEvent.into(), &MY_EVENT_STORAGE);
     /// }
     /// ```
-    fn create_event(&'static self, event_id: EventId) -> Result<(), InitError> {
+    fn create_event(
+        &'static self,
+        event_id: EventId,
+        storage: &'static EventStorage,
+    ) -> Result<(), InitError> {
+        if EVENT_MANAGER.has_event(event_id) {
+            return Err(InitError::EventAlreadyExists(event_id));
+        }
+
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
-            EVENT_MANAGER.create_event(event_id)?;
+            storage.init(event_id)?;
+        }
+
+        let event = storage
+            .event()
+            .expect("Failed to get reference to the stored event");
+        // SAFETY: This is safe as long as this function is called only during system
+        // initialization.
+        unsafe {
+            EVENT_MANAGER.add_event(event)?;
         }
 
         Ok(())
@@ -493,10 +512,8 @@ impl InitApi for Aerugo {
 
     /// Subscribes a tasklet to events.
     ///
-    /// Tasklet subscribes for emitted events. After subscription, specific events have to be enabled
-    /// for this tasklet using [EventEnabler] returned from this
-    /// function. Emitting an event will wake up all tasklet for which it is enabled and make them
-    /// ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
+    /// Tasklet subscribes for emitted events. Emitting an event will wake up all tasklet for which it is enabled
+    /// and make them ready to be executed. Tasklet is ready for an execution for as long as there is unhandled
     /// event. On each execution tasklet will handle one event, receiving it's ID in step function.
     ///
     /// Each tasklet can be subscribed to at maximum one data provider. Each event can be active
@@ -522,7 +539,8 @@ impl InitApi for Aerugo {
     ///
     /// # Example
     /// ```
-    /// # use aerugo::{Aerugo, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage};
+    /// # use aerugo::{Aerugo, EventId, EventStorage, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    ///     TaskletStorage};
     /// #
     /// # fn task(_: EventId, _: &mut (), _: &dyn RuntimeApi) {}
     /// #
@@ -531,6 +549,7 @@ impl InitApi for Aerugo {
     /// enum Events {
     ///     MyEvent,
     /// }
+    ///
     /// impl From<Events> for EventId {
     ///     fn from(value: Events) -> Self {
     ///         match value {
@@ -538,6 +557,9 @@ impl InitApi for Aerugo {
     ///         }
     ///     }
     /// }
+    ///
+    /// static MY_EVENT_STORAGE: EventStorage = EventStorage::new();
+    ///
     /// fn main() {
     ///     # let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
     ///     # let task_config = TaskletConfig::default();
@@ -545,29 +567,39 @@ impl InitApi for Aerugo {
     ///     #   .create_tasklet(TaskletConfig::default(), task, &TASK_STORAGE)
     ///     #   .expect("Unable to create Tasklet");
     ///     # aerugo
-    ///     #   .create_event(Events::MyEvent.into())
+    ///     #   .create_event(Events::MyEvent.into(), &MY_EVENT_STORAGE)
     ///     #   .expect("Unable to create MyEvent");
     ///     let task_handle = TASK_STORAGE.create_handle().expect("Failed to create Task handle");
+    ///     let task_events = [Events::MyEvent.into()];
     ///
     ///     aerugo
-    ///         .subscribe_tasklet_to_events(&task_handle)
-    ///         .expect("Failed to subscribe Task to events")
-    ///         .enable(Events::MyEvent.into())
-    ///         .expect("Failed to subscribe Task to MyEvent");
+    ///         .subscribe_tasklet_to_events(&task_handle, task_events)
+    ///         .expect("Failed to subscribe Task to events");
     /// }
     /// ```
-    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize>(
+    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize, const EVENT_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<EventId, C, COND_COUNT>,
-    ) -> Result<EventEnabler, InitError> {
+        events: [EventId; EVENT_COUNT],
+    ) -> Result<(), InitError> {
         let tasklet = tasklet_handle.tasklet();
 
         let event_set = unsafe { EVENT_MANAGER.create_event_set(tasklet.ptr())? };
+
+        for event_id in events {
+            let event = match EVENT_MANAGER.get_event(event_id) {
+                Some(event) => event,
+                None => return Err(InitError::EventNotFound(event_id)),
+            };
+
+            // SAFETY: This is safe as long as this function is called only during system initialization.
+            unsafe { event.add_set(event_set)? };
+        }
+
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe { tasklet.subscribe(event_set)? };
 
-        let event_subscriber = EventEnabler::new(event_set, &EVENT_MANAGER);
-        Ok(event_subscriber)
+        Ok(())
     }
 
     /// Subscribes tasklet to the boolean condition.

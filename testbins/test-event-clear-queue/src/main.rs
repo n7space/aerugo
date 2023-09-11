@@ -1,5 +1,5 @@
 use aerugo::{
-    logln, Aerugo, EventId, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    logln, Aerugo, EventId, EventStorage, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage,
 };
 
@@ -79,14 +79,17 @@ static TASK_B_STORAGE: TaskletStorage<EventId, TaskBContext, 0> = TaskletStorage
 static TASK_C_STORAGE: TaskletStorage<EventId, TaskCContext, 0> = TaskletStorage::new();
 static TASK_D_STORAGE: TaskletStorage<EventId, TaskDContext, 0> = TaskletStorage::new();
 
+static SMALL_EVENT_STORAGE: EventStorage = EventStorage::new();
+static BIG_EVENT_STORAGE: EventStorage = EventStorage::new();
+
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
     aerugo
-        .create_event(MyEvents::SmallEvent.into())
+        .create_event(MyEvents::SmallEvent.into(), &SMALL_EVENT_STORAGE)
         .expect("Unable to create SmallEvent");
     aerugo
-        .create_event(MyEvents::BigEvent.into())
+        .create_event(MyEvents::BigEvent.into(), &BIG_EVENT_STORAGE)
         .expect("Unable to create BigEvent");
 
     let task_a_config = TaskletConfig {
@@ -142,27 +145,21 @@ fn main() -> ! {
     aerugo
         .subscribe_tasklet_to_cyclic(&task_a_handle, None)
         .expect("Unable to set cyclic on TaskA");
+
+    let task_b_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
     aerugo
-        .subscribe_tasklet_to_events(&task_b_handle)
-        .expect("Unable to subscribe TaskB to events")
-        .enable(MyEvents::SmallEvent.into())
-        .expect("Unable to enable SmallEvent for TaskB")
-        .enable(MyEvents::BigEvent.into())
-        .expect("Unable to enable BigEvent for TaskB");
+        .subscribe_tasklet_to_events(&task_b_handle, task_b_events)
+        .expect("Unable to subscribe TaskB to events");
+
+    let task_c_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
     aerugo
-        .subscribe_tasklet_to_events(&task_c_handle)
-        .expect("Unable to subscribe TaskC to events")
-        .enable(MyEvents::SmallEvent.into())
-        .expect("Unable to enable SmallEvent for TaskC")
-        .enable(MyEvents::BigEvent.into())
-        .expect("Unable to enable BigEvent for TaskC");
+        .subscribe_tasklet_to_events(&task_c_handle, task_c_events)
+        .expect("Unable to subscribe TaskC to events");
+
+    let task_d_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
     aerugo
-        .subscribe_tasklet_to_events(&task_d_handle)
-        .expect("Unable to subscribe TaskD to events")
-        .enable(MyEvents::SmallEvent.into())
-        .expect("Unable to enable SmallEvent for TaskD")
-        .enable(MyEvents::BigEvent.into())
-        .expect("Unable to enable BigEvent for TaskD");
+        .subscribe_tasklet_to_events(&task_d_handle, task_d_events)
+        .expect("Unable to subscribe TaskD to events");
 
     aerugo.start();
 }

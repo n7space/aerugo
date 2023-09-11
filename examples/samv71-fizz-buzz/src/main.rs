@@ -7,8 +7,8 @@ extern crate panic_rtt_target;
 
 use aerugo::{
     log, logln, Aerugo, BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
-    EventId, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage,
+    EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi,
+    SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 
 use rt::entry;
@@ -75,16 +75,6 @@ fn done(_: bool, _: &mut DoneContext, _: &'static dyn RuntimeApi) {
     log!("Done!\n");
 }
 
-static PRODUCER_STORAGE: TaskletStorage<(), ProducerContext, 1> = TaskletStorage::new();
-static DISTRIBUTOR_STORAGE: TaskletStorage<u8, DistributorContext, 0> = TaskletStorage::new();
-static FIZZ_STORAGE: TaskletStorage<EventId, FizzContext, 0> = TaskletStorage::new();
-static BUZZ_STORAGE: TaskletStorage<EventId, BuzzContext, 0> = TaskletStorage::new();
-static DONE_STORAGE: TaskletStorage<bool, DoneContext, 0> = TaskletStorage::new();
-
-static ELEM_QUEUE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
-
-static GENERATE_NUMBERS_CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
-
 enum FizzBuzzEvents {
     Fizz,
     Buzz,
@@ -112,6 +102,20 @@ impl From<EventId> for FizzBuzzEvents {
     }
 }
 
+static PRODUCER_STORAGE: TaskletStorage<(), ProducerContext, 1> = TaskletStorage::new();
+static DISTRIBUTOR_STORAGE: TaskletStorage<u8, DistributorContext, 0> = TaskletStorage::new();
+static FIZZ_STORAGE: TaskletStorage<EventId, FizzContext, 0> = TaskletStorage::new();
+static BUZZ_STORAGE: TaskletStorage<EventId, BuzzContext, 0> = TaskletStorage::new();
+static DONE_STORAGE: TaskletStorage<bool, DoneContext, 0> = TaskletStorage::new();
+
+static ELEM_QUEUE: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
+
+static FIZZ_EVENT_STORAGE: EventStorage = EventStorage::new();
+static BUZZ_EVENT_STORAGE: EventStorage = EventStorage::new();
+static FIZZ_BUZZ_EVENT_STORAGE: EventStorage = EventStorage::new();
+
+static GENERATE_NUMBERS_CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
 #[entry]
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
@@ -123,13 +127,13 @@ fn main() -> ! {
         .expect("Unable to create ElemQueue");
 
     aerugo
-        .create_event(FizzBuzzEvents::Fizz.into())
+        .create_event(FizzBuzzEvents::Fizz.into(), &FIZZ_EVENT_STORAGE)
         .expect("Unable to create Fizz event");
     aerugo
-        .create_event(FizzBuzzEvents::Buzz.into())
+        .create_event(FizzBuzzEvents::Buzz.into(), &BUZZ_EVENT_STORAGE)
         .expect("Unable to create Buzz event");
     aerugo
-        .create_event(FizzBuzzEvents::FizzBuzz.into())
+        .create_event(FizzBuzzEvents::FizzBuzz.into(), &FIZZ_BUZZ_EVENT_STORAGE)
         .expect("Unable to create FizzBuzz event");
 
     aerugo
@@ -221,24 +225,18 @@ fn main() -> ! {
     let fizz_handle = FIZZ_STORAGE
         .create_handle()
         .expect("Unable to create handle to Fizz");
+    let fizz_events = [FizzBuzzEvents::Fizz.into(), FizzBuzzEvents::FizzBuzz.into()];
     aerugo
-        .subscribe_tasklet_to_events(&fizz_handle)
-        .expect("Unable to subscribe Fizz to events")
-        .enable(FizzBuzzEvents::Fizz.into())
-        .expect("Unable to enable Fizz event for Fizz")
-        .enable(FizzBuzzEvents::FizzBuzz.into())
-        .expect("Unable to enable FizzBuzz event for Fizz");
+        .subscribe_tasklet_to_events(&fizz_handle, fizz_events)
+        .expect("Unable to subscribe Fizz to events");
 
     let buzz_handle = BUZZ_STORAGE
         .create_handle()
         .expect("Unable to create handle to Buzz");
+    let buzz_events = [FizzBuzzEvents::Buzz.into(), FizzBuzzEvents::FizzBuzz.into()];
     aerugo
-        .subscribe_tasklet_to_events(&buzz_handle)
-        .expect("Unable to subscribe Buzz to events")
-        .enable(FizzBuzzEvents::Buzz.into())
-        .expect("Unable to enable Buzz event for Buzz")
-        .enable(FizzBuzzEvents::FizzBuzz.into())
-        .expect("Unable to enable FizzBuzz event for Buzz");
+        .subscribe_tasklet_to_events(&buzz_handle, buzz_events)
+        .expect("Unable to subscribe Buzz to events");
 
     let done_handle = DONE_STORAGE
         .create_handle()

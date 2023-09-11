@@ -35,7 +35,7 @@ pub use self::api::{InitApi, RuntimeApi};
 pub use self::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,
 };
-pub use self::event::{EventEnabler, EventId};
+pub use self::event::{EventId, EventStorage};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
 pub use aerugo_hal::{time, Duration, Instant, SystemHardwareConfig};
