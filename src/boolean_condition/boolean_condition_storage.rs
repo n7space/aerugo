@@ -12,8 +12,8 @@ use heapless::Vec;
 use crate::api::InitError;
 use crate::boolean_condition::BooleanConditionHandle;
 
-/// Type of the queue data storage.
-pub(crate) type BooleanConditionBuffer = Vec<u8, { core::mem::size_of::<BooleanCondition>() }>;
+/// Type of the boolean condition data storage.
+type BooleanConditionBuffer = Vec<u8, { core::mem::size_of::<BooleanCondition>() }>;
 
 /// Structure containing memory for BooleanCondition creation.
 ///
@@ -41,23 +41,18 @@ impl BooleanConditionStorage {
         self.initialized.get().is_some()
     }
 
-    /// Creates new handle to a boolean condition allocated in ths storage.
+    /// Creates new handle to a boolean condition allocated in this storage.
     ///
     /// # Return
     /// `Some(handle)` if this storage has been initialized. `None` otherwise.
     pub fn create_handle(&'static self) -> Option<BooleanConditionHandle> {
-        match self.initialized.get() {
-            Some(_) => {
-                let boolean_condition = self
-                    .boolean_condition()
-                    .expect("Failed to get reference to the stored BooleanCondition");
-                Some(BooleanConditionHandle::new(boolean_condition))
-            }
-            None => None,
-        }
+        self.boolean_condition().map(BooleanConditionHandle::new)
     }
 
     /// Initializes this storage.
+    ///
+    /// # Parameters
+    /// * `value` - Initial condition value.
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
@@ -73,7 +68,7 @@ impl BooleanConditionStorage {
         let condition = BooleanCondition::new(value);
 
         // This is safe, because `condition_buffer` doesn't contain any value yet, and it's size is
-        // guaranteed to be large enough to store queue structure.
+        // guaranteed to be large enough to store boolean condition structure.
         let condition_buffer = BooleanConditionBuffer::new();
         unsafe {
             let condition_buffer_ptr = condition_buffer.as_ptr() as *mut BooleanCondition;
@@ -86,20 +81,23 @@ impl BooleanConditionStorage {
 
         self.initialized
             .set(())
-            .expect("Failed to initialize BooleanConditionStorage");
+            .expect("Failed to set BooleanConditionStorage initialization status");
 
         Ok(())
     }
 
     /// Returns a reference to the stored BooleanCondition structure.
+    ///
+    /// # Return
+    /// `Some(condition)` if storage is initialized, `None` otherwise.
     #[inline(always)]
     fn boolean_condition(&'static self) -> Option<&'static BooleanCondition> {
-        match self.condition_buffer.get() {
-            Some(buffer) => {
-                // This is safe, because buffer is initialized
-                unsafe { Some(&*(buffer.as_ptr() as *const BooleanCondition)) }
-            }
-            None => None,
+        match (self.initialized.get(), self.condition_buffer.get()) {
+            // SAFETY: This is safe, because the storage is initialized.
+            (Some(_), Some(buffer)) => unsafe {
+                Some(&*(buffer.as_ptr() as *const BooleanCondition))
+            },
+            (_, _) => None,
         }
     }
 }
