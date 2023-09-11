@@ -12,7 +12,7 @@ pygdbmi = "^0.11.0.0"
 paramiko = "^3.3.1"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+black = "^23.9.1"
 mypy = "^1.5.1"
 isort = "^5.12.0"
 flake8 = "^6.1.0"
