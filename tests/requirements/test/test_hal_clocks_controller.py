@@ -49,6 +49,7 @@ def main():
     except ValueError:
         # Catching ValueError means that the test panicked at some point.
         logging.critical("TEST FAILED, APPLICATION PANICKED")
+        exit(10)
 
     wait_for_messages(
         rtt,
