@@ -1,9 +1,11 @@
 //! Module containing sturctures related to system events.
 
-mod event_enabler;
+mod event_handle;
 mod event_set;
+mod event_storage;
 
-pub use self::event_enabler::EventEnabler;
+pub use self::event_handle::EventHandle;
+pub use self::event_storage::EventStorage;
 
 pub(crate) use self::event_set::EventSet;
 

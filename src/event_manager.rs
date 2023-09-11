@@ -12,7 +12,7 @@ use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 
 /// Type for list of events.
-type EventList = InternalList<Event, { EventManager::EVENT_COUNT }>;
+type EventList = InternalList<&'static Event, { EventManager::EVENT_COUNT }>;
 /// Type fo list of event sets.
 type EventSetList = InternalList<EventSet, { Aerugo::TASKLET_COUNT }>;
 
@@ -52,9 +52,7 @@ impl EventManager {
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of events.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn create_event(&'static self, event_id: EventId) -> Result<(), InitError> {
-        let event = Event::new(event_id);
-
+    pub(crate) unsafe fn add_event(&'static self, event: &'static Event) -> Result<(), InitError> {
         match self.events.add(event) {
             Ok(_) => Ok(()),
             Err(_) => Err(InitError::EventListFull),
@@ -86,9 +84,17 @@ impl EventManager {
         Ok(self.event_sets.as_ref().last().unwrap())
     }
 
+    /// Checks if event of given ID exists.
+    pub(crate) fn has_event(&'static self, event_id: EventId) -> bool {
+        self.events.iter().any(|&event| event.id() == event_id)
+    }
+
     /// Returns reference to the event with given ID.
     pub(crate) fn get_event(&'static self, event_id: EventId) -> Option<&'static Event> {
-        self.events.iter().find(|&event| event.id() == event_id)
+        self.events
+            .iter()
+            .find(|&event| event.id() == event_id)
+            .copied()
     }
 
     /// Emits event with the given ID.

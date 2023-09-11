@@ -9,7 +9,7 @@ use crate::api::InitError;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
-use crate::event::{EventEnabler, EventId};
+use crate::event::{EventId, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 
@@ -82,7 +82,11 @@ pub trait InitApi {
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
-    fn create_event(&'static self, event_id: EventId) -> Result<(), InitError>;
+    fn create_event(
+        &'static self,
+        event_id: EventId,
+        storage: &'static EventStorage,
+    ) -> Result<(), InitError>;
 
     /// Creates new boolean condition in the system.
     ///
@@ -127,11 +131,12 @@ pub trait InitApi {
     /// * `tasklet_handle` - Handle to the target tasklet.
     ///
     /// # Return
-    /// `EventEnabler` if successful, `InitError` otherwise.
-    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize>(
+    /// `()` if successful, `InitError` otherwise.
+    fn subscribe_tasklet_to_events<C, const COND_COUNT: usize, const EVENT_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<EventId, C, COND_COUNT>,
-    ) -> Result<EventEnabler, InitError>;
+        events: [EventId; EVENT_COUNT],
+    ) -> Result<(), InitError>;
 
     /// Subscribes tasklet to the boolean condition.
     ///
