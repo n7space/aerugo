@@ -1,3 +1,20 @@
+"""This script can be used to run Aerugo example on remote SAMV71 board connected via OpenOCD probe
+
+Usage:
+Run this script from Aerugo's root directory. Pass the directory name of the example as an argument
+(for example, `samv71-basic-execution`). This should be a preferred way of running the examples, or
+should be treated as template for manual execution of any Aerugo/Calldwell applications.
+
+This script performs following steps:
+1. Verify that the example actually exists
+2. Verify that Cargo is installed and project is built successfully (will automatically build it
+   if necessary)
+3. Start remote GDB server via SSH using credentials from `test_utils` module. See
+   `tests/requirements/tests/tests_utils.py` for details.
+4. Start RTT server, flash the application and perform the startup process
+5. Wait for RTT to be initialized on MCU side and start RTT facilities
+6. Execute the rest of example's code
+"""
 import sys
 from enum import IntEnum
 from pathlib import Path

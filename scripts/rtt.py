@@ -1,3 +1,10 @@
+"""This script can be used to capture raw RTT traffic coming from target board.
+
+Usage:
+Pass the hostname and port (in `hostname:port` format, for example 192.168.1.1:1234)
+as an argument to this script. It will automatically connect to RTT server on the other end,
+and start receiving data and printing it to stdout.
+"""
 import sys
 from typing import Tuple
 
