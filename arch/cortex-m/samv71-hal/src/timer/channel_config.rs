@@ -94,7 +94,7 @@ pub enum ChannelClock {
     XC1,
     /// External clock 2
     XC2,
-    /// Timer peripheral clock (see [`ClocksController`](crate::clocks_controller::ClocksController) for details)
+    /// Timer peripheral clock (see [`PMC`](crate::pmc::PMC) for details)
     TimerPeripheralClock,
 }
 

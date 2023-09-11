@@ -1,6 +1,6 @@
 //! Module representing user-accessible peripherals.
 
-use samv71_hal::{clocks_controller::ClocksController, pac};
+use samv71_hal::{pac, pmc::PMC};
 
 /// Peripherals structure.
 /// These peripherals can be used to create HAL drivers in user code.
@@ -19,7 +19,7 @@ pub struct UserPeripherals {
     pub timer_counter3: Option<pac::TC3>,
     /// Clocks controller.
     /// This is HAL driver instance that provides abstraction over PMC.
-    pub clocks_controller: Option<ClocksController>,
+    pub pmc: Option<PMC>,
     /// NVIC
     pub nvic: Option<pac::NVIC>,
 }

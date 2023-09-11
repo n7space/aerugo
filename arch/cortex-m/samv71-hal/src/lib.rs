@@ -13,6 +13,6 @@ pub use samv71q21_pac as pac;
 #[cfg(feature = "rt")]
 pub use pac::interrupt;
 
-pub mod clocks_controller;
+pub mod pmc;
 pub mod timer;
 pub mod watchdog;

@@ -7,7 +7,7 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
 use aerugo::{
-    hal::drivers::clocks_controller::{
+    hal::drivers::pmc::{
         config::{
             main_rc::MainRcFrequency,
             master_clock::{
@@ -20,7 +20,7 @@ use aerugo::{
             PeripheralId,
         },
         status::{MCOStatus, SlowClockSource},
-        ClocksController, Interrupts as ClockInterrupts, Status as ClocksStatus,
+        Interrupts as ClockInterrupts, Status as ClocksStatus, PMC,
     },
     Aerugo, InitApi, SystemHardwareConfig,
 };
@@ -28,8 +28,8 @@ use calldwell::with_rtt_out;
 use core::fmt::Write;
 use rt::entry;
 
-fn perform_status_test(clocks_controller: &mut ClocksController) {
-    let current_status = clocks_controller.status();
+fn perform_status_test(pmc: &mut PMC) {
+    let current_status = pmc.status();
 
     // Assuming default, startup configuration, status should be as follows:
     let default_status = ClocksStatus {
@@ -65,9 +65,9 @@ fn perform_status_test(clocks_controller: &mut ClocksController) {
     with_rtt_out(|w, _| w.write_str("status test successful"));
 }
 
-fn perform_interrupt_config_test(clocks_controller: &mut ClocksController) {
-    clocks_controller.enable_interrupts(ClockInterrupts::all());
-    let masks_post_disable = clocks_controller.interrupts_masks();
+fn perform_interrupt_config_test(pmc: &mut PMC) {
+    pmc.enable_interrupts(ClockInterrupts::all());
+    let masks_post_disable = pmc.interrupts_masks();
 
     if masks_post_disable != ClockInterrupts::all() {
         panic!(
@@ -76,8 +76,8 @@ fn perform_interrupt_config_test(clocks_controller: &mut ClocksController) {
         );
     }
 
-    clocks_controller.disable_interrupts(ClockInterrupts::all());
-    let masks_post_disable = clocks_controller.interrupts_masks();
+    pmc.disable_interrupts(ClockInterrupts::all());
+    let masks_post_disable = pmc.interrupts_masks();
 
     if masks_post_disable != ClockInterrupts::none() {
         panic!(
@@ -89,16 +89,13 @@ fn perform_interrupt_config_test(clocks_controller: &mut ClocksController) {
     with_rtt_out(|w, _| w.write_str("interrupts config test successful"));
 }
 
-fn send_measured_main_rc_frequency(clocks_controller: &mut ClocksController) {
-    let main_rc_frequency = clocks_controller.measure_main_rc_frequency();
+fn send_measured_main_rc_frequency(pmc: &mut PMC) {
+    let main_rc_frequency = pmc.measure_main_rc_frequency();
     with_rtt_out(|w, _| write!(w.writer(), "{}", main_rc_frequency.to_Hz()).unwrap());
 }
 
-fn validate_main_rc_frequency(
-    clocks_controller: &ClocksController,
-    expected_frequency: MainRcFrequency,
-) {
-    let read_main_rc_frequency = clocks_controller.main_rc_frequency();
+fn validate_main_rc_frequency(pmc: &PMC, expected_frequency: MainRcFrequency) {
+    let read_main_rc_frequency = pmc.main_rc_frequency();
     if read_main_rc_frequency != expected_frequency {
         panic!(
             "unexpected default main RC frequency, expected {:#?}, got {:#?}",
@@ -107,30 +104,30 @@ fn validate_main_rc_frequency(
     }
 }
 
-fn perform_main_rc_config_test(clocks_controller: &mut ClocksController) {
+fn perform_main_rc_config_test(pmc: &mut PMC) {
     // By default the frequency should be set to 12MHz
-    validate_main_rc_frequency(clocks_controller, MainRcFrequency::MainRc12MHz);
-    send_measured_main_rc_frequency(clocks_controller);
+    validate_main_rc_frequency(pmc, MainRcFrequency::MainRc12MHz);
+    send_measured_main_rc_frequency(pmc);
 
     // Change it to 8MHz and verify it
-    clocks_controller.set_main_rc_frequency(MainRcFrequency::MainRc8MHz);
-    validate_main_rc_frequency(clocks_controller, MainRcFrequency::MainRc8MHz);
-    send_measured_main_rc_frequency(clocks_controller);
+    pmc.set_main_rc_frequency(MainRcFrequency::MainRc8MHz);
+    validate_main_rc_frequency(pmc, MainRcFrequency::MainRc8MHz);
+    send_measured_main_rc_frequency(pmc);
 
     // Change it to 4MHz and verify it
-    clocks_controller.set_main_rc_frequency(MainRcFrequency::MainRc4MHz);
-    validate_main_rc_frequency(clocks_controller, MainRcFrequency::MainRc4MHz);
-    send_measured_main_rc_frequency(clocks_controller);
+    pmc.set_main_rc_frequency(MainRcFrequency::MainRc4MHz);
+    validate_main_rc_frequency(pmc, MainRcFrequency::MainRc4MHz);
+    send_measured_main_rc_frequency(pmc);
 
     // Restore original configuration
-    clocks_controller.set_main_rc_frequency(MainRcFrequency::MainRc12MHz);
-    validate_main_rc_frequency(clocks_controller, MainRcFrequency::MainRc12MHz);
-    send_measured_main_rc_frequency(clocks_controller);
+    pmc.set_main_rc_frequency(MainRcFrequency::MainRc12MHz);
+    validate_main_rc_frequency(pmc, MainRcFrequency::MainRc12MHz);
+    send_measured_main_rc_frequency(pmc);
 }
 
-fn perform_master_clock_config_test(clocks_controller: &mut ClocksController) {
+fn perform_master_clock_config_test(pmc: &mut PMC) {
     // Fetch and validate default configuration
-    let original_master_clock_config = clocks_controller.master_clock_config();
+    let original_master_clock_config = pmc.master_clock_config();
     let expected_master_clock_config = MasterClockConfig {
         source: MasterClockSource::MainClock,
         prescaler: ProcessorClockPrescaler::NoDivision,
@@ -151,12 +148,12 @@ fn perform_master_clock_config_test(clocks_controller: &mut ClocksController) {
         divider: MasterClockDivider::DivBy4,
     };
 
-    clocks_controller.configure_master_clock(new_master_clock_config);
-    if !clocks_controller.status().master_clock_ready {
+    pmc.configure_master_clock(new_master_clock_config);
+    if !pmc.status().master_clock_ready {
         panic!("master clock is not ready after setting it's new configuration");
     }
 
-    let read_master_clock_config = clocks_controller.master_clock_config();
+    let read_master_clock_config = pmc.master_clock_config();
     if read_master_clock_config != new_master_clock_config {
         panic!(
             "changing master clock configuration failed, expected {:#?}, got {:#?}",
@@ -165,12 +162,12 @@ fn perform_master_clock_config_test(clocks_controller: &mut ClocksController) {
     }
 
     // Restore previous configuration
-    clocks_controller.configure_master_clock(original_master_clock_config);
-    if !clocks_controller.status().master_clock_ready {
+    pmc.configure_master_clock(original_master_clock_config);
+    if !pmc.status().master_clock_ready {
         panic!("master clock is not ready after restoring it's previous configuration");
     }
 
-    let read_master_clock_config = clocks_controller.master_clock_config();
+    let read_master_clock_config = pmc.master_clock_config();
     if read_master_clock_config != original_master_clock_config {
         panic!(
             "restoring master clock configuration failed, expected {:#?}, got {:#?}",
@@ -181,17 +178,17 @@ fn perform_master_clock_config_test(clocks_controller: &mut ClocksController) {
     with_rtt_out(|w, _| w.write_str("master clock test successful"));
 }
 
-fn perform_processor_clock_status_test(clocks_controller: &ClocksController) {
-    if !clocks_controller.processor_clock_enabled() {
+fn perform_processor_clock_status_test(pmc: &PMC) {
+    if !pmc.processor_clock_enabled() {
         panic!("processor clock disabled, yet nothing has disabled it explicitly");
     }
     with_rtt_out(|w, _| w.write_str("processor clock status test successful"));
 }
 
-fn perform_programmable_clocks_config_test(clocks_controller: &mut ClocksController) {
+fn perform_programmable_clocks_config_test(pmc: &mut PMC) {
     // PCK6 is enabled because Aerugo is using it internally.
     let expected_status = [false, false, false, false, false, false, true, false];
-    let actual_status = clocks_controller.programmable_clocks_status();
+    let actual_status = pmc.programmable_clocks_status();
     if actual_status != expected_status {
         panic!(
             "unexpected programmable clocks status, expected {:#?}, got {:#?}",
@@ -206,8 +203,8 @@ fn perform_programmable_clocks_config_test(clocks_controller: &mut ClocksControl
     let tested_clock = PCK::PCK2;
 
     // Configure PCK2 and validate the configuration
-    clocks_controller.configure_programmable_clock(tested_clock, pck_config);
-    let actual_config = clocks_controller.programmable_clock_config(tested_clock);
+    pmc.configure_programmable_clock(tested_clock, pck_config);
+    let actual_config = pmc.programmable_clock_config(tested_clock);
     if pck_config != actual_config {
         panic!(
             "unexpected configuration read from {:#?}, expected {:#?}, got {:#?}",
@@ -215,16 +212,16 @@ fn perform_programmable_clocks_config_test(clocks_controller: &mut ClocksControl
         );
     }
 
-    clocks_controller.enable_programmable_clock(tested_clock);
-    if !clocks_controller.programmable_clock_enabled(tested_clock) {
+    pmc.enable_programmable_clock(tested_clock);
+    if !pmc.programmable_clock_enabled(tested_clock) {
         panic!(
             "{:#?} was enabled, but clock controller reports it's disabled",
             tested_clock
         );
     }
 
-    clocks_controller.disable_programmable_clock(tested_clock);
-    if clocks_controller.programmable_clock_enabled(tested_clock) {
+    pmc.disable_programmable_clock(tested_clock);
+    if pmc.programmable_clock_enabled(tested_clock) {
         panic!(
             "{:#?} was disabled, but clock controller reports it's enabled",
             tested_clock
@@ -234,13 +231,13 @@ fn perform_programmable_clocks_config_test(clocks_controller: &mut ClocksControl
     with_rtt_out(|w, _| w.write_str("programmable clocks config test successful"));
 }
 
-fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksController) {
+fn perform_peripheral_clocks_config_test(pmc: &mut PMC) {
     // I2S is selected because it's the only peripheral that supports generic clock configuration.
     // Other peripherals will simply not react to generic clock settings.
     let tested_peripheral = PeripheralId::I2SC0;
 
     // Clock should be disabled by default
-    let default_clock_config = clocks_controller.peripheral_clocks_config(tested_peripheral);
+    let default_clock_config = pmc.peripheral_clocks_config(tested_peripheral);
     let expected_clock_config = PeripheralClockConfig::default();
 
     if default_clock_config != expected_clock_config {
@@ -251,11 +248,8 @@ fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksControlle
     }
 
     // Enable peripheral clock
-    clocks_controller.enable_peripheral_clock(tested_peripheral);
-    if !clocks_controller
-        .peripheral_clocks_config(tested_peripheral)
-        .enabled
-    {
+    pmc.enable_peripheral_clock(tested_peripheral);
+    if !pmc.peripheral_clocks_config(tested_peripheral).enabled {
         panic!(
             "peripheral clock for {:#?} was enabled, but configuration indicates it's disabled",
             tested_peripheral
@@ -263,11 +257,8 @@ fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksControlle
     }
 
     // Disable peripheral clock
-    clocks_controller.disable_peripheral_clock(tested_peripheral);
-    if clocks_controller
-        .peripheral_clocks_config(tested_peripheral)
-        .enabled
-    {
+    pmc.disable_peripheral_clock(tested_peripheral);
+    if pmc.peripheral_clocks_config(tested_peripheral).enabled {
         panic!(
             "peripheral clock for {:#?} was disabled, but configuration indicates it's enabled",
             tested_peripheral
@@ -285,11 +276,10 @@ fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksControlle
         generic_clock: expected_generic_clock_config,
     };
 
-    clocks_controller
-        .configure_peripheral_clocks(tested_peripheral, expected_peripheral_clock_config);
+    pmc.configure_peripheral_clocks(tested_peripheral, expected_peripheral_clock_config);
 
     // Validate the configuration
-    let read_config = clocks_controller.peripheral_clocks_config(tested_peripheral);
+    let read_config = pmc.peripheral_clocks_config(tested_peripheral);
     if read_config != expected_peripheral_clock_config {
         panic!(
             "peripheral clock config for {:#?} invalid, expected {:#?}, got {:#?}",
@@ -298,8 +288,8 @@ fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksControlle
     }
 
     // Check if generic clock configuration stays in the register after peripheral clock is disabled
-    clocks_controller.disable_peripheral_clock(tested_peripheral);
-    let read_config = clocks_controller.peripheral_clocks_config(tested_peripheral);
+    pmc.disable_peripheral_clock(tested_peripheral);
+    let read_config = pmc.peripheral_clocks_config(tested_peripheral);
     if (read_config.generic_clock.source != expected_generic_clock_config.source)
         || (read_config.generic_clock.divider != expected_generic_clock_config.divider)
     {
@@ -313,14 +303,14 @@ fn perform_peripheral_clocks_config_test(clocks_controller: &mut ClocksControlle
     with_rtt_out(|w, _| w.write_str("peripheral clocks config test successful"));
 }
 
-fn perform_clocks_controller_test(mut clocks_controller: ClocksController) {
-    perform_status_test(&mut clocks_controller);
-    perform_interrupt_config_test(&mut clocks_controller);
-    perform_main_rc_config_test(&mut clocks_controller);
-    perform_master_clock_config_test(&mut clocks_controller);
-    perform_processor_clock_status_test(&clocks_controller);
-    perform_programmable_clocks_config_test(&mut clocks_controller);
-    perform_peripheral_clocks_config_test(&mut clocks_controller);
+fn perform_pmc_test(mut pmc: PMC) {
+    perform_status_test(&mut pmc);
+    perform_interrupt_config_test(&mut pmc);
+    perform_main_rc_config_test(&mut pmc);
+    perform_master_clock_config_test(&mut pmc);
+    perform_processor_clock_status_test(&pmc);
+    perform_programmable_clocks_config_test(&mut pmc);
+    perform_peripheral_clocks_config_test(&mut pmc);
     with_rtt_out(|w, _| w.write_str("all tests finished successfully"));
 }
 
@@ -330,11 +320,11 @@ fn main() -> ! {
 
     let (aerugo, peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    let clocks_controller = peripherals
-        .clocks_controller
+    let pmc = peripherals
+        .pmc
         .expect("clocks controller missing from peripherals structure");
 
-    perform_clocks_controller_test(clocks_controller);
+    perform_pmc_test(pmc);
 
     aerugo.start();
 }

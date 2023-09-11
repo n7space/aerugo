@@ -7,8 +7,8 @@ extern crate panic_rtt_target;
 
 use core::cell::RefCell;
 
-use aerugo::hal::drivers::clocks_controller::config::PeripheralId;
-use aerugo::hal::drivers::clocks_controller::ClocksController;
+use aerugo::hal::drivers::pmc::config::PeripheralId;
+use aerugo::hal::drivers::pmc::PMC;
 use aerugo::hal::drivers::timer::{
     channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Waveform, TC1,
 };
@@ -47,9 +47,9 @@ fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi)
 
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
 
-fn init_clocks(mut clocks_controller: ClocksController) {
+fn init_clocks(mut pmc: PMC) {
     // Enable TC1 CH0 clock
-    clocks_controller.enable_peripheral_clock(PeripheralId::TC1CH0);
+    pmc.enable_peripheral_clock(PeripheralId::TC1CH0);
 }
 
 fn init_timer(mut timer: Timer<TC1>) {
@@ -106,10 +106,8 @@ fn main() -> ! {
 
     logln!("Doing stuff with timers...");
     let timer = Timer::new(peripherals.timer_counter1.expect("Timer 1 already used"));
-    let clocks_controller = peripherals
-        .clocks_controller
-        .expect("Clocks controller already used");
-    init_clocks(clocks_controller);
+    let pmc = peripherals.pmc.expect("PMC already taken");
+    init_clocks(pmc);
     init_timer(timer);
 
     init_tasks(aerugo);

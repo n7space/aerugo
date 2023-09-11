@@ -1,14 +1,8 @@
-//! Implementation of HAL Clock Controller driver.
-//! This driver provides an abstraction over Power Management Controller (PMC).
-//!
-//! Difference in the name of this module is due to the fact that "Power" Management
-//! Controller original name reflects it's actual usage quite inaccurately.
+//! Implementation of HAL PMC driver.
 //!
 //! Power Management Controller (PMC) controls all the SAMV71 MCU clocks.
 //! You can use it to configure system clocks and PLLs, and to configure/disable/enable
 //! peripheral's clocks.
-//!
-//! This module can also calculate some of the clock's frequencies.
 
 pub mod config;
 pub mod interrupt;
@@ -21,7 +15,7 @@ use self::config::main_rc::*;
 use self::config::master_clock::*;
 use self::config::pck::*;
 use self::config::peripheral::*;
-use crate::pac::PMC;
+use crate::pac;
 use crate::time;
 use cortex_m::asm;
 
@@ -36,15 +30,15 @@ use cortex_m::asm;
 ///
 /// This structure is not thread/interrupt-safe, as it uses shared state (registers).
 /// If you need to share it, wrap it in a proper container that implements [`Sync`].
-pub struct ClocksController {
-    /// PMC instance.
-    pmc: PMC,
+pub struct PMC {
+    /// PAC PMC instance.
+    pmc: pac::PMC,
 }
 
-impl ClocksController {
-    /// Create new Clock controller instance
-    pub const fn new(pmc: PMC) -> Self {
-        ClocksController { pmc }
+impl PMC {
+    /// Create new PMC instance
+    pub const fn new(pmc: pac::PMC) -> Self {
+        PMC { pmc }
     }
 
     /// Returns current PMC status.
@@ -357,7 +351,7 @@ impl ClocksController {
     /// Enables provided programmable clock (PCK).
     ///
     /// This function waits until PCK is ready after enabling it, so there's no need
-    /// to call [`ClocksController::wait_until_programmable_clock_is_ready`] again.
+    /// to call [`PMC::wait_until_programmable_clock_is_ready`] again.
     pub fn enable_programmable_clock(&mut self, clock: PCK) {
         /// PMC bits in System Clock Enable Register start at 8th bit
         const PMC_BITS_START: u32 = 8;

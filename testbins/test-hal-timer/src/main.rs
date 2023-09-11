@@ -8,7 +8,7 @@ extern crate cortex_m_rt as rt;
 
 use aerugo::{
     hal::drivers::{
-        clocks_controller::{config::PeripheralId, ClocksController},
+        pmc::{config::PeripheralId, PMC},
         timer::{
             channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Timer,
             Waveform, TC1,
@@ -86,9 +86,9 @@ fn initialize_nvic() {
     }
 }
 
-fn initialize_clocks(mut clocks_controller: ClocksController) {
+fn initialize_clocks(mut pmc: PMC) {
     // Enable TC1 CH0 clock
-    clocks_controller.enable_peripheral_clock(PeripheralId::TC1CH0);
+    pmc.enable_peripheral_clock(PeripheralId::TC1CH0);
 }
 
 fn initialize_timer(mut timer: Timer<TC1>) {
@@ -160,11 +160,7 @@ fn main() -> ! {
     let timer = Timer::new(peripherals.timer_counter1.expect("TC1 already taken!"));
 
     initialize_nvic();
-    initialize_clocks(
-        peripherals
-            .clocks_controller
-            .expect("Clocks controller already taken!"),
-    );
+    initialize_clocks(peripherals.pmc.expect("PMC already taken!"));
     initialize_timer(timer);
 
     initialize_tasks(aerugo);

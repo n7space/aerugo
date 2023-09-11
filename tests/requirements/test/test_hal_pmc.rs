@@ -11,12 +11,12 @@
 /// @SRS{ROS-FUN-BSP-PMC-030}
 #[cfg_attr(not(doc), test)]
 #[cfg(feature = "test-aerugo-cortex-m")]
-fn req_test_hal_clocks_controller() {
+fn req_test_hal_pmc() {
     use assert_cmd::Command;
 
     // The script will build test binary
     Command::new("python")
-        .arg("tests/requirements/test/test_hal_clocks_controller.py")
+        .arg("tests/requirements/test/test_hal_pmc.py")
         .timeout(std::time::Duration::from_secs(60))
         .assert()
         .success()
