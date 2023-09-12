@@ -1,5 +1,7 @@
 """HAL Watchdog driver integration test."""
 
+from __future__ import annotations
+
 import logging
 
 from test_utils import finish_test, init_test, wait_for_messages
@@ -9,7 +11,7 @@ from calldwell import init_default_logger
 TEST_NAME = "test-hal-watchdog"
 
 
-def main():
+def main() -> None:
     """Main function of integration test."""
     gdb, rtt, ssh = init_test(TEST_NAME)
 

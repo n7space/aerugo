@@ -3,8 +3,9 @@
 import logging
 
 
-def init_default_logger():
+def init_default_logger() -> None:
     """Initializes default logger instance with Calldwell's log format"""
     logging.basicConfig(
-        level=logging.INFO, format="[%(asctime)s] <%(levelname)s|%(name)s>: %(message)s"
+        level=logging.INFO,
+        format="[%(asctime)s] <%(levelname)s|%(name)s>: %(message)s",
     )

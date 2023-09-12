@@ -18,9 +18,11 @@ This script performs following steps:
 6. Execute the rest of example's code
 """
 
+from __future__ import annotations
+
 import sys
 from enum import IntEnum
-from pathlib import Path
+from typing import TYPE_CHECKING, NoReturn
 
 from calldwell import init_default_logger
 from calldwell.gdb_client import GDBClient
@@ -45,6 +47,9 @@ from scripts.env import (
     LOGGER_INIT_FUNCTION_NAME,
 )
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class ExitReason(IntEnum):
     """Exit reason of current script.
@@ -68,16 +73,15 @@ class ExitReason(IntEnum):
 def get_args() -> str:
     """Parses and returns script's arguments, exist the program with non-zero exit code
     if arguments are missing or cannot be parsed."""
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 2:  # noqa: PLR2004 (magic number self-explanatory)
         print(
             "SAMV71 example runner, starts remote GDB session, configures RTT, "
-            "runs example and prints it's output on stdout"
+            "runs example and prints it's output on stdout",
         )
         print(f"Usage: {sys.argv[0]} example-name")
         sys.exit(ExitReason.INVALID_ARGUMENTS)
 
-    example_name = sys.argv[1]
-    return example_name
+    return sys.argv[1]
 
 
 def get_example_path(example_name: str) -> Path:
@@ -125,7 +129,7 @@ def wait_for_rtt_init(gdb: GDBClient) -> None:
     if not gdb.set_breakpoint(rtt_init_function_full_name):
         print(
             "Error: Cannot set the breakpoint on RTT init function "
-            f"{rtt_init_function_full_name}!"
+            f"{rtt_init_function_full_name}!",
         )
         sys.exit(ExitReason.CANNOT_SET_BREAKPOINT_AT_RTT_INIT)
 
@@ -152,7 +156,7 @@ def setup_rtt(gdb: GDBClient) -> RTTClient:
     if not gdb.setup_rtt(rtt_symbol.address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
         print(
             f"Could not setup RTT for section @ {rtt_symbol.address} "
-            f"searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
+            f"searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)",
         )
         sys.exit(ExitReason.COULD_NOT_SETUP_RTT)
 
@@ -163,7 +167,7 @@ def setup_rtt(gdb: GDBClient) -> RTTClient:
     return RTTClient(BOARD_NETWORK_PATH, BOARD_RTT_PORT)
 
 
-def main():
+def main() -> NoReturn:
     """Main function of the script."""
     example_name = get_args()
     example_path = get_example_path(example_name)
@@ -171,7 +175,7 @@ def main():
         print(
             f"Error: example '{example_path.absolute()}' does not exist!\n"
             "Make sure you're running this script from root directory of the project, "
-            "and that the example name is correct!"
+            "and that the example name is correct!",
         )
         sys.exit(ExitReason.INVALID_EXAMPLE_PATH)
 
@@ -190,7 +194,7 @@ def main():
     while True:
         try:
             print(rtt.receive_string(), end="")
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # noqa: PERF203 (we don't care about performance here)
             ssh.execute("killall openocd")
             ssh.close()
             sys.exit(0)

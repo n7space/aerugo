@@ -1,12 +1,18 @@
 """Module containing some boilerplate, common to all tests that use `calldwell-rs` library."""
+
+from __future__ import annotations
+
 import logging
 import shutil
 import subprocess
-from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any
 
 from .gdb_client import GDBClient
 from .rtt_client import CalldwellRTTClient
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
 
 RTT_SECTION_SYMBOL_NAME = "_SEGGER_RTT"
 """Section name of RTT symbol. Hard-coded in `rtt_target` library."""
@@ -29,18 +35,18 @@ EXPECTED_MCU_HANDSHAKE_MESSAGE = f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE
 
 # Yes, this is a very big function, but it's supposed to be all-in-one single-liner.
 # pylint: disable=too-many-arguments,too-many-return-statements
-def init_remote_calldwell_rs_session(
+def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     gdb_executable: str,
     gdb_server_hostname: str,
     gdb_server_port: int,
     rtt_server_port: int,
     path_to_test_executable: str,
-    gdb_timeout: Optional[float] = None,
+    gdb_timeout: float | None = None,
     log_responses: bool = False,
     log_execution: bool = False,
-    pre_handshake_hook: Optional[Callable[[GDBClient, Optional[Any]], None]] = None,
-    pre_handshake_hook_argument: Optional[Any] = None,
-) -> Optional[tuple[GDBClient, CalldwellRTTClient]]:
+    pre_handshake_hook: Callable[[GDBClient, Any | None], None] | None = None,
+    pre_handshake_hook_argument: Any | None = None,  # noqa: ANN401 (this argument is for the user)
+) -> tuple[GDBClient, CalldwellRTTClient] | None:
     """Initializes Calldwell-rs test session by connecting to GDB server (like OpenOCD),
     starting RTT server, flashing the executable, waiting until `calldwell::initialize`
     executes, and performing handshake (and optional pre-handshake hook, if provided).
@@ -117,8 +123,10 @@ def init_remote_calldwell_rs_session(
 
 
 def build_cargo_app(
-    project_path: Path, target_triple: str, release_build: bool = False
-) -> Optional[Path]:
+    project_path: Path,
+    target_triple: str,
+    release_build: bool = False,
+) -> Path | None:
     """Builds Cargo binary and returns path to it's executable, or None if Cargo is not installed.
     Throws an exception on build failure.
 
@@ -138,7 +146,7 @@ def build_cargo_app(
         build_command.append("--release")
 
     subprocess.run(
-        build_command,
+        build_command,  # noqa: S603 (cargo existence validated, and path took via which)
         cwd=project_path,
         text=True,
         check=True,
@@ -156,7 +164,7 @@ def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
     if (init_message := rtt.receive_string_stream()) != EXPECTED_MCU_INIT_MESSAGE:
         logging.error(
             "Received unexpected MCU init message "
-            f"(got '{init_message}', expected '{EXPECTED_MCU_INIT_MESSAGE}')"
+            f"(got '{init_message}', expected '{EXPECTED_MCU_INIT_MESSAGE}')",
         )
         return False
 
@@ -165,7 +173,7 @@ def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
     if (response := rtt.receive_string_stream()) != EXPECTED_MCU_HANDSHAKE_MESSAGE:
         logging.error(
             "MCU responded with invalid handshake message "
-            f"(got '{response}', expected '{EXPECTED_MCU_HANDSHAKE_MESSAGE}')"
+            f"(got '{response}', expected '{EXPECTED_MCU_HANDSHAKE_MESSAGE}')",
         )
         return False
 
@@ -177,7 +185,7 @@ def _initialize_rtt(
     gdb_server_hostname: str,
     rtt_server_port: int,
     rtt_address: int,
-) -> Optional[CalldwellRTTClient]:
+) -> CalldwellRTTClient | None:
     """Performs RTT initialization after program start, and creates Calldwell's RTT client."""
     if not gdb.set_breakpoint(CALLDWELL_INIT_FUNCTION_NAME):
         logging.error(f"Could not set breakpoint @ {CALLDWELL_INIT_FUNCTION_NAME}")
@@ -198,7 +206,7 @@ def _initialize_rtt(
     if not gdb.setup_rtt(rtt_address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
         logging.error(
             f"Could not setup RTT for section @ {rtt_address} "
-            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)"
+            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)",
         )
         return None
 

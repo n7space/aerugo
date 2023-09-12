@@ -1,12 +1,20 @@
 """An example project that uses Calldwell to communicate with Rust application."""
+
+from __future__ import annotations
+
 import logging
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from calldwell import init_default_logger
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
+
+if TYPE_CHECKING:
+    from calldwell.gdb_client import GDBClient
+    from calldwell.rtt_client import CalldwellRTTClient
 
 # This example is prepared to run on remote development setup and requires following
 # environmental variables:
@@ -33,7 +41,7 @@ except ValueError as e:
     sys.exit(1)
 
 
-def init_example():
+def init_example() -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Initializes Calldwell session for this example application"""
     project_path = Path(sys.argv[0])
 
@@ -64,7 +72,7 @@ def init_example():
     return gdb, rtt, ssh
 
 
-def main():
+def main() -> None:
     """Main function of this example"""
     _, rtt, ssh = init_example()
 

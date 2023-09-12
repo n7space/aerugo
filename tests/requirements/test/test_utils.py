@@ -1,11 +1,13 @@
 """Test utilities used by Aerugo's integration test scripts.
-Provides integration test's boilerplate."""
+Provides integration test's boilerplate.
+"""
+
+from __future__ import annotations
 
 import logging
 import sys
+from typing import TYPE_CHECKING
 
-from calldwell.gdb_client import GDBClient
-from calldwell.rtt_client import CalldwellRTTClient
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
 from scripts.env import (
@@ -20,9 +22,13 @@ from scripts.env import (
     INTEGRATION_TESTS_DIRECTORY,
 )
 
+if TYPE_CHECKING:
+    from calldwell.gdb_client import GDBClient
+    from calldwell.rtt_client import CalldwellRTTClient
+
 
 def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
-    """Creates SSH connection to target board, initializes Calldwell"""
+    """Creates SSH connection to target board, initializes Calldwell."""
     project_path = INTEGRATION_TESTS_DIRECTORY / test_name
     if (test_binary_path := build_cargo_app(project_path, BOARD_TARGET_TRIPLE)) is None:
         sys.exit(100)
@@ -58,11 +64,14 @@ def finish_test(ssh: SSHClient) -> None:
 
 
 def wait_for_messages(
-    rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: list[str]
+    rtt: CalldwellRTTClient,
+    ssh: SSHClient,
+    expected_messages: list[str],
 ) -> None:
     """Waits until list of specified messages is received, prematurely finishes
     the test with non-zero exit code if an invalid message is received, indicating
-    test failure."""
+    test failure.
+    """
     for message in expected_messages:
         logging.info(f"Expecting '{message}'")
         received_message = rtt.receive_string_stream()
@@ -70,7 +79,7 @@ def wait_for_messages(
         if received_message != message:
             logging.critical(
                 "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
-                f"(expected '{message}', got '{received_message}')"
+                f"(expected '{message}', got '{received_message}')",
             )
             finish_test(ssh)
             sys.exit(2)

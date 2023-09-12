@@ -1,26 +1,35 @@
 """HAL PMC driver integration test."""
 
+from __future__ import annotations
+
 import logging
 import sys
+from typing import TYPE_CHECKING
 
 from test_utils import finish_test, init_test, wait_for_messages
 
 from calldwell import init_default_logger
-from calldwell.rtt_client import CalldwellRTTClient
+
+if TYPE_CHECKING:
+    from calldwell.rtt_client import CalldwellRTTClient
 
 TEST_NAME = "test-hal-pmc"
 
 
 def is_main_rc_frequency_valid(
-    rtt: CalldwellRTTClient, expected_frequency_mhz: int
+    rtt: CalldwellRTTClient,
+    expected_frequency_mhz: int,
 ) -> tuple[bool, int]:
     """Receives a message via Calldwell stream, which should contain measured frequency of RC
-    oscillator. Compares the frequency to fixed tolerance interval and returns if it fits the
+    oscillator.
+
+    Compares the frequency to fixed tolerance interval and returns if it fits the
     tolerance criteria and frequency value, or throws ValueError if invalid frequency was
-    received (for example, if the test panicked)."""
+    received (for example, if the test panicked).
+    """
     measured_frequency_raw = rtt.receive_string_stream()
     logging.info(
-        f"Received measured internal RC oscillator frequency [Hz]: {measured_frequency_raw}"
+        f"Received measured internal RC oscillator frequency [Hz]: {measured_frequency_raw}",
     )
 
     measured_frequency = int(measured_frequency_raw)
@@ -31,7 +40,7 @@ def is_main_rc_frequency_valid(
     return (min_frequency < measured_frequency < max_frequency), measured_frequency
 
 
-def main():
+def main() -> None:
     """Main function of integration test."""
     _, rtt, ssh = init_test(TEST_NAME)
 
@@ -51,7 +60,7 @@ def main():
             if not is_valid:
                 logging.critical(
                     "TEST FAILED, measured frequency is outside of 'expected frequency"
-                    f"+/- 1MHz' range! Expected {frequency}MHz, got {measured_frequency}"
+                    f"+/- 1MHz' range! Expected {frequency}MHz, got {measured_frequency}",
                 )
     except ValueError:
         # Catching ValueError means that the test panicked at some point.
