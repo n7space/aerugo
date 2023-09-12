@@ -8,7 +8,7 @@ from test_utils import finish_test, init_test, wait_for_messages
 from calldwell import init_default_logger
 from calldwell.rtt_client import CalldwellRTTClient
 
-TEST_NAME = "test-hal-clocks-controller"
+TEST_NAME = "test-hal-pmc"
 
 
 def is_main_rc_frequency_valid(

@@ -215,7 +215,7 @@ fn perform_programmable_clocks_config_test(pmc: &mut PMC) {
     pmc.enable_programmable_clock(tested_clock);
     if !pmc.programmable_clock_enabled(tested_clock) {
         panic!(
-            "{:#?} was enabled, but clock controller reports it's disabled",
+            "{:#?} was enabled, but PMC reports it's disabled",
             tested_clock
         );
     }
@@ -223,7 +223,7 @@ fn perform_programmable_clocks_config_test(pmc: &mut PMC) {
     pmc.disable_programmable_clock(tested_clock);
     if pmc.programmable_clock_enabled(tested_clock) {
         panic!(
-            "{:#?} was disabled, but clock controller reports it's enabled",
+            "{:#?} was disabled, but PMC reports it's enabled",
             tested_clock
         );
     }
@@ -322,7 +322,7 @@ fn main() -> ! {
 
     let pmc = peripherals
         .pmc
-        .expect("clocks controller missing from peripherals structure");
+        .expect("PMC missing from peripherals structure");
 
     perform_pmc_test(pmc);
 
