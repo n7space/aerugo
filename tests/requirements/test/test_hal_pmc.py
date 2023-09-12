@@ -1,4 +1,7 @@
+"""HAL PMC driver integration test."""
+
 import logging
+import sys
 from typing import Tuple
 
 from test_utils import finish_test, init_test, wait_for_messages
@@ -12,6 +15,10 @@ TEST_NAME = "test-hal-clocks-controller"
 def is_main_rc_frequency_valid(
     rtt: CalldwellRTTClient, expected_frequency_mhz: int
 ) -> Tuple[bool, int]:
+    """Receives a message via Calldwell stream, which should contain measured frequency of RC
+    oscillator. Compares the frequency to fixed tolerance interval and returns if it fits the
+    tolerance criteria and frequency value, or throws ValueError if invalid frequency was
+    received (for example, if the test panicked)."""
     measured_frequency_raw = rtt.receive_string_stream()
     logging.info(
         f"Received measured internal RC oscillator frequency [Hz]: {measured_frequency_raw}"
@@ -26,7 +33,8 @@ def is_main_rc_frequency_valid(
 
 
 def main():
-    gdb, rtt, ssh = init_test(TEST_NAME)
+    """Main function of integration test."""
+    _, rtt, ssh = init_test(TEST_NAME)
 
     wait_for_messages(
         rtt,
@@ -49,7 +57,7 @@ def main():
     except ValueError:
         # Catching ValueError means that the test panicked at some point.
         logging.critical("TEST FAILED, APPLICATION PANICKED")
-        exit(10)
+        sys.exit(10)
 
     wait_for_messages(
         rtt,

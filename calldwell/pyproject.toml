@@ -10,16 +10,13 @@ readme = "README.md"
 python = "^3.9"
 pygdbmi = "^0.11.0.0"
 paramiko = "^3.3.1"
+ruff = "^0.0.288"
+pylint = "^2.17.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
 mypy = "^1.5.1"
-isort = "^5.12.0"
-flake8 = "^6.1.0"
 types-paramiko = "^3.3.0.0"
-
-[tool.isort]
-profile = "black"
 
 [tool.black]
 line-length = 100
@@ -28,6 +25,28 @@ line-length = 100
 python_version = "3.9"
 check_untyped_defs = true
 show_error_codes = true
+
+[tool.ruff]
+line-length = 100
+
+[tool.pylint.main]
+max-line-length = 100
+jobs = 0 # auto-detects the amount of available threads to run in parallel
+fail-under = '10.0' # we do not allow subpar quality code here
+suggestion-mode = 'yes'
+# This hook assumes that all the checks are ran from root directory of Aerugo.
+# It adds this directory to system path, so Pylint can find the module imports correctly.
+# This is a workaround that allows to not disable the rules that inform about invalid imports,
+# as it's much more drastic than altering the PATH.
+init-hook='''import sys
+from pathlib import Path
+sys.path.append(Path("."))
+'''
+
+[tool.pylint.messages]
+disable = '''logging-fstring-interpolation
+'''
+
 
 [build-system]
 requires = ["poetry-core"]

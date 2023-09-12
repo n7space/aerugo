@@ -2,6 +2,7 @@
 Provides integration test's boilerplate."""
 
 import logging
+import sys
 from typing import List, Tuple
 
 from calldwell.gdb_client import GDBClient
@@ -26,7 +27,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
     project_path = INTEGRATION_TESTS_DIRECTORY / test_name
     test_binary_path = build_cargo_app(project_path, BOARD_TARGET_TRIPLE)
     if test_binary_path is None:
-        exit(100)
+        sys.exit(100)
 
     logging.info("Starting the test, initializing the environment...")
     ssh = SSHClient(BOARD_NETWORK_PATH, BOARD_LOGIN, BOARD_PASSWORD)
@@ -42,7 +43,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
 
     if session is None:
         logging.critical("Test failed, cannot initialize Calldwell session")
-        exit(1)
+        sys.exit(1)
 
     gdb, rtt = session
 
@@ -51,6 +52,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
 
 
 def finish_test(ssh: SSHClient) -> None:
+    """Finishes integration test's execution by cleaning up resources."""
     logging.info("Finishing the test, cleaning up environment...")
     ssh.execute("pkill openocd")
     ssh.close()
@@ -60,6 +62,9 @@ def finish_test(ssh: SSHClient) -> None:
 def wait_for_messages(
     rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: List[str]
 ) -> None:
+    """Waits until list of specified messages is received, prematurely finishes
+    the test with non-zero exit code if an invalid message is received, indicating
+    test failure."""
     for message in expected_messages:
         logging.info(f"Expecting '{message}'")
         received_message = rtt.receive_string_stream()
@@ -70,4 +75,4 @@ def wait_for_messages(
                 f"(expected '{message}', got '{received_message}')"
             )
             finish_test(ssh)
-            exit(2)
+            sys.exit(2)

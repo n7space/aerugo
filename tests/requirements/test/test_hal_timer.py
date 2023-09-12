@@ -1,4 +1,7 @@
+"""HAL Timer driver integration test."""
+
 import logging
+import sys
 from typing import List
 
 from test_utils import finish_test, init_test
@@ -9,18 +12,20 @@ TEST_NAME = "test-hal-timer"
 
 
 def average_difference(values: List[int]) -> float:
+    """Returns average difference between values on the list."""
     diffs = [j - i for i, j in zip(values[:-1], values[1:])]
     return sum(diffs) / len(diffs)
 
 
 def main():
+    """Main function of integration test."""
     _, rtt, ssh = init_test(TEST_NAME)
 
     # Timer should be running by default, and program should output
     # it's overflow count via RTT.
 
     # First 10 messages should contain fast-changing timer IRQ count
-    fast_irq_counts: List[int] = list()
+    fast_irq_counts: List[int] = []
     for _ in range(10):
         fast_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_fast = average_difference(fast_irq_counts)
@@ -28,7 +33,7 @@ def main():
 
     # After 10 messages, tasklet should disable the timer, so incoming IRQ counts
     # should not change
-    stopped_irq_counts: List[int] = list()
+    stopped_irq_counts: List[int] = []
     for _ in range(10):
         stopped_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
     avg_diffs_stopped = average_difference(stopped_irq_counts)
@@ -36,7 +41,7 @@ def main():
 
     # After another 10 messages, tasklet should switch timer's source to slower one
     # and enable it, returning IRQ count that's changing slower
-    slow_irq_counts: List[int] = list()
+    slow_irq_counts: List[int] = []
     for _ in range(10):
         slow_irq_counts.append(int(rtt.receive_bytes_stream().decode()))
 
@@ -45,7 +50,7 @@ def main():
 
     if avg_diffs_fast <= avg_diffs_slow:
         logging.critical("TEST FAILED: FASTER CLOCK IS IN FACT SLOWER")
-        exit(2)
+        sys.exit(2)
 
     if avg_diffs_stopped != 0:
         logging.critical("TEST FAILED: CLOCK DID NOT STOP")

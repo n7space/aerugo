@@ -1,3 +1,5 @@
+"""HAL Watchdog driver integration test."""
+
 import logging
 
 from test_utils import finish_test, init_test, wait_for_messages
@@ -8,6 +10,7 @@ TEST_NAME = "test-hal-watchdog"
 
 
 def main():
+    """Main function of integration test."""
     gdb, rtt, ssh = init_test(TEST_NAME)
 
     wait_for_messages(
