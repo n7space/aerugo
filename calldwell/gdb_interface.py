@@ -8,7 +8,7 @@ import logging
 import signal
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pygdbmi.gdbcontroller import GdbController
 
@@ -119,7 +119,7 @@ class GDBInterface:
         if log_responses is None:
             log_responses = self._should_log_responses
 
-        raw_responses: List[Dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
+        raw_responses: list[dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
             timeout
         )
 

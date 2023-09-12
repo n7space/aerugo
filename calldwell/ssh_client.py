@@ -1,7 +1,7 @@
 """Module containing classes for SSH management."""
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
 import paramiko
 from paramiko.channel import ChannelFile, ChannelStderrFile, ChannelStdinFile
@@ -37,7 +37,7 @@ class SSHClient:
         self,
         command: str,
         timeout: Optional[float] = None,
-        environment: Optional[Dict[str, str]] = None,
+        environment: Optional[dict[str, str]] = None,
     ) -> CommandChannels:
         """Executes a command on remote, returns `stdin`, `stdout`, `stderr` wrapped in dataclass.
 

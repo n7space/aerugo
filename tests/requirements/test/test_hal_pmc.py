@@ -2,7 +2,6 @@
 
 import logging
 import sys
-from typing import Tuple
 
 from test_utils import finish_test, init_test, wait_for_messages
 
@@ -14,7 +13,7 @@ TEST_NAME = "test-hal-clocks-controller"
 
 def is_main_rc_frequency_valid(
     rtt: CalldwellRTTClient, expected_frequency_mhz: int
-) -> Tuple[bool, int]:
+) -> tuple[bool, int]:
     """Receives a message via Calldwell stream, which should contain measured frequency of RC
     oscillator. Compares the frequency to fixed tolerance interval and returns if it fits the
     tolerance criteria and frequency value, or throws ValueError if invalid frequency was
@@ -47,7 +46,7 @@ def main():
 
     # Now main RC frequency test will proceed
     try:
-        for frequency in [12, 8, 4, 12]:
+        for frequency in (12, 8, 4, 12):
             is_valid, measured_frequency = is_main_rc_frequency_valid(rtt, frequency)
             if not is_valid:
                 logging.critical(

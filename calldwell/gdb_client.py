@@ -2,7 +2,7 @@
 This is probably what you're looking for, if you want to manage GDB."""
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from .gdb_interface import GDBInterface
 from .gdb_responses import GDBResponsesList, ProgramSymbol
@@ -304,7 +304,7 @@ class GDBClient:
         self._interface.execute(f"monitor rtt server start {server_port} {rtt_port}")
         return self._wait_for_command_response("RTT server started!", "Couldn't start RTT server!")
 
-    def get_variables(self, name_regex: str) -> Optional[List[ProgramSymbol]]:
+    def get_variables(self, name_regex: str) -> Optional[list[ProgramSymbol]]:
         """Queries GDB about variable with name specified by provided regular expression.
         Returns a list with all found occurrences, or `None` of request fails.
         """
@@ -328,8 +328,7 @@ class GDBClient:
         If multiple variables are found, info about first one found is returned,
         and a warning is logged.
         """
-        found_symbols = self.get_variables(name_regex)
-        if found_symbols is None:
+        if (found_symbols := self.get_variables(name_regex)) is None:
             return None
 
         if len(found_symbols) == 0:

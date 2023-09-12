@@ -5,7 +5,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
+from typing import Any, Optional, Union
+from collections.abc import Iterable, Iterator
 
 
 @dataclass
@@ -28,7 +29,7 @@ class ProgramSymbol:
 class GDBResponse:
     """Structure representing GDB response."""
 
-    Payload = Union[Dict[str, Any], List[Any], str]
+    Payload = Union[dict[str, Any], list[Any], str]
 
     message: Optional[str]
     """Message is usually a human-readable string."""
@@ -105,7 +106,7 @@ class GDBResponse:
         """Returns `True` if payload is a JSON object, `False` otherwise"""
         return isinstance(self.payload, dict)
 
-    def payload_json(self) -> Dict[str, Any]:
+    def payload_json(self) -> dict[str, Any]:
         """Returns payload as a JSON (or rather dict with string keys).
         Raises an exception if payload is not actually a dictionary."""
         if not self.payload_is_json():
@@ -137,7 +138,7 @@ class GDBResponsesList:
     or concatenating the console messages into singular string.
     """
 
-    def __init__(self, responses: List[GDBResponse]) -> None:
+    def __init__(self, responses: list[GDBResponse]) -> None:
         """Initializes the list with responses received from GDB"""
         self._items = responses
 
@@ -169,7 +170,7 @@ class GDBResponsesList:
         """Returns a list containing only `target`-type messages"""
         return self.of_type(GDBResponse.Type.TARGET)
 
-    def payload_string_list(self, unescape: bool = True) -> List[str]:
+    def payload_string_list(self, unescape: bool = True) -> list[str]:
         """Returns a list of stringified payloads from all responses.
 
         # Parameters
@@ -210,11 +211,11 @@ class GDBResponsesList:
         """Returns `True` if any of the stored responses is a result with `error` message."""
         return GDBResponse.with_message(GDBResponse.Type.RESULT, "error") in self
 
-    def to_symbols_list(self) -> List[ProgramSymbol]:
+    def to_symbols_list(self) -> list[ProgramSymbol]:
         """Looks for symbols in stored responses and returns them.
         Symbols are assumed to be stored in `console` output, in `address  symbol_name` format,
         one per response."""
-        found_symbols: List[ProgramSymbol] = []
+        found_symbols: list[ProgramSymbol] = []
         for response in self.console():
             # Symbols are separated with double space
             split_payload = response.unescaped_payload().strip().split("  ")

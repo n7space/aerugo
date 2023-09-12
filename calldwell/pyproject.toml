@@ -31,21 +31,42 @@ line-length = 100
 
 [tool.pylint.main]
 max-line-length = 100
-jobs = 0 # auto-detects the amount of available threads to run in parallel
-fail-under = '10.0' # we do not allow subpar quality code here
+jobs = 0                # auto-detects the amount of available threads to run in parallel
+fail-under = '10.0'     # we do not allow subpar quality code here
 suggestion-mode = 'yes'
 # This hook assumes that all the checks are ran from root directory of Aerugo.
 # It adds this directory to system path, so Pylint can find the module imports correctly.
 # This is a workaround that allows to not disable the rules that inform about invalid imports,
 # as it's much more drastic than altering the PATH.
-init-hook='''import sys
+init-hook = '''import sys
 from pathlib import Path
 sys.path.append(Path("."))
 '''
+load-plugins = '''pylint.extensions.code_style,
+pylint.extensions.comparison_placement,
+pylint.extensions.confusing_elif,
+pylint.extensions.for_any_all,
+pylint.extensions.consider_refactoring_into_while_condition,
+pylint.extensions.consider_ternary_expression,
+pylint.extensions.mccabe,
+pylint.extensions.docstyle,
+pylint.extensions.check_elif,
+pylint.extensions.empty_comment,
+pylint.extensions.eq_without_hash,
+pylint.extensions.private_import,
+pylint.extensions.redefined_variable_type,
+pylint.extensions.no_self_use,
+pylint.extensions.overlapping_exceptions,
+pylint.extensions.redefined_loop_name,
+pylint.extensions.typing,
+'''
 
 [tool.pylint.messages]
+enable = 'all'
 disable = '''logging-fstring-interpolation,
-logging-not-lazy
+logging-not-lazy,
+locally-disabled,
+suppressed-message,
 '''
 
 

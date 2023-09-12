@@ -21,7 +21,6 @@ This script performs following steps:
 import sys
 from enum import IntEnum
 from pathlib import Path
-from typing import Tuple
 
 from calldwell import init_default_logger
 from calldwell.gdb_client import GDBClient
@@ -86,7 +85,7 @@ def get_example_path(example_name: str) -> Path:
     return EXAMPLES_DIRECTORY / example_name
 
 
-def start_gdb() -> Tuple[GDBClient, SSHClient]:
+def start_gdb() -> tuple[GDBClient, SSHClient]:
     """Connects to remote setup via SSH and starts GDB server."""
     ssh = SSHClient(BOARD_NETWORK_PATH, BOARD_LOGIN, BOARD_PASSWORD)
     ssh.execute(BOARD_DEBUGGING_SCRIPT_PATH)
@@ -142,8 +141,7 @@ def wait_for_rtt_init(gdb: GDBClient) -> None:
 def setup_rtt(gdb: GDBClient) -> RTTClient:
     """Configures the RTT on host side by fetching RTT section symbol address from the
     binary and initializing RTT facilities."""
-    rtt_symbol = gdb.get_variable(RTT_SECTION_SYMBOL_NAME)
-    if rtt_symbol is None:
+    if (rtt_symbol := gdb.get_variable(RTT_SECTION_SYMBOL_NAME)) is None:
         print(f"Error: Could not find RTT symbol '{RTT_SECTION_SYMBOL_NAME}' in the binary!")
         sys.exit(ExitReason.COULD_NOT_FIND_RTT_SYMBOL)
 

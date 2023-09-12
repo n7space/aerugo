@@ -3,7 +3,6 @@ Provides integration test's boilerplate."""
 
 import logging
 import sys
-from typing import List, Tuple
 
 from calldwell.gdb_client import GDBClient
 from calldwell.rtt_client import CalldwellRTTClient
@@ -22,11 +21,10 @@ from scripts.env import (
 )
 
 
-def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
+def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell"""
     project_path = INTEGRATION_TESTS_DIRECTORY / test_name
-    test_binary_path = build_cargo_app(project_path, BOARD_TARGET_TRIPLE)
-    if test_binary_path is None:
+    if (test_binary_path := build_cargo_app(project_path, BOARD_TARGET_TRIPLE)) is None:
         sys.exit(100)
 
     logging.info("Starting the test, initializing the environment...")
@@ -60,7 +58,7 @@ def finish_test(ssh: SSHClient) -> None:
 
 
 def wait_for_messages(
-    rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: List[str]
+    rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: list[str]
 ) -> None:
     """Waits until list of specified messages is received, prematurely finishes
     the test with non-zero exit code if an invalid message is received, indicating

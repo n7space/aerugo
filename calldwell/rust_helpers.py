@@ -3,7 +3,7 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional
 
 from .gdb_client import GDBClient
 from .rtt_client import CalldwellRTTClient
@@ -40,7 +40,7 @@ def init_remote_calldwell_rs_session(
     log_execution: bool = False,
     pre_handshake_hook: Optional[Callable[[GDBClient, Optional[Any]], None]] = None,
     pre_handshake_hook_argument: Optional[Any] = None,
-) -> Optional[Tuple[GDBClient, CalldwellRTTClient]]:
+) -> Optional[tuple[GDBClient, CalldwellRTTClient]]:
     """Initializes Calldwell-rs test session by connecting to GDB server (like OpenOCD),
     starting RTT server, flashing the executable, waiting until `calldwell::initialize`
     executes, and performing handshake (and optional pre-handshake hook, if provided).
@@ -91,8 +91,7 @@ def init_remote_calldwell_rs_session(
         logging.error(f"Could not load executable {path_to_test_executable} into MCU memory")
         return None
 
-    rtt_symbol = gdb.get_variable(RTT_SECTION_SYMBOL_NAME)
-    if rtt_symbol is None:
+    if (rtt_symbol := gdb.get_variable(RTT_SECTION_SYMBOL_NAME)) is None:
         logging.error(f"Could not find symbol for RTT section {RTT_SECTION_SYMBOL_NAME}")
         return None
 
@@ -130,8 +129,7 @@ def build_cargo_app(
                         will be produced instead.
     """
 
-    cargo = shutil.which("cargo")
-    if cargo is None:
+    if (cargo := shutil.which("cargo")) is None:
         logging.error("Error: Cargo executable not found!")
         return None
 
@@ -155,9 +153,7 @@ def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
     """Performs Calldwell handshake after it's RTT facilities are started.
     This acts like a mini self-test of RTT communication, to guarantee that it works correctly.
     """
-    init_message = rtt.receive_string_stream()
-
-    if init_message != EXPECTED_MCU_INIT_MESSAGE:
+    if (init_message := rtt.receive_string_stream()) != EXPECTED_MCU_INIT_MESSAGE:
         logging.error(
             "Received unexpected MCU init message "
             f"(got '{init_message}', expected '{EXPECTED_MCU_INIT_MESSAGE}')"
@@ -165,9 +161,8 @@ def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
         return False
 
     rtt.transmit_string_stream(HOST_HANDSHAKE_MESSAGE)
-    response = rtt.receive_string_stream()
 
-    if response != EXPECTED_MCU_HANDSHAKE_MESSAGE:
+    if (response := rtt.receive_string_stream()) != EXPECTED_MCU_HANDSHAKE_MESSAGE:
         logging.error(
             "MCU responded with invalid handshake message "
             f"(got '{response}', expected '{EXPECTED_MCU_HANDSHAKE_MESSAGE}')"

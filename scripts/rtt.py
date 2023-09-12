@@ -6,12 +6,11 @@ as an argument to this script. It will automatically connect to RTT server on th
 end, and start receiving data and printing it to stdout.
 """
 import sys
-from typing import Tuple
 
 from calldwell.rtt_client import RTTClient
 
 
-def get_args() -> Tuple[str, int]:
+def get_args() -> tuple[str, int]:
     """Parses and returns script's arguments, exist the program with non-zero exit code
     if arguments are missing or cannot be parsed."""
     if len(sys.argv) != 2:

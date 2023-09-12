@@ -38,8 +38,7 @@ def init_example():
     project_path = Path(sys.argv[0])
 
     logging.info("Building the example binary...")
-    test_bin_path = build_cargo_app(project_path, TARGET_TRIPLE, release_build=True)
-    if test_bin_path is None:
+    if (test_bin_path := build_cargo_app(project_path, TARGET_TRIPLE, release_build=True)) is None:
         logging.error("Could not build the binary!")
         sys.exit(100)
 
