@@ -10,6 +10,8 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
 
 @dataclass
 class ProgramSymbol:
+    """Structure representing a symbol from the binary (function, variable, etc.)"""
+
     name: str
     address: int
 
@@ -40,6 +42,8 @@ class GDBResponse:
     GDBResponses for comparison."""
 
     class Type(Enum):
+        """Response type"""
+
         RESULT = "result"
         NOTIFY = "notify"
         CONSOLE = "console"
@@ -55,6 +59,8 @@ class GDBResponse:
             return str(self)
 
     class Stream(Enum):
+        """Stream type"""
+
         STDOUT = "stdout"
         STDIN = "stdin"
         STDERR = "stderr"
@@ -107,16 +113,20 @@ class GDBResponse:
         return self.payload  # type: ignore
 
     @staticmethod
-    def with_message(type: Type, message: str) -> GDBResponse:
+    def with_message(message_type: Type, message: str) -> GDBResponse:
         """Returns a GDBResponse with only `type` and `message` fields set.
         Use this function to create a response object for `is_similar` comparison."""
-        return GDBResponse(message=message, type=type, payload=None, token=None, stream=None)
+        return GDBResponse(
+            message=message, type=message_type, payload=None, token=None, stream=None
+        )
 
     @staticmethod
-    def with_payload(type: Type, payload: Payload) -> GDBResponse:
+    def with_payload(message_type: Type, payload: Payload) -> GDBResponse:
         """Returns a GDBResponse with only `type` and `payload` fields set.
         Use this function to create a response object for `is_similar` comparison."""
-        return GDBResponse(payload=payload, type=type, message=None, token=None, stream=None)
+        return GDBResponse(
+            payload=payload, type=message_type, message=None, token=None, stream=None
+        )
 
 
 class GDBResponsesList:
@@ -183,7 +193,8 @@ class GDBResponsesList:
 
     def extend(self, other: GDBResponsesList) -> None:
         """Adds items from different response list to current one."""
-        self._items.extend(other._items)
+        # This uses another instance of itself, so protected access should be allowed.
+        self._items.extend(other._items)  # pylint: disable=protected-access
 
     def contains_any(self, responses: Iterable[GDBResponse]) -> bool:
         """Returns `True` if any of the provided responses is on the list. `False` otherwise.
@@ -203,7 +214,7 @@ class GDBResponsesList:
         """Looks for symbols in stored responses and returns them.
         Symbols are assumed to be stored in `console` output, in `address  symbol_name` format,
         one per response."""
-        found_symbols: List[ProgramSymbol] = list()
+        found_symbols: List[ProgramSymbol] = []
         for response in self.console():
             # Symbols are separated with double space
             split_payload = response.unescaped_payload().strip().split("  ")

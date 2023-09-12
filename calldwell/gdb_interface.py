@@ -388,6 +388,8 @@ class GDBInterface:
 
 @dataclass
 class ProgramFrame:
+    """Structure representing a current program frame (where Program Counter currently points)"""
+
     address: int
     function: str
 

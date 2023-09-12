@@ -27,6 +27,8 @@ EXPECTED_MCU_HANDSHAKE_MESSAGE = f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE
 """Expected MCU response to handshake request"""
 
 
+# Yes, this is a very big function, but it's supposed to be all-in-one single-liner.
+# pylint: disable=too-many-arguments,too-many-return-statements
 def init_remote_calldwell_rs_session(
     gdb_executable: str,
     gdb_server_hostname: str,

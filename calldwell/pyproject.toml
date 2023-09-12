@@ -44,7 +44,8 @@ sys.path.append(Path("."))
 '''
 
 [tool.pylint.messages]
-disable = '''logging-fstring-interpolation
+disable = '''logging-fstring-interpolation,
+logging-not-lazy
 '''
 
 

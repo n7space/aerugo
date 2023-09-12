@@ -27,6 +27,8 @@ class SSHClient:
 
     @dataclass
     class CommandChannels:
+        """Channels of executed SSH command"""
+
         stdin: ChannelStdinFile
         stdout: ChannelFile
         stderr: ChannelStderrFile

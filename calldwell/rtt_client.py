@@ -29,18 +29,22 @@ class RTTClient:
         self._socket.close()
 
     def receive(self) -> bytes:
+        """Receives raw data via RTT"""
         self._receive()
         data = self._data_buffer.copy()
         self._data_buffer.clear()
         return data
 
     def transmit(self, data: bytes) -> None:
+        """Transmits raw data via RTT"""
         self._transmit(data)
 
     def receive_string(self) -> str:
+        """Receives raw data via RTT and decodes it into UTF-8 string"""
         return self.receive().decode("utf-8")
 
     def transmit_string(self, data: str) -> None:
+        """Encodes the data into UTF-8 string and transmits it via RTT"""
         self.transmit(data.encode("utf-8"))
 
     def _receive(self, chunk_size: Optional[int] = None) -> None:
@@ -62,8 +66,8 @@ class CalldwellRTTClient(RTTClient):
     class StreamMarker(IntEnum):
         """Enumeration listing Calldwell stream markers"""
 
-        Start = 0xDD
-        End = 0xEE
+        START = 0xDD
+        END = 0xEE
 
     def receive_bytes_stream(self) -> bytes:
         """Receives data via Calldwell stream from RTT target"""
@@ -76,9 +80,9 @@ class CalldwellRTTClient(RTTClient):
 
     def transmit_bytes_stream(self, data: bytes) -> None:
         """Transmits data via Calldwell stream to RTT target"""
-        self._transmit_stream_marker(CalldwellRTTClient.StreamMarker.Start)
+        self._transmit_stream_marker(CalldwellRTTClient.StreamMarker.START)
         self._transmit(data)
-        self._transmit_stream_marker(CalldwellRTTClient.StreamMarker.End)
+        self._transmit_stream_marker(CalldwellRTTClient.StreamMarker.END)
 
     def receive_string_stream(self) -> str:
         """Receives an UTF-8 string via Calldwell stream from RTT target"""
@@ -90,12 +94,12 @@ class CalldwellRTTClient(RTTClient):
 
     def _extract_stream_data_from_recv_buffer(self) -> Optional[bytes]:
         """Looks for valid Calldwell stream in reception buffer, and returns it's data if found"""
-        start_marker_index = self._data_buffer.find(CalldwellRTTClient.StreamMarker.Start)
+        start_marker_index = self._data_buffer.find(CalldwellRTTClient.StreamMarker.START)
         if start_marker_index == -1:
             return None
 
         end_marker_index = self._data_buffer.find(
-            CalldwellRTTClient.StreamMarker.End, start_marker_index
+            CalldwellRTTClient.StreamMarker.END, start_marker_index
         )
         if end_marker_index == -1:
             return None
