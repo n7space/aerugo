@@ -15,7 +15,7 @@ paramiko = "^3.3.1"
 black = "^23.9.1"
 mypy = "^1.5.1"
 pylint = "^2.17.5"
-ruff = "^0.0.288"
+ruff = "^0.0.289"
 types-paramiko = "^3.3.0.0"
 
 [tool.black]
@@ -68,8 +68,8 @@ ignore = []
 
 [tool.pylint.main]
 max-line-length = 100
-jobs = 0                # auto-detects the amount of available threads to run in parallel
-fail-under = '10.0'     # we do not allow subpar quality code here
+jobs = 0 # auto-detects the amount of available threads to run in parallel
+fail-under = '10.0' # we do not allow subpar quality code here
 suggestion-mode = 'yes'
 load-plugins = '''pylint.extensions.code_style,
 pylint.extensions.comparison_placement,
