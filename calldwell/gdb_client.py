@@ -7,6 +7,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from .gdb_interface import GDBInterface
+from .gdb_responses import GDBResponse
 
 if TYPE_CHECKING:
     from .gdb_responses import GDBResponsesList, ProgramSymbol
@@ -96,7 +97,12 @@ class GDBClient:
             return False
 
         self._interface.execute("load")
-        return self._wait_for_command_response("Executable loaded!", "Loading executable failed!")
+        if not self._wait_for_executable_load_finish():
+            self._logger.error("Loading the binary has failed!")
+            return False
+
+        self._logger.info("Binary loaded into target's memory!")
+        return True
 
     def restart_platform(self: GDBClient, reset_type: str = "init") -> bool:
         """Resets the platform via GDB.
@@ -394,4 +400,25 @@ class GDBClient:
             self._logger.error(error_message)
         else:
             self._logger.info(success_message)
+        return not responses.contains_error()
+
+    def _wait_for_executable_load_finish(self: GDBClient) -> bool:
+        """Private function. Do not use.
+        Helper function that processes the messages from GDB informing about binary loading
+        progress. Returns `True` if flashing was successful, `False` otherwise."""
+        final_responses = (
+            GDBResponse.with_message(GDBResponse.Type.RESULT, "done"),
+            GDBResponse.with_message(GDBResponse.Type.RESULT, "error"),
+        )
+
+        # Before receiving final response, progress is reported in form of `console` and
+        # `output`-type payloads. Log this progress for the user.
+        # It's helpful when diagnosing issues with binary layout, as addresses and sizes of
+        # sections are reported in this output.
+        while not (responses := self._get_responses()).contains_any(final_responses):
+            for response in responses:
+                if response.response_type == GDBResponse.Type.CONSOLE:
+                    # Console responses are human-readable
+                    self._logger.info(response.unescaped_payload().strip())
+
         return not responses.contains_error()
