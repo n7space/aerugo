@@ -1,37 +1,45 @@
-import logging
-import os
-from pathlib import Path
-from typing import List, Tuple
+"""Test utilities used by Aerugo's integration test scripts.
+Provides integration test's boilerplate.
+"""
 
-from calldwell.gdb_client import GDBClient
-from calldwell.rtt_client import CalldwellRTTClient
+from __future__ import annotations
+
+import logging
+import sys
+from typing import TYPE_CHECKING
+
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
+from scripts.env import (
+    BOARD_DEBUGGING_SCRIPT_PATH,
+    BOARD_GDB_PORT,
+    BOARD_LOGIN,
+    BOARD_NETWORK_PATH,
+    BOARD_PASSWORD,
+    BOARD_RTT_PORT,
+    BOARD_TARGET_TRIPLE,
+    HOST_GDB_EXECUTABLE,
+    INTEGRATION_TESTS_DIRECTORY,
+)
 
-BOARD_LOGIN = str(os.environ.get("AERUGO_BOARD_LOGIN"))
-BOARD_PASSWORD = str(os.environ.get("AERUGO_BOARD_PASSWORD"))
-BOARD_HOSTNAME = str(os.environ.get("AERUGO_BOARD_HOSTNAME"))
-BOARD_GDB_PORT = int(str(os.environ.get("AERUGO_BOARD_GDB_PORT")))
-BOARD_RTT_PORT = int(str(os.environ.get("AERUGO_BOARD_RTT_PORT")))
-GDB_EXECUTABLE = "arm-none-eabi-gdb"
-TEST_BINS_DIRECTORY = Path("./testbins")
-TARGET_NAME = "thumbv7em-none-eabihf"
+if TYPE_CHECKING:
+    from calldwell.gdb_client import GDBClient
+    from calldwell.rtt_client import CalldwellRTTClient
 
 
-def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]:
-    """Creates SSH connection to target board, initializes Calldwell"""
-    project_path = TEST_BINS_DIRECTORY / test_name
-    test_binary_path = build_cargo_app(project_path, TARGET_NAME)
-    if test_binary_path is None:
-        exit(100)
+def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
+    """Creates SSH connection to target board, initializes Calldwell."""
+    project_path = INTEGRATION_TESTS_DIRECTORY / test_name
+    if (test_binary_path := build_cargo_app(project_path, BOARD_TARGET_TRIPLE)) is None:
+        sys.exit(100)
 
     logging.info("Starting the test, initializing the environment...")
-    ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
-    ssh.execute("./setup_debugging_sam_clean.sh")
+    ssh = SSHClient(BOARD_NETWORK_PATH, BOARD_LOGIN, BOARD_PASSWORD)
+    ssh.execute(BOARD_DEBUGGING_SCRIPT_PATH)
 
     session = init_remote_calldwell_rs_session(
-        gdb_executable=GDB_EXECUTABLE,
-        gdb_server_hostname=BOARD_HOSTNAME,
+        gdb_executable=HOST_GDB_EXECUTABLE,
+        gdb_server_hostname=BOARD_NETWORK_PATH,
         gdb_server_port=BOARD_GDB_PORT,
         rtt_server_port=BOARD_RTT_PORT,
         path_to_test_executable=str(test_binary_path.absolute()),
@@ -39,7 +47,7 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
 
     if session is None:
         logging.critical("Test failed, cannot initialize Calldwell session")
-        exit(1)
+        sys.exit(1)
 
     gdb, rtt = session
 
@@ -47,14 +55,23 @@ def init_test(test_name: str) -> Tuple[GDBClient, CalldwellRTTClient, SSHClient]
     return gdb, rtt, ssh
 
 
-def finish_test(ssh: SSHClient):
+def finish_test(ssh: SSHClient) -> None:
+    """Finishes integration test's execution by cleaning up resources."""
     logging.info("Finishing the test, cleaning up environment...")
     ssh.execute("pkill openocd")
     ssh.close()
     logging.info("Environment cleaned up!")
 
 
-def wait_for_messages(rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages: List[str]):
+def wait_for_messages(
+    rtt: CalldwellRTTClient,
+    ssh: SSHClient,
+    expected_messages: list[str],
+) -> None:
+    """Waits until list of specified messages is received, prematurely finishes
+    the test with non-zero exit code if an invalid message is received, indicating
+    test failure.
+    """
     for message in expected_messages:
         logging.info(f"Expecting '{message}'")
         received_message = rtt.receive_string_stream()
@@ -62,7 +79,7 @@ def wait_for_messages(rtt: CalldwellRTTClient, ssh: SSHClient, expected_messages
         if received_message != message:
             logging.critical(
                 "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
-                f"(expected '{message}', got '{received_message}')"
+                f"(expected '{message}', got '{received_message}')",
             )
             finish_test(ssh)
-            exit(2)
+            sys.exit(2)

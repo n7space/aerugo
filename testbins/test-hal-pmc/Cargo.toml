@@ -1,5 +1,5 @@
 [package]
-name = "test-hal-clocks-controller"
+name = "test-hal-pmc"
 authors = ["Wojciech Olech <wojciech_olech@hotmail.com>"]
 edition = "2021"
 version = "0.1.0"

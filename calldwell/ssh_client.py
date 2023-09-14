@@ -1,16 +1,20 @@
 """Module containing classes for SSH management."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import TYPE_CHECKING
 
 import paramiko
-from paramiko.channel import ChannelFile, ChannelStderrFile, ChannelStdinFile
+
+if TYPE_CHECKING:
+    from paramiko.channel import ChannelFile, ChannelStderrFile, ChannelStdinFile
 
 
 class SSHClient:
     """Convenience class for all SSH-related functionality."""
 
-    def __init__(self, host: str, login: str, password: str, port: int = 22) -> None:
+    def __init__(self: SSHClient, host: str, login: str, password: str, port: int = 22) -> None:
         """Connects with SSH server. After connecting, your working dir will be set to home dir of
         logged in user (if it has one).
 
@@ -27,15 +31,17 @@ class SSHClient:
 
     @dataclass
     class CommandChannels:
+        """Channels of executed SSH command"""
+
         stdin: ChannelStdinFile
         stdout: ChannelFile
         stderr: ChannelStderrFile
 
     def execute(
-        self,
+        self: SSHClient,
         command: str,
-        timeout: Optional[float] = None,
-        environment: Optional[Dict[str, str]] = None,
+        timeout: float | None = None,
+        environment: dict[str, str] | None = None,
     ) -> CommandChannels:
         """Executes a command on remote, returns `stdin`, `stdout`, `stderr` wrapped in dataclass.
 
@@ -47,11 +53,17 @@ class SSHClient:
         """
 
         stdin, stdout, stderr = self.client.exec_command(
-            command, timeout=timeout, environment=environment
+            command,
+            timeout=timeout,
+            environment=environment,
         )
         return self.CommandChannels(stdin, stdout, stderr)
 
-    def upload_file_to_remote(self, local_source_path: str, remote_destination_path: str) -> None:
+    def upload_file_to_remote(
+        self: SSHClient,
+        local_source_path: str,
+        remote_destination_path: str,
+    ) -> None:
         """Sends a file from local machine to remote. Will raise an exception on failure.
 
         # Parameters
@@ -61,7 +73,9 @@ class SSHClient:
         self.sftp.put(local_source_path, remote_destination_path, confirm=True)
 
     def download_file_from_remote(
-        self, remote_source_path: str, local_destination_path: str
+        self: SSHClient,
+        remote_source_path: str,
+        local_destination_path: str,
     ) -> None:
         """Downloads a file from remote to local machine. Will raise an exception on failure.
 
@@ -71,7 +85,7 @@ class SSHClient:
         """
         self.sftp.get(remote_source_path, local_destination_path)
 
-    def close(self) -> None:
+    def close(self: SSHClient) -> None:
         """Close the connection. Better do that manually after finishing up with SSH, to prevent
         halting the program."""
         self.client.close()

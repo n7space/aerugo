@@ -6,13 +6,15 @@ from __future__ import annotations
 
 import logging
 import signal
-from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from pygdbmi.gdbcontroller import GdbController
 
 from .gdb_responses import GDBResponse, GDBResponsesList
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class GDBInterface:
@@ -25,7 +27,7 @@ class GDBInterface:
     """
 
     def __init__(
-        self,
+        self: GDBInterface,
         gdb_executable: str,
         default_timeout: float,
         log_execution: bool = True,
@@ -49,7 +51,7 @@ class GDBInterface:
         self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
             f"of {default_timeout}s, received following startup message:\n"
-            + self._parse_init_message()
+            + self._parse_init_message(),
         )
 
         self.execute(
@@ -60,20 +62,20 @@ class GDBInterface:
         self.wait_for_done(self._default_timeout, self._should_log_responses)
 
     @property
-    def program_state(self) -> ProgramState:
+    def program_state(self: GDBInterface) -> ProgramState:
         """Returns the state of currently debugged program. State is tracked via notifications."""
         return self._program_state
 
-    def interrupt(self) -> None:
+    def interrupt(self: GDBInterface) -> None:
         """Send SIGINT to GDB process, in order to interrupt it
         (and, for example, pause execution)"""
         self._controller.gdb_process.send_signal(signal.SIGINT)  # type: ignore
 
     def execute(
-        self,
+        self: GDBInterface,
         command: str,
-        timeout: Optional[float] = None,
-        log_execution: Optional[bool] = None,
+        timeout: float | None = None,
+        log_execution: bool | None = None,
     ) -> None:
         """Executes a GDB command. Does not fetch any response, use `get_responses` to do it
         manually, or one of `execute_and_*` functions to block until an expected response is
@@ -101,7 +103,9 @@ class GDBInterface:
         )
 
     def get_responses(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Fetches all available responses from GDB.
         This is a wrap, similarly to `execute`, mostly for type safety.
@@ -119,8 +123,8 @@ class GDBInterface:
         if log_responses is None:
             log_responses = self._should_log_responses
 
-        raw_responses: List[Dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
-            timeout
+        raw_responses: list[dict[str, Any]] = self._controller.get_gdb_response(  # type: ignore
+            timeout,
         )
 
         responses = GDBResponsesList(
@@ -129,11 +133,11 @@ class GDBInterface:
                     message=response.get("message"),
                     payload=response.get("payload"),
                     token=response.get("token"),
-                    type=GDBResponse.Type(response.get("type")),
+                    response_type=GDBResponse.Type(response.get("type")),
                     stream=GDBResponse.Stream(response.get("stream")),
                 )
                 for response in raw_responses
-            ]
+            ],
         )
 
         if log_responses:
@@ -144,10 +148,10 @@ class GDBInterface:
         return responses
 
     def wait_for_response(
-        self,
+        self: GDBInterface,
         expected_response: GDBResponse,
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Block until an expected response is received from GDB.
 
@@ -167,10 +171,10 @@ class GDBInterface:
         return received_responses
 
     def wait_for_any_response(
-        self,
+        self: GDBInterface,
         expected_responses: Iterable[GDBResponse],
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Block until any response from the list is received from GDB.
 
@@ -191,10 +195,10 @@ class GDBInterface:
         return received_responses
 
     def wait_for_all_responses(
-        self,
+        self: GDBInterface,
         expected_responses: Iterable[GDBResponse],
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Block until all responses from the list are received from GDB.
 
@@ -215,10 +219,10 @@ class GDBInterface:
         return received_responses
 
     def wait_for_result(
-        self,
+        self: GDBInterface,
         message: str,
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `result` response with specified message is received.
         Returns list of all received responses.
@@ -235,10 +239,10 @@ class GDBInterface:
         )
 
     def wait_for_any_result(
-        self,
+        self: GDBInterface,
         messages: Iterable[str],
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `result` response with message matching any of the provided ones
         is received.
@@ -255,10 +259,10 @@ class GDBInterface:
         return self.wait_for_any_response(expected_responses, timeout, log_responses)
 
     def wait_for_notification(
-        self,
+        self: GDBInterface,
         message: str,
-        timeout: Optional[float] = None,
-        log_responses: Optional[bool] = None,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `notify` response with specified message is received.
         Returns list of all received responses.
@@ -270,7 +274,9 @@ class GDBInterface:
         )
 
     def wait_for_done(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `{type: result, message: done}` response is received.
         Returns list of all received responses.
@@ -278,7 +284,9 @@ class GDBInterface:
         return self.wait_for_result("done", timeout, log_responses)
 
     def wait_for_error(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `{type: result, message: error}` response is received.
         Returns list of all received responses.
@@ -286,7 +294,9 @@ class GDBInterface:
         return self.wait_for_result("error", timeout, log_responses)
 
     def wait_for_done_or_error(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `{type: result, message: done}` or `{type: result, message: error}'
         response is received.
@@ -295,7 +305,9 @@ class GDBInterface:
         return self.wait_for_any_result(["done", "error"], timeout, log_responses)
 
     def wait_for_running(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `{type: result, message: running}` response is received.
         Returns list of all received responses.
@@ -303,23 +315,25 @@ class GDBInterface:
         return self.wait_for_result("running", timeout, log_responses)
 
     def wait_for_stopped(
-        self, timeout: Optional[float] = None, log_responses: Optional[bool] = None
+        self: GDBInterface,
+        timeout: float | None = None,
+        log_responses: bool | None = None,
     ) -> GDBResponsesList:
         """Blocks until a `{type: notify, message: stopped}` response is received.
         Returns list of all received responses.
         See `wait_for_response` for details."""
         return self.wait_for_notification("stopped", timeout, log_responses)
 
-    def _parse_init_message(self) -> str:
+    def _parse_init_message(self: GDBInterface) -> str:
         """Private function. Do not use.
         Parses init message received from GDB after creating it's instance, and returns it
         as a string"""
         return self.get_responses(log_responses=False).console().payload_string()
 
     def _log_responses(
-        self,
+        self: GDBInterface,
         responses: GDBResponsesList,
-    ):
+    ) -> None:
         """Private function. Do not use.
         Logs the response in appropriate way, depending on it's type.
 
@@ -334,14 +348,15 @@ class GDBInterface:
             return
 
         for response in responses:
-            log_message: str = f"[Response <{response.type.value}>]:"
-            if response.type == GDBResponse.Type.NOTIFY:
+            log_message: str = f"[Response <{response.response_type.value}>]:"
+            if response.response_type == GDBResponse.Type.NOTIFY:
                 log_message += f" {response.message} -> {response.unescaped_payload().strip()}"
-            elif response.type == GDBResponse.Type.RESULT:
+            elif response.response_type == GDBResponse.Type.RESULT:
                 log_message += f" {response.message}"
                 if response.payload_is_json():
                     additional_message = response.payload_json().get(
-                        "msg", response.unescaped_payload().strip()
+                        "msg",
+                        response.unescaped_payload().strip(),
                     )
                     log_message += f" ({additional_message})"
             else:
@@ -351,7 +366,7 @@ class GDBInterface:
                     log_message += f" {response.unescaped_payload().strip()}"
             self._logger.info(log_message)
 
-    def _handle_async_events(self, responses: GDBResponsesList):
+    def _handle_async_events(self: GDBInterface, responses: GDBResponsesList) -> None:
         """Private function. Do not use.
         Looks through responses on the list and changes this object's state according to received
         messages."""
@@ -374,7 +389,7 @@ class GDBInterface:
                     self.program_state.was_reset = True
 
                 self._logger.info(
-                    f"Program has stopped at {current_program_frame}, reason: {stop_reason}"
+                    f"Program has stopped at {current_program_frame}, reason: {stop_reason}",
                 )
             elif notification.message == "running":
                 self._program_state.is_running = True
@@ -388,15 +403,17 @@ class GDBInterface:
 
 @dataclass
 class ProgramFrame:
+    """Structure representing a current program frame (where Program Counter currently points)"""
+
     address: int
     function: str
 
-    def address_string(self, address_size: int = 4) -> str:
+    def address_string(self: ProgramFrame, address_size: int = 4) -> str:
         """Returns address as hex string. Assumes 32-bit addresses by default."""
         stringified_address = f"{self.address:X}".zfill(address_size * 2)
         return f"0x{stringified_address}"
 
-    def __str__(self) -> str:
+    def __str__(self: ProgramFrame) -> str:
         return f"{self.function} @ {self.address_string()}"
 
 
@@ -405,19 +422,19 @@ class ProgramState:
     """Container for everything related to program state."""
 
     is_running: bool = False
-    last_stop_reason: Optional[str] = None
-    program_frame: Optional[ProgramFrame] = None
+    last_stop_reason: str | None = None
+    program_frame: ProgramFrame | None = None
     """Program frame is updated and valid only when program is stopped."""
     was_reset: bool = False
 
-    def stopped_by(self, reason: str) -> bool:
+    def stopped_by(self: ProgramState, reason: str) -> bool:
         """Returns `True` if program is currently stopped by specified reason."""
         return self.is_running is False and self.last_stop_reason == reason
 
-    def stopped_by_breakpoint(self) -> bool:
+    def stopped_by_breakpoint(self: ProgramState) -> bool:
         """Shorthand for `is_stopped_by("breakpoint-hit")"""
         return self.stopped_by("breakpoint-hit")
 
-    def function_finished_execution(self) -> bool:
+    def function_finished_execution(self: ProgramState) -> bool:
         """Shorthand for `is_stopped_by("function-finished")"""
         return self.stopped_by("function-finished")

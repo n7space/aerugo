@@ -29,6 +29,6 @@ repos:
 
       - id: python-check-calldwell
         name: Check Calldwell's Python code
-        entry: bash -c 'cd calldwell && ./scripts/prehook/check_code.sh'
+        entry: calldwell/scripts/prehook/check_code.sh
         stages: [commit]
         language: system

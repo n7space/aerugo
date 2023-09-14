@@ -1,11 +1,20 @@
+"""An example project that uses Calldwell to communicate with Rust application."""
+
+from __future__ import annotations
+
 import logging
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from calldwell import init_default_logger
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from calldwell.ssh_client import SSHClient
+
+if TYPE_CHECKING:
+    from calldwell.gdb_client import GDBClient
+    from calldwell.rtt_client import CalldwellRTTClient
 
 # This example is prepared to run on remote development setup and requires following
 # environmental variables:
@@ -29,17 +38,17 @@ try:
 except ValueError as e:
     print("Missing/invalid environmental variables, read the source of this script for details!")
     print(f"Exception: {e}")
-    exit(1)
+    sys.exit(1)
 
 
-def init_example():
+def init_example() -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
+    """Initializes Calldwell session for this example application"""
     project_path = Path(sys.argv[0])
 
     logging.info("Building the example binary...")
-    test_bin_path = build_cargo_app(project_path, TARGET_TRIPLE, release_build=True)
-    if test_bin_path is None:
+    if (test_bin_path := build_cargo_app(project_path, TARGET_TRIPLE, release_build=True)) is None:
         logging.error("Could not build the binary!")
-        exit(100)
+        sys.exit(100)
 
     logging.info("Starting GDB server on development setup..")
     ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
@@ -55,7 +64,7 @@ def init_example():
 
     if session is None:
         logging.error("Failed to initialize remote Calldwell-rs session!")
-        exit(200)
+        sys.exit(200)
 
     gdb, rtt = session
 
@@ -63,7 +72,8 @@ def init_example():
     return gdb, rtt, ssh
 
 
-def main():
+def main() -> None:
+    """Main function of this example"""
     _, rtt, ssh = init_example()
 
     message = rtt.receive_string_stream()

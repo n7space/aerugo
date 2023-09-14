@@ -12,14 +12,11 @@ pygdbmi = "^0.11.0.0"
 paramiko = "^3.3.1"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+black = "^23.9.1"
 mypy = "^1.5.1"
-isort = "^5.12.0"
-flake8 = "^6.1.0"
+pylint = "^2.17.5"
+ruff = "^0.0.289"
 types-paramiko = "^3.3.0.0"
-
-[tool.isort]
-profile = "black"
 
 [tool.black]
 line-length = 100
@@ -28,6 +25,80 @@ line-length = 100
 python_version = "3.9"
 check_untyped_defs = true
 show_error_codes = true
+
+[tool.ruff]
+line-length = 100
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "C",    # mccabe
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+    "ANN",  # flake8-annotations
+    "S",    # flake8-bandit
+    "BLE",  # flake8-blind-except
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
+    "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "EM",   # flake8-errmsg
+    "FA",   # flake8-future-annotations
+    "ISC",  # flake8-implicit-str-concat
+    "PIE",  # flake8-pie
+    "Q",    # flake8-quotes
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+    "INT",  # flake8-gettext
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "TD",   # flake8-todos
+    "ERA",  # eradicate commented out code
+    "PL",   # pylint checks
+    "FLY",  # flynt, static-join-to-f-string
+    "PERF", # perflint
+    "RUF",  # ruff-specific rules
+]
+ignore = []
+
+[tool.pylint.main]
+max-line-length = 100
+jobs = 0 # auto-detects the amount of available threads to run in parallel
+fail-under = '10.0' # we do not allow subpar quality code here
+suggestion-mode = 'yes'
+load-plugins = '''pylint.extensions.code_style,
+pylint.extensions.comparison_placement,
+pylint.extensions.confusing_elif,
+pylint.extensions.for_any_all,
+pylint.extensions.consider_refactoring_into_while_condition,
+pylint.extensions.consider_ternary_expression,
+pylint.extensions.mccabe,
+pylint.extensions.docstyle,
+pylint.extensions.check_elif,
+pylint.extensions.empty_comment,
+pylint.extensions.eq_without_hash,
+pylint.extensions.private_import,
+pylint.extensions.redefined_variable_type,
+pylint.extensions.no_self_use,
+pylint.extensions.overlapping_exceptions,
+pylint.extensions.redefined_loop_name,
+pylint.extensions.typing,
+'''
+
+[tool.pylint.messages]
+enable = 'all'
+disable = '''logging-fstring-interpolation,
+logging-not-lazy,
+locally-disabled,
+suppressed-message,
+import-error,
+'''
+
 
 [build-system]
 requires = ["poetry-core"]

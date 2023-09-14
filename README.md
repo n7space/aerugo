@@ -69,13 +69,13 @@ To run SAMV71 tests, you have to set these environmental variables first:
 
 Both Calldwell, and all helper scripts, are guaranteed to be backwards-compatible with Python 3.9, however, they should also work fine with Python 3.10 and 3.11.
 
-Use [`pyproject.toml`](./calldwell/pyproject.toml) provided in [`calldwell`](./calldwell/) directory to create virtual environment (Poetry is recommended, but any virtualenv manager that can understand `pyproject.toml` will do fine).
+Use [`pyproject.toml`](./pyproject.toml) to create virtual environment (Poetry is recommended, but any virtualenv manager that can understand `pyproject.toml` will do fine).
 
-When using Poetry, go to `calldwell` directory and run `poetry shell`. **When running this command for the first time, you should also run `poetry install` to install required dependencies in virtual environment!**
+When using Poetry, run `poetry shell` from this directory. **When running this command for the first time, you should also run `poetry install` to install required dependencies in virtual environment!**
 
 #### Running the tests
 
-**All commands from this section should be ran from project's root directory (the one with this README)!**
+**All commands from this section should be run from project's root directory (the one with this README)!**
 You can either run each test manually, by invoking `./tests/requirements/test/test_*.py` script via virtualenv shell. Test script will automatically build the test, if needed.
 
 ```sh
