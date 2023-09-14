@@ -10,8 +10,9 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use heapless::Vec;
 
-use crate::api::{InitError, RuntimeApi};
+use crate::api::RuntimeApi;
 use crate::boolean_condition::BooleanConditionSet;
+use crate::error::SystemError;
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
 
 /// Type of the tasklet buffer storage.
@@ -81,9 +82,9 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         step_fn: StepFn<T, C>,
         context: C,
         runtime_api: &'static dyn RuntimeApi,
-    ) -> Result<(), InitError> {
+    ) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
-            return Err(InitError::StorageAlreadyInitialized);
+            return Err(SystemError::StorageAlreadyInitialized);
         }
 
         // SAFETY: The tasklet created below is the only one with access to the context data, and
@@ -108,13 +109,15 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             core::ptr::write(tasklet_buffer_ptr, tasklet);
         }
 
-        self.tasklet_buffer
-            .set(tasklet_buffer)
-            .expect("Failed to initialize TaskletStorage buffer");
+        match self.tasklet_buffer.set(tasklet_buffer) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(SystemError::StorageBufferAlreadySet),
+        }?;
 
-        self.initialized
-            .set(())
-            .expect("Failed to initialize TaskletStorage");
+        match self.initialized.set(()) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(SystemError::StorageInitializedAlreadySet),
+        }?;
 
         Ok(())
     }

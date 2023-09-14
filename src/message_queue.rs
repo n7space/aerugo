@@ -9,8 +9,9 @@ pub use self::message_queue_storage::MessageQueueStorage;
 pub(crate) use self::message_queue_storage::QueueData;
 
 use crate::aerugo::Aerugo;
-use crate::api::{InitError, RuntimeError};
+use crate::api::RuntimeError;
 use crate::data_provider::DataProvider;
+use crate::error::SystemError;
 use crate::internal_list::InternalList;
 use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
@@ -46,15 +47,15 @@ impl<T, const N: usize> MessageQueue<T, N> {
     /// * `task` - Task to register.
     ///
     /// # Returns
-    /// `()` if successful, `InitError` otherwise.
+    /// `()` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), InitError> {
+    pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), SystemError> {
         match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
-            Err(_) => Err(InitError::TaskletListFull),
+            Err(_) => Err(SystemError::TaskletListFull),
         }
     }
 

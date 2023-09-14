@@ -6,14 +6,15 @@
 use env_parser::read_env;
 
 use crate::aerugo::Aerugo;
-use crate::api::{InitError, RuntimeError};
+use crate::api::RuntimeError;
+use crate::error::SystemError;
 use crate::event::{Event, EventId, EventSet};
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 
 /// Type for list of events.
 type EventList = InternalList<&'static Event, { EventManager::EVENT_COUNT }>;
-/// Type fo list of event sets.
+/// Type for list of event sets.
 type EventSetList = InternalList<EventSet, { Aerugo::TASKLET_COUNT }>;
 
 /// System events manager.
@@ -47,15 +48,22 @@ impl EventManager {
     /// * `event_id` - ID for the new event.
     ///
     /// # Return
-    /// `()` if successful, `InitError` otherwise.
+    /// `()` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of events.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn add_event(&'static self, event: &'static Event) -> Result<(), InitError> {
+    pub(crate) unsafe fn add_event(
+        &'static self,
+        event: &'static Event,
+    ) -> Result<(), SystemError> {
+        if self.has_event(event.id()) {
+            return Err(SystemError::EventAlreadyExists(event.id()));
+        }
+
         match self.events.add(event) {
             Ok(_) => Ok(()),
-            Err(_) => Err(InitError::EventListFull),
+            Err(_) => Err(SystemError::EventListFull),
         }
     }
 
@@ -65,7 +73,7 @@ impl EventManager {
     /// * `tasklet` - Tasklet that will be assigned to this event set.
     ///
     /// # Returns
-    /// Reference to `EventSet` if successful, `InitError` otherwise.
+    /// Reference to `EventSet` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of event sets.
@@ -73,12 +81,12 @@ impl EventManager {
     pub(crate) unsafe fn create_event_set(
         &'static self,
         tasklet: TaskletPtr,
-    ) -> Result<&'static EventSet, InitError> {
+    ) -> Result<&'static EventSet, SystemError> {
         let event_set = EventSet::new(tasklet);
 
         match self.event_sets.add(event_set) {
             Ok(_) => (),
-            Err(_) => return Err(InitError::EventSetListFull),
+            Err(_) => return Err(SystemError::EventSetListFull),
         };
 
         Ok(self.event_sets.as_ref().last().unwrap())

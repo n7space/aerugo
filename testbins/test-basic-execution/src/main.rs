@@ -42,9 +42,7 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext { cnt: 0 };
 
-    aerugo
-        .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
-        .expect("Unable to create TaskA");
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
@@ -52,23 +50,13 @@ fn main() -> ! {
     };
     let task_b_context = TaskBContext { cnt: 0 };
 
-    aerugo
-        .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
-        .expect("Unable to create TaskB");
+    aerugo.create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE);
 
-    let task_a_handle = TASK_A_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskA");
-    let task_b_handle = TASK_B_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskB");
+    let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&task_a_handle, None)
-        .expect("Unable to set cyclic on TaskA");
-    aerugo
-        .subscribe_tasklet_to_cyclic(&task_b_handle, None)
-        .expect("Unable to set cyclic on TaskB");
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&task_b_handle, None);
 
     aerugo.start();
 }

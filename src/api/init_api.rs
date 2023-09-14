@@ -5,7 +5,6 @@
 //! # Safety
 //! Functions from this trait shouldn't be called after the system was started.
 
-use crate::api::InitError;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
@@ -34,7 +33,7 @@ pub trait InitApi {
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Creates new tasklet in the system with initialized context data.
     ///
@@ -57,7 +56,7 @@ pub trait InitApi {
         step_fn: StepFn<T, C>,
         context: C,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Creates new message queue in the system.
     ///
@@ -73,7 +72,7 @@ pub trait InitApi {
     fn create_message_queue<T, const QUEUE_SIZE: usize>(
         &'static self,
         storage: &'static MessageQueueStorage<T, QUEUE_SIZE>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Creates new event in the system.
     ///
@@ -82,11 +81,7 @@ pub trait InitApi {
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
-    fn create_event(
-        &'static self,
-        event_id: EventId,
-        storage: &'static EventStorage,
-    ) -> Result<(), InitError>;
+    fn create_event(&'static self, event_id: EventId, storage: &'static EventStorage);
 
     /// Creates new boolean condition in the system.
     ///
@@ -97,9 +92,9 @@ pub trait InitApi {
     /// `()` if successful, `InitError` otherwise.
     fn create_boolean_condition(
         &'static self,
-        storage: &'static BooleanConditionStorage,
         value: bool,
-    ) -> Result<(), InitError>;
+        storage: &'static BooleanConditionStorage,
+    );
 
     /// Subscribes tasklet to the queue.
     ///
@@ -119,7 +114,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         queue_handle: &MessageQueueHandle<T, QUEUE_SIZE>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Subscribes tasklet to the event.
     ///
@@ -136,7 +131,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<EventId, C, COND_COUNT>,
         events: [EventId; EVENT_COUNT],
-    ) -> Result<(), InitError>;
+    );
 
     /// Subscribes tasklet to the boolean condition.
     ///
@@ -154,7 +149,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<bool, C, COND_COUNT>,
         condition_handle: &BooleanConditionHandle,
-    ) -> Result<(), InitError>;
+    );
 
     /// Subscribes tasklet to the cyclic execution.
     ///
@@ -172,7 +167,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
         period: Option<crate::time::MillisDurationU32>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Sets tasklet condition set.
     ///
@@ -191,7 +186,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         condition_set: BooleanConditionSet<COND_COUNT>,
-    ) -> Result<(), InitError>;
+    );
 
     /// Starts the system.
     fn start(&'static self) -> !;

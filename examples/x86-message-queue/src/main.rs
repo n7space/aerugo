@@ -37,13 +37,9 @@ static QUEUE_X: MessageQueueStorage<u8, 10> = MessageQueueStorage::new();
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    aerugo
-        .create_message_queue(&QUEUE_X)
-        .expect("Unable to create QueueX");
+    aerugo.create_message_queue(&QUEUE_X);
 
-    let queue_x_handle = QUEUE_X
-        .create_handle()
-        .expect("Unable to create QueueX handle");
+    let queue_x_handle = QUEUE_X.create_handle().unwrap();
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
@@ -61,26 +57,14 @@ fn main() -> ! {
         queue_handle: queue_x_handle,
     };
 
-    aerugo
-        .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
-        .expect("Unable to create TaskA");
-    aerugo
-        .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
-        .expect("Unable to create TaskB");
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
+    aerugo.create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE);
 
-    let task_a_handle = TASK_A_STORAGE
-        .create_handle()
-        .expect("Unable to create TaskA handle");
-    let task_b_handle = TASK_B_STORAGE
-        .create_handle()
-        .expect("Unable to create TaskB handle");
+    let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_queue(&task_a_handle, &queue_x_handle)
-        .expect("Unable to subscribe TaskA to QueueX");
-    aerugo
-        .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
-        .expect("Unable to subscribe TaskB to QueueX");
+    aerugo.subscribe_tasklet_to_queue(&task_a_handle, &queue_x_handle);
+    aerugo.subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle);
 
     queue_x_handle
         .send_data(0)

@@ -78,24 +78,18 @@ fn init_tasks(aerugo: &'static impl InitApi) {
     };
     let dummy_task_context = DummyTaskContext::default();
 
-    aerugo
-        .create_tasklet_with_context(
-            dummy_task_config,
-            dummy_task,
-            dummy_task_context,
-            &DUMMY_TASK_STORAGE,
-        )
-        .expect("Unable to create dummy task!");
+    aerugo.create_tasklet_with_context(
+        dummy_task_config,
+        dummy_task,
+        dummy_task_context,
+        &DUMMY_TASK_STORAGE,
+    );
 
-    let dummy_task_handle = DUMMY_TASK_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to dummy task!");
+    let dummy_task_handle = DUMMY_TASK_STORAGE.create_handle().unwrap();
 
     logln!("Subscribing tasks...");
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&dummy_task_handle, None)
-        .expect("Unable to subscribe dummy task to cyclic execution!");
+    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, None);
 }
 
 #[entry]

@@ -63,38 +63,26 @@ fn initialize_tasks(aerugo: &'static impl InitApi) {
     let short_task_context = ShortTaskContext::default();
     let long_task_context = LongTaskContext::default();
 
-    aerugo
-        .create_tasklet_with_context(
-            short_task_config,
-            short_task,
-            short_task_context,
-            &SHORT_TASK_STORAGE,
-        )
-        .expect("Unable to create short task!");
+    aerugo.create_tasklet_with_context(
+        short_task_config,
+        short_task,
+        short_task_context,
+        &SHORT_TASK_STORAGE,
+    );
 
-    aerugo
-        .create_tasklet_with_context(
-            long_task_config,
-            long_task,
-            long_task_context,
-            &LONG_TASK_STORAGE,
-        )
-        .expect("Unable to create long task!");
+    aerugo.create_tasklet_with_context(
+        long_task_config,
+        long_task,
+        long_task_context,
+        &LONG_TASK_STORAGE,
+    );
 
-    let short_task_handle = SHORT_TASK_STORAGE
-        .create_handle()
-        .expect("Unable to create short task handle!");
+    let short_task_handle = SHORT_TASK_STORAGE.create_handle().unwrap();
 
-    let long_task_handle = LONG_TASK_STORAGE
-        .create_handle()
-        .expect("Unable to create short task handle!");
+    let long_task_handle = LONG_TASK_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&short_task_handle, None)
-        .expect("Unable to subscribe short task to cyclic execution!");
-    aerugo
-        .subscribe_tasklet_to_cyclic(&long_task_handle, None)
-        .expect("Unable to subscribe long task to cyclic execution!");
+    aerugo.subscribe_tasklet_to_cyclic(&short_task_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&long_task_handle, None);
 }
 
 #[entry]

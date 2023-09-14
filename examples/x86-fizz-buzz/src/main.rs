@@ -112,31 +112,18 @@ static GENERATE_NUMBERS_CONDITION_STORAGE: BooleanConditionStorage = BooleanCond
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    aerugo
-        .create_message_queue(&ELEM_QUEUE)
-        .expect("Unable to create ElemQueue");
+    aerugo.create_message_queue(&ELEM_QUEUE);
 
-    aerugo
-        .create_event(FizzBuzzEvents::Fizz.into(), &FIZZ_EVENT_STORAGE)
-        .expect("Unable to create Fizz event");
-    aerugo
-        .create_event(FizzBuzzEvents::Buzz.into(), &BUZZ_EVENT_STORAGE)
-        .expect("Unable to create Buzz event");
-    aerugo
-        .create_event(FizzBuzzEvents::FizzBuzz.into(), &FIZZ_BUZZ_EVENT_STORAGE)
-        .expect("Unable to create FizzBuzz event");
+    aerugo.create_event(FizzBuzzEvents::Fizz.into(), &FIZZ_EVENT_STORAGE);
+    aerugo.create_event(FizzBuzzEvents::Buzz.into(), &BUZZ_EVENT_STORAGE);
+    aerugo.create_event(FizzBuzzEvents::FizzBuzz.into(), &FIZZ_BUZZ_EVENT_STORAGE);
 
-    aerugo
-        .create_boolean_condition(&GENERATE_NUMBERS_CONDITION_STORAGE, true)
-        .expect("Unable to create GenerateNumbersCondition");
+    aerugo.create_boolean_condition(true, &GENERATE_NUMBERS_CONDITION_STORAGE);
 
-    let elem_queue_handle = ELEM_QUEUE
-        .create_handle()
-        .expect("Unable to create ElemQueue");
+    let elem_queue_handle = ELEM_QUEUE.create_handle().unwrap();
 
-    let generate_numbers_condition_handle = GENERATE_NUMBERS_CONDITION_STORAGE
-        .create_handle()
-        .expect("Unable to create GenerateNumbersCondition handle");
+    let generate_numbers_condition_handle =
+        GENERATE_NUMBERS_CONDITION_STORAGE.create_handle().unwrap();
 
     let producer_config = TaskletConfig {
         name: "Producer",
@@ -148,92 +135,60 @@ fn main() -> ! {
         generate_numbers_condition_handle,
     };
 
-    aerugo
-        .create_tasklet_with_context(
-            producer_config,
-            producer,
-            producer_context,
-            &PRODUCER_STORAGE,
-        )
-        .expect("Unable to create Producer");
+    aerugo.create_tasklet_with_context(
+        producer_config,
+        producer,
+        producer_context,
+        &PRODUCER_STORAGE,
+    );
 
     let distributor_config = TaskletConfig {
         name: "Distributor",
         ..Default::default()
     };
 
-    aerugo
-        .create_tasklet(distributor_config, distributor, &DISTRIBUTOR_STORAGE)
-        .expect("Unable to create Distributor");
+    aerugo.create_tasklet(distributor_config, distributor, &DISTRIBUTOR_STORAGE);
 
     let fizz_config = TaskletConfig {
         name: "Fizz",
         priority: 2,
     };
 
-    aerugo
-        .create_tasklet(fizz_config, fizz, &FIZZ_STORAGE)
-        .expect("Unable to create Fizz");
+    aerugo.create_tasklet(fizz_config, fizz, &FIZZ_STORAGE);
 
     let buzz_config = TaskletConfig {
         name: "Buzz",
         priority: 1,
     };
 
-    aerugo
-        .create_tasklet(buzz_config, buzz, &BUZZ_STORAGE)
-        .expect("Unable to create Buzz");
+    aerugo.create_tasklet(buzz_config, buzz, &BUZZ_STORAGE);
 
     let done_config = TaskletConfig {
         name: "Done",
         priority: 3,
     };
 
-    aerugo
-        .create_tasklet(done_config, done, &DONE_STORAGE)
-        .expect("Unable to create Done");
+    aerugo.create_tasklet(done_config, done, &DONE_STORAGE);
 
     let producer_condition_set = BooleanConditionSet::from(generate_numbers_condition_handle);
 
-    let producer_handle = PRODUCER_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to Producer");
-    aerugo
-        .set_tasklet_conditions(&producer_handle, producer_condition_set)
-        .expect("Unable to set Producer condition set");
-    aerugo
-        .subscribe_tasklet_to_cyclic(&producer_handle, None)
-        .expect("Unable to set cyclic on Producer");
+    let producer_handle = PRODUCER_STORAGE.create_handle().unwrap();
+    aerugo.set_tasklet_conditions(&producer_handle, producer_condition_set);
+    aerugo.subscribe_tasklet_to_cyclic(&producer_handle, None);
 
-    let distributor_handle = DISTRIBUTOR_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to Distributor");
-    aerugo
-        .subscribe_tasklet_to_queue(&distributor_handle, &elem_queue_handle)
-        .expect("Unable to subscribe Distributor to ElemQueue");
+    let distributor_handle = DISTRIBUTOR_STORAGE.create_handle().unwrap();
+    aerugo.subscribe_tasklet_to_queue(&distributor_handle, &elem_queue_handle);
 
-    let fizz_handle = FIZZ_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to Fizz");
+    let fizz_handle = FIZZ_STORAGE.create_handle().unwrap();
     let fizz_events = [FizzBuzzEvents::Fizz.into(), FizzBuzzEvents::FizzBuzz.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&fizz_handle, fizz_events)
-        .expect("Unable to subscribe Fizz to events");
+    aerugo.subscribe_tasklet_to_events(&fizz_handle, fizz_events);
 
-    let buzz_handle = BUZZ_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to Buzz");
+    let buzz_handle = BUZZ_STORAGE.create_handle().unwrap();
     let buzz_events = [FizzBuzzEvents::Buzz.into(), FizzBuzzEvents::FizzBuzz.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&buzz_handle, buzz_events)
-        .expect("Unable to subscribe Buzz to events");
+    aerugo.subscribe_tasklet_to_events(&buzz_handle, buzz_events);
 
-    let done_handle = DONE_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to Done");
-    aerugo
-        .subscribe_tasklet_to_condition(&done_handle, &generate_numbers_condition_handle)
-        .expect("Unable to subscribe Done to GenerateNumbersCondition");
+    let done_handle = DONE_STORAGE.create_handle().unwrap();
+    aerugo.subscribe_tasklet_to_condition(&done_handle, &generate_numbers_condition_handle);
 
     aerugo.start();
 }

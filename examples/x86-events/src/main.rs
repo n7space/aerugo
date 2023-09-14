@@ -66,15 +66,9 @@ static EVENT_255_STORAGE: EventStorage = EventStorage::new();
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    aerugo
-        .create_event(MyEvents::Event1.into(), &EVENT_1_STORAGE)
-        .expect("Unable to create Event1");
-    aerugo
-        .create_event(MyEvents::Event42.into(), &EVENT_42_STORAGE)
-        .expect("Unable to create Event42");
-    aerugo
-        .create_event(MyEvents::Event255.into(), &EVENT_255_STORAGE)
-        .expect("Unable to create Event255");
+    aerugo.create_event(MyEvents::Event1.into(), &EVENT_1_STORAGE);
+    aerugo.create_event(MyEvents::Event42.into(), &EVENT_42_STORAGE);
+    aerugo.create_event(MyEvents::Event255.into(), &EVENT_255_STORAGE);
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
@@ -82,51 +76,33 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext { acc: 0 };
 
-    aerugo
-        .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
-        .expect("Unable to create TaskA");
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
         ..Default::default()
     };
 
-    aerugo
-        .create_tasklet(task_b_config, task_b, &TASK_B_STORAGE)
-        .expect("Unable to create TaskB");
+    aerugo.create_tasklet(task_b_config, task_b, &TASK_B_STORAGE);
 
     let task_c_config = TaskletConfig {
         name: "TaskC",
         ..Default::default()
     };
 
-    aerugo
-        .create_tasklet(task_c_config, task_c, &TASK_C_STORAGE)
-        .expect("Unable to create TaskC");
+    aerugo.create_tasklet(task_c_config, task_c, &TASK_C_STORAGE);
 
-    let task_a_handle = TASK_A_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskA");
-    let task_b_handle = TASK_B_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskB");
-    let task_c_handle = TASK_C_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskC");
+    let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
+    let task_c_handle = TASK_C_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&task_a_handle, None)
-        .expect("Unable to set cyclic on TaskA");
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None);
 
     let task_b_events = [MyEvents::Event1.into(), MyEvents::Event42.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&task_b_handle, task_b_events)
-        .expect("Unable to subscribe TaskB to events");
+    aerugo.subscribe_tasklet_to_events(&task_b_handle, task_b_events);
 
     let task_c_events = [MyEvents::Event42.into(), MyEvents::Event255.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&task_c_handle, task_c_events)
-        .expect("Unable to subscribe TaskC to events");
+    aerugo.subscribe_tasklet_to_events(&task_c_handle, task_c_events);
 
     aerugo.start();
 }
