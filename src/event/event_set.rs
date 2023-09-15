@@ -3,8 +3,8 @@
 use heapless::spsc::Queue;
 
 use crate::aerugo::Aerugo;
-use crate::api::RuntimeError;
 use crate::data_provider::DataProvider;
+use crate::error::RuntimeError;
 use crate::event::EventId;
 use crate::event_manager::EventManager;
 use crate::mutex::Mutex;

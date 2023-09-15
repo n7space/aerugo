@@ -10,7 +10,7 @@ pub use self::event_storage::EventStorage;
 pub(crate) use self::event_set::EventSet;
 
 use crate::aerugo::Aerugo;
-use crate::api::{InitError, RuntimeError};
+use crate::error::{RuntimeError, SystemError};
 use crate::internal_list::InternalList;
 
 /// Type for list of event sets.
@@ -44,15 +44,15 @@ impl Event {
     /// * `event_set` - Set to add.
     ///
     /// # Return
-    /// `()` if successful, `InitError` otherwise.
+    /// `()` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of event sets.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn add_set(&self, event_set: &'static EventSet) -> Result<(), InitError> {
+    pub(crate) unsafe fn add_set(&self, event_set: &'static EventSet) -> Result<(), SystemError> {
         match self.sets.add(event_set) {
             Ok(_) => Ok(()),
-            Err(_) => Err(InitError::EventSetListFull),
+            Err(_) => Err(SystemError::EventSetListFull),
         }
     }
 

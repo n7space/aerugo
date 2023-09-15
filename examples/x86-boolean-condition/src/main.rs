@@ -42,21 +42,13 @@ static ENABLE_CONDITION_STORAGE: BooleanConditionStorage = BooleanConditionStora
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    aerugo
-        .create_message_queue(&QUEUE_X_STORAGE)
-        .expect("Unable to create QueueX");
+    aerugo.create_message_queue(&QUEUE_X_STORAGE);
 
-    let queue_x_handle = QUEUE_X_STORAGE
-        .create_handle()
-        .expect("Unable to create QueueX handle");
+    let queue_x_handle = QUEUE_X_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .create_boolean_condition(&ENABLE_CONDITION_STORAGE, true)
-        .expect("Unable to create EnableCondition");
+    aerugo.create_boolean_condition(true, &ENABLE_CONDITION_STORAGE);
 
-    let enable_condition_handle = ENABLE_CONDITION_STORAGE
-        .create_handle()
-        .expect("Unable to create EnableCondition handle");
+    let enable_condition_handle = ENABLE_CONDITION_STORAGE.create_handle().unwrap();
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
@@ -75,31 +67,17 @@ fn main() -> ! {
         condition_handle: enable_condition_handle,
     };
 
-    aerugo
-        .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
-        .expect("Unable to create TaskA");
-    aerugo
-        .create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE)
-        .expect("Unable to create TaskB");
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
+    aerugo.create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE);
 
-    let task_a_handle = TASK_A_STORAGE
-        .create_handle()
-        .expect("Unable to create TaskA handle");
-    let task_b_handle = TASK_B_STORAGE
-        .create_handle()
-        .expect("Unable to create TaskB handle");
+    let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&task_a_handle, None)
-        .expect("Unable to subscribe TaskA to cyclic");
-    aerugo
-        .subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle)
-        .expect("Unable to subscribe TaskB to QueueX");
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None);
+    aerugo.subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle);
 
     let task_a_condition_set = BooleanConditionSet::from(enable_condition_handle);
-    aerugo
-        .set_tasklet_conditions(&task_a_handle, task_a_condition_set)
-        .expect("Unable to set TaskA condition set");
+    aerugo.set_tasklet_conditions(&task_a_handle, task_a_condition_set);
 
     aerugo.start();
 }

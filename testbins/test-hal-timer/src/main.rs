@@ -61,22 +61,16 @@ fn initialize_tasks(aerugo: &'static impl InitApi) {
 
     let timer_test_task_context = TimerTestTaskContext::default();
 
-    aerugo
-        .create_tasklet_with_context(
-            timer_test_task_config,
-            timer_test_task,
-            timer_test_task_context,
-            &TIMER_TEST_TASK_STORAGE,
-        )
-        .expect("Unable to create timer test task!");
+    aerugo.create_tasklet_with_context(
+        timer_test_task_config,
+        timer_test_task,
+        timer_test_task_context,
+        &TIMER_TEST_TASK_STORAGE,
+    );
 
-    let timer_test_task_handle = TIMER_TEST_TASK_STORAGE
-        .create_handle()
-        .expect("Unable to create timer test task handle!");
+    let timer_test_task_handle = TIMER_TEST_TASK_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&timer_test_task_handle, None)
-        .expect("Unable to subscribe timer test task to cyclic execution!");
+    aerugo.subscribe_tasklet_to_cyclic(&timer_test_task_handle, None);
 }
 
 fn initialize_nvic() {

@@ -85,12 +85,8 @@ static BIG_EVENT_STORAGE: EventStorage = EventStorage::new();
 fn main() -> ! {
     let (aerugo, _) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    aerugo
-        .create_event(MyEvents::SmallEvent.into(), &SMALL_EVENT_STORAGE)
-        .expect("Unable to create SmallEvent");
-    aerugo
-        .create_event(MyEvents::BigEvent.into(), &BIG_EVENT_STORAGE)
-        .expect("Unable to create BigEvent");
+    aerugo.create_event(MyEvents::SmallEvent.into(), &SMALL_EVENT_STORAGE);
+    aerugo.create_event(MyEvents::BigEvent.into(), &BIG_EVENT_STORAGE);
 
     let task_a_config = TaskletConfig {
         name: "TaskA",
@@ -98,68 +94,44 @@ fn main() -> ! {
     };
     let task_a_context = TaskAContext { acc: 0 };
 
-    aerugo
-        .create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE)
-        .expect("Unable to create TaskA");
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
         priority: 3,
     };
 
-    aerugo
-        .create_tasklet(task_b_config, task_b, &TASK_B_STORAGE)
-        .expect("Unable to create TaskB");
+    aerugo.create_tasklet(task_b_config, task_b, &TASK_B_STORAGE);
 
     let task_c_config = TaskletConfig {
         name: "TaskC",
         priority: 2,
     };
 
-    aerugo
-        .create_tasklet(task_c_config, task_c, &TASK_C_STORAGE)
-        .expect("Unable to create TaskC");
+    aerugo.create_tasklet(task_c_config, task_c, &TASK_C_STORAGE);
 
     let task_d_config = TaskletConfig {
         name: "TaskD",
         priority: 1,
     };
 
-    aerugo
-        .create_tasklet(task_d_config, task_d, &TASK_D_STORAGE)
-        .expect("Unable to create TaskD");
+    aerugo.create_tasklet(task_d_config, task_d, &TASK_D_STORAGE);
 
-    let task_a_handle = TASK_A_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskA");
-    let task_b_handle = TASK_B_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskB");
-    let task_c_handle = TASK_C_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskC");
-    let task_d_handle = TASK_D_STORAGE
-        .create_handle()
-        .expect("Unable to create handle to TaskD");
+    let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
+    let task_c_handle = TASK_C_STORAGE.create_handle().unwrap();
+    let task_d_handle = TASK_D_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_cyclic(&task_a_handle, None)
-        .expect("Unable to set cyclic on TaskA");
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None);
 
     let task_b_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&task_b_handle, task_b_events)
-        .expect("Unable to subscribe TaskB to events");
+    aerugo.subscribe_tasklet_to_events(&task_b_handle, task_b_events);
 
     let task_c_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&task_c_handle, task_c_events)
-        .expect("Unable to subscribe TaskC to events");
+    aerugo.subscribe_tasklet_to_events(&task_c_handle, task_c_events);
 
     let task_d_events = [MyEvents::SmallEvent.into(), MyEvents::BigEvent.into()];
-    aerugo
-        .subscribe_tasklet_to_events(&task_d_handle, task_d_events)
-        .expect("Unable to subscribe TaskD to events");
+    aerugo.subscribe_tasklet_to_events(&task_d_handle, task_d_events);
 
     aerugo.start();
 }

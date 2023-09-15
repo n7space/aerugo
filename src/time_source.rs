@@ -6,7 +6,7 @@ use core::cell::OnceCell;
 
 use aerugo_hal::AerugoHal;
 
-use crate::api::RuntimeError;
+use crate::error::RuntimeError;
 use crate::hal::Hal;
 use crate::{Duration, Instant};
 
@@ -90,6 +90,9 @@ impl TimeSource {
     ///
     /// See [`TimeSource::time_since_init`] for details about time since system initialization.
     ///
+    /// # Return
+    /// `()` is offset was set for the first time, `RuntimeError` otherwise.
+    ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
     /// Calling [`TimeSource::system_time`] in parallel with this function (interrupt is treated as different
@@ -106,6 +109,9 @@ impl TimeSource {
 
     /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting
     /// the scheduler.
+    ///
+    /// # Return
+    /// `()` is was set for the first time, `RuntimeError` otherwise.
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.

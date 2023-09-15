@@ -9,7 +9,7 @@ use core::cell::OnceCell;
 
 use heapless::Vec;
 
-use crate::api::InitError;
+use crate::error::SystemError;
 use crate::message_queue::MessageQueueHandle;
 use crate::mutex::Mutex;
 
@@ -62,14 +62,14 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Initializes this storage.
     ///
     /// # Return
-    /// `()` if successful, `InitError` otherwise.
+    /// `()` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored queue and queue data buffers.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn init(&'static self) -> Result<(), InitError> {
+    pub(crate) unsafe fn init(&'static self) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
-            return Err(InitError::StorageAlreadyInitialized);
+            return Err(SystemError::StorageAlreadyInitialized);
         }
 
         let queue = MessageQueue::<T, N>::new(&self.queue_data);
@@ -82,13 +82,15 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
             core::ptr::write(queue_buffer_ptr, queue);
         }
 
-        self.queue_buffer
-            .set(queue_buffer)
-            .expect("Failed to initialize MessageQueueStorage buffer");
+        match self.queue_buffer.set(queue_buffer) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(SystemError::StorageBufferAlreadySet),
+        }?;
 
-        self.initialized
-            .set(())
-            .expect("Failed to initialize MessageQueueStorage");
+        match self.initialized.set(()) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(SystemError::StorageInitializedAlreadySet),
+        }?;
 
         Ok(())
     }
@@ -139,7 +141,7 @@ mod tests {
         assert!(init_result.is_err());
         assert_eq!(
             init_result.err().unwrap(),
-            InitError::StorageAlreadyInitialized
+            SystemError::StorageAlreadyInitialized
         );
     }
 

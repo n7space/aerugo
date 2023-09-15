@@ -15,6 +15,7 @@ mod boolean_condition;
 mod cyclic_execution;
 mod cyclic_execution_manager;
 mod data_provider;
+mod error;
 mod event;
 mod event_manager;
 mod execution_monitoring;

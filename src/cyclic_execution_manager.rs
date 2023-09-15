@@ -4,8 +4,8 @@
 //! that should be executed periodically.
 
 use crate::aerugo::Aerugo;
-use crate::api::InitError;
 use crate::cyclic_execution::CyclicExecution;
+use crate::error::SystemError;
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
 use crate::time::MillisDurationU32;
@@ -41,7 +41,7 @@ impl CyclicExecutionManager {
     /// * `period`: Period for execution, `None` if tasklet shall be executed without waits
     ///
     /// # Return
-    /// Reference to the cyclic execution data if successful, `InitError` otherwise.
+    /// Reference to the cyclic execution data if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of cyclic executions.
@@ -50,12 +50,12 @@ impl CyclicExecutionManager {
         &'static self,
         tasklet: TaskletPtr,
         period: Option<MillisDurationU32>,
-    ) -> Result<&'static CyclicExecution, InitError> {
+    ) -> Result<&'static CyclicExecution, SystemError> {
         let cyclic_execution = CyclicExecution::new(tasklet, period);
 
         match self.cyclic_executions.add(cyclic_execution) {
             Ok(_) => (),
-            Err(_) => return Err(InitError::CyclicExecutionListFull),
+            Err(_) => return Err(SystemError::CyclicExecutionListFull),
         };
 
         Ok(self.cyclic_executions.last().unwrap())

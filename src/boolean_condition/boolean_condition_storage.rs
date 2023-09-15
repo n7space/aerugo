@@ -9,8 +9,8 @@ use core::cell::OnceCell;
 
 use heapless::Vec;
 
-use crate::api::InitError;
 use crate::boolean_condition::BooleanConditionHandle;
+use crate::error::SystemError;
 
 /// Type of the boolean condition data storage.
 type BooleanConditionBuffer = Vec<u8, { core::mem::size_of::<BooleanCondition>() }>;
@@ -55,14 +55,14 @@ impl BooleanConditionStorage {
     /// * `value` - Initial condition value.
     ///
     /// # Return
-    /// `()` if successful, `InitError` otherwise.
+    /// `()` if successful, `SystemError` otherwise.
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored condition buffer.
     /// This is safe to call before the system initialization.
-    pub(crate) unsafe fn init(&'static self, value: bool) -> Result<(), InitError> {
+    pub(crate) unsafe fn init(&'static self, value: bool) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
-            return Err(InitError::StorageAlreadyInitialized);
+            return Err(SystemError::StorageAlreadyInitialized);
         }
 
         let condition = BooleanCondition::new(value);
@@ -135,7 +135,7 @@ mod tests {
         assert!(init_result.is_err());
         assert_eq!(
             init_result.err().unwrap(),
-            InitError::StorageAlreadyInitialized
+            SystemError::StorageAlreadyInitialized
         );
     }
 

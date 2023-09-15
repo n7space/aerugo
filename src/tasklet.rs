@@ -26,9 +26,10 @@ pub use self::tasklet_storage::TaskletStorage;
 
 use core::cell::{OnceCell, UnsafeCell};
 
-use crate::api::{InitError, RuntimeApi};
+use crate::api::RuntimeApi;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
+use crate::error::SystemError;
 use crate::mutex::Mutex;
 use crate::Instant;
 
@@ -125,13 +126,16 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     }
 
     /// Sets this tasklet conditions.
+    ///
+    /// # Return
+    /// `SystemError` if tasklet already has condition set, `()` otherwise.
     pub(crate) unsafe fn set_condition_set(
         &self,
         condition_set: BooleanConditionSet<COND_COUNT>,
-    ) -> Result<(), InitError> {
+    ) -> Result<(), SystemError> {
         match self.condition_set.set(condition_set) {
             Ok(_) => Ok(()),
-            Err(_) => Err(InitError::TaskletAlreadyConditioned),
+            Err(_) => Err(SystemError::TaskletAlreadyHasConditionSet(self.get_name())),
         }
     }
 
@@ -141,14 +145,14 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// * `data_provider` - Data provider.
     ///
     /// # Return
-    /// `InitError` in case of an error, `Ok(())` otherwise.
+    /// `SystemError` if tasklet already has data provider, `()` otherwise.
     pub(crate) unsafe fn subscribe(
         &self,
         data_provider: &'static dyn DataProvider<T>,
-    ) -> Result<(), InitError> {
+    ) -> Result<(), SystemError> {
         match self.data_provider.set(data_provider) {
             Ok(_) => Ok(()),
-            Err(_) => Err(InitError::TaskletAlreadySubscribed),
+            Err(_) => Err(SystemError::TaskletAlreadySubscribed(self.get_name())),
         }
     }
 
