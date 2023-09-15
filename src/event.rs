@@ -10,8 +10,7 @@ pub use self::event_storage::EventStorage;
 pub(crate) use self::event_set::EventSet;
 
 use crate::aerugo::Aerugo;
-use crate::api::RuntimeError;
-use crate::error::SystemError;
+use crate::error::{RuntimeError, SystemError};
 use crate::internal_list::InternalList;
 
 /// Type for list of event sets.

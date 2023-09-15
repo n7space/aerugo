@@ -9,13 +9,14 @@ use aerugo_hal::{AerugoHal, SystemHardwareConfig};
 use critical_section::CriticalSection;
 use env_parser::read_env;
 
-use crate::api::{InitApi, RuntimeApi, RuntimeError};
+use crate::api::{InitApi, RuntimeApi};
 #[cfg(feature = "log")]
 use crate::arch::init_log;
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
+use crate::error::RuntimeError;
 use crate::event::{EventId, EventStorage};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;

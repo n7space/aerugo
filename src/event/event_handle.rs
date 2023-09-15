@@ -3,7 +3,7 @@
 //! This module contains event handle implementation, which can be used to reference an event in
 //! the system.
 
-use crate::api::RuntimeError;
+use crate::error::RuntimeError;
 use crate::event::Event;
 
 /// Event handle.

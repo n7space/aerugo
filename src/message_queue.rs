@@ -9,9 +9,8 @@ pub use self::message_queue_storage::MessageQueueStorage;
 pub(crate) use self::message_queue_storage::QueueData;
 
 use crate::aerugo::Aerugo;
-use crate::api::RuntimeError;
 use crate::data_provider::DataProvider;
-use crate::error::SystemError;
+use crate::error::{RuntimeError, SystemError};
 use crate::internal_list::InternalList;
 use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;

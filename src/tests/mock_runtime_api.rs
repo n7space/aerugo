@@ -1,6 +1,7 @@
 use critical_section::CriticalSection;
 
-use crate::api::{RuntimeApi, RuntimeError};
+use crate::api::RuntimeApi;
+use crate::error::RuntimeError;
 use crate::event::EventId;
 use crate::execution_monitoring::ExecutionStats;
 use crate::tasklet::TaskletId;

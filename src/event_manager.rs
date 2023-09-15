@@ -6,8 +6,7 @@
 use env_parser::read_env;
 
 use crate::aerugo::Aerugo;
-use crate::api::RuntimeError;
-use crate::error::SystemError;
+use crate::error::{RuntimeError, SystemError};
 use crate::event::{Event, EventId, EventSet};
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
