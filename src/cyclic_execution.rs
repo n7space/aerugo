@@ -32,7 +32,7 @@ impl CyclicExecution {
     ///
     /// # Parameters
     /// * `current_time` - Current system time.
-    pub(crate) fn wake_if_time(&self, current_time: Instant) {
+    pub(crate) fn wake_if_should_execute(&self, current_time: Instant) {
         if let Some(period) = self.period {
             if self.next_execution_time.lock(|next| current_time >= *next) {
                 Aerugo::wake_tasklet(&self.tasklet);

@@ -69,7 +69,7 @@ impl CyclicExecutionManager {
     pub(crate) fn wake_tasklets(&'static self) {
         for ce in &self.cyclic_executions {
             let system_time = self.time_source.system_time();
-            ce.wake_if_time(system_time);
+            ce.wake_if_should_execute(system_time);
         }
     }
 }
