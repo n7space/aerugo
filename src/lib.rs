@@ -39,7 +39,15 @@ pub use self::boolean_condition::{
 pub use self::event::{EventId, EventStorage};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::tasklet::{TaskletConfig, TaskletStorage};
-pub use aerugo_hal::{time, Duration, Instant, SystemHardwareConfig};
+
+/// Module for re-exporting time structures.
+pub mod time {
+    pub use aerugo_hal::time::*;
+    pub use aerugo_hal::{Duration, Instant};
+}
+pub use time::*;
+
+pub use aerugo_hal::SystemHardwareConfig;
 pub use mutex::Mutex;
 
 #[cfg(feature = "use-aerugo-cortex-m")]

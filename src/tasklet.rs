@@ -31,7 +31,7 @@ use crate::boolean_condition::BooleanConditionSet;
 use crate::data_provider::DataProvider;
 use crate::error::SystemError;
 use crate::mutex::Mutex;
-use crate::Instant;
+use crate::time::Instant;
 
 /// Type of function that is executed by the tasklet in its step.
 pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);

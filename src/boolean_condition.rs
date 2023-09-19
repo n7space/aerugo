@@ -95,7 +95,7 @@ impl DataProvider<bool> for BooleanCondition {
 
     /// Returns false, as there is no waiting data in the condition.
     ///
-    /// Condition has it's state that can be accessed, but's it is not considered 'waiting' for the
+    /// Condition has it's state that can be accessed, but it is not considered 'waiting' for the
     /// scheduling purposes.
     fn data_waiting(&self) -> bool {
         false

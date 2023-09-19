@@ -24,8 +24,8 @@ use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
+use crate::time::{Duration, Instant};
 use crate::time_source::TimeSource;
-use crate::{Duration, Instant};
 
 /// Core system.
 ///
@@ -109,9 +109,9 @@ impl Aerugo {
                 .execute_next_tasklet()
                 .expect("Failure in tasklet execution");
 
-            Hal::feed_watchdog();
-
             CYCLIC_EXECUTION_MANAGER.wake_tasklets();
+
+            Hal::feed_watchdog();
         }
     }
 }

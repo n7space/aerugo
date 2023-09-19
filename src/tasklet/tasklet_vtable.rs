@@ -7,7 +7,7 @@
 //! For more information look at `TaskletPtr` structure.
 
 use crate::tasklet::{Tasklet, TaskletStatus};
-use crate::Instant;
+use crate::time::Instant;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {

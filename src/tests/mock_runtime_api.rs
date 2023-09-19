@@ -5,7 +5,7 @@ use crate::error::RuntimeError;
 use crate::event::EventId;
 use crate::execution_monitoring::ExecutionStats;
 use crate::tasklet::TaskletId;
-use crate::{Duration, Instant};
+use crate::time::{Duration, Instant};
 
 pub(crate) struct MockRuntimeApi;
 

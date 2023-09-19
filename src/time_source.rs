@@ -8,7 +8,7 @@ use aerugo_hal::AerugoHal;
 
 use crate::error::RuntimeError;
 use crate::hal::Hal;
-use crate::{Duration, Instant};
+use crate::time::{Duration, Instant};
 
 /// Time source, responsible for creating timestamps.
 ///

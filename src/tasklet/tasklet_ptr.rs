@@ -14,7 +14,7 @@
 use core::cmp::Ordering;
 
 use crate::tasklet::{tasklet_vtable, Tasklet, TaskletStatus, TaskletVTable};
-use crate::Instant;
+use crate::time::Instant;
 
 /// Raw tasklet pointer.
 #[derive(Clone)]
