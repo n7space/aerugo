@@ -8,7 +8,8 @@ use crate::cyclic_execution::CyclicExecution;
 use crate::error::SystemError;
 use crate::internal_list::InternalList;
 use crate::tasklet::TaskletPtr;
-use crate::time::MillisDurationU32;
+use crate::time::Duration;
+use crate::time_source::TimeSource;
 
 /// List of cyclic executions registered in the system.
 type CyclicExecutions = InternalList<CyclicExecution, { Aerugo::TASKLET_COUNT }>;
@@ -21,6 +22,8 @@ type CyclicExecutions = InternalList<CyclicExecution, { Aerugo::TASKLET_COUNT }>
 pub(crate) struct CyclicExecutionManager {
     /// Registered cyclic executions.
     cyclic_executions: CyclicExecutions,
+    /// Time source.
+    time_source: &'static TimeSource,
 }
 
 impl CyclicExecutionManager {
@@ -28,9 +31,10 @@ impl CyclicExecutionManager {
     ///
     /// # Safety
     /// This shouldn't be called more than once.
-    pub(crate) const fn new() -> Self {
+    pub(crate) const fn new(time_source: &'static TimeSource) -> Self {
         CyclicExecutionManager {
             cyclic_executions: CyclicExecutions::new(),
+            time_source,
         }
     }
 
@@ -49,7 +53,7 @@ impl CyclicExecutionManager {
     pub(crate) unsafe fn create_cyclic_execution(
         &'static self,
         tasklet: TaskletPtr,
-        period: Option<MillisDurationU32>,
+        period: Option<Duration>,
     ) -> Result<&'static CyclicExecution, SystemError> {
         let cyclic_execution = CyclicExecution::new(tasklet, period);
 
@@ -64,7 +68,8 @@ impl CyclicExecutionManager {
     /// Wakes all cyclic tasklets.
     pub(crate) fn wake_tasklets(&'static self) {
         for ce in &self.cyclic_executions {
-            ce.wake_tasklet();
+            let system_time = self.time_source.system_time();
+            ce.wake_if_time(system_time);
         }
     }
 }

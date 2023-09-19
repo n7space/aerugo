@@ -46,7 +46,8 @@ static EVENT_MANAGER: EventManager = EventManager::new();
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
 /// structure.
-static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager::new();
+static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
+    CyclicExecutionManager::new(AERUGO.time_source());
 
 /// System structure.
 ///
@@ -866,7 +867,7 @@ impl InitApi for Aerugo {
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
-        period: Option<crate::time::MillisDurationU32>,
+        period: Option<Duration>,
     ) {
         let tasklet = tasklet_handle.tasklet();
 

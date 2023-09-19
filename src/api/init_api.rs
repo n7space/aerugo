@@ -11,6 +11,7 @@ use crate::boolean_condition::{
 use crate::event::{EventId, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
+use crate::time::Duration;
 
 /// System initialization API
 pub trait InitApi {
@@ -166,7 +167,7 @@ pub trait InitApi {
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
-        period: Option<crate::time::MillisDurationU32>,
+        period: Option<Duration>,
     );
 
     /// Sets tasklet condition set.
