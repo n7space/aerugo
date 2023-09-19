@@ -28,7 +28,7 @@ impl CyclicExecution {
         }
     }
 
-    /// Wakes that stored tasklet if the time has come.
+    /// Wakes that stored tasklet if the time for it's execution has come.
     ///
     /// # Parameters
     /// * `current_time` - Current system time.
