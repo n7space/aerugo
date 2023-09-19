@@ -3,8 +3,7 @@
 use std::convert::TryInto;
 use std::time::SystemTime;
 
-use aerugo_hal::Instant;
-use aerugo_hal::{AerugoHal, SystemHardwareConfig};
+use aerugo_hal::{AerugoHal, Duration, Instant, SystemHardwareConfig};
 use once_cell::sync::Lazy;
 
 use crate::error::HalError;
@@ -32,14 +31,16 @@ impl AerugoHal for Hal {
     }
 
     fn get_system_time() -> Instant {
-        Instant::from_ticks(
+        let duration = Duration::nanos(
             TIME_START
                 .elapsed()
                 .expect("{}")
                 .as_nanos()
                 .try_into()
                 .unwrap(),
-        )
+        );
+
+        Instant::from_ticks(duration.ticks())
     }
 
     fn feed_watchdog() {
