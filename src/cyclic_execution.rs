@@ -58,8 +58,9 @@ impl DataProvider<()> for CyclicExecution {
 
     /// Returns false, as there is no waiting data for the execution.
     ///
-    /// Cyclic execution has a period for execution, and is scheduled by the [CyclingExecutionManager],
-    /// but doesn't store any data that is 'waiting' for the scheduling purposes.
+    /// Cyclic execution has a period for execution, and is scheduled by the
+    /// [crate::cyclic_execution_manager::CyclicExecutionManager], but doesn't store any
+    /// data that is 'waiting' for the scheduling purposes.
     fn data_waiting(&self) -> bool {
         false
     }
