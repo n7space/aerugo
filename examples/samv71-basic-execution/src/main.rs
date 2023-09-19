@@ -6,7 +6,8 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 use aerugo::{
-    logln, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
+    logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage,
 };
 use rt::entry;
 
@@ -48,7 +49,7 @@ fn main() -> ! {
 
     logln!("Subscribing tasks...");
 
-    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, Some(Duration::secs(1)));
 
     logln!("Starting the system!");
 
