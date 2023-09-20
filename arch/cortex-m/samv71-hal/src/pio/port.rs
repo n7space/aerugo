@@ -2,7 +2,7 @@
 
 use core::marker::PhantomData;
 
-use super::port_metadata::IoPortMetadata;
+use super::{pin::ResetMode, port_metadata::IoPortMetadata, Pin};
 
 /// Structure representing a generic I/O port.
 ///
@@ -15,6 +15,10 @@ pub struct Port<PortMetadata: IoPortMetadata> {
     /// Port marker.
     _port_meta: PhantomData<PortMetadata>,
 }
+
+/// Type representing pins of a port.
+/// Value of this type can be obtained via [`Port::into_pins`].
+pub type Pins = [Option<Pin<ResetMode>>; 32];
 
 impl<Instance: IoPortMetadata> Port<Instance> {
     /// Creates new I/O Port instance from PAC PIO Port structure.
@@ -29,78 +33,45 @@ impl<Instance: IoPortMetadata> Port<Instance> {
     }
 
     /// Returns ID (uppercase letter) of the port.
-    #[inline(always)]
     pub const fn id(&self) -> char {
         Instance::ID
     }
+
+    /// Consumes port instance and returns it's pins.
+    pub const fn into_pins(self) -> Pins {
+        [
+            Some(Pin::new(&self, 0)),
+            Some(Pin::new(&self, 1)),
+            Some(Pin::new(&self, 2)),
+            Some(Pin::new(&self, 3)),
+            Some(Pin::new(&self, 4)),
+            Some(Pin::new(&self, 5)),
+            Some(Pin::new(&self, 6)),
+            Some(Pin::new(&self, 7)),
+            Some(Pin::new(&self, 8)),
+            Some(Pin::new(&self, 9)),
+            Some(Pin::new(&self, 10)),
+            Some(Pin::new(&self, 11)),
+            Some(Pin::new(&self, 12)),
+            Some(Pin::new(&self, 13)),
+            Some(Pin::new(&self, 14)),
+            Some(Pin::new(&self, 15)),
+            Some(Pin::new(&self, 16)),
+            Some(Pin::new(&self, 17)),
+            Some(Pin::new(&self, 18)),
+            Some(Pin::new(&self, 19)),
+            Some(Pin::new(&self, 20)),
+            Some(Pin::new(&self, 21)),
+            Some(Pin::new(&self, 22)),
+            Some(Pin::new(&self, 23)),
+            Some(Pin::new(&self, 24)),
+            Some(Pin::new(&self, 25)),
+            Some(Pin::new(&self, 26)),
+            Some(Pin::new(&self, 27)),
+            Some(Pin::new(&self, 28)),
+            Some(Pin::new(&self, 29)),
+            Some(Pin::new(&self, 30)),
+            Some(Pin::new(&self, 31)),
+        ]
+    }
 }
-
-/// Extension trait which allows the port to be split into pins.
-///
-/// This trait should be implemented via macro to avoid unnecessary repetition of code,
-/// as each port will have pins with different generic types.
-pub trait IntoPins {
-    /// Type representing a structure with I/O pins of port implementing this trait.
-    type Pins;
-
-    /// Consumes current port instance and returns structure containing pins associated with consumed port.
-    fn into_pins(self) -> Self::Pins;
-}
-
-/// Helper macro used to define Pins structure and implement IntoPins trait for specified PIO port.
-///
-/// Should only be used internally by this module.
-macro_rules! implement_into_pins_for_port {
-    ($pins_structure_name:ident, $port_type:ident, $port_letter:ident, [$($pin:literal),*]) => {
-        paste::paste! {
-            #[doc = "Structure containing all port " $port_letter:upper " pins."]
-            pub struct $pins_structure_name<Port: super::IoPortMetadata> {
-            $(
-                #[doc = "Pin " $pin " of port " $port_letter:upper "."]
-                pub [<p$port_letter:lower$pin>]: Pin<$port_type, $pin, PostResetMode>,
-            )*
-                #[doc = "Port " $port_letter:upper " metadata."]
-                _port_meta: core::marker::PhantomData<Port>,
-            }
-
-            impl super::IntoPins for super::Port<$port_type> {
-                type Pins = Pins<$port_type>;
-
-                fn into_pins(self) -> Self::Pins {
-                    $pins_structure_name {
-                    $(
-                        [<p$port_letter:lower$pin>]: Pin::new(),
-                    )*
-                        _port_meta: core::marker::PhantomData
-                    }
-                }
-            }
-        }
-    };
-}
-
-/// Helper macro used to generate implementation of IntoPins trait for specified PIO port.
-///
-/// Should only be used internally by this module.
-///
-/// By passing a single letter (case doesn't matter, as it's always explicitly stated), a module with implementation
-/// of IntoPins trait for PIOx port is generated, where `x` is the passed letter.
-macro_rules! generate_port_implementation {
-    ($port_letter:ident) => {
-        paste::paste! {
-            #[doc = "Module containing IntoPins implementation for port " $port_letter:upper]
-            pub mod [<port_$port_letter:lower>] {
-                use crate::pac::[<PIO$port_letter:upper>];
-                use crate::pio::pin::{Pin, PostResetMode};
-
-                implement_into_pins_for_port!(Pins, [<PIO$port_letter:upper>], [<$port_letter:lower>], [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]);
-            }
-        }
-    };
-}
-
-generate_port_implementation!(A);
-generate_port_implementation!(B);
-generate_port_implementation!(C);
-generate_port_implementation!(D);
-generate_port_implementation!(E);

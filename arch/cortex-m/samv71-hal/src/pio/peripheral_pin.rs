@@ -1,6 +1,6 @@
 //! Module containing Parallel I/O (PIO) pin items for peripheral-controlled I/O pin.
 
-use super::{pin::PeripheralMode, port_metadata::IoPortMetadata, Pin};
+use super::{pin::PeripheralMode, Pin};
 
 /// Enumeration specifying peripheral controlling the pin.
 ///
@@ -32,7 +32,7 @@ pub enum Peripheral {
 ///
 /// For more details, consult your MCU's documentation ("Package and Pinout" section, and "Functional
 /// Description" section of PIO driver if you want to confirm that this comment is actually true)
-impl<Port: IoPortMetadata, const ID: u8> Pin<Port, ID, PeripheralMode> {
+impl Pin<PeripheralMode> {
     /// Changes the peripheral controlling the pin. This can be used instead of [`Pin::into_peripheral_pin`]
     /// if the pin is already controlled by a peripheral.
     ///

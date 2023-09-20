@@ -6,10 +6,7 @@ extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
-use aerugo::{
-    hal::drivers::pio::{port::IntoPins, Port},
-    Aerugo, InitApi, SystemHardwareConfig,
-};
+use aerugo::{hal::drivers::pio::Port, Aerugo, InitApi, SystemHardwareConfig};
 use rt::entry;
 
 #[entry]
@@ -24,9 +21,9 @@ fn main() -> ! {
             .expect("PIO A missing from peripherals structure"),
     );
 
-    let pins = port.into_pins();
+    let mut pins = port.into_pins();
 
-    let _is_high = pins.pc11.state();
+    let _pc2 = pins[2].take().unwrap();
 
     aerugo.start();
 }
