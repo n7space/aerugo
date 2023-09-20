@@ -14,6 +14,8 @@ a structure with every pin as separate object.
 
 */
 
+pub mod io_pin;
+pub mod peripheral_pin;
 pub mod pin;
 pub mod port;
 mod port_metadata;
