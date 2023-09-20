@@ -2,7 +2,7 @@
 
 use super::{pin::InputMode, Pin};
 
-use embedded_hal::digital::{InputPin, PinState};
+use embedded_hal::digital::InputPin;
 
 /// PIO-controlled pin's implementation for pin in input mode.
 ///
@@ -14,11 +14,11 @@ impl Pin<InputMode> {}
 impl InputPin for Pin<InputMode> {
     #[inline(always)]
     fn is_high(&self) -> Result<bool, Self::Error> {
-        Ok(self.state() == PinState::High)
+        Ok(self.is_high())
     }
 
     #[inline(always)]
     fn is_low(&self) -> Result<bool, Self::Error> {
-        Ok(self.state() == PinState::Low)
+        Ok(self.is_low())
     }
 }

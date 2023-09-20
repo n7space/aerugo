@@ -33,6 +33,7 @@ impl<Instance: IoPortMetadata> Port<Instance> {
     }
 
     /// Returns ID (uppercase letter) of the port.
+    #[inline(always)]
     pub const fn id(&self) -> char {
         Instance::ID
     }

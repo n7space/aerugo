@@ -79,11 +79,13 @@ pub enum PullResistor {
 /// Generic pin functions, available to all pins, no matter which mode they are currently in.
 impl<Mode: PinMode> Pin<Mode> {
     /// Returns the number of the pin (for example, 12 for PC12).
+    #[inline(always)]
     pub fn id(&self) -> u8 {
         self.id
     }
 
     /// Returns ID (uppercase letter) of the port of this pin (for example, 'C' for PC12).
+    #[inline(always)]
     pub fn port_id(&self) -> char {
         self.port_id
     }
@@ -141,7 +143,20 @@ impl<Mode: PinMode> Pin<Mode> {
         PinState::from(self.is_pin_bit_set(self.registers_ref().pdsr.read().bits()))
     }
 
+    /// Returns true if pin currently reads high state.
+    #[inline(always)]
+    pub fn is_high(&self) -> bool {
+        self.state() == PinState::High
+    }
+
+    /// Returns true if pin currently reads low state.
+    #[inline(always)]
+    pub fn is_low(&self) -> bool {
+        self.state() == PinState::Low
+    }
+
     /// Returns true if pin is currently controlled by peripheral.
+    #[inline(always)]
     pub fn is_peripheral_controlled(&self) -> bool {
         !self.is_pio_controlled()
     }
@@ -247,6 +262,7 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Implementation of this type makes sure that pins always access it's own bit, and doesn't access
     /// nor modify bits for other pins, therefore sharing this register block should be safe, as long
     /// as all pin types have correct, unique IDs specified by generic parameter `N`.
+    #[inline(always)]
     pub(super) const fn registers_ref(&self) -> &RegisterBlock {
         unsafe { &*self.port_registers }
     }
@@ -257,6 +273,7 @@ impl<Mode: PinMode> Pin<Mode> {
     /// This function will panic if pin was created with invalid ID, enforcing safe design of this type.
     /// This makes it safe to use with `bits` method of register writer, as it guarantees that returned
     /// mask will always point to a valid bit in 32-bit PIO register.
+    #[inline(always)]
     pub(super) const fn pin_mask(&self) -> u32 {
         if self.id > 31 {
             panic!("invalid pin number, valid range is (0..=31)")
@@ -267,6 +284,7 @@ impl<Mode: PinMode> Pin<Mode> {
 
     /// Helper function that checks whether the bit representing current pin in
     /// provided register's value is set.
+    #[inline(always)]
     pub(super) const fn is_pin_bit_set(&self, register_value: u32) -> bool {
         (register_value & self.pin_mask()) != 0
     }
