@@ -5,10 +5,13 @@ use core::marker::PhantomData;
 pub use super::input_pin::*;
 pub use super::output_pin::*;
 pub use super::peripheral_pin::*;
-use super::Port;
-pub use embedded_hal::digital::{InputPin, PinState};
-
 use super::port_metadata::{IoPortMetadata, RegisterBlock};
+
+pub use embedded_hal::digital::PinState;
+
+use super::Port;
+use core::convert::Infallible;
+use embedded_hal::digital::ErrorType;
 
 /// Structure representing a generic, dynamically-managed I/O pin.
 ///
@@ -134,8 +137,8 @@ impl<Mode: PinMode> Pin<Mode> {
     }
 
     /// Returns current logic state on pin's I/O line.
-    pub fn state(&self) -> bool {
-        self.is_pin_bit_set(self.registers_ref().pdsr.read().bits())
+    pub fn state(&self) -> PinState {
+        PinState::from(self.is_pin_bit_set(self.registers_ref().pdsr.read().bits()))
     }
 
     /// Returns true if pin is currently controlled by peripheral.
@@ -338,4 +341,8 @@ impl<Mode: PinMode> Pin<Mode> {
         self.registers_ref().abcdsr[0].write(|w| unsafe { w.bits(select_registers.0) });
         self.registers_ref().abcdsr[1].write(|w| unsafe { w.bits(select_registers.1) });
     }
+}
+
+impl<Mode: PinMode> ErrorType for Pin<Mode> {
+    type Error = Infallible;
 }
