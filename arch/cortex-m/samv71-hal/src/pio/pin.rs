@@ -23,17 +23,27 @@ pub struct Pin<Port: IoPortMetadata, const N: u8, PortMode: Mode> {
     _port_meta: PhantomData<Port>,
     /// Current mode.
     _mode: PhantomData<PortMode>,
+    /// Phantom pointer which disables auto-implementation of Send and Sync.
+    /// This structure cannot be shared between threads safely, as it uses
+    /// raw pointer. Normally, Rust should automatically not implement Send/Sync
+    /// for this type because of that, but this pointer is hidden in type system,
+    /// under `Port` generic argument, and Rust does not recognize this as something
+    /// that should disable auto-implementation of Send and Sync, so we need to do
+    /// this manually.
+    _disable_send_and_sync: PhantomData<*const ()>,
 }
 
 /// Assuming that the user does not create Pin instances manually, it's safe to send them to
-/// other threads, as they don't share any data. They are sharing the pointer to PIOx controller's
-/// register, but all internal operations are masked. Therefore, if there's no duplicate instances
-/// of the pins (as there shouldn't be, by design), each pin refers to different bit in PIOx registers.
+/// other threads, as there cannot be duplicate instances of them, sharing data.
+/// They are sharing the pointer to PIOx controller's register, but all internal operations
+/// are masked. Therefore, if there's no duplicate instances of the pins (as there shouldn't
+/// be, by design), each pin refers to different bit in PIOx registers, and there's no memory overlap.
 /// Since we're working on single-core environment, parallel access to PIO registers is not possible
 /// (as long as DMA is not used, but it's not reasonably possible to implement safety measures for
 /// that at this point, so the user should manually manage the safety of DMA operations)
 ///
-/// Sharing references ([`Sync`]) to pins is not safe, and should be managed by the user manually.
+/// Sharing references to pins is not safe, and should be managed by the user manually,
+/// usually by wrapping pins in type that implements [`Sync`].
 unsafe impl<Port: IoPortMetadata, const N: u8, PortMode: Mode> Send for Pin<Port, N, PortMode> {}
 
 /// Trait representing I/O pin's mode.
@@ -62,9 +72,16 @@ pub enum PullResistor {
 
 /// Pin implementation for all possible states.
 impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode> {
-    /// Returns the number of the pin, passed via `N` generic parameter.
+    /// Returns the number of the pin.
+    #[inline(always)]
     pub const fn id(&self) -> u8 {
         ID
+    }
+
+    /// Returns ID (uppercase letter) of the port of this pin.
+    #[inline(always)]
+    pub const fn port_id(&self) -> char {
+        Port::ID
     }
 
     /// Reads and returns current logic state of pin's I/O line.
@@ -75,7 +92,7 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
     /// Returns current pull resistor configuration of the pin.
     pub fn pull_resistor(&self) -> PullResistor {
         match (self.is_pulled_up(), self.is_pulled_down()) {
-            (true, true) => panic!("unexpected, invalid state of P{}{} - both pull-up and pull-down resistors are active. Is your silicon OK?", Port::ID, ID),
+            (true, true) => panic!("unexpected, invalid state of P{}{} - both pull-up and pull-down resistors are active. Is your silicon OK?", self.port_id(), self.id()),
             (true, false) => PullResistor::Up,
             (false, true) => PullResistor::Down,
             (false, false) => PullResistor::None,
@@ -186,6 +203,7 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
         Self {
             _port_meta: PhantomData,
             _mode: PhantomData,
+            _disable_send_and_sync: PhantomData,
         }
     }
 }

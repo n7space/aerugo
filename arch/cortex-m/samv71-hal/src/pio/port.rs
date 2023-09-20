@@ -27,6 +27,12 @@ impl<Instance: IoPortMetadata> Port<Instance> {
             _port_meta: PhantomData,
         }
     }
+
+    /// Returns ID (uppercase letter) of the port.
+    #[inline(always)]
+    pub const fn id(&self) -> char {
+        Instance::ID
+    }
 }
 
 /// Extension trait which allows the port to be split into pins.
@@ -41,8 +47,7 @@ pub trait IntoPins {
     fn into_pins(self) -> Self::Pins;
 }
 
-/// Helper macro used to define Pins structure for specified PIO port and implementation of IntoPins trait
-/// for specified PIO port.
+/// Helper macro used to define Pins structure and implement IntoPins trait for specified PIO port.
 ///
 /// Should only be used internally by this module.
 macro_rules! implement_into_pins_for_port {
