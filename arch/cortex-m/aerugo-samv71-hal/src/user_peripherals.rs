@@ -22,4 +22,14 @@ pub struct UserPeripherals {
     pub pmc: Option<PMC>,
     /// NVIC
     pub nvic: Option<pac::NVIC>,
+    /// I/O Port A.
+    pub pio_a: Option<pac::PIOA>,
+    /// I/O Port B.
+    pub pio_b: Option<pac::PIOB>,
+    /// I/O Port C.
+    pub pio_c: Option<pac::PIOC>,
+    /// I/O Port D.
+    pub pio_d: Option<pac::PIOD>,
+    /// I/O Port E.
+    pub pio_e: Option<pac::PIOE>,
 }
