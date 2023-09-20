@@ -16,7 +16,7 @@ use cortex_m::interrupt::free as irq_free;
 use cortex_m::interrupt::Mutex;
 
 use aerugo::{
-    hal::drivers::timer::Timer, logln, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig,
+    hal::drivers::timer::Timer, logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig,
     TaskletConfig, TaskletStorage,
 };
 use rt::entry;
@@ -89,7 +89,7 @@ fn init_tasks(aerugo: &'static impl InitApi) {
 
     logln!("Subscribing tasks...");
 
-    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, Some(Duration::secs(1)));
 }
 
 #[entry]

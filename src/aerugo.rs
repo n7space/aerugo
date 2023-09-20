@@ -24,8 +24,8 @@ use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
+use crate::time::{Duration, Instant};
 use crate::time_source::TimeSource;
-use crate::{Duration, Instant};
 
 /// Core system.
 ///
@@ -46,7 +46,8 @@ static EVENT_MANAGER: EventManager = EventManager::new();
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
 /// structure.
-static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager = CyclicExecutionManager::new();
+static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
+    CyclicExecutionManager::new(AERUGO.time_source());
 
 /// System structure.
 ///
@@ -109,9 +110,9 @@ impl Aerugo {
                 .execute_next_tasklet()
                 .expect("Failure in tasklet execution");
 
-            Hal::feed_watchdog();
-
             CYCLIC_EXECUTION_MANAGER.wake_tasklets();
+
+            Hal::feed_watchdog();
         }
     }
 }
@@ -866,7 +867,7 @@ impl InitApi for Aerugo {
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
-        period: Option<crate::time::MillisDurationU32>,
+        period: Option<Duration>,
     ) {
         let tasklet = tasklet_handle.tasklet();
 

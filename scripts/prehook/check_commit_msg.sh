@@ -40,7 +40,6 @@ while read -r line; do
         fi
 
         # Check if the commit title has the category specified
-        # message_regex="^[A-Z](.*[a-zA-z+])+: .+$"
         message_regex="^[A-Z]([a-zA-Z0-9-])+: .+$"
         if (grep -Evq "$message_regex" <<< "$line"); then
             error "Commit title not matching \`Category: Message\` pattern"

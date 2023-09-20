@@ -5,22 +5,24 @@ use aerugo::{
 
 #[derive(Default)]
 struct TaskAContext {
-    acc: u8,
+    cnt: u8,
 }
 
 fn task_a(_: (), context: &mut TaskAContext, _: &dyn RuntimeApi) {
-    context.acc = context.acc.wrapping_add(1);
-    logln!("TaskA: {}", context.acc);
+    context.cnt = context.cnt.wrapping_add(1);
+
+    logln!("TaskA: {}", context.cnt);
 }
 
 #[derive(Default)]
 struct TaskBContext {
-    acc: u16,
+    cnt: u8,
 }
 
 fn task_b(_: (), context: &mut TaskBContext, _: &dyn RuntimeApi) {
-    context.acc = context.acc.wrapping_add(2);
-    logln!("TaskB: {}", context.acc);
+    context.cnt = context.cnt.wrapping_add(1);
+
+    logln!("TaskB: {}", context.cnt);
 }
 
 static TASK_A_STORAGE: TaskletStorage<(), TaskAContext, 0> = TaskletStorage::new();
@@ -33,23 +35,22 @@ fn main() -> ! {
         name: "TaskA",
         ..Default::default()
     };
-
-    aerugo.create_tasklet(task_a_config, task_a, &TASK_A_STORAGE);
-    aerugo.create_tasklet(task_a_config, task_a, &TASK_A_STORAGE);
+    let task_a_context = TaskAContext { cnt: 0 };
 
     let task_b_config = TaskletConfig {
         name: "TaskB",
         ..Default::default()
     };
-    let task_b_context = TaskBContext { acc: 0 };
+    let task_b_context = TaskBContext { cnt: 0 };
 
+    aerugo.create_tasklet_with_context(task_a_config, task_a, task_a_context, &TASK_A_STORAGE);
     aerugo.create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE);
 
     let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
-    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
-
     aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)));
-    aerugo.subscribe_tasklet_to_cyclic(&task_b_handle, Some(Duration::secs(1)));
+
+    let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
+    aerugo.subscribe_tasklet_to_cyclic(&task_b_handle, Some(Duration::secs(5)));
 
     aerugo.start();
 }
