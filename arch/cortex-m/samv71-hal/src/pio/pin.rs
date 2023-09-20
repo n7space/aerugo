@@ -63,6 +63,7 @@ impl Mode for IOMode {}
 impl Mode for PeripheralMode {}
 
 /// Enumeration representing available pull-up/down resistors configuration for PIO pin.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PullResistor {
     /// Neither pull-up nor pull-down is enabled.
     None,
@@ -101,6 +102,14 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
             .pdr
             .write(|w| unsafe { w.bits(self.pin_mask()) });
 
+        Pin::transform(self)
+    }
+
+    /// Transforms the pin into I/O pin, giving the user full control over it.
+    pub fn into_io_pin(self) -> Pin<Port, ID, IOMode> {
+        self.registers_ref()
+            .per
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
         Pin::transform(self)
     }
 

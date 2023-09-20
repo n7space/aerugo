@@ -6,6 +6,7 @@ use super::{pin::PeripheralMode, port_metadata::IoPortMetadata, Pin};
 ///
 /// For details about peripheral mapping, see your MCU documentation (Package and
 /// Pinout section), or documentation for [`Pin<Port, ID, PeripheralMode>`] implementation.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Peripheral {
     /// Peripheral A.
     A,
