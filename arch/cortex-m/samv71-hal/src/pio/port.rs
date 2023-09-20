@@ -57,7 +57,7 @@ macro_rules! implement_into_pins_for_port {
             pub struct $pins_structure_name<Port: super::IoPortMetadata> {
             $(
                 #[doc = "Pin " $pin " of port " $port_letter:upper "."]
-                pub [<p$port_letter:lower$pin>]: Pin<$port_type, $pin, PostReset>,
+                pub [<p$port_letter:lower$pin>]: Pin<$port_type, $pin, PostResetMode>,
             )*
                 #[doc = "Port " $port_letter:upper " metadata."]
                 _port_meta: core::marker::PhantomData<Port>,
@@ -91,7 +91,7 @@ macro_rules! generate_port_implementation {
             #[doc = "Module containing IntoPins implementation for port " $port_letter:upper]
             pub mod [<port_$port_letter:lower>] {
                 use crate::pac::[<PIO$port_letter:upper>];
-                use crate::pio::pin::{Pin, PostReset};
+                use crate::pio::pin::{Pin, PostResetMode};
 
                 implement_into_pins_for_port!(Pins, [<PIO$port_letter:upper>], [<$port_letter:lower>], [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]);
             }

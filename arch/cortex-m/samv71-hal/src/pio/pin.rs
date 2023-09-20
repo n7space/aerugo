@@ -1,5 +1,7 @@
 //! Module containing Parallel I/O (PIO) pin items for generic I/O pin.
 
+pub use super::peripheral_pin::Peripheral;
+
 use core::marker::PhantomData;
 
 use super::port_metadata::{IoPortMetadata, RegisterBlock};
@@ -50,15 +52,15 @@ unsafe impl<Port: IoPortMetadata, const N: u8, PortMode: Mode> Send for Pin<Port
 pub trait Mode {}
 
 /// Empty structure representing I/O pin in post-reset state.
-pub struct PostReset;
+pub struct PostResetMode;
 /// Empty structure representing I/O pin in I/O state (controlled by PIO).
-pub struct IO;
+pub struct IOMode;
 /// Empty structure representing I/O pin in peripheral-controlled state.
-pub struct Peripheral;
+pub struct PeripheralMode;
 
-impl Mode for PostReset {}
-impl Mode for IO {}
-impl Mode for Peripheral {}
+impl Mode for PostResetMode {}
+impl Mode for IOMode {}
+impl Mode for PeripheralMode {}
 
 /// Enumeration representing available pull-up/down resistors configuration for PIO pin.
 pub enum PullResistor {
@@ -70,23 +72,51 @@ pub enum PullResistor {
     Down,
 }
 
-/// Pin implementation for all possible states.
+/// Generic pin functions, available to all pins, no matter which state they are currently in.
 impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode> {
-    /// Returns the number of the pin.
+    /// Returns the number of the pin (for example, 12 for PC12).
     #[inline(always)]
     pub const fn id(&self) -> u8 {
         ID
     }
 
-    /// Returns ID (uppercase letter) of the port of this pin.
+    /// Returns ID (uppercase letter) of the port of this pin (for example, 'C' for PC12).
     #[inline(always)]
     pub const fn port_id(&self) -> char {
         Port::ID
     }
 
-    /// Reads and returns current logic state of pin's I/O line.
+    /// Transforms the pin into peripheral pin, giving control of it to selected peripheral.
+    ///
+    /// This function can be used to either change the mode of the pin, or change the peripheral
+    /// controlling it.
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral that will control the pin.
+    pub fn into_peripheral_pin(mut self, peripheral: Peripheral) -> Pin<Port, ID, PeripheralMode> {
+        self.select_peripheral(peripheral);
+
+        // Give control to the peripheral
+        self.registers_ref()
+            .pdr
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
+
+        Pin::transform(self)
+    }
+
+    /// Returns current logic state on pin's I/O line.
     pub fn state(&self) -> bool {
         self.is_pin_bit_set(self.registers_ref().pdsr.read().bits())
+    }
+
+    /// Returns true if pin is currently controlled by peripheral.
+    pub fn is_peripheral_controlled(&self) -> bool {
+        !self.is_pio_controlled()
+    }
+
+    /// Returns true if pin is currently controlled by PIO controller.
+    pub fn is_pio_controlled(&self) -> bool {
+        self.is_pin_bit_set(self.registers_ref().psr.read().bits())
     }
 
     /// Returns current pull resistor configuration of the pin.
@@ -168,10 +198,10 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
     /// Note that all PIO pins of single PIO peripheral share the same registers block.
     /// This is due to the hardware implementation of PIO peripheral.
     /// Each PIO pin has it's own bit in every PIO register.
-    /// Implementation of this type makes sure that pins always access it's own bit, and don't access
+    /// Implementation of this type makes sure that pins always access it's own bit, and doesn't access
     /// nor modify bits for other pins, therefore sharing this register block should be safe, as long
-    /// as all pin types have correct, non-repeating `N` generic parameter values.
-    const fn registers_ref(&self) -> &RegisterBlock {
+    /// as all pin types have correct, unique IDs specified by generic parameter `N`.
+    pub(super) const fn registers_ref(&self) -> &RegisterBlock {
         unsafe { &*Port::REGISTERS }
     }
 
@@ -181,7 +211,7 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
     /// This function will panic if pin was created with invalid ID, enforcing safe design of this type.
     /// This makes it safe to use with `bits` method of register writer, as it guarantees that returned
     /// mask will always point to a valid bit in 32-bit PIO register.
-    const fn pin_mask(&self) -> u32 {
+    pub(super) const fn pin_mask(&self) -> u32 {
         if ID > 31 {
             panic!("invalid pin number, valid range is (0..=31)")
         }
@@ -191,8 +221,26 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
 
     /// Helper function that checks whether the bit representing current pin in
     /// provided register's value is set.
-    const fn is_pin_bit_set(&self, register_value: u32) -> bool {
+    pub(super) const fn is_pin_bit_set(&self, register_value: u32) -> bool {
         (register_value & self.pin_mask()) != 0
+    }
+
+    /// Transform the pin into a type with different mode.
+    ///
+    /// This is a helper function that allows to reduce state transition boilerplate to minimum.
+    ///
+    /// Rust compiler can deduce `Self` from function's return type, and transformation is basically a
+    /// no-op, so no code should be generated from this. This function is only to signalize the compiler
+    /// that we really want to change the type of current pin.
+    ///
+    /// # Parameters
+    /// * `_pin` - Pin to be transformed.
+    const fn transform<NewMode: Mode>(_pin: Pin<Port, ID, NewMode>) -> Self {
+        Self {
+            _port_meta: PhantomData,
+            _mode: PhantomData,
+            _disable_send_and_sync: PhantomData,
+        }
     }
 
     /// Creates a pin instance.
@@ -205,5 +253,44 @@ impl<Port: IoPortMetadata, const ID: u8, PortMode: Mode> Pin<Port, ID, PortMode>
             _mode: PhantomData,
             _disable_send_and_sync: PhantomData,
         }
+    }
+
+    /// Changes the peripheral that controls the pin.
+    /// This change has no effect unless pin's control is switched to peripheral.
+    ///
+    /// # Parameters
+    /// * `peripheral` - Peripheral that will control the pin.
+    pub(super) fn select_peripheral(&mut self, peripheral: Peripheral) {
+        // Original values of peripheral select registers with cleared bit representing
+        // current pin, which will be set later (if needed).
+        let mut select_registers = (
+            self.registers_ref().abcdsr[0].read().bits() & (!self.pin_mask()),
+            self.registers_ref().abcdsr[1].read().bits() & (!self.pin_mask()),
+        );
+
+        match peripheral {
+            Peripheral::A => {
+                // Peripheral A: (0, 0) in abcdsr 0/1 registers.
+            }
+            Peripheral::B => {
+                // Peripheral B: (1, 0) in abcdsr 0/1 registers.
+                select_registers.0 |= self.pin_mask();
+            }
+            Peripheral::C => {
+                // Peripheral C: (0, 1) in abcdsr 0/1 registers.
+                select_registers.1 |= self.pin_mask();
+            }
+            Peripheral::D => {
+                // Peripheral D: (1, 1) in abcdsr 0/1 registers.
+                select_registers.0 |= self.pin_mask();
+                select_registers.1 |= self.pin_mask();
+            }
+        }
+
+        // Safety: this is safe, because we're only modifying bit representing current pin.
+        // This is not thread-safe, as it's not an atomic operation, but this type does not
+        // implement `Sync`, so we're not breaking any invariants.
+        self.registers_ref().abcdsr[0].write(|w| unsafe { w.bits(select_registers.0) });
+        self.registers_ref().abcdsr[1].write(|w| unsafe { w.bits(select_registers.1) });
     }
 }
