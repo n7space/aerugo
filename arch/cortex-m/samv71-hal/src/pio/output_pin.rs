@@ -22,7 +22,7 @@ impl Pin<OutputMode> {
 
 /// Implementation of OutputPin trait from `embedded-hal` crate.
 ///
-/// [`Pin<_>::Error`] type is [`std::convert::Infallible`]. These functions cannot fail.
+/// `Pin<_>::Error` type is [`core::convert::Infallible`]. These functions cannot fail.
 /// As long as pin is in output mode, it always can be set high or low.
 impl OutputPin for Pin<OutputMode> {
     /// Drives the pin low.
@@ -53,7 +53,7 @@ impl OutputPin for Pin<OutputMode> {
 
 /// Implementation of OutputPin trait from `embedded-hal` crate.
 ///
-/// [`Pin<_>::Error`] type is [`std::convert::Infallible`]. These functions cannot fail.
+/// `Pin<_>::Error` type is [`core::convert::Infallible`]. These functions cannot fail.
 /// As long as pin is in output mode, it's set state can always be looked up.
 impl StatefulOutputPin for Pin<OutputMode> {
     /// Returns true if the pin is currently driven "high".
@@ -82,7 +82,7 @@ impl StatefulOutputPin for Pin<OutputMode> {
 /// SAMV71 PIO driver does not provide any quick way of toggling the pin's state,
 /// so this function uses the naive "check + invert state" approach.
 ///
-/// [`Pin<_>::Error`] type is [`std::convert::Infallible`]. These functions cannot fail.
+/// `Pin<_>::Error` type is [`core::convert::Infallible`]. These functions cannot fail.
 /// As long as pin is in output mode, it can always be toggled.
 impl ToggleableOutputPin for Pin<OutputMode> {
     /// Toggles pin output (from "high" to "low" or vice versa).

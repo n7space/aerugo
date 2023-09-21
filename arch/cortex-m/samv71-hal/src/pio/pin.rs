@@ -310,7 +310,7 @@ impl<Mode: PinMode> Pin<Mode> {
 
     /// Creates a pin instance.
     /// Does not take arguments, as everything is kept in type system.
-    /// This function should never be called manually, only [`Port`](super::Port) should be able
+    /// This function should never be called manually, only [`Port`] should be able
     /// to create pins instances.
     pub(super) const fn new<PortMeta: IoPortMetadata>(port: &Port<PortMeta>, id: u8) -> Self {
         Self {

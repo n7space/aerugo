@@ -15,7 +15,7 @@ impl Pin<InputMode> {}
 /// in case of SAMV71 the pin's state can always be read, but for the sake of
 /// type safety, pin should be converted to InputMode to be treated as such.
 ///
-/// [`Pin::Error`] type is [`std::convert::Infallible`]. These functions cannot fail.
+/// `Pin<_>::Error` type is [`core::convert::Infallible`]. These functions cannot fail.
 /// They will always return valid state measured on the pin's digital line.
 impl InputPin for Pin<InputMode> {
     #[inline(always)]
