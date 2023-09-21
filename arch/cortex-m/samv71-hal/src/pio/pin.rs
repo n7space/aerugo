@@ -1,5 +1,6 @@
 //! Module containing Parallel I/O (PIO) pin items for generic I/O pin.
 
+use core::fmt::Debug;
 use core::marker::PhantomData;
 
 pub use super::input_pin::*;
@@ -49,7 +50,10 @@ pub struct Pin<Mode: PinMode> {
 unsafe impl<Mode: PinMode> Send for Pin<Mode> {}
 
 /// Trait representing I/O pin's mode.
-pub trait PinMode {}
+pub trait PinMode {
+    /// Name of the mode, used for debug.
+    const NAME: &'static str;
+}
 
 /// Empty structure representing I/O pin in post-reset (unknown) mode.
 pub struct ResetMode;
@@ -60,10 +64,21 @@ pub struct OutputMode;
 /// Empty structure representing I/O pin in peripheral-controlled mode.
 pub struct PeripheralMode;
 
-impl PinMode for ResetMode {}
-impl PinMode for InputMode {}
-impl PinMode for OutputMode {}
-impl PinMode for PeripheralMode {}
+impl PinMode for ResetMode {
+    const NAME: &'static str = "Reset";
+}
+
+impl PinMode for InputMode {
+    const NAME: &'static str = "Input";
+}
+
+impl PinMode for OutputMode {
+    const NAME: &'static str = "Output";
+}
+
+impl PinMode for PeripheralMode {
+    const NAME: &'static str = "Peripheral";
+}
 
 /// Enumeration representing available pull-up/down resistors configuration for PIO pin.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -377,5 +392,15 @@ impl Pin<ResetMode> {
             port_id: port.id(),
             _mode: PhantomData,
         }
+    }
+}
+
+impl<Mode: PinMode> Debug for Pin<Mode> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pin")
+            .field("id", &self.id)
+            .field("port_id", &self.port_id)
+            .field("mode", &Mode::NAME)
+            .finish()
     }
 }

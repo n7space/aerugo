@@ -9,72 +9,9 @@ pub enum DriveMode {
     /// Pin is driven both to the high- and low-level.
     PushPull,
     /// Pin can be driven only to low-level, driving it to
-    /// high-level results in floating pin. Pull resistors
-    /// (external or internal) recommended with this mode.
+    /// high-level results in floating pin. Using pull resistors
+    /// (external or internal) is recommended with this mode.
     OpenDrain,
-}
-
-/// PIO-controlled pin's implementation for pin in output mode.
-///
-/// This mode allows the pin to:
-/// * Set it's output state
-/// * Configure it in open-drain or push-pull mode
-/// * Configure
-impl Pin<OutputMode> {
-    /// Sets pin's state. Calls [`Pin<OutputMode>::set_low`] or [`Pin<OutputMode>::set_high`].
-    pub fn set_state(&mut self, state: PinState) {
-        match state {
-            PinState::Low => self.set_low().unwrap(),
-            PinState::High => self.set_high().unwrap(),
-        }
-    }
-
-    /// Sets pin's drive mode.
-    /// Calls [`Pin<OutputMode>::switch_to_push_pull_mode`] or [`Pin<OutputMode>::switch_to_open_drain_mode`].
-    pub fn set_drive_mode(&mut self, mode: DriveMode) {
-        match mode {
-            DriveMode::PushPull => self.switch_to_push_pull_mode(),
-            DriveMode::OpenDrain => self.switch_to_open_drain_mode(),
-        }
-    }
-
-    /// Gets pin's current drive mode.
-    pub fn drive_mode(&self) -> DriveMode {
-        if self.in_open_drain_mode() {
-            DriveMode::OpenDrain
-        } else {
-            DriveMode::PushPull
-        }
-    }
-
-    /// Switches the pin to push-pull mode.
-    ///
-    /// This is the default mode of an output pin.
-    pub fn switch_to_push_pull_mode(&mut self) {
-        // Safety: See `Pin::pin_mask` description.
-        self.registers_ref()
-            .mddr
-            .write(|w| unsafe { w.bits(self.pin_mask()) });
-    }
-
-    /// Switches the pin to open-drain mode.
-    pub fn switch_to_open_drain_mode(&mut self) {
-        // Safety: See `Pin::pin_mask` description.
-        self.registers_ref()
-            .mder
-            .write(|w| unsafe { w.bits(self.pin_mask()) });
-    }
-
-    /// Returns `true` if pin is currently in push-pull mode.
-    #[inline(always)]
-    pub fn in_push_pull_mode(&self) -> bool {
-        !self.in_open_drain_mode()
-    }
-
-    /// Returns `true` if pin is currently in open-drain mode.
-    pub fn in_open_drain_mode(&self) -> bool {
-        self.is_pin_bit_set(self.registers_ref().mdsr.read().bits())
-    }
 }
 
 /// Implementation of OutputPin trait from `embedded-hal` crate.
@@ -150,5 +87,88 @@ impl ToggleableOutputPin for Pin<OutputMode> {
             self.set_high().unwrap();
         }
         Ok(())
+    }
+}
+
+/// PIO-controlled pin's implementation for pin in output mode.
+///
+/// This mode allows the pin to:
+/// * Set it's output state
+/// * Configure it in open-drain or push-pull mode
+/// * Configure
+impl Pin<OutputMode> {
+    /// Sets pin's state. Calls [`Pin<OutputMode>::set_low`] or [`Pin<OutputMode>::set_high`].
+    pub fn set_state(&mut self, state: PinState) {
+        match state {
+            PinState::Low => self.set_low().unwrap(),
+            PinState::High => self.set_high().unwrap(),
+        }
+    }
+
+    /// Sets pin's drive mode.
+    /// Calls [`Pin<OutputMode>::switch_to_push_pull_mode`] or [`Pin<OutputMode>::switch_to_open_drain_mode`].
+    pub fn set_drive_mode(&mut self, mode: DriveMode) {
+        match mode {
+            DriveMode::PushPull => self.switch_to_push_pull_mode(),
+            DriveMode::OpenDrain => self.switch_to_open_drain_mode(),
+        }
+    }
+
+    /// Gets pin's current drive mode.
+    pub fn drive_mode(&self) -> DriveMode {
+        if self.in_open_drain_mode() {
+            DriveMode::OpenDrain
+        } else {
+            DriveMode::PushPull
+        }
+    }
+
+    /// Switches the pin to push-pull mode.
+    ///
+    /// This is the default mode of an output pin.
+    pub fn switch_to_push_pull_mode(&mut self) {
+        // Safety: See `Pin::pin_mask` description.
+        self.registers_ref()
+            .mddr
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
+    }
+
+    /// Switches the pin to open-drain mode.
+    pub fn switch_to_open_drain_mode(&mut self) {
+        // Safety: See `Pin::pin_mask` description.
+        self.registers_ref()
+            .mder
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
+    }
+
+    /// Returns `true` if pin is currently in push-pull mode.
+    #[inline(always)]
+    pub fn in_push_pull_mode(&self) -> bool {
+        !self.in_open_drain_mode()
+    }
+
+    /// Returns `true` if pin is currently in open-drain mode.
+    pub fn in_open_drain_mode(&self) -> bool {
+        self.is_pin_bit_set(self.registers_ref().mdsr.read().bits())
+    }
+
+    /// Enables synchronous mode operation for the pin.
+    ///
+    /// This function is used internally by [`SynchronousPins`](super::SynchronousPins) type.
+    pub(super) fn enable_synchronous_mode(&mut self) {
+        // Safety: See `Pin::pin_mask` description.
+        self.registers_ref()
+            .ower
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
+    }
+
+    /// Disables synchronous mode operation for the pin.
+    ///
+    /// This function is used internally by [`SynchronousPins`](super::SynchronousPins) type.
+    pub(super) fn disable_synchronous_mode(&mut self) {
+        // Safety: See `Pin::pin_mask` description.
+        self.registers_ref()
+            .owdr
+            .write(|w| unsafe { w.bits(self.pin_mask()) });
     }
 }

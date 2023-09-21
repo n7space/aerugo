@@ -19,7 +19,10 @@ pub mod output_pin;
 pub mod peripheral_pin;
 pub mod pin;
 pub mod port;
-mod port_metadata;
+pub mod synchronous_port;
 
 pub use pin::Pin;
 pub use port::Port;
+pub use synchronous_port::SynchronousPort;
+
+mod port_metadata;
