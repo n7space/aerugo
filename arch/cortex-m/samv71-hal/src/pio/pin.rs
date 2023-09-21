@@ -276,7 +276,12 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Returns register mask for current pin.
     ///
     /// # Safety
-    /// This function is safe to call as long, as pin the pin number is in (0..=31) range.
+    /// This function is safe to call as long, as pin the pin number is in (0..=31) range,
+    /// and as long as every instance of pin is unique. You should never, under any circumstances,
+    /// create pin instances manually, as it would break this invariant and make access to cloned pin
+    /// unsafe.
+    ///
+    /// Range of pin's ID is checked on construction, see [`Pin<ResetMode>::new`].
     #[inline(always)]
     pub(super) const fn pin_mask(&self) -> u32 {
         1u32 << self.id
@@ -304,19 +309,6 @@ impl<Mode: PinMode> Pin<Mode> {
             port_registers: pin.port_registers,
             id: pin.id,
             port_id: pin.port_id,
-            _mode: PhantomData,
-        }
-    }
-
-    /// Creates a pin instance.
-    /// Does not take arguments, as everything is kept in type system.
-    /// This function should never be called manually, only [`Port`] should be able
-    /// to create pins instances.
-    pub(super) const fn new<PortMeta: IoPortMetadata>(port: &Port<PortMeta>, id: u8) -> Self {
-        Self {
-            port_registers: PortMeta::REGISTERS,
-            id,
-            port_id: port.id(),
             _mode: PhantomData,
         }
     }
@@ -364,4 +356,26 @@ impl<Mode: PinMode> Pin<Mode> {
 
 impl<Mode: PinMode> ErrorType for Pin<Mode> {
     type Error = Infallible;
+}
+
+impl Pin<ResetMode> {
+    /// Creates a pin instance.
+    /// This function should never be called manually, only [`Port`] should be able
+    /// to create pins instances.
+    ///
+    /// # Safety
+    /// This function checks if pin's ID value is correct (in (0..=31) range), and will panic
+    /// if it's not.
+    pub(super) const fn new<PortMeta: IoPortMetadata>(port: &Port<PortMeta>, id: u8) -> Self {
+        if id > 31 {
+            panic!("pin tried to be created with invalid ID (expected ID in range (0..=31))");
+        }
+
+        Self {
+            port_registers: PortMeta::REGISTERS,
+            id,
+            port_id: port.id(),
+            _mode: PhantomData,
+        }
+    }
 }
