@@ -26,3 +26,4 @@ pub use port::Port;
 pub use synchronous_port::SynchronousPort;
 
 mod port_metadata;
+pub use port_metadata::*;

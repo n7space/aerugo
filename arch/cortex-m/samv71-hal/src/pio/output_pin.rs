@@ -5,6 +5,7 @@ use embedded_hal::digital::{OutputPin, PinState, StatefulOutputPin, ToggleableOu
 use super::{pin::OutputMode, Pin};
 
 /// Enumeration listing available pin driving modes.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DriveMode {
     /// Pin is driven both to the high- and low-level.
     PushPull,
@@ -154,7 +155,7 @@ impl Pin<OutputMode> {
 
     /// Enables synchronous mode operation for the pin.
     ///
-    /// This function is used internally by [`SynchronousPins`](super::SynchronousPins) type.
+    /// This function is used internally by [`SynchronousPort`](super::SynchronousPort) type.
     pub(super) fn enable_synchronous_mode(&mut self) {
         // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
@@ -164,7 +165,7 @@ impl Pin<OutputMode> {
 
     /// Disables synchronous mode operation for the pin.
     ///
-    /// This function is used internally by [`SynchronousPins`](super::SynchronousPins) type.
+    /// This function is used internally by [`SynchronousPort`](super::SynchronousPort) type.
     pub(super) fn disable_synchronous_mode(&mut self) {
         // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
