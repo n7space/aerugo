@@ -101,6 +101,7 @@ impl<Mode: PinMode> Pin<Mode> {
         self.select_peripheral(peripheral);
 
         // Give control over the pin to the peripheral
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .pdr
             .write(|w| unsafe { w.bits(self.pin_mask()) });
@@ -111,11 +112,13 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Transforms the pin into input I/O pin, giving the user full control over it.
     pub fn into_input_pin(self) -> Pin<InputMode> {
         // Give control over the pin to PIO controller
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .per
             .write(|w| unsafe { w.bits(self.pin_mask()) });
 
         // Put the pin in input mode
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .odr
             .write(|w| unsafe { w.bits(self.pin_mask()) });
@@ -126,11 +129,13 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Transforms the pin into output I/O pin, giving the user full control over it.
     pub fn into_output_pin(self) -> Pin<OutputMode> {
         // Give control over the pin to PIO controller
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .per
             .write(|w| unsafe { w.bits(self.pin_mask()) });
 
         // Put the pin in output mode
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .oer
             .write(|w| unsafe { w.bits(self.pin_mask()) });
@@ -240,6 +245,7 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Disables pull-up or pull-down if it's currently enabled.
     /// Does nothing otherwise.
     pub fn disable_pull_resistor(&mut self) {
+        // Safety: See `Pin::pin_mask` description.
         self.registers_ref()
             .pudr
             .write(|w| unsafe { w.bits(self.pin_mask()) });
@@ -270,15 +276,9 @@ impl<Mode: PinMode> Pin<Mode> {
     /// Returns register mask for current pin.
     ///
     /// # Safety
-    /// This function will panic if pin was created with invalid ID, enforcing safe design of this type.
-    /// This makes it safe to use with `bits` method of register writer, as it guarantees that returned
-    /// mask will always point to a valid bit in 32-bit PIO register.
+    /// This function is safe to call as long, as pin the pin number is in (0..=31) range.
     #[inline(always)]
     pub(super) const fn pin_mask(&self) -> u32 {
-        if self.id > 31 {
-            panic!("invalid pin number, valid range is (0..=31)")
-        }
-
         1u32 << self.id
     }
 
@@ -356,6 +356,7 @@ impl<Mode: PinMode> Pin<Mode> {
         // Safety: this is safe, because we're only modifying bit representing current pin.
         // This is not thread-safe, as it's not an atomic operation, but this type does not
         // implement `Sync`, so we're not breaking any invariants.
+        // Also: See `Pin::pin_mask` description.
         self.registers_ref().abcdsr[0].write(|w| unsafe { w.bits(select_registers.0) });
         self.registers_ref().abcdsr[1].write(|w| unsafe { w.bits(select_registers.1) });
     }
