@@ -10,7 +10,13 @@ use embedded_hal::digital::InputPin;
 /// As of now, it's outside of project's requirements, so it's left for future activity.
 impl Pin<InputMode> {}
 
-/// InputPin trait implementation from `embedded-hal` crate.
+/// Implementation of InputPin trait from `embedded-hal` crate.
+/// These are just aliases of the functions from generic Pin implementation,
+/// in case of SAMV71 the pin's state can always be read, but for the sake of
+/// type safety, pin should be converted to InputMode to be treated as such.
+///
+/// [`Pin::Error`] type is [`std::convert::Infallible`]. These functions cannot fail.
+/// They will always return valid state measured on the pin's digital line.
 impl InputPin for Pin<InputMode> {
     #[inline(always)]
     fn is_high(&self) -> Result<bool, Self::Error> {
