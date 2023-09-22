@@ -63,6 +63,11 @@ impl Hal {
                     timer_counter3: Some(mcu_peripherals.TC3),
                     pmc: system_peripherals.pmc.take(),
                     nvic: Some(core_peripherals.NVIC),
+                    pio_a: Some(mcu_peripherals.PIOA),
+                    pio_b: Some(mcu_peripherals.PIOB),
+                    pio_c: Some(mcu_peripherals.PIOC),
+                    pio_d: Some(mcu_peripherals.PIOD),
+                    pio_e: Some(mcu_peripherals.PIOE),
                 })
             } else {
                 None

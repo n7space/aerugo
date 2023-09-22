@@ -3,6 +3,7 @@ mod test_boolean_condition;
 mod test_event_cancellation;
 mod test_event_clear_queue;
 mod test_events;
+mod test_hal_pio;
 mod test_hal_pmc;
 mod test_hal_timer;
 mod test_hal_watchdog;
