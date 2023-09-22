@@ -23,9 +23,11 @@ BOARD_NETWORK_PATH = str(os.environ.get("AERUGO_BOARD_HOSTNAME"))
 """Network path of development setup, might be a domain name or IP address"""
 
 # Board environment
-BOARD_DEBUGGING_SCRIPT_PATH = "./run_openocd_samv71_clean.sh"
-"""This script should run GDB server bound to a TCP port provided in `BOARD_GDB_PORT`
+BOARD_START_GDB_SERVER_COMMAND = "./run_openocd_samv71_clean.sh"
+"""This command should run GDB server bound to a TCP port provided in `BOARD_GDB_PORT`
 constant"""
+BOARD_CLEAN_ENVIRONMENT_COMMAND = "killall openocd"
+"""This command should clean up environment after debug session."""
 BOARD_GDB_PORT = int(str(os.environ.get("AERUGO_BOARD_GDB_PORT")))
 """GDB TCP port of development setup"""
 BOARD_RTT_PORT = int(str(os.environ.get("AERUGO_BOARD_RTT_PORT")))

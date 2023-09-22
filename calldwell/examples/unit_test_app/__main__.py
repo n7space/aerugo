@@ -58,7 +58,7 @@ def init_example() -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
         gdb_server_port=BOARD_GDB_PORT,
         rtt_server_port=BOARD_RTT_PORT,
         local_gdb_executable=GDB_EXECUTABLE,
-        remote_gdb_executable=BOARD_GDB_EXEC_SCRIPT,
+        remote_gdb_server_command=BOARD_GDB_EXEC_SCRIPT,
         path_to_test_executable=str(test_bin_path.absolute()),
     )
 

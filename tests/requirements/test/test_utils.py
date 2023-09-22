@@ -10,12 +10,13 @@ from typing import TYPE_CHECKING
 
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
 from scripts.env import (
-    BOARD_DEBUGGING_SCRIPT_PATH,
+    BOARD_CLEAN_ENVIRONMENT_COMMAND,
     BOARD_GDB_PORT,
     BOARD_LOGIN,
     BOARD_NETWORK_PATH,
     BOARD_PASSWORD,
     BOARD_RTT_PORT,
+    BOARD_START_GDB_SERVER_COMMAND,
     BOARD_TARGET_TRIPLE,
     HOST_GDB_EXECUTABLE,
     INTEGRATION_TESTS_DIRECTORY,
@@ -41,7 +42,7 @@ def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]
         gdb_server_port=BOARD_GDB_PORT,
         rtt_server_port=BOARD_RTT_PORT,
         local_gdb_executable=HOST_GDB_EXECUTABLE,
-        remote_gdb_executable=BOARD_DEBUGGING_SCRIPT_PATH,
+        remote_gdb_server_command=BOARD_START_GDB_SERVER_COMMAND,
         path_to_test_executable=str(test_binary_path.absolute()),
     )
 
@@ -58,7 +59,7 @@ def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]
 def finish_test(ssh: SSHClient) -> None:
     """Finishes integration test's execution by cleaning up resources."""
     logging.info("Finishing the test, cleaning up environment...")
-    ssh.execute("pkill openocd")
+    ssh.execute(BOARD_CLEAN_ENVIRONMENT_COMMAND)
     ssh.close()
     logging.info("Environment cleaned up!")
 

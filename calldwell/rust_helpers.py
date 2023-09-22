@@ -43,9 +43,11 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     gdb_server_port: int,
     rtt_server_port: int,
     local_gdb_executable: str,
-    remote_gdb_executable: str,
+    remote_gdb_server_command: str,
     path_to_test_executable: str,
     gdb_timeout: float | None = None,
+    flashing_timeout: float | None = None,
+    _upload_tries: int = 5,
     log_responses: bool = False,
     log_execution: bool = False,
     pre_handshake_hook: Callable[[GDBClient, Any | None], None] | None = None,
@@ -56,17 +58,23 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     `calldwell::initialize` executes, and performing handshake (and optional pre-handshake hook, if
     provided).
 
-    This function returns a tuple containing `SSHClient` connected to debug host, `GDBClient` with
-    program in stopped state right after `calldwell:initialize` execution, and `RTTClient`, or
-    `None` if starting the session fails at any point.
+    This function returns a tuple containing `SSHClient` connected to debug host, `GDBClient`
+    connected to remote GDB server controlling running application, and `RTTClient` connected
+    to running application, or `None` if starting the session fails at any point.
 
-    Provided test executable is in running state after this function finishes.
+    Microcontroller is in running state after this function finishes execution. You must block the
+    program manually (for example by putting a loop waiting for RTT message) in order to prevent
+    it from continuing execution after establishing the session.
 
     This function can also throw one of the `pygdbmi` exceptions, like `GdbTimeoutError`.
 
     To check what caused the issue, you should check the logs. Writing proper error handling
     for all the scenarios is certainly possible, but usually the error is unrecoverable and
     should fail the test anyway, so there's no point in proper error handling anyway.
+
+    This operation often fails, and therefore is a source of most false-positives
+    in tests. It's caused by issues with GDB server connection.
+    There's no other known fix for that, other than restarting the connection.
 
     Optional pre-handshake hook will be executed while program is stopped.
     Pre-handshake hook is given `GDBClient` instance as first argument, and user-provided
@@ -80,11 +88,12 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     * `gdb_server_port` - Network port of GDB server
     * `rtt_server_port` - Port for RTT communication that will be opened by GDB
     * `local_gdb_executable` - Path to executable invoking local GDB client that will connect to
-                               remote server. May point to a shell script.
-    * `remote_gdb_executable` - Path to executable on remote debug host that will run GDB server.
-                                May point to a shell script.
+                               remote server.
+    * `remote_gdb_server_command` - Command starting GDB server on remote debug host.
     * `path_to_test_executable` - Path to Calldwell test executable
     * `gdb_timeout` - Timeout for GDBClient, if `None` then default one will be used.
+    * `flashing_timeout` - Timeout of binary flashing, if `None` then default one will be used.
+    * `upload_tries` - Amount of tries this function will try to upload the binary to MCU memory.
     * `log_responses` - Whether to log GDB/MI responses, or not
     * `log_execution` - Whether to log the execution of GDB commands, or not
     * `pre_handshake_hook` - Function that will be called before performing Calldwell handshake.
@@ -93,14 +102,15 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     * `pre_handshake_hook_argument` - User argument passed to `pre_handshake_hook`, if present.
     """
     ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
-    ssh.execute(remote_gdb_executable)
+    ssh.execute(remote_gdb_server_command)
 
     gdb_server_full_hostname = f"{debug_host_network_path}:{gdb_server_port}"
     gdb = GDBClient(
-        local_gdb_executable,
-        gdb_timeout,
-        log_responses,
-        log_execution,
+        gdb_executable=local_gdb_executable,
+        default_timeout=gdb_timeout,
+        flashing_timeout=flashing_timeout,
+        log_responses=log_responses,
+        log_execution=log_execution,
     )
 
     if not gdb.connect_to_remote(gdb_server_full_hostname):
