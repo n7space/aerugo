@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from .gdb_client import GDBClient
 from .rtt_client import CalldwellRTTClient
+from .ssh_client import SSHClient
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -34,26 +35,30 @@ EXPECTED_MCU_HANDSHAKE_MESSAGE = f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE
 
 
 # Yes, this is a very big function, but it's supposed to be all-in-one single-liner.
-# pylint: disable=too-many-arguments,too-many-return-statements
+# pylint: disable=too-many-arguments,too-many-return-statements,too-many-locals
 def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
-    gdb_executable: str,
-    gdb_server_hostname: str,
+    debug_host_network_path: str,
+    debug_host_login: str,
+    debug_host_password: str,
     gdb_server_port: int,
     rtt_server_port: int,
+    local_gdb_executable: str,
+    remote_gdb_executable: str,
     path_to_test_executable: str,
     gdb_timeout: float | None = None,
     log_responses: bool = False,
     log_execution: bool = False,
     pre_handshake_hook: Callable[[GDBClient, Any | None], None] | None = None,
     pre_handshake_hook_argument: Any | None = None,  # noqa: ANN401 (this argument is for the user)
-) -> tuple[GDBClient, CalldwellRTTClient] | None:
-    """Initializes Calldwell-rs test session by connecting to GDB server (like OpenOCD),
-    starting RTT server, flashing the executable, waiting until `calldwell::initialize`
-    executes, and performing handshake (and optional pre-handshake hook, if provided).
+) -> tuple[SSHClient, GDBClient, CalldwellRTTClient] | None:
+    """Initializes Calldwell-rs test session by connecting to debug host via SSH, running GDB server
+    (like OpenOCD), starting RTT server, flashing the executable, waiting until
+    `calldwell::initialize` executes, and performing handshake (and optional pre-handshake hook, if
+    provided).
 
-    This function returns a tuple containing `GDBClient` with program in stopped state right after
-    `calldwell:initialize` execution, and `RTTClient`, or `None` if starting the session fails at
-    any point.
+    This function returns a tuple containing `SSHClient` connected to debug host, `GDBClient` with
+    program in stopped state right after `calldwell:initialize` execution, and `RTTClient`, or
+    `None` if starting the session fails at any point.
 
     Provided test executable is in running state after this function finishes.
 
@@ -68,10 +73,16 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     `pre_handshake_hook_argument` as second.
 
     # Parameters
-    * `gdb_executable` - Path to GDB executable
-    * `gdb_server_hostname` - Network path to GDB server. If ran locally, use `localhost`
+    * `debug_host_network_path` - Network path to debug host with debugger attached to target board.
+                                  If ran locally, use `localhost`
+    * `debug_host_login` - SSH login of debug host.
+    * `debug_host_password` - SSH password of debug host.
     * `gdb_server_port` - Network port of GDB server
     * `rtt_server_port` - Port for RTT communication that will be opened by GDB
+    * `local_gdb_executable` - Path to executable invoking local GDB client that will connect to
+                               remote server. May point to a shell script.
+    * `remote_gdb_executable` - Path to executable on remote debug host that will run GDB server.
+                                May point to a shell script.
     * `path_to_test_executable` - Path to Calldwell test executable
     * `gdb_timeout` - Timeout for GDBClient, if `None` then default one will be used.
     * `log_responses` - Whether to log GDB/MI responses, or not
@@ -81,9 +92,12 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
                              starts normal execution.
     * `pre_handshake_hook_argument` - User argument passed to `pre_handshake_hook`, if present.
     """
-    gdb_server_full_hostname = f"{gdb_server_hostname}:{gdb_server_port}"
+    ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
+    ssh.execute(remote_gdb_executable)
+
+    gdb_server_full_hostname = f"{debug_host_network_path}:{gdb_server_port}"
     gdb = GDBClient(
-        gdb_executable,
+        local_gdb_executable,
         gdb_timeout,
         log_responses,
         log_execution,
@@ -105,7 +119,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
         logging.error("Could not start execution of test program")
         return None
 
-    rtt = _initialize_rtt(gdb, gdb_server_hostname, rtt_server_port, rtt_symbol.address)
+    rtt = _initialize_rtt(gdb, debug_host_network_path, rtt_server_port, rtt_symbol.address)
     if rtt is None:
         logging.error("Couldn't initialize RTT facilities")
         return None
@@ -119,7 +133,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
         logging.error("Couldn't perform correct handshake with MCU")
         return None
 
-    return gdb, rtt
+    return ssh, gdb, rtt
 
 
 def build_cargo_app(
