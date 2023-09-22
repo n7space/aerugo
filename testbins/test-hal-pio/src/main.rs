@@ -78,7 +78,7 @@ fn perform_basic_pin_functions_test(mut pin: Pin<OutputMode>) {
 
 fn check_pull_resistor_config<Mode: PinMode>(pin: &Pin<Mode>, expected_resistor: PullResistor) {
     let current_resistor = pin.pull_resistor();
-    if current_resistor != PullResistor::None {
+    if current_resistor != expected_resistor {
         panic!(
             "pin reports {:#?} after setting it to {:#?}",
             current_resistor, expected_resistor
@@ -112,12 +112,33 @@ fn perform_pull_resistors_test<Mode: PinMode>(mut pin: Pin<Mode>) {
 }
 
 fn validate_port_state<Port: IoPortMetadata, const N: usize>(
-    port: &SynchronousPort<Port, N>,
-    expected_mask: u32,
+    port: &mut SynchronousPort<Port, N>,
+    set_state: u32,
+    expected_state: u32,
 ) {
-    let state = port.output_state();
-    if state != expected_mask {
-        panic!("all synchronous bits driven high, but `output_state` reports otherwise (expected {:#012b}, got {:#012b}", expected_mask, state);
+    port.set_state(set_state);
+    let read_state = port.output_state();
+    if read_state != expected_state {
+        panic!(
+            "Unexpected synchronous port state!\nSet:\t\t{:#012b}\nExpected:\t{:#012b}\nGot:\t\t{:#012b}",
+            set_state, expected_state, read_state
+        );
+    }
+}
+
+fn validate_masked_port_state<Port: IoPortMetadata, const N: usize>(
+    port: &mut SynchronousPort<Port, N>,
+    set_state: u32,
+    set_state_mask: u32,
+    expected_state: u32,
+) {
+    port.set_masked_state(set_state, set_state_mask);
+    let read_state = port.output_state();
+    if read_state != expected_state {
+        panic!(
+            "Unexpected synchronous port state!\nSet:\t\t{:#012b}\nMask:\t{:#012b}\nExpected:\t{:#012b}\nGot:\t\t{:#012b}",
+            set_state, set_state_mask, expected_state, read_state
+        );
     }
 }
 
@@ -128,38 +149,19 @@ fn perform_synchronous_port_test(pins: [Pin<OutputMode>; 4], port_mask: u32, par
     check_pin_functionality(&mut port[2]);
 
     // Check port access
-    port.set_state(u32::MAX);
-    validate_port_state(&port, port_mask);
+    validate_port_state(&mut port, u32::MAX, port_mask);
+    validate_port_state(&mut port, 0, 0);
+    validate_port_state(&mut port, partial_mask, partial_mask);
+    validate_port_state(&mut port, !partial_mask, !partial_mask & port_mask);
+    validate_port_state(&mut port, partial_mask | 0xBEEF0000, partial_mask);
+    validate_port_state(&mut port, port_mask, port_mask);
 
-    port.set_state(0);
-    validate_port_state(&port, 0);
-
-    port.set_state(partial_mask);
-    validate_port_state(&port, partial_mask);
-
-    port.set_state(!partial_mask);
-    validate_port_state(&port, !partial_mask);
-
-    port.set_state(partial_mask | 0xBEEF0000);
-    validate_port_state(&port, partial_mask);
-
-    port.set_state(port_mask);
-    validate_port_state(&port, port_mask);
-
-    port.set_masked_state(u32::MAX, u32::MAX);
-    validate_port_state(&port, port_mask);
-
-    port.set_masked_state(u32::MAX, 0);
-    validate_port_state(&port, port_mask);
-
-    port.set_masked_state(0, u32::MAX);
-    validate_port_state(&port, 0);
-
-    port.set_masked_state(partial_mask, partial_mask);
-    validate_port_state(&port, partial_mask);
-
-    port.set_masked_state(!partial_mask, !partial_mask);
-    validate_port_state(&port, port_mask);
+    // Check masked port access
+    validate_masked_port_state(&mut port, u32::MAX, u32::MAX, port_mask);
+    validate_masked_port_state(&mut port, u32::MAX, 0, port_mask);
+    validate_masked_port_state(&mut port, 0, u32::MAX, 0);
+    validate_masked_port_state(&mut port, partial_mask, partial_mask, partial_mask);
+    validate_masked_port_state(&mut port, !partial_mask, !partial_mask, port_mask);
 
     with_rtt_out(|w, _| w.write_str("synchronous pin access test successful"));
 }
