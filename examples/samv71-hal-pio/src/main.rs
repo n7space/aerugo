@@ -28,7 +28,7 @@ fn pio_output_task(_: (), _: &mut PioTaskContext, _: &'static dyn RuntimeApi) {
     irq_free(|cs| {
         let mut pin_binding = IO_OUT_PIN.borrow(cs).borrow_mut();
         let pin = pin_binding.as_mut().unwrap();
-        logln!("Inspecting pin {:#?}", pin);
+        logln!("Inspecting pin {:?}", pin);
         logln!("Current drive mode: {:#?}", pin.drive_mode());
         logln!("Current state: {:#?}", pin.state());
 
@@ -40,7 +40,7 @@ fn pio_input_task(_: (), _: &mut PioTaskContext, _: &'static dyn RuntimeApi) {
     irq_free(|cs| {
         let mut pin_binding = IO_IN_PIN.borrow(cs).borrow_mut();
         let pin = pin_binding.as_mut().unwrap();
-        logln!("Inspecting pin {:#?}", pin);
+        logln!("Inspecting pin {:?}", pin);
         logln!("Current state: {:#?}", pin.state());
 
         match pin.pull_resistor() {
