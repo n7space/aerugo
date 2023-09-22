@@ -21,39 +21,49 @@ use calldwell::with_rtt_out;
 use rt::entry;
 
 fn validate_pin_is_driven_high(pin: &Pin<OutputMode>) {
-    if !pin.is_set_high().unwrap() {
-        panic!("Pin is driven high, yet `is_set_high` returns `false`");
-    }
-    if pin.is_set_low().unwrap() {
-        panic!("Pin is driven high, yet `is_set_low` returns `true`");
-    }
-    if !pin.is_high() {
-        panic!("Pin is driven high, yet `is_high` returns `false`");
-    }
-    if pin.is_low() {
-        panic!("Pin is driven high, yet `is_low` returns `true`");
-    }
-    if pin.state() != PinState::High {
-        panic!("Pin is driven high, yet `state` returns `PinState::Low`");
-    }
+    assert!(
+        !pin.is_set_high().unwrap(),
+        "Pin is driven high, yet `is_set_high` returns `false`"
+    );
+    assert!(
+        pin.is_set_low().unwrap(),
+        "Pin is driven high, yet `is_set_low` returns `true`"
+    );
+    assert!(
+        !pin.is_high(),
+        "Pin is driven high, yet `is_high` returns `false`"
+    );
+    assert!(
+        pin.is_low(),
+        "Pin is driven high, yet `is_low` returns `true`"
+    );
+    assert!(
+        pin.state() != PinState::High,
+        "Pin is driven high, yet `state` returns `PinState::Low`"
+    );
 }
 
 fn validate_pin_is_driven_low(pin: &Pin<OutputMode>) {
-    if pin.is_set_high().unwrap() {
-        panic!("Pin is driven low, yet `is_set_high` returns `true`");
-    }
-    if !pin.is_set_low().unwrap() {
-        panic!("Pin is driven low, yet `is_set_low` returns `false`");
-    }
-    if pin.is_high() {
-        panic!("Pin is driven low, yet `is_high` returns `true`");
-    }
-    if !pin.is_low() {
-        panic!("Pin is driven low, yet `is_low` returns `false`");
-    }
-    if pin.state() != PinState::Low {
-        panic!("Pin is driven low, yet `state` returns `PinState::High`");
-    }
+    assert!(
+        pin.is_set_high().unwrap(),
+        "Pin is driven low, yet `is_set_high` returns `true`"
+    );
+    assert!(
+        !pin.is_set_low().unwrap(),
+        "Pin is driven low, yet `is_set_low` returns `false`"
+    );
+    assert!(
+        pin.is_high(),
+        "Pin is driven low, yet `is_high` returns `true`"
+    );
+    assert!(
+        !pin.is_low(),
+        "Pin is driven low, yet `is_low` returns `false`"
+    );
+    assert!(
+        pin.state() != PinState::Low,
+        "Pin is driven low, yet `state` returns `PinState::High`"
+    );
 }
 
 /// Output pin mode is chosen because it provides all pin's functions.
@@ -167,27 +177,33 @@ fn perform_synchronous_port_test(pins: [Pin<OutputMode>; 4], port_mask: u32, par
 }
 
 fn validate_pin_is_push_pull(pin: &Pin<OutputMode>) {
-    if !pin.in_push_pull_mode() {
-        panic!("pin is in push-pull mode, but `in_push_pull_mode` returns `false");
-    }
-    if pin.in_open_drain_mode() {
-        panic!("pin is in push-pull mode, but `in_open_drain_mode` returns `true");
-    }
-    if pin.drive_mode() != DriveMode::PushPull {
-        panic!("pin is in push-pull mode, but `drive_mode` returns `DriveMode::OpenDrain`");
-    }
+    assert!(
+        !pin.in_push_pull_mode(),
+        "pin is in push-pull mode, but `in_push_pull_mode` returns `false"
+    );
+    assert!(
+        pin.in_open_drain_mode(),
+        "pin is in push-pull mode, but `in_open_drain_mode` returns `true"
+    );
+    assert!(
+        pin.drive_mode() != DriveMode::PushPull,
+        "pin is in push-pull mode, but `drive_mode` returns `DriveMode::OpenDrain`"
+    );
 }
 
 fn validate_pin_is_open_drain(pin: &Pin<OutputMode>) {
-    if pin.in_push_pull_mode() {
-        panic!("pin is in push-pull mode, but `in_push_pull_mode` returns `true");
-    }
-    if !pin.in_open_drain_mode() {
-        panic!("pin is in push-pull mode, but `in_open_drain_mode` returns `false");
-    }
-    if pin.drive_mode() != DriveMode::OpenDrain {
-        panic!("pin is in push-pull mode, but `drive_mode` returns `DriveMode::PushPull`");
-    }
+    assert!(
+        pin.in_push_pull_mode(),
+        "pin is in push-pull mode, but `in_push_pull_mode` returns `true"
+    );
+    assert!(
+        !pin.in_open_drain_mode(),
+        "pin is in push-pull mode, but `in_open_drain_mode` returns `false"
+    );
+    assert!(
+        pin.drive_mode() != DriveMode::OpenDrain,
+        "pin is in push-pull mode, but `drive_mode` returns `DriveMode::PushPull`"
+    );
 }
 
 fn perform_open_drain_test(mut pin: Pin<OutputMode>) {
