@@ -212,12 +212,12 @@ impl<Mode: PinMode> Pin<Mode> {
 
     /// Returns `true` if pin is currently pulled up.
     pub fn is_pulled_up(&self) -> bool {
-        self.is_pin_bit_set(self.registers_ref().pusr.read().bits())
+        !self.is_pin_bit_set(self.registers_ref().pusr.read().bits())
     }
 
     /// Returns `true` if pin is currently pulled down.
     pub fn is_pulled_down(&self) -> bool {
-        self.is_pin_bit_set(self.registers_ref().ppdsr.read().bits())
+        !self.is_pin_bit_set(self.registers_ref().ppdsr.read().bits())
     }
 
     /// Sets pull resistor configuration of the pin.
