@@ -42,17 +42,22 @@ class GDBInterface:
         * `log_responses` - If `True`, all responses to commands will be logged.
         """
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._controller = GdbController(command=[gdb_executable, "--interpreter=mi2"])
+        self._controller = GdbController(
+            command=[gdb_executable, "--nx", "--quiet", "--interpreter=mi3"],
+        )
         self._default_timeout = default_timeout
         self._should_log_execution = log_execution
         self._should_log_responses = log_responses
         self._program_state = ProgramState()
 
+        init_message = self._parse_init_message()
         self._logger.info(
             f"GDB interface created for '{gdb_executable}' with default command timeout "
-            f"of {default_timeout}s, received following startup message:\n"
-            + self._parse_init_message(),
+            f"of {default_timeout}s",
         )
+
+        if len(init_message) > 0:
+            self._logger.info(f"received following startup message:\n{init_message}")
 
         self.execute(
             f"set remotetimeout {int(self._default_timeout)}",
