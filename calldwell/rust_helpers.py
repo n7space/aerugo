@@ -35,8 +35,8 @@ EXPECTED_MCU_HANDSHAKE_MESSAGE = f"{len(HOST_HANDSHAKE_MESSAGE)}:{HOST_HANDSHAKE
 
 
 # Yes, this is a very big function, but it's supposed to be all-in-one single-liner.
-# pylint: disable=too-many-arguments,too-many-return-statements,too-many-locals
-def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
+# pylint: disable=too-many-arguments,too-many-locals,too-complex
+def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
     debug_host_network_path: str,
     debug_host_login: str,
     debug_host_password: str,
@@ -47,7 +47,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     path_to_test_executable: str,
     gdb_timeout: float | None = None,
     flashing_timeout: float | None = None,
-    _upload_tries: int = 5,
+    max_upload_tries: int = 5,
     log_responses: bool = False,
     log_execution: bool = False,
     pre_handshake_hook: Callable[[GDBClient, Any | None], None] | None = None,
@@ -93,7 +93,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
     * `path_to_test_executable` - Path to Calldwell test executable
     * `gdb_timeout` - Timeout for GDBClient, if `None` then default one will be used.
     * `flashing_timeout` - Timeout of binary flashing, if `None` then default one will be used.
-    * `upload_tries` - Amount of tries this function will try to upload the binary to MCU memory.
+    * `max_upload_tries` - Amount of tries this function will try to upload the binary to MCU memory
     * `log_responses` - Whether to log GDB/MI responses, or not
     * `log_execution` - Whether to log the execution of GDB commands, or not
     * `pre_handshake_hook` - Function that will be called before performing Calldwell handshake.
@@ -101,25 +101,51 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,PLR0911
                              starts normal execution.
     * `pre_handshake_hook_argument` - User argument passed to `pre_handshake_hook`, if present.
     """
-    ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
-    ssh.execute(remote_gdb_server_command)
 
-    gdb_server_full_hostname = f"{debug_host_network_path}:{gdb_server_port}"
-    gdb = GDBClient(
-        gdb_executable=local_gdb_executable,
-        default_timeout=gdb_timeout,
-        flashing_timeout=flashing_timeout,
-        log_responses=log_responses,
-        log_execution=log_execution,
-    )
+    def try_initializing_session() -> tuple[GDBClient, SSHClient] | None:
+        ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
+        upload_try = 0
+        remote_gdb_full_hostname = f"{debug_host_network_path}:{gdb_server_port}"
 
-    if not gdb.connect_to_remote(gdb_server_full_hostname):
-        logging.error(f"Could not connect to remote GDB server @ {gdb_server_full_hostname}")
+        while upload_try < max_upload_tries:
+            logging.info(
+                "Establishing session and uploading the binary, try "
+                f"{upload_try + 1}/{max_upload_tries}",
+            )
+            ssh.execute(remote_gdb_server_command)
+            gdb = GDBClient(
+                gdb_executable=local_gdb_executable,
+                default_timeout=gdb_timeout,
+                flashing_timeout=flashing_timeout,
+                log_responses=log_responses,
+                log_execution=log_execution,
+            )
+
+            if not gdb.connect_to_remote(remote_gdb_full_hostname):
+                logging.error(
+                    f"Could not connect to remote GDB server @ {remote_gdb_full_hostname}",
+                )
+                return None
+
+            if not gdb.load_executable(path_to_test_executable):
+                logging.warning(
+                    f"Loading executable {path_to_test_executable} failed. Restarting session",
+                )
+                upload_try += 1
+                ssh.close()
+                ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
+                logging.info("Session restarted.")
+                continue
+
+            logging.info(f"Session established on try # {upload_try + 1}!")
+            return gdb, ssh
         return None
 
-    if not gdb.load_executable(path_to_test_executable):
-        logging.error(f"Could not load executable {path_to_test_executable} into MCU memory")
+    if (session := try_initializing_session()) is None:
+        logging.critical(f"Could not upload the binary {path_to_test_executable} into MCU memory")
         return None
+
+    gdb, ssh = session
 
     if (rtt_symbol := gdb.get_variable(RTT_SECTION_SYMBOL_NAME)) is None:
         logging.error(f"Could not find symbol for RTT section {RTT_SECTION_SYMBOL_NAME}")
