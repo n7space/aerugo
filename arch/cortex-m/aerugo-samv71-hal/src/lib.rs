@@ -16,3 +16,7 @@ pub use hal::Hal;
 pub use samv71_hal as drivers;
 pub use samv71_hal::cortex_m;
 pub use user_peripherals::UserPeripherals;
+
+#[cfg(feature = "rt")]
+/// Macro for interrupt handlers.
+pub use samv71_hal::interrupt;

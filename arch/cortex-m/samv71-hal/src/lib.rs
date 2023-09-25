@@ -11,6 +11,7 @@ pub use fugit as time;
 pub use samv71q21_pac as pac;
 
 #[cfg(feature = "rt")]
+/// Macro for interrupt handlers.
 pub use pac::interrupt;
 
 pub mod pio;
