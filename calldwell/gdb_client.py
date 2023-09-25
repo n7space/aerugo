@@ -19,11 +19,14 @@ class GDBClient:
 
     DEFAULT_TIMEOUT = 10.0
     """Default GDB operation timeout, in seconds"""
+    DEFAULT_FLASHING_TIMEOUT = 60.0
+    """Default GDB operation timeout when flashing an executable, in seconds"""
 
     def __init__(
         self: GDBClient,
         gdb_executable: str = "gdb",
         default_timeout: float | None = None,
+        flashing_timeout: float | None = None,
         log_responses: bool = True,
         log_execution: bool = True,
     ) -> None:
@@ -33,11 +36,17 @@ class GDBClient:
         * `gdb_executable` - Path to GDB executable, passed to GDBInterface() constructor
         * `default_timeout` - Default timeout for GDB operations, passed to GDBInterface()
                               constructor. If None, `GDBClient.DEFAULT_TIMEOUT` is used instead.
+        * `flashing_timeout` - Timeout used for flashing operations, should be long enough for the
+                               biggest section of the binary (not necessarily the whole binary) to
+                               be flashed successfully.
         * `log_responses` - If `True`, all GDB responses will be logged by GDBInterface.
         * `log_execution` - If `True`, executed GDB commands will be logged by GDBInterface.
         """
         if default_timeout is None:
             default_timeout = self.DEFAULT_TIMEOUT
+
+        if flashing_timeout is None:
+            flashing_timeout = self.DEFAULT_FLASHING_TIMEOUT
 
         self._logger = logging.getLogger(self.__class__.__name__)
         self._should_log_responses = log_responses
@@ -49,6 +58,7 @@ class GDBClient:
             log_responses=self._should_log_responses,
         )
         self._timeout = default_timeout
+        self._flashing_timeout = flashing_timeout
 
         self._logger.info("GDBClient instance created!")
 
@@ -90,7 +100,9 @@ class GDBClient:
                                               be loaded. If not provided, must be set via
                                               `select_executable()` before calling this function.
         """
-        self._logger.info("Loading executable into memory...")
+        self._logger.info(
+            f"Loading executable into memory (flashing timeout = {self._flashing_timeout}s)...",
+        )
 
         if executable_path is not None and not self.select_executable(executable_path):
             self._logger.error("Loading executable failed, because it cannot be selected.")
@@ -415,7 +427,12 @@ class GDBClient:
         # `output`-type payloads. Log this progress for the user.
         # It's helpful when diagnosing issues with binary layout, as addresses and sizes of
         # sections are reported in this output.
-        while not (responses := self._get_responses()).contains_any(final_responses):
+        while not (
+            responses := self._interface.get_responses(
+                self._flashing_timeout,
+                self._should_log_responses,
+            )
+        ).contains_any(final_responses):
             for response in responses:
                 if response.response_type == GDBResponse.Type.CONSOLE:
                     # Console responses are human-readable

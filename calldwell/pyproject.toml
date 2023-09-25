@@ -66,11 +66,15 @@ select = [
 ]
 ignore = []
 
+[tool.ruff.pylint]
+max-args = 6
+
 [tool.pylint.main]
 max-line-length = 100
 jobs = 0 # auto-detects the amount of available threads to run in parallel
 fail-under = '10.0' # we do not allow subpar quality code here
 suggestion-mode = 'yes'
+max-args = 6
 load-plugins = '''pylint.extensions.code_style,
 pylint.extensions.comparison_placement,
 pylint.extensions.confusing_elif,

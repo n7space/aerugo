@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING
 
 from calldwell import init_default_logger
 from calldwell.rust_helpers import build_cargo_app, init_remote_calldwell_rs_session
-from calldwell.ssh_client import SSHClient
 
 if TYPE_CHECKING:
     from calldwell.gdb_client import GDBClient
     from calldwell.rtt_client import CalldwellRTTClient
+    from calldwell.ssh_client import SSHClient
 
 # This example is prepared to run on remote development setup and requires following
 # environmental variables:
@@ -51,14 +51,14 @@ def init_example() -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
         sys.exit(100)
 
     logging.info("Starting GDB server on development setup..")
-    ssh = SSHClient(BOARD_HOSTNAME, BOARD_LOGIN, BOARD_PASSWORD)
-    ssh.execute(BOARD_GDB_EXEC_SCRIPT)
-
     session = init_remote_calldwell_rs_session(
-        gdb_executable=GDB_EXECUTABLE,
-        gdb_server_hostname=BOARD_HOSTNAME,
+        debug_host_network_path=BOARD_HOSTNAME,
+        debug_host_login=BOARD_LOGIN,
+        debug_host_password=BOARD_PASSWORD,
         gdb_server_port=BOARD_GDB_PORT,
         rtt_server_port=BOARD_RTT_PORT,
+        local_gdb_executable=GDB_EXECUTABLE,
+        remote_gdb_server_command=BOARD_GDB_EXEC_SCRIPT,
         path_to_test_executable=str(test_bin_path.absolute()),
     )
 
@@ -66,7 +66,7 @@ def init_example() -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
         logging.error("Failed to initialize remote Calldwell-rs session!")
         sys.exit(200)
 
-    gdb, rtt = session
+    ssh, gdb, rtt = session
 
     logging.info("Example started!")
     return gdb, rtt, ssh

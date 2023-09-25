@@ -35,12 +35,12 @@ from calldwell.rust_helpers import (
 )
 from calldwell.ssh_client import SSHClient
 from scripts.env import (
-    BOARD_DEBUGGING_SCRIPT_PATH,
     BOARD_GDB_PORT,
     BOARD_LOGIN,
     BOARD_NETWORK_PATH,
     BOARD_PASSWORD,
     BOARD_RTT_PORT,
+    BOARD_START_GDB_SERVER_COMMAND,
     BOARD_TARGET_TRIPLE,
     EXAMPLES_DIRECTORY,
     HOST_GDB_EXECUTABLE,
@@ -92,7 +92,7 @@ def get_example_path(example_name: str) -> Path:
 def start_gdb() -> tuple[GDBClient, SSHClient]:
     """Connects to remote setup via SSH and starts GDB server."""
     ssh = SSHClient(BOARD_NETWORK_PATH, BOARD_LOGIN, BOARD_PASSWORD)
-    ssh.execute(BOARD_DEBUGGING_SCRIPT_PATH)
+    ssh.execute(BOARD_START_GDB_SERVER_COMMAND)
 
     gdb = GDBClient(HOST_GDB_EXECUTABLE, log_responses=False, log_execution=False)
     remote_gdb_hostname = f"{BOARD_NETWORK_PATH}:{BOARD_GDB_PORT}"
