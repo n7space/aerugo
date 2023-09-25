@@ -11,15 +11,6 @@ use samv71_hal::{pac, pmc::PMC};
 pub struct UserPeripherals {
     /// Chip ID.
     pub chip_id: Option<pac::CHIPID>,
-    /// Timer Counter 1.
-    pub timer_counter1: Option<pac::TC1>,
-    /// Timer Counter 2.
-    pub timer_counter2: Option<pac::TC2>,
-    /// Timer Counter 3.
-    pub timer_counter3: Option<pac::TC3>,
-    /// Clocks controller.
-    /// This is HAL driver instance that provides abstraction over PMC.
-    pub pmc: Option<PMC>,
     /// NVIC
     pub nvic: Option<pac::NVIC>,
     /// I/O Port A.
@@ -32,4 +23,13 @@ pub struct UserPeripherals {
     pub pio_d: Option<pac::PIOD>,
     /// I/O Port E.
     pub pio_e: Option<pac::PIOE>,
+    /// Clocks controller.
+    /// This is HAL driver instance that provides abstraction over PMC.
+    pub pmc: Option<PMC>,
+    /// Timer Counter 1.
+    pub timer_counter1: Option<pac::TC1>,
+    /// Timer Counter 2.
+    pub timer_counter2: Option<pac::TC2>,
+    /// Timer Counter 3.
+    pub timer_counter3: Option<pac::TC3>,
 }
