@@ -36,11 +36,19 @@ impl TimeSource {
         }
     }
 
-    /// Returns time since system initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize),
-    /// start of the hardware timer)
-    #[inline(always)]
-    pub(crate) fn time_since_init() -> Instant {
-        Hal::get_system_time()
+    /// Return system time with offset if it was defined.
+    ///
+    /// # Safety
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
+    /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
+    pub(crate) fn system_time(&self) -> Instant {
+        match self.user_offset.get() {
+            Some(user_offset) => TimeSource::time_since_init()
+                .checked_add_duration(*user_offset)
+                .expect("Failed to add user offset"),
+            None => TimeSource::time_since_init(),
+        }
     }
 
     /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::InitApi::start)),
@@ -57,21 +65,6 @@ impl TimeSource {
         }
     }
 
-    /// Return system time with offset if it was defined.
-    ///
-    /// # Safety
-    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
-    pub(crate) fn system_time(&self) -> Instant {
-        match self.user_offset.get() {
-            Some(user_offset) => TimeSource::time_since_init()
-                .checked_add_duration(*user_offset)
-                .expect("Failed to add user offset"),
-            None => TimeSource::time_since_init(),
-        }
-    }
-
     /// Returns the duration between system initialization and start of the scheduler, or `None` if system
     /// hasn't started yet.
     ///
@@ -81,6 +74,28 @@ impl TimeSource {
     /// thread) is an undefined behavior.
     pub(crate) fn startup_duration(&self) -> Option<Duration> {
         self.system_start_offset.get().copied()
+    }
+
+    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting
+    /// the scheduler.
+    ///
+    /// # Return
+    /// `()` is was set for the first time, `RuntimeError` otherwise.
+    ///
+    /// # Safety
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
+    /// Calling [`TimeSource::startup_duration`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
+    pub(crate) unsafe fn set_system_start(&self) -> Result<(), RuntimeError> {
+        let current_time = TimeSource::time_since_init();
+
+        match self
+            .system_start_offset
+            .set(current_time.duration_since_epoch())
+        {
+            Ok(_) => Ok(()),
+            Err(_) => Err(RuntimeError::SystemTimeStartAlreadySet),
+        }
     }
 
     /// Sets user-defined offset.
@@ -107,26 +122,11 @@ impl TimeSource {
         }
     }
 
-    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting
-    /// the scheduler.
-    ///
-    /// # Return
-    /// `()` is was set for the first time, `RuntimeError` otherwise.
-    ///
-    /// # Safety
-    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::startup_duration`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
-    pub(crate) unsafe fn set_system_start(&self) -> Result<(), RuntimeError> {
-        let current_time = TimeSource::time_since_init();
-
-        match self
-            .system_start_offset
-            .set(current_time.duration_since_epoch())
-        {
-            Ok(_) => Ok(()),
-            Err(_) => Err(RuntimeError::SystemTimeStartAlreadySet),
-        }
+    /// Returns time since system initialization (call to [`Aerugo::initialize`](crate::Aerugo::initialize),
+    /// start of the hardware timer)
+    #[inline(always)]
+    fn time_since_init() -> Instant {
+        Hal::get_system_time()
     }
 }
 
