@@ -162,7 +162,7 @@ impl NVIC {
     /// * `interrupt` - Interrupt to query.
     #[inline]
     pub fn is_not_pending(&self, interrupt: Interrupt) -> bool {
-        pac::NVIC::is_pending(interrupt)
+        !self.is_pending(interrupt)
     }
 
     /// Force interrupt into pending state.
