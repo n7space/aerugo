@@ -113,6 +113,18 @@ impl NVIC {
         pac::NVIC::is_active(interrupt)
     }
 
+    /// Returns `true` if interrupt is currently NOT being handled
+    /// (is active or pre-empted and stacked).
+    ///
+    /// Complement of `is_active`.
+    ///
+    /// # Parameters
+    /// * `interrupt` - Interrupt to query.
+    #[inline]
+    pub fn is_inactive(&self, interrupt: Interrupt) -> bool {
+        !self.is_active(interrupt)
+    }
+
     /// Returns `true` if interrupt is currently enabled.
     ///
     /// # Parameters
@@ -122,12 +134,34 @@ impl NVIC {
         pac::NVIC::is_enabled(interrupt)
     }
 
+    /// Returns `true` if interrupt is currently disabled.
+    ///
+    /// Complement of `is_enabled`.
+    ///
+    /// # Parameters
+    /// * `interrupt` - Interrupt to query.
+    #[inline]
+    pub fn is_disabled(&self, interrupt: Interrupt) -> bool {
+        !self.is_enabled(interrupt)
+    }
+
     /// Returns `true` if interrupt is currently pending.
     ///
     /// # Parameters
     /// * `interrupt` - Interrupt to query.
     #[inline]
     pub fn is_pending(&self, interrupt: Interrupt) -> bool {
+        pac::NVIC::is_pending(interrupt)
+    }
+
+    /// Returns `true` if interrupt is currently not pending.
+    ///
+    /// Complement of `is_pending`.
+    ///
+    /// # Parameters
+    /// * `interrupt` - Interrupt to query.
+    #[inline]
+    pub fn is_not_pending(&self, interrupt: Interrupt) -> bool {
         pac::NVIC::is_pending(interrupt)
     }
 
