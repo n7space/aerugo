@@ -11,9 +11,7 @@ use aerugo::hal::drivers::embedded_hal::digital::ToggleableOutputPin;
 use aerugo::hal::drivers::pio::pin::InputMode;
 use aerugo::hal::drivers::pio::{pin::OutputMode, Pin, Port, PIOC};
 use aerugo::hal::drivers::pmc::{config::PeripheralId, PMC};
-
-use cortex_m::interrupt::free as irq_free;
-use cortex_m::interrupt::Mutex;
+use aerugo::Mutex;
 
 use aerugo::{
     logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
@@ -25,9 +23,8 @@ static IO_OUT_PIN: Mutex<RefCell<Option<Pin<OutputMode>>>> = Mutex::new(RefCell:
 static IO_IN_PIN: Mutex<RefCell<Option<Pin<InputMode>>>> = Mutex::new(RefCell::new(None));
 
 fn pio_output_task(_: (), _: &mut PioTaskContext, _: &'static dyn RuntimeApi) {
-    irq_free(|cs| {
-        let mut pin_binding = IO_OUT_PIN.borrow(cs).borrow_mut();
-        let pin = pin_binding.as_mut().unwrap();
+    IO_OUT_PIN.lock(|pin_ref| {
+        let pin = pin_ref.get_mut().as_mut().unwrap();
         logln!("Inspecting pin {:?}", pin);
         logln!("Current drive mode: {:#?}", pin.drive_mode());
         logln!("Current state: {:#?}", pin.state());
@@ -37,9 +34,8 @@ fn pio_output_task(_: (), _: &mut PioTaskContext, _: &'static dyn RuntimeApi) {
 }
 
 fn pio_input_task(_: (), _: &mut PioTaskContext, _: &'static dyn RuntimeApi) {
-    irq_free(|cs| {
-        let mut pin_binding = IO_IN_PIN.borrow(cs).borrow_mut();
-        let pin = pin_binding.as_mut().unwrap();
+    IO_IN_PIN.lock(|pin_ref| {
+        let pin = pin_ref.get_mut().as_mut().unwrap();
         logln!("Inspecting pin {:?}", pin);
         logln!("Current state: {:#?}", pin.state());
 
@@ -75,10 +71,8 @@ fn init_pio(port: Port<PIOC>) {
     let example_out_pin = pins[5].take().unwrap().into_output_pin();
     let example_in_pin = pins[10].take().unwrap().into_input_pin();
 
-    irq_free(|cs| {
-        IO_OUT_PIN.borrow(cs).replace(Some(example_out_pin));
-        IO_IN_PIN.borrow(cs).replace(Some(example_in_pin));
-    });
+    IO_OUT_PIN.lock(|pin_ref| pin_ref.replace(Some(example_out_pin)));
+    IO_IN_PIN.lock(|pin_ref| pin_ref.replace(Some(example_in_pin)));
 }
 
 fn init_tasks(aerugo: &'static impl InitApi) {

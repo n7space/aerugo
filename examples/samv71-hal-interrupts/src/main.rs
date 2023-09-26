@@ -15,8 +15,7 @@ use aerugo::hal::drivers::timer::{
     Ch0, Channel, Timer, Waveform, TC1,
 };
 use aerugo::hal::interrupt;
-use cortex_m::interrupt::free as irq_free;
-use cortex_m::interrupt::Mutex;
+use aerugo::Mutex;
 
 use aerugo::{
     logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
@@ -34,10 +33,7 @@ struct DummyTaskContext {}
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
 
 fn dummy_task(_: (), _: &mut DummyTaskContext, _: &'static dyn RuntimeApi) {
-    irq_free(|cs| {
-        let counter_value = *COUNTER.borrow(cs).borrow();
-        logln!("Overflow IRQ happened {} times.", counter_value);
-    })
+    COUNTER.lock(|value_ref| logln!("Overflow IRQ happened {} times.", value_ref.borrow()));
 }
 
 fn init_timer(mut timer: Timer<TC1>) {
@@ -64,9 +60,7 @@ fn init_timer(mut timer: Timer<TC1>) {
     let status = ch0.status().clock_enabled;
     logln!("Clock is {}", if status { "enabled" } else { "disabled" });
 
-    irq_free(|cs| {
-        TIMER_CHANNEL.borrow(cs).replace(Some(ch0));
-    })
+    TIMER_CHANNEL.lock(|channel_ref| channel_ref.replace(Some(ch0)));
 }
 
 fn init_tasks(aerugo: &'static impl InitApi) {
@@ -118,15 +112,16 @@ fn main() -> ! {
 
 #[interrupt]
 fn TC3() {
-    irq_free(|cs| {
-        let mut counter = COUNTER.borrow(cs).borrow_mut();
+    COUNTER.lock(|counter_ref| {
+        let counter = counter_ref.get_mut();
         *counter = counter.wrapping_add(1);
+    });
 
-        let mut timer_channel_ref = TIMER_CHANNEL.borrow(cs).borrow_mut();
-        let timer_channel = timer_channel_ref.as_mut().unwrap();
+    TIMER_CHANNEL.lock(|channel_ref| {
+        let tc_ref = channel_ref.get_mut().as_mut().unwrap();
+        // To prevent IRQ looping, we need to read IRQ status from TC registers
+        tc_ref.status();
+    });
 
-        // This is required, otherwise this IRQ will loop permanently.
-        timer_channel.status();
-        logln!("IRQ!");
-    })
+    logln!("IRQ!");
 }
