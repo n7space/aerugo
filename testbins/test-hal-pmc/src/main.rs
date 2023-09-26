@@ -24,7 +24,7 @@ use aerugo::{
     },
     Aerugo, InitApi, SystemHardwareConfig,
 };
-use calldwell::with_rtt_out;
+use calldwell::{with_rtt_out, write_str};
 use core::fmt::Write;
 use rt::entry;
 
@@ -62,7 +62,7 @@ fn perform_status_test(pmc: &mut PMC) {
     // only by configuration. Therefore, there's no point in writing specific tests for `status`,
     // as the issues should be detected by configuration tests.
 
-    with_rtt_out(|w, _| w.write_str("status test successful"));
+    write_str("status test successful");
 }
 
 fn perform_interrupt_config_test(pmc: &mut PMC) {
@@ -86,7 +86,7 @@ fn perform_interrupt_config_test(pmc: &mut PMC) {
         );
     }
 
-    with_rtt_out(|w, _| w.write_str("interrupts config test successful"));
+    write_str("interrupts config test successful");
 }
 
 fn send_measured_main_rc_frequency(pmc: &mut PMC) {
@@ -175,14 +175,14 @@ fn perform_master_clock_config_test(pmc: &mut PMC) {
         );
     }
 
-    with_rtt_out(|w, _| w.write_str("master clock test successful"));
+    write_str("master clock test successful");
 }
 
 fn perform_processor_clock_status_test(pmc: &PMC) {
     if !pmc.processor_clock_enabled() {
         panic!("processor clock disabled, yet nothing has disabled it explicitly");
     }
-    with_rtt_out(|w, _| w.write_str("processor clock status test successful"));
+    write_str("processor clock status test successful");
 }
 
 fn perform_programmable_clocks_config_test(pmc: &mut PMC) {
@@ -228,7 +228,7 @@ fn perform_programmable_clocks_config_test(pmc: &mut PMC) {
         );
     }
 
-    with_rtt_out(|w, _| w.write_str("programmable clocks config test successful"));
+    write_str("programmable clocks config test successful");
 }
 
 fn perform_peripheral_clocks_config_test(pmc: &mut PMC) {
@@ -300,7 +300,7 @@ fn perform_peripheral_clocks_config_test(pmc: &mut PMC) {
         );
     }
 
-    with_rtt_out(|w, _| w.write_str("peripheral clocks config test successful"));
+    write_str("peripheral clocks config test successful");
 }
 
 fn perform_pmc_test(mut pmc: PMC) {
@@ -311,7 +311,7 @@ fn perform_pmc_test(mut pmc: PMC) {
     perform_processor_clock_status_test(&pmc);
     perform_programmable_clocks_config_test(&mut pmc);
     perform_peripheral_clocks_config_test(&mut pmc);
-    with_rtt_out(|w, _| w.write_str("all tests finished successfully"));
+    write_str("all tests finished successfully");
 }
 
 #[entry]

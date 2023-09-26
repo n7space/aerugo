@@ -10,7 +10,7 @@ use aerugo::{
     time::MillisDurationU32 as Milliseconds, Aerugo, InitApi, RuntimeApi, SystemHardwareConfig,
     TaskletConfig, TaskletStorage,
 };
-use calldwell::with_rtt_out;
+use calldwell::write_str;
 use cortex_m::asm;
 use rt::entry;
 
@@ -25,25 +25,25 @@ struct LongTaskContext {
 }
 
 fn short_task(_: (), context: &mut ShortTaskContext, _: &dyn RuntimeApi) {
-    with_rtt_out(|w, _| w.write_str("short task started"));
+    write_str("short task started");
 
     while context.acc != 1000 {
         context.acc = context.acc.wrapping_add(1);
         asm::nop();
     }
 
-    with_rtt_out(|w, _| w.write_str("short task ended"));
+    write_str("short task ended");
 }
 
 fn long_task(_: (), context: &mut LongTaskContext, _: &dyn RuntimeApi) {
-    with_rtt_out(|w, _| w.write_str("long task started"));
+    write_str("long task started");
 
     while context.acc != 4000000000 {
         context.acc = context.acc.wrapping_add(1);
         asm::nop();
     }
 
-    with_rtt_out(|w, _| w.write_str("long task ended"));
+    write_str("long task ended");
 }
 
 static SHORT_TASK_STORAGE: TaskletStorage<(), ShortTaskContext, 0> = TaskletStorage::new();
