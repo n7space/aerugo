@@ -19,7 +19,7 @@ class GDBClient:
 
     DEFAULT_TIMEOUT = 10.0
     """Default GDB operation timeout, in seconds"""
-    DEFAULT_FLASHING_TIMEOUT = 60.0
+    DEFAULT_FLASHING_TIMEOUT = 10.0
     """Default GDB operation timeout when flashing an executable, in seconds"""
 
     def __init__(
