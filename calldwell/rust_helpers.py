@@ -165,7 +165,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
 
     gdb.continue_program()
 
-    if not _perform_handshake(rtt):
+    if not perform_calldwell_rs_handshake(rtt):
         logging.error("Couldn't perform correct handshake with MCU")
         return None
 
@@ -207,10 +207,12 @@ def build_cargo_app(
     return project_path / "target" / target_triple / build_type / exec_name
 
 
-def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
+def perform_calldwell_rs_handshake(rtt: CalldwellRTTClient) -> bool:
     """Performs Calldwell handshake after it's RTT facilities are started.
     This acts like a mini self-test of RTT communication, to guarantee that it works correctly.
     """
+    logging.info("Performing Calldwell handshake")
+
     if (init_message := rtt.receive_string_stream()) != EXPECTED_MCU_INIT_MESSAGE:
         logging.error(
             "Received unexpected MCU init message "

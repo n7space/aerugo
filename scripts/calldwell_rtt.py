@@ -1,9 +1,11 @@
-"""Script that can be used to capture raw RTT traffic coming from target board.
+"""Script that can be used to capture Calldwell's RTT traffic coming from target board.
 
 Usage:
 Pass the hostname and port (in `hostname:port` format, for example 192.168.1.1:1234)
 as an argument to this script. It will automatically connect to RTT server on the other
-end, and start receiving data and printing it to stdout.
+end, perform Calldwell's handshake, and start receiving data and printing it to stdout.
+
+Useful for debugging integration tests.
 """
 
 from __future__ import annotations
@@ -11,7 +13,9 @@ from __future__ import annotations
 import sys
 from typing import NoReturn
 
-from calldwell.rtt_client import RTTClient
+from calldwell import init_default_logger
+from calldwell.rtt_client import CalldwellRTTClient
+from calldwell.rust_helpers import perform_calldwell_rs_handshake
 
 
 def get_args() -> tuple[str, int]:
@@ -35,11 +39,15 @@ def get_args() -> tuple[str, int]:
 
 def listen_to_rtt(host: str, port: int) -> NoReturn:
     """Starts listening to RTT server and prints all received data on stdout."""
-    rtt = RTTClient(host, port)
+    rtt = CalldwellRTTClient(host, port)
+
+    if not perform_calldwell_rs_handshake(rtt):
+        print("Couldn't perform Calldwell's RTT handshake")
+        sys.exit(0xDEAD)
 
     while True:
         try:
-            print(rtt.receive_string(), end="")
+            print(rtt.receive_string_stream(), end="")
         except KeyboardInterrupt:  # noqa: PERF203 (we don't care about performance here)
             sys.exit(0)
 
@@ -51,4 +59,5 @@ def main() -> NoReturn:
 
 
 if __name__ == "__main__":
+    init_default_logger()
     main()
