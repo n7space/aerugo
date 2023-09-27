@@ -17,7 +17,7 @@ fn req_test_tasklet_priority_multiple_queues() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskB: 1
+            r"TaskB: 1
 TaskB: 2
 TaskC: 1
 TaskB: 3
@@ -28,6 +28,6 @@ TaskB: 6
 TaskC: 3
 TaskC: 4
 TaskC: 5
-"#,
+",
         );
 }

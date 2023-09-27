@@ -19,10 +19,10 @@ fn req_test_events() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskB: 1
+            r"TaskB: 1
 TaskC: 42
 TaskB: 42
 TaskC: 255
-"#,
+",
         );
 }
