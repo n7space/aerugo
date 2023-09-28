@@ -19,7 +19,7 @@ fn req_test_message_queue() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskB: 1
+            r"TaskB: 1
 TaskC: 1
 TaskB: 2
 TaskC: 2
@@ -28,6 +28,6 @@ TaskC: 3
 TaskB: 4
 TaskC: 4
 TaskB: 5
-"#,
+",
         );
 }

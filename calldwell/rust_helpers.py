@@ -7,6 +7,8 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING, Any
 
+from pygdbmi.constants import GdbTimeoutError
+
 from .gdb_client import GDBClient
 from .rtt_client import CalldwellRTTClient
 from .ssh_client import SSHClient
@@ -103,7 +105,6 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
     """
 
     def try_initializing_session() -> tuple[GDBClient, SSHClient] | None:
-        ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
         upload_try = 0
         remote_gdb_full_hostname = f"{debug_host_network_path}:{gdb_server_port}"
 
@@ -112,6 +113,8 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
                 "Establishing session and uploading the binary, try "
                 f"{upload_try + 1}/{max_upload_tries}",
             )
+
+            ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
             ssh.execute(remote_gdb_server_command)
             gdb = GDBClient(
                 gdb_executable=local_gdb_executable,
@@ -127,18 +130,26 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
                 )
                 return None
 
-            if not gdb.load_executable(path_to_test_executable):
-                logging.warning(
-                    f"Loading executable {path_to_test_executable} failed. Restarting session",
-                )
-                upload_try += 1
-                ssh.close()
-                ssh = SSHClient(debug_host_network_path, debug_host_login, debug_host_password)
-                logging.info("Session restarted.")
-                continue
+            session_established = False
 
-            logging.info(f"Session established on try # {upload_try + 1}!")
-            return gdb, ssh
+            try:
+                if gdb.load_executable(path_to_test_executable):
+                    session_established = True
+                else:
+                    logging.warning(
+                        f"Loading executable {path_to_test_executable} failed. Restarting session",
+                    )
+            except GdbTimeoutError:
+                logging.warning("Received GdbTimeoutError, restarting session")
+
+            if session_established:
+                logging.info(f"Session established on try # {upload_try + 1}!")
+                return gdb, ssh
+
+            upload_try += 1
+            ssh.close()
+            logging.info("Session closed.")
+
         return None
 
     if (session := try_initializing_session()) is None:
@@ -165,7 +176,7 @@ def init_remote_calldwell_rs_session(  # noqa: PLR0913,C901
 
     gdb.continue_program()
 
-    if not _perform_handshake(rtt):
+    if not perform_calldwell_rs_handshake(rtt):
         logging.error("Couldn't perform correct handshake with MCU")
         return None
 
@@ -207,10 +218,12 @@ def build_cargo_app(
     return project_path / "target" / target_triple / build_type / exec_name
 
 
-def _perform_handshake(rtt: CalldwellRTTClient) -> bool:
+def perform_calldwell_rs_handshake(rtt: CalldwellRTTClient) -> bool:
     """Performs Calldwell handshake after it's RTT facilities are started.
     This acts like a mini self-test of RTT communication, to guarantee that it works correctly.
     """
+    logging.info("Performing Calldwell handshake")
+
     if (init_message := rtt.receive_string_stream()) != EXPECTED_MCU_INIT_MESSAGE:
         logging.error(
             "Received unexpected MCU init message "

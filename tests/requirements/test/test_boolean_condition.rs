@@ -20,13 +20,13 @@ fn req_test_boolean_condition() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskA: true, false
+            r"TaskA: true, false
 TaskB: 1
 TaskA: true, false
 TaskB: 1
 TaskA: true, false
 TaskB: 1
 TaskC: false, true
-"#,
+",
         );
 }

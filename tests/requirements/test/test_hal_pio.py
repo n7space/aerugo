@@ -1,4 +1,4 @@
-"""HAL PMC driver integration test."""
+"""HAL PIO driver integration test."""
 
 from __future__ import annotations
 

@@ -17,11 +17,11 @@ fn req_test_tasklet_priority() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskB: 1
+            r"TaskB: 1
 TaskB: 2
 TaskB: 3
 TaskB: 4
 TaskB: 5
-"#,
+",
         );
 }

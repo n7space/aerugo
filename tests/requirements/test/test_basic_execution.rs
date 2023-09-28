@@ -15,10 +15,10 @@ fn req_test_basic_execution() {
         .success()
         .code(0)
         .stdout(
-            r#"TaskA
+            r"TaskA
 TaskB
 TaskA
 TaskB
-"#,
+",
         );
 }
