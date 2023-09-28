@@ -7,7 +7,7 @@ This project is developed as part of the European Space Agency activity
 
 ## Features
 
-`aerugo` targets ATSAMV71Q21 microcontroller based on the 32-bit ARM Cortex-M7 processor. It's design is
+`aerugo` targets ATSAMV71Q21 microcontroller based on the 32-bit ARM Cortex-M7 processor. Its design is
 inspired by purely functional programming paradigm and transputers architecture.
 
 * RTOS is implemented in a form of an executor instead of classic scheduler and doesn't support preemption.
@@ -44,7 +44,7 @@ x86 target is also supported for development purposes: \
 
 ## Tests
 
-Tests can be build and run using a bash script. For all tests run: \
+Tests can be built and run using a bash script. For all tests run: \
 `./scripts/run_tests.sh`
 
 or for specific package run for example: \
@@ -54,8 +54,8 @@ Tests can also be run using `cargo test` with `--features` and `--target` flags.
 
 ### Running SAMV71 tests
 
-Tests for SAMV71 are ignored by default, to prevent running them with CI, as they require additional environment setup and access to development board.
-All tests are configured to be ran on remote machine that has the development board connected to it via OpenOCD-supported debugger probe.
+Tests for SAMV71 are ignored by default, to prevent running them with CI, as they require additional environment setup and access to a development board.
+All tests are configured to be ran on a remote machine that has the development board connected to it via OpenOCD-supported debugger probe.
 
 #### Preparing the environment
 
@@ -89,8 +89,8 @@ Test binaries can be built either by running [`./scripts/build_hal_tests.sh`](./
 
 ## Examples
 
-The `examples` directory contains examples of system usage. Each of the example is a separate project and can
-be build and run with a simple `cargo run`.
+The `examples` directory contains examples of system usage. Each of the examples is a separate project and can
+be built and run with a simple `cargo run`.
 
 ### Running SAMV71 examples
 
