@@ -17,7 +17,7 @@ use aerugo::{
     hal::{
         drivers::interrupt, drivers::pac::NVIC, drivers::timer::channel_config::ChannelInterrupts,
     },
-    Aerugo, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
+    Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 use calldwell::with_rtt_out;
 use core::{cell::RefCell, fmt::Write, ops::AddAssign};
@@ -36,18 +36,16 @@ struct TimerTestTaskContext {
 fn timer_test_task(_: (), context: &mut TimerTestTaskContext, _: &dyn RuntimeApi) {
     context.acc = context.acc.wrapping_add(1);
 
-    if context.acc % 100 == 0 {
-        let irq_count = get_irq_count();
-        with_rtt_out(|w, _| write!(w.writer(), "{}", irq_count).unwrap());
+    let irq_count = get_irq_count();
+    with_rtt_out(|w, _| write!(w.writer(), "{}", irq_count).unwrap());
 
-        if context.acc == 1000 {
-            disable_channel();
-        }
+    if context.acc == 10 {
+        disable_channel();
+    }
 
-        if context.acc == 2000 {
-            change_channels_clock_source();
-            enable_and_trigger_channel();
-        }
+    if context.acc == 20 {
+        change_channels_clock_source();
+        enable_and_trigger_channel();
     }
 }
 
@@ -70,7 +68,7 @@ fn initialize_tasks(aerugo: &'static impl InitApi) {
 
     let timer_test_task_handle = TIMER_TEST_TASK_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&timer_test_task_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&timer_test_task_handle, Some(Duration::millis(100)));
 }
 
 fn initialize_nvic() {
