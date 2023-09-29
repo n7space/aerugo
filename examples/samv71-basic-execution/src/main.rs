@@ -12,15 +12,10 @@ use aerugo::{
 use rt::entry;
 
 #[derive(Default)]
-struct DummyTaskContext {
-    acc: u16,
-}
+struct DummyTaskContext {}
 
-fn dummy_task(_: (), context: &mut DummyTaskContext, _: &dyn RuntimeApi) {
-    context.acc = context.acc.wrapping_add(1);
-    if context.acc % 250 == 0 {
-        logln!("I'm running!");
-    }
+fn dummy_task(_: (), _: &mut DummyTaskContext, _: &dyn RuntimeApi) {
+    logln!("I'm running!");
 }
 
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();

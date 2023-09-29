@@ -12,8 +12,7 @@ use aerugo::hal::drivers::pmc::PMC;
 use aerugo::hal::drivers::timer::{
     channel_config::ChannelClock, waveform_config::WaveformModeConfig, Ch0, Channel, Waveform, TC1,
 };
-use cortex_m::interrupt::free as irq_free;
-use cortex_m::interrupt::Mutex;
+use aerugo::Mutex;
 
 use aerugo::{
     hal::drivers::timer::Timer, logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig,
@@ -25,24 +24,14 @@ static TIMER_CHANNEL: Mutex<RefCell<Option<Channel<TC1, Ch0, Waveform>>>> =
     Mutex::new(RefCell::new(None));
 
 #[derive(Default)]
-struct DummyTaskContext {
-    acc: u16,
-}
+struct DummyTaskContext {}
 
-fn dummy_task(_: (), context: &mut DummyTaskContext, _: &'static dyn RuntimeApi) {
-    context.acc = context.acc.wrapping_add(1);
-    if context.acc % 1000 == 0 {
-        irq_free(|cs| {
-            // This is safe, because TIMER_CHANNEL is set before the scheduler starts.
-            let timer_value = TIMER_CHANNEL
-                .borrow(cs)
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .counter_value();
-            logln!("TC1 CH0: {}", timer_value);
-        })
-    }
+fn dummy_task(_: (), _: &mut DummyTaskContext, _: &'static dyn RuntimeApi) {
+    TIMER_CHANNEL.lock(|channel_ref| {
+        // This will never panic, as timer is put in place before scheduler starts.
+        let timer_value = channel_ref.borrow().as_ref().unwrap().counter_value();
+        logln!("TC1 CH0: {}", timer_value);
+    })
 }
 
 static DUMMY_TASK_STORAGE: TaskletStorage<(), DummyTaskContext, 0> = TaskletStorage::new();
@@ -65,9 +54,7 @@ fn init_timer(mut timer: Timer<TC1>) {
     let status = ch0.status().clock_enabled;
     logln!("Clock is {}", if status { "enabled" } else { "disabled" });
 
-    irq_free(|cs| {
-        TIMER_CHANNEL.borrow(cs).replace(Some(ch0));
-    });
+    TIMER_CHANNEL.lock(|channel_ref| channel_ref.replace(Some(ch0)));
 }
 
 fn init_tasks(aerugo: &'static impl InitApi) {

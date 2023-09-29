@@ -168,6 +168,16 @@ where
     })
 }
 
+/// Writes a string via Calldwell stream.
+///
+/// For more sophisticated cases, consider using `with_rtt_out`.
+///
+/// # Returns
+/// Amount of written bytes.
+pub fn write_str<'a>(message: impl Into<&'a str>) -> usize {
+    with_rtt_out(|w, _| w.write_str(message))
+}
+
 #[panic_handler]
 fn calldwell_panic(info: &PanicInfo) -> ! {
     with_rtt_out(|w, _| {

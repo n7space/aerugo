@@ -17,7 +17,7 @@ use aerugo::{
     },
     Aerugo, InitApi, SystemHardwareConfig,
 };
-use calldwell::with_rtt_out;
+use calldwell::write_str;
 use rt::entry;
 
 fn validate_pin_is_driven_high(pin: &Pin<OutputMode>) {
@@ -83,7 +83,7 @@ fn check_pin_functionality(pin: &mut Pin<OutputMode>) {
 
 fn perform_basic_pin_functions_test(mut pin: Pin<OutputMode>) {
     check_pin_functionality(&mut pin);
-    with_rtt_out(|w, _| w.write_str("basic pin functions test successful"));
+    write_str("basic pin functions test successful");
 }
 
 fn check_pull_resistor_config<Mode: PinMode>(pin: &Pin<Mode>, expected_resistor: PullResistor) {
@@ -118,7 +118,7 @@ fn perform_pull_resistors_test<Mode: PinMode>(mut pin: Pin<Mode>) {
 
     pin.disable_pull_resistor();
 
-    with_rtt_out(|w, _| w.write_str("pull resistors config test successful"));
+    write_str("pull resistors config test successful");
 }
 
 fn validate_port_state<Port: IoPortMetadata, const N: usize>(
@@ -173,7 +173,7 @@ fn perform_synchronous_port_test(pins: [Pin<OutputMode>; 4], port_mask: u32, par
     validate_masked_port_state(&mut port, partial_mask, partial_mask, partial_mask);
     validate_masked_port_state(&mut port, !partial_mask, !partial_mask, port_mask);
 
-    with_rtt_out(|w, _| w.write_str("synchronous pin access test successful"));
+    write_str("synchronous pin access test successful");
 }
 
 fn validate_pin_is_push_pull(pin: &Pin<OutputMode>) {
@@ -216,7 +216,7 @@ fn perform_open_drain_test(mut pin: Pin<OutputMode>) {
     pin.set_drive_mode(DriveMode::OpenDrain);
     validate_pin_is_open_drain(&pin);
 
-    with_rtt_out(|w, _| w.write_str("push-pull/open-drain config test successful"));
+    write_str("push-pull/open-drain config test successful");
 }
 
 fn perform_pio_test<PortMeta: IoPortMetadata>(port: Port<PortMeta>) {
@@ -236,7 +236,7 @@ fn perform_pio_test<PortMeta: IoPortMetadata>(port: Port<PortMeta>) {
     );
     perform_open_drain_test(pins[20].take().unwrap().into_output_pin());
 
-    with_rtt_out(|w, _| w.write_str("all tests finished successfully"));
+    write_str("all tests finished successfully");
 }
 
 #[entry]
