@@ -19,7 +19,16 @@
 //! - Comparison configuration
 //! - Sleepwalking mode
 
+use core::marker::PhantomData;
+
+use self::metadata::UartMetadata;
+
 pub mod metadata;
 
 /// Structure representing UART driver
-pub struct UART {}
+pub struct UART<Metadata: UartMetadata> {
+    /// PAC UART instance metadata.
+    _meta: PhantomData<Metadata>,
+}
+
+impl<Metadata: UartMetadata> UART<Metadata> {}
