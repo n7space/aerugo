@@ -1,4 +1,4 @@
-//! Module containing HAL NVIC driver.
+//! Implementation of HAL NVIC driver.
 //!
 //! This is a wrapper for Cortex-M/PAC NVIC type, because that type has most of it's
 //! functionality implemented via trait functions for NVIC structure without `self`
