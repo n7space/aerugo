@@ -21,7 +21,7 @@ use samv71_hal::watchdog::{Watchdog, WatchdogConfig};
 ///
 /// # Safety
 /// Mutex is not used here, because it would imply a critical section at every access to HAL.
-/// Safety of this cell is managed by HAL instead, guaranteeing that undefined behavior will not occur.
+/// Safety of this instance is managed by HAL instead, guaranteeing that undefined behavior will not occur.
 static mut HAL_SYSTEM_PERIPHERALS: Option<SystemPeripherals> = None;
 
 /// HAL implementation for Cortex-M based SAMV71 MCU.
@@ -71,6 +71,11 @@ impl Hal {
                     timer_counter1: Some(mcu_peripherals.TC1),
                     timer_counter2: Some(mcu_peripherals.TC2),
                     timer_counter3: Some(mcu_peripherals.TC3),
+                    uart_0: Some(mcu_peripherals.UART0),
+                    uart_1: Some(mcu_peripherals.UART1),
+                    uart_2: Some(mcu_peripherals.UART2),
+                    uart_3: Some(mcu_peripherals.UART3),
+                    uart_4: Some(mcu_peripherals.UART4),
                 })
             } else {
                 None
