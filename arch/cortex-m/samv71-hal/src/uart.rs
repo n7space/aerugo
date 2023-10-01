@@ -33,7 +33,6 @@ use core::marker::PhantomData;
 
 use self::metadata::UartMetadata;
 
-pub mod config;
 pub mod interrupt;
 pub mod metadata;
 pub mod mode;
