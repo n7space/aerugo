@@ -4,9 +4,9 @@
 
 use crate::aerugo::Aerugo;
 use crate::data_provider::DataProvider;
+use crate::mutex::Mutex;
 use crate::tasklet::TaskletPtr;
 use crate::time::{Duration, Instant};
-use crate::Mutex;
 
 /// Cyclic execution information.
 pub(crate) struct CyclicExecution {
