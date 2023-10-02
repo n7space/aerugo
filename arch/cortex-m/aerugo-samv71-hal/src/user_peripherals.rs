@@ -1,8 +1,8 @@
 //! Module representing user-accessible peripherals.
 
 pub use samv71_hal::pac::{
-    CHIPID, CPUID, NVIC, PIOA, PIOB, PIOC, PIOD, PIOE, SCB, TC1, TC2, TC3, UART0, UART1, UART2,
-    UART3, UART4,
+    CHIPID, CPUID, NVIC, PIOA, PIOB, PIOC, PIOD, PIOE, SCB, SYST, TC1, TC2, TC3, UART0, UART1,
+    UART2, UART3, UART4,
 };
 pub use samv71_hal::pmc::PMC;
 
