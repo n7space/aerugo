@@ -65,7 +65,11 @@ impl W {
     pub fn ncs_rd_pulse(&mut self) -> NCS_RD_PULSE_W<PULSE_SPEC, 24> {
         NCS_RD_PULSE_W::new(self)
     }
-    #[doc = "Writes raw bits to the register."]
+    #[doc = r" Writes raw bits to the register."]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Passing incorrect value can cause undefined behaviour. See reference manual"]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
         self.bits = bits;

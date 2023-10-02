@@ -121,7 +121,7 @@ module"]
 pub type DBTP = crate::Reg<dbtp::DBTP_SPEC>;
 #[doc = "Data Bit Timing and Prescaler Register"]
 pub mod dbtp;
-#[doc = "TEST (rw) register accessor: Test Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get `@test::R`,  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using `test::W`. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@test`]
+#[doc = "TEST (rw) register accessor: Test Register\n\nYou can [`read`](crate::generic::Reg::read) this register and get `test::R`.  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using `test::W`. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see `test`
 module"]
 pub type TEST = crate::Reg<test::TEST_SPEC>;
 #[doc = "Test Register"]
