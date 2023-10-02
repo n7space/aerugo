@@ -49,9 +49,19 @@ pub struct UART<Metadata: UartMetadata> {
 impl<Instance: UartMetadata> UART<Instance> {
     /// Returns current UART status.
     ///
-    /// Status flags must be manually cleared by calling [`UART::reset_status`](Self::reset_status)
+    /// Error flags **must** be cleared manually by calling [`UART::reset_status`].
     pub fn status(&self) -> Status {
-        todo!()
+        let reg = self.registers_ref().sr.read();
+
+        Status {
+            comparison_matched: reg.cmp().bit_is_set(),
+            transmitter_empty: reg.txempty().bit_is_set(),
+            parity_error: reg.pare().bit_is_set(),
+            framing_error: reg.frame().bit_is_set(),
+            overrun_error: reg.ovre().bit_is_set(),
+            transmitter_ready: reg.txrdy().bit_is_set(),
+            receiver_ready: reg.rxrdy().bit_is_set(),
+        }
     }
 
     /// Resets UART status by clearing status flags.

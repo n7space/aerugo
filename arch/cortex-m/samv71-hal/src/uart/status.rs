@@ -14,8 +14,9 @@ pub struct Status {
     /// `true` if a character is received while RX holding register isn't empty.
     pub overrun_error: bool,
     /// `true` if TX holding register is empty. It does not indicate that transmitter
-    /// is idle, see [`Status::transmitter_empty`].
+    /// is idle, as it may still process data from it's internal shift register,
+    /// see [`Status::transmitter_empty`].
     pub transmitter_ready: bool,
-    /// `true` if RX holding register is empty.
+    /// `true` if RX holding register contains a complete character, ready to be read.
     pub receiver_ready: bool,
 }
