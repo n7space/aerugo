@@ -31,13 +31,16 @@
 
 use core::marker::PhantomData;
 
+use samv71q21_pac::uart0::mr::FILTERSELECT_A;
+
 use self::metadata::{RegisterBlock, UartMetadata};
 
+pub use self::config::{ClockSource, Config, Mode, ParityBit};
 pub use self::status::Status;
 
+pub mod config;
 pub mod interrupt;
 pub mod metadata;
-pub mod mode;
 pub mod status;
 
 /// Structure representing UART driver
@@ -115,6 +118,98 @@ impl<Instance: UartMetadata> UART<Instance> {
         self.registers_ref().cr.write(|w| w.rstrx().set_bit());
     }
 
+    /// Returns current UART configuration (mode, clock source, parity bit config and RX filtering state)
+    ///
+    /// This is a single-read operation, and it should be preferred instead of concrete functions
+    /// (mode, clock_source, etc.) when multiple config values are needed.
+    pub fn config(&self) -> Config {
+        let reg = self.registers_ref().mr.read();
+
+        // If the register holds invalid parity bit configuration, it's reasonable to panic here.
+        Config {
+            mode: reg.chmode().variant().into(),
+            clock_source: reg.brsrcck().variant().into(),
+            parity: reg.par().variant().unwrap().into(),
+            rx_filter_enabled: reg.filter().is_enabled(),
+        }
+    }
+
+    /// Sets UART configuration.
+    ///
+    /// This is a single-write operation, and it should be preferred instead of concrete functions
+    /// (set_mode, set_clock_source, etc.) if you intend to change multiple configuration settings.
+    pub fn set_config(&mut self, config: Config) {
+        self.registers_ref().mr.write(|w| {
+            w.chmode()
+                .variant(config.mode.into())
+                .brsrcck()
+                .variant(config.clock_source.into())
+                .par()
+                .variant(config.parity.into())
+                .filter()
+                .variant(Self::bool_to_rx_filter_config(config.rx_filter_enabled))
+        });
+    }
+
+    /// Returns current UART mode (normal/loopback)
+    pub fn mode(&self) -> Mode {
+        self.registers_ref().mr.read().chmode().variant().into()
+    }
+
+    /// Sets UART mode (normal/loopback)
+    pub fn set_mode(&mut self, mode: Mode) {
+        self.registers_ref()
+            .mr
+            .modify(|_, w| w.chmode().variant(mode.into()));
+    }
+
+    /// Returns current clock source used to drive UART baudrate.
+    pub fn clock_source(&self) -> ClockSource {
+        self.registers_ref().mr.read().brsrcck().variant().into()
+    }
+
+    /// Sets clock source used to drive UART baudrate.
+    pub fn set_clock_source(&mut self, source: ClockSource) {
+        self.registers_ref()
+            .mr
+            .modify(|_, w| w.brsrcck().variant(source.into()));
+    }
+
+    /// Returns current parity bit configuration.
+    pub fn parity_bit_config(&self) -> ParityBit {
+        // If the register holds invalid parity bit configuration, it's reasonable to panic here.
+        self.registers_ref()
+            .mr
+            .read()
+            .par()
+            .variant()
+            .unwrap()
+            .into()
+    }
+
+    /// Sets parity bit configuration.
+    pub fn set_parity_bit_config(&mut self, config: ParityBit) {
+        self.registers_ref()
+            .mr
+            .modify(|_, w| w.par().variant(config.into()));
+    }
+
+    /// Returns true if receive line is filtered.
+    ///
+    /// Filtering is done using a three-sample filter (16x-bit clock, 2 over 3 majority).
+    pub fn rx_filter_enabled(&self) -> bool {
+        Self::rx_filter_config_to_bool(self.registers_ref().mr.read().filter().variant())
+    }
+
+    /// Sets receive line filtering state.
+    ///
+    /// Filtering is done using a three-sample filter (16x-bit clock, 2 over 3 majority).
+    pub fn set_rx_filter_state(&mut self, enabled: bool) {
+        self.registers_ref()
+            .mr
+            .modify(|_, w| w.filter().variant(Self::bool_to_rx_filter_config(enabled)));
+    }
+
     /// Returns reference to UART registers.
     ///
     /// # Safety
@@ -123,5 +218,27 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// of UART sharing the same register.
     fn registers_ref(&self) -> &RegisterBlock {
         unsafe { &*Instance::REGISTERS }
+    }
+
+    /// Converts RX filter selection to boolean.
+    ///
+    /// `From` cannot be implemented for `bool`, as it's an external type.
+    #[inline(always)]
+    const fn rx_filter_config_to_bool(config: FILTERSELECT_A) -> bool {
+        match config {
+            FILTERSELECT_A::DISABLED => false,
+            FILTERSELECT_A::ENABLED => true,
+        }
+    }
+
+    /// Converts boolean into RX filter selection.
+    ///
+    /// `From` cannot be implemented for `bool`, as it's an external type.
+    #[inline(always)]
+    const fn bool_to_rx_filter_config(filter_enabled: bool) -> FILTERSELECT_A {
+        match filter_enabled {
+            true => FILTERSELECT_A::ENABLED,
+            false => FILTERSELECT_A::DISABLED,
+        }
     }
 }
