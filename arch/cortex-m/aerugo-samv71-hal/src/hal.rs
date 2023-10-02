@@ -58,6 +58,7 @@ impl Hal {
 
                 Some(UserPeripherals {
                     chip_id: Some(mcu_peripherals.CHIPID),
+                    cpu_id: Some(core_peripherals.CPUID),
                     nvic: Some(core_peripherals.NVIC),
                     pio_a: Some(mcu_peripherals.PIOA),
                     pio_b: Some(mcu_peripherals.PIOB),
@@ -65,6 +66,7 @@ impl Hal {
                     pio_d: Some(mcu_peripherals.PIOD),
                     pio_e: Some(mcu_peripherals.PIOE),
                     pmc: system_peripherals.pmc.take(),
+                    scb: Some(core_peripherals.SCB),
                     timer_counter1: Some(mcu_peripherals.TC1),
                     timer_counter2: Some(mcu_peripherals.TC2),
                     timer_counter3: Some(mcu_peripherals.TC3),
