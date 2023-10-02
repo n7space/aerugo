@@ -20,7 +20,11 @@ impl W {
     pub fn fi_di_ratio(&mut self) -> FI_DI_RATIO_W<US_FIDI_USART_MODE_SPEC, 0> {
         FI_DI_RATIO_W::new(self)
     }
-    #[doc = "Writes raw bits to the register."]
+    #[doc = r" Writes raw bits to the register."]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Passing incorrect value can cause undefined behaviour. See reference manual"]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
         self.bits = bits;

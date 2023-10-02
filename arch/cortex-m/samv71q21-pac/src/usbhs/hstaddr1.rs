@@ -65,7 +65,11 @@ impl W {
     pub fn hstaddrp3(&mut self) -> HSTADDRP3_W<HSTADDR1_SPEC, 24> {
         HSTADDRP3_W::new(self)
     }
-    #[doc = "Writes raw bits to the register."]
+    #[doc = r" Writes raw bits to the register."]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Passing incorrect value can cause undefined behaviour. See reference manual"]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
         self.bits = bits;
