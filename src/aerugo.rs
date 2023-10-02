@@ -964,11 +964,7 @@ impl InitApi for Aerugo {
     fn start(&'static self) -> ! {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
-        unsafe {
-            self.time_source
-                .set_system_start()
-                .expect("Failed to set system start time");
-        }
+        unsafe { self.time_source.set_system_start() }
 
         self.run()
     }
@@ -999,21 +995,15 @@ impl RuntimeApi for Aerugo {
 
     /// Returns time elapsed between system initialization and start of the scheduler.
     /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_startup_time(&'static self) -> Option<Duration> {
+    fn get_startup_duration(&'static self) -> Duration {
         self.time_source.startup_duration()
     }
 
-    /// Returns time elapsed since scheduler's start.
-    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_time_since_startup(&'static self) -> Option<Instant> {
-        self.time_source.time_since_start()
-    }
-
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
+    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
         todo!()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 

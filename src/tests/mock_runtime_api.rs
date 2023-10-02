@@ -30,19 +30,15 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn get_startup_time(&'static self) -> Option<Duration> {
-        todo!()
-    }
-
-    fn get_time_since_startup(&'static self) -> Option<Instant> {
-        todo!()
-    }
-
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
+    fn get_startup_duration(&'static self) -> Duration {
         todo!()
     }
 
     fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
+        todo!()
+    }
+
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 

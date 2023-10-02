@@ -44,14 +44,7 @@ pub trait RuntimeApi {
 
     /// Returns time elapsed between system initialization and start of the scheduler.
     /// If called before scheduler's start, should return `None`.
-    fn get_startup_time(&'static self) -> Option<Duration>;
-
-    /// Returns time elapsed since scheduler's start.
-    /// If called before scheduler's start, should return `None`.
-    fn get_time_since_startup(&'static self) -> Option<Instant>;
-
-    /// Returns an iterator to the list with IDs of registered tasklets.
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
+    fn get_startup_duration(&'static self) -> Duration;
 
     /// Returns execution statistics for given tasklet.
     ///
@@ -61,6 +54,9 @@ pub trait RuntimeApi {
     /// # Return
     /// Execution statistics for this tasklet.
     fn get_execution_statistics(&'static self, task_id: TaskletId) -> ExecutionStats;
+
+    /// Returns an iterator to the list with IDs of registered tasklets.
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
 
     /// Executes closure `f` in an interrupt-free context.
     ///

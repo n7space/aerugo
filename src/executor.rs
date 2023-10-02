@@ -182,6 +182,7 @@ mod tests {
         assert!(subscribe_result.is_ok());
 
         static time_source: TimeSource = TimeSource::new();
+        unsafe { time_source.set_system_start() };
 
         static executor: Executor = Executor::new(&time_source);
 
