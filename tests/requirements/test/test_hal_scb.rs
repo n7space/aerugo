@@ -1,9 +1,9 @@
 // Test scenario:
 // - Verify that icache can be disabled/enabled/cleared
 // - Verify that dcache can be disabled/enabled/cleared
+// TODO: SCB-030 requirement coverage
 
 /// @SRS{ROS-FUN-BSP-SCB-020}
-/// @SRS{ROS-FUN-BSP-SCB-030}
 /// @SRS{ROS-FUN-BSP-SCB-040}
 /// @SRS{ROS-FUN-BSP-SCB-050}
 /// @SRS{ROS-FUN-BSP-SCB-060}

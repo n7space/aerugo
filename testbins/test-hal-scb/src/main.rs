@@ -48,7 +48,9 @@ fn perform_dcache_tests(scb: &mut SCB, cpuid: &mut CPUID) {
 
     scb.clean_invalidate_dcache(cpuid);
 
-    // TODO: Why does this crash/halt the test?
+    // TODO: Migrate from RTT to UART, because with RTT the cache must be
+    // disabled as currently it's not possible to disable RTT region
+    // caching due to lack of support from `rtt_target` library for that.
     // scb.disable_dcache(cpuid);
     // assert!(
     //     !SCB::dcache_enabled(),
