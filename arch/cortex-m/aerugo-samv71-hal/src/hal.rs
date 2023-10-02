@@ -67,6 +67,7 @@ impl Hal {
                     pio_e: Some(mcu_peripherals.PIOE),
                     pmc: system_peripherals.pmc.take(),
                     scb: Some(core_peripherals.SCB),
+                    systick: Some(core_peripherals.SYST),
                     timer_counter1: Some(mcu_peripherals.TC1),
                     timer_counter2: Some(mcu_peripherals.TC2),
                     timer_counter3: Some(mcu_peripherals.TC3),
