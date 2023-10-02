@@ -36,6 +36,7 @@ use samv71q21_pac::uart0::mr::FILTERSELECT_A;
 use self::metadata::{RegisterBlock, UartMetadata};
 
 pub use self::config::{ClockSource, Config, Mode, ParityBit};
+pub use self::interrupt::Interrupt;
 pub use self::status::Status;
 
 pub mod config;
@@ -208,6 +209,47 @@ impl<Instance: UartMetadata> UART<Instance> {
         self.registers_ref()
             .mr
             .modify(|_, w| w.filter().variant(Self::bool_to_rx_filter_config(enabled)));
+    }
+
+    /// Returns `true` if specified interrupt is currently enabled.
+    pub fn is_interrupt_enabled(&self, interrupt: Interrupt) -> bool {
+        let reg = self.registers_ref().imr.read();
+
+        match interrupt {
+            Interrupt::Comparison => reg.cmp().bit_is_set(),
+            Interrupt::TxEmpty => reg.txempty().bit_is_set(),
+            Interrupt::ParityError => reg.pare().bit_is_set(),
+            Interrupt::FramingError => reg.frame().bit_is_set(),
+            Interrupt::OverrunError => reg.ovre().bit_is_set(),
+            Interrupt::TxReady => reg.txrdy().bit_is_set(),
+            Interrupt::RxReady => reg.rxrdy().bit_is_set(),
+        }
+    }
+
+    /// Enables specified interrupt.
+    pub fn enable_interrupt(&mut self, interrupt: Interrupt) {
+        self.registers_ref().ier.write(|w| match interrupt {
+            Interrupt::Comparison => w.cmp().set_bit(),
+            Interrupt::TxEmpty => w.txempty().set_bit(),
+            Interrupt::ParityError => w.pare().set_bit(),
+            Interrupt::FramingError => w.frame().set_bit(),
+            Interrupt::OverrunError => w.ovre().set_bit(),
+            Interrupt::TxReady => w.txrdy().set_bit(),
+            Interrupt::RxReady => w.rxrdy().set_bit(),
+        });
+    }
+
+    /// Disables specified interrupt.
+    pub fn disable_interrupt(&mut self, interrupt: Interrupt) {
+        self.registers_ref().idr.write(|w| match interrupt {
+            Interrupt::Comparison => w.cmp().set_bit(),
+            Interrupt::TxEmpty => w.txempty().set_bit(),
+            Interrupt::ParityError => w.pare().set_bit(),
+            Interrupt::FramingError => w.frame().set_bit(),
+            Interrupt::OverrunError => w.ovre().set_bit(),
+            Interrupt::TxReady => w.txrdy().set_bit(),
+            Interrupt::RxReady => w.rxrdy().set_bit(),
+        });
     }
 
     /// Returns reference to UART registers.
