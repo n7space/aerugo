@@ -14,7 +14,35 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn cancel_event(&'static self, _event_id: EventId) -> Result<(), RuntimeError> {
+    fn schedule_event(
+        &'static self,
+        _event_id: EventId,
+        _time: Instant,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn schedule_event_at(
+        &'static self,
+        _event_id: EventId,
+        _time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn schedule_event_in(
+        &'static self,
+        _event_id: EventId,
+        _time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn is_event_scheduled(&'static self, _event_id: EventId) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn cancel_event(&'static self, _event_id: EventId) -> Result<bool, RuntimeError> {
         todo!()
     }
 

@@ -115,6 +115,21 @@ impl TimeSource {
             .expect("System start offset not set")
     }
 
+    /// Calculates absolute time based on system time.
+    pub(crate) fn calculate_absolute_time(&self, time: Duration) -> Instant {
+        let system_start = self
+            .system_start
+            .get()
+            .expect("System start timestamp not set");
+
+        let absolute_time = *system_start + time;
+
+        match self.apply_offset(absolute_time) {
+            Some(absolute_time_with_offset) => absolute_time_with_offset,
+            None => absolute_time,
+        }
+    }
+
     /// Returns time since system's scheduler start (call to [`Aerugo::start`](crate::InitApi::start)),
     /// or `None` if system hasn't started yet.
     ///

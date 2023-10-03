@@ -25,6 +25,11 @@ pub(crate) enum SystemError {
     EventListFull,
     /// Event set list was full when tried to create a new one.
     EventSetListFull,
+    /// Scheduled event list was full when tried to schedule a new one.
+    #[allow(dead_code)]
+    ScheduledEventListFull,
+    /// Enqueued event to a full event queue.
+    EventQueueFull,
     /// Event already exists in the system.
     EventAlreadyExists(EventId),
     /// Cyclic execution was full when tried to create a new one.
@@ -83,6 +88,19 @@ impl fmt::Debug for SystemError {
                     "internal system error. Event manager stores a list of event sets of size equal to the maximum
                     number of tasklets that can be created in the system. Each tasklet should have at maximum only one
                     event set. This error means that there is some fault logic in event set creation.")
+            }
+            SystemError::ScheduledEventListFull => {
+                write!(f,
+                    "internal system error. Event managers stores a list of events that are scheduled to become active
+                    at a given time of size equal to the maximum number of events that can be created in the system.
+                    Each event should be scheduled only once at a given time. This error means that there is some fault
+                    logic in scheduling events.")
+            }
+            SystemError::EventQueueFull => {
+                write!(f,
+                    "internal system error. Event set stores a list of activated events of size equal to the maximum
+                    number of exents that can be created in the system. Each event should be active only once in a
+                    given set at a given time. This error means that there is some fault logic in scheduling events.")
             }
             SystemError::EventAlreadyExists(event_id) => {
                 write!(f,

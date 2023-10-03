@@ -21,14 +21,73 @@ pub trait RuntimeApi {
     /// `()` if successful, `RuntimeError` otherwise.
     fn emit_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
 
+    /// Schedules event of given ID at the given absolute time.
+    ///
+    /// Time is counted from the system scheduler start.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to emit.
+    /// * `time` - Absolute time when event should be emitted.
+    ///
+    /// # Return
+    /// `bool` indicating if emit was successfully scheduled, `RuntimeError` if some error
+    /// occurred.
+    ///
+    fn schedule_event(
+        &'static self,
+        event_id: EventId,
+        time: Instant,
+    ) -> Result<bool, RuntimeError>;
+
+    /// Schedules event of given ID at given time counted from the system scheduler start.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to emit.
+    /// * `time` - Time since the scheduler start when event should be emitted.
+    ///
+    /// # Return
+    /// `bool` indicating if emit was successfully scheduled, `RuntimeError` if some error
+    /// occurred.
+    fn schedule_event_at(
+        &'static self,
+        event_id: EventId,
+        time: Duration,
+    ) -> Result<bool, RuntimeError>;
+
+    /// Schedules event of given ID in time counting from current system time.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to emit.
+    /// * `time` - Time since current system time when event should be emitted.
+    ///
+    /// # Return
+    /// `bool` indicating if emit was successfully scheduled, `RuntimeError` if some error
+    /// occurred.
+    fn schedule_event_in(
+        &'static self,
+        event_id: EventId,
+        time: Duration,
+    ) -> Result<bool, RuntimeError>;
+
+    /// Checks if event of given ID is scheduled to be emitted.
+    ///
+    /// If event was already scheduled at this time, that event will be rescheduled to the given time.
+    ///
+    /// # Parameters
+    /// * `event_id` - ID of event to check.
+    ///
+    /// # Return
+    /// `bool` indicating if event was rescheduled, `RuntimeError` if some error occurred.
+    fn is_event_scheduled(&'static self, event_id: EventId) -> Result<bool, RuntimeError>;
+
     /// Cancels event of given ID.
     ///
     /// # Parameters
     /// * `event_id` - ID of event to cancel.
     ///
     /// # Return
-    /// `()` if successful, `RuntimeError` otherwise.
-    fn cancel_event(&'static self, event_id: EventId) -> Result<(), RuntimeError>;
+    /// `bool` indicating if event was cancelled, `RuntimeError` if some error occurred.
+    fn cancel_event(&'static self, event_id: EventId) -> Result<bool, RuntimeError>;
 
     /// Clears event queue.
     fn clear_event_queue(&'static self);

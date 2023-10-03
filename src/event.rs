@@ -10,8 +10,11 @@ pub use self::event_storage::EventStorage;
 pub(crate) use self::event_set::EventSet;
 
 use crate::aerugo::Aerugo;
-use crate::error::{RuntimeError, SystemError};
+use crate::error::SystemError;
 use crate::internal_list::InternalList;
+
+/// System event ID.
+pub type EventId = u32;
 
 /// Type for list of event sets.
 type EventSetList = InternalList<&'static EventSet, { Aerugo::TASKLET_COUNT }>;
@@ -60,31 +63,19 @@ impl Event {
     ///
     /// This sets the value of this event to `true` in each event set and wakes tasklet assigned to
     /// those sets.
-    ///
-    /// # Return
-    /// `()` if successful, `RuntimeError` otherwise
-    pub(crate) fn emit(&self) -> Result<(), RuntimeError> {
+    pub(crate) fn emit(&self) {
         for event_set in &self.sets {
-            event_set.activate_event(self.id)?;
+            event_set
+                .activate_event(self.id)
+                .expect("Failed to activate an event");
         }
-
-        Ok(())
-    }
-
-    /// Cancels this event.
-    ///
-    /// This sets the value of this event to `false` in each event set.
-    ///
-    /// # Return
-    /// `()` if successful, `RuntimeError` otherwise
-    pub(crate) fn cancel(&self) -> Result<(), RuntimeError> {
-        for event_set in &self.sets {
-            event_set.deactivate_event(self.id)?;
-        }
-
-        Ok(())
     }
 }
 
-/// System event ID.
-pub type EventId = u32;
+impl Eq for Event {}
+
+impl PartialEq for Event {
+    fn eq(&self, other: &Self) -> bool {
+        self.id.eq(&other.id)
+    }
+}
