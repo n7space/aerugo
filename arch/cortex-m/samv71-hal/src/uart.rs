@@ -35,6 +35,8 @@ use samv71q21_pac::uart0::mr::FILTERSELECT_A;
 
 use self::metadata::{RegisterBlock, UartMetadata};
 
+pub use super::time::HertzU32 as Frequency;
+
 pub use self::config::{ClockSource, Config, Mode, ParityBit};
 pub use self::interrupt::Interrupt;
 pub use self::status::Status;
@@ -48,6 +50,23 @@ pub mod status;
 pub struct UART<Metadata: UartMetadata> {
     /// PAC UART instance metadata.
     _meta: PhantomData<Metadata>,
+}
+
+/// Constant representing oversampling ratio, which is used in baudrate calculations.
+const OVERSAMPLING_RATIO: u32 = 16;
+
+/// Enumeration representing an invalid baudrate.
+/// This error indicates that the baudrate passed to [`UART::set_baudrate`]
+/// cannot be represented, e.g. it would cause the clock divisor to be
+/// zero, disabling the baudrate clock, or it would cause it to be larger
+/// than it's maximum possible value.
+pub enum InvalidBaudrate {
+    /// Specified baudrate is too low, and it would result in clock divisor
+    /// larger than maximum possible value.
+    TooLow,
+    /// Specified baudrate is too high, and it would cause the clock divisor
+    /// to be zero, effectively disabling baudrate clock.
+    TooHigh,
 }
 
 impl<Instance: UartMetadata> UART<Instance> {
@@ -250,6 +269,101 @@ impl<Instance: UartMetadata> UART<Instance> {
             Interrupt::TxReady => w.txrdy().set_bit(),
             Interrupt::RxReady => w.rxrdy().set_bit(),
         });
+    }
+
+    /// Returns current clock divisor.
+    ///
+    /// Clock divisor is used for calculating baudrate.
+    /// If you intend to set specific baudrate, instead of calculating it
+    /// manually, use [insert a function when it's done here].
+    ///
+    /// Clock divisor is defined as source clock frequency divided by
+    /// 16*baudrate.
+    ///
+    /// Clock source can be changed with [`UART::set_clock_source`]
+    /// and [`UART::set_config`].
+    ///
+    /// If the divisor is equal to 0, baud rate clock is disabled.
+    pub fn clock_divisor(&self) -> u16 {
+        self.registers_ref().brgr.read().cd().bits()
+    }
+
+    /// Sets the clock divisor.
+    ///
+    /// Clock divisor is used for calculating baudrate.
+    /// If you intend to set specific baudrate, instead of calculating it
+    /// manually, use [insert a function when it's done here].
+    ///
+    /// Clock divisor is defined as source clock frequency divided by
+    /// 16*baudrate.
+    ///
+    /// Clock source can be changed with [`UART::set_clock_source`]
+    /// and [`UART::set_config`].
+    ///
+    /// If the divisor is equal to 0, baud rate clock is disabled.
+    pub fn set_clock_divisor(&mut self, divisor: u16) {
+        self.registers_ref().brgr.write(|w| w.cd().variant(divisor));
+    }
+
+    /// Returns current UART baudrate (in bits per second).
+    ///
+    /// # Parameters
+    /// * `source_clock_frequency` - Frequency of the UART source clock.
+    ///                              Required for calculations.
+    ///
+    /// Clock source can be changed with [`UART::set_clock_source`]
+    /// and [`UART::set_config`].
+    pub fn baudrate(&self, source_clock_frequency: Frequency) -> u32 {
+        let divisor = self.clock_divisor();
+        source_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * (divisor as u32))
+    }
+
+    /// Sets UART baudrate.
+    ///
+    /// # Parameters
+    /// * `baudrate` - Desired baudrate, in bits per second.
+    /// * `source_clock_frequency` - Frequency of the UART source clock.
+    ///                              Required for calculations.
+    ///
+    /// # Remarks
+    /// Because of the fact that clock divisor is 16-bit, specified baudrate
+    /// might not be possible to be precisely configured. This function will calculate
+    /// the approximate clock divisor for specified baudrate using rough integer
+    /// division. True baudrate is returned from this function.
+    ///
+    /// Clock source can be changed with [`UART::set_clock_source`]
+    /// and [`UART::set_config`].
+    ///
+    /// # Returns
+    /// `Ok(u32)` if baudrate was set successfully. Returned `u32` is the true baudrate.
+    /// `Err([InvalidBaudrate])` if specified baudrate cannot be set.
+    pub fn set_baudrate(
+        &mut self,
+        baudrate: u32,
+        source_clock_frequency: Frequency,
+    ) -> Result<u32, InvalidBaudrate> {
+        let divisor = source_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * baudrate);
+
+        // If provided baudrate is larger than source clock frequency / 16, it will
+        // cause the divisor to be truncated to 0, which will disable the baudrate clock.
+        // If you intend to disable the baudrate clock that way, set the divisor to 0
+        // directly, using `UART::set_clock_divisor`.
+        if divisor == 0 {
+            return Err(InvalidBaudrate::TooHigh);
+        }
+
+        // If provided baudrate is small enough, it will cause the divisor to be
+        // larger than (2^16) - 1, which would cause an integer overflow if tried
+        // to be converted to it's type.
+        if divisor > (u16::MAX as u32) {
+            return Err(InvalidBaudrate::TooLow);
+        }
+
+        self.registers_ref()
+            .brgr
+            .write(|w| w.cd().variant(divisor as u16));
+
+        Ok(source_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * divisor))
     }
 
     /// Returns reference to UART registers.
