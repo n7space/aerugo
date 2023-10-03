@@ -21,7 +21,7 @@ use crate::time::{Duration, Instant};
 /// Failing to adhere to this requirement will invalidate `Sync` trait implementation of this type,
 /// unless it's explicitly guaranteed by design that mutations will not occur during interrupt's execution.
 pub(crate) struct TimeSource {
-    /// Time system's scheduler started.
+    /// Time when system scheduler started.
     system_start: OnceCell<Instant>,
     /// Time since system's scheduler start.
     system_start_offset: OnceCell<Duration>,
