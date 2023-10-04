@@ -60,6 +60,7 @@ const OVERSAMPLING_RATIO: u32 = 16;
 /// cannot be represented, e.g. it would cause the clock divisor to be
 /// zero, disabling the baudrate clock, or it would cause it to be larger
 /// than it's maximum possible value.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum InvalidBaudrate {
     /// Specified baudrate is too low, and it would result in clock divisor
     /// larger than maximum possible value.
@@ -69,7 +70,21 @@ pub enum InvalidBaudrate {
     TooHigh,
 }
 
+/// Enumeration representing UART I/O errors.
+/// These errors might happen either when reception or transmission fails.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum IOError {
+    /// Timeout was reached.
+    Timeout,
+}
+
 impl<Instance: UartMetadata> UART<Instance> {
+    /// Create UART instance. Consumes PAC UART instance to prevent creating multiple instances
+    /// of UART driver for the same UART peripheral.
+    pub fn new(_uart: Instance) -> Self {
+        Self { _meta: PhantomData }
+    }
+
     /// Returns current UART status.
     ///
     /// Error flags **must** be cleared manually by calling [`UART::reset_status`].
@@ -103,15 +118,15 @@ impl<Instance: UartMetadata> UART<Instance> {
 
     /// Disables UART transmitter.
     ///
-    /// If a character is being processed, and a character has been written to UART holding
-    /// register, both characters are transmitted before the transmitter is stopped.
+    /// If a byte is being processed, and a byte has been written to UART holding
+    /// register, both bytes are transmitted before the transmitter is stopped.
     pub fn disable_transmitter(&mut self) {
         self.registers_ref().cr.write(|w| w.txdis().set_bit());
     }
 
     /// Resets UART transmitter.
     ///
-    /// Any pending character transmission is aborted when the transmitter is reset.
+    /// Any pending byte transmission is aborted when the transmitter is reset.
     pub fn reset_transmitter(&mut self) {
         self.registers_ref().cr.write(|w| w.rsttx().set_bit());
     }
@@ -126,14 +141,14 @@ impl<Instance: UartMetadata> UART<Instance> {
 
     /// Disables UART receiver.
     ///
-    /// If a character is being processed, reception is completed before receiver is stopped.
+    /// If a byte is being processed, reception is completed before receiver is stopped.
     pub fn disable_receiver(&mut self) {
         self.registers_ref().cr.write(|w| w.rxdis().set_bit());
     }
 
     /// Resets UART receiver.
     ///
-    /// Any pending character reception is aborted when the receiver is reset.
+    /// Any pending byte reception is aborted when the receiver is reset.
     pub fn reset_receiver(&mut self) {
         self.registers_ref().cr.write(|w| w.rstrx().set_bit());
     }
@@ -300,8 +315,11 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// Clock source can be changed with [`UART::set_clock_source`]
     /// and [`UART::set_config`].
     ///
+    /// # Safety
     /// If the divisor is equal to 0, baud rate clock is disabled.
-    pub fn set_clock_divisor(&mut self, divisor: u16) {
+    /// Therefore, this function is unsafe, as it has potential, unwanted
+    /// side-effect.
+    pub unsafe fn set_clock_divisor(&mut self, divisor: u16) {
         self.registers_ref().brgr.write(|w| w.cd().variant(divisor));
     }
 
@@ -359,11 +377,84 @@ impl<Instance: UartMetadata> UART<Instance> {
             return Err(InvalidBaudrate::TooLow);
         }
 
-        self.registers_ref()
-            .brgr
-            .write(|w| w.cd().variant(divisor as u16));
+        // Safety: This is safe, because the divisor is validated.
+        unsafe {
+            self.set_clock_divisor(divisor as u16);
+        }
 
         Ok(source_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * divisor))
+    }
+
+    /// Transmits a single byte. Blocks until the transmission is completed, or timeout
+    /// is hit.
+    ///
+    /// UART has no direct PMC dependency, and PMC doesn't support clock frequency calculations
+    /// yet, therefore the timeout is specified as amount of CPU cycles to wait until UART
+    /// finishes the transmission.
+    ///
+    /// # Parameters
+    /// * `byte` - Byte to transmit
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission should take.
+    ///
+    /// # Returns
+    /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.                         
+    pub fn transmit_byte(&mut self, byte: u8, timeout_cpu_cycles: u32) -> Result<(), IOError> {
+        if let Ok(timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
+            self.set_transmitted_byte(byte);
+            return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(IOError::Timeout),
+            };
+        }
+
+        Err(IOError::Timeout)
+    }
+
+    /// Transmits multiple bytes. Blocks until the transmission is completed, or timeout
+    /// is hit.
+    ///
+    /// This function is more optimal than calling [`UART::transmit_byte`] in a loop, as
+    /// it will feed the holding register as soon as possible, instead of waiting for transmission
+    /// to finish. It should be preferred for this kind of operations.
+    ///
+    /// # Parameters
+    /// * `bytes` - Bytes to transmit.
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission of whole buffer should take.
+    ///
+    /// # Returns
+    /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.
+    pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cpu_cycles: u32) -> Result<(), IOError> {
+        if let Ok(mut timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
+            for &byte in bytes {
+                self.set_transmitted_byte(byte);
+                match self.wait_for_transmitter_ready(timeout_cpu_cycles) {
+                    Ok(remaining_timeout) => timeout_cpu_cycles = remaining_timeout,
+                    Err(_) => return Err(IOError::Timeout),
+                }
+            }
+
+            return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(IOError::Timeout),
+            };
+        }
+
+        Err(IOError::Timeout)
+    }
+
+    /// Receives a single byte. Blocks until a byte is received, or timeout is hit.
+    ///
+    /// # Parameters
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for the character.
+    ///
+    /// # Returns
+    /// `Ok(u8)` if reception was successful, the value is the received byte.
+    /// `Err(())` on timeout.
+    pub fn receive_byte(&self, timeout_cpu_cycles: u32) -> Result<u8, IOError> {
+        match self.wait_for_byte_reception(timeout_cpu_cycles) {
+            Ok(_) => Ok(self.get_received_byte()),
+            Err(_) => Err(IOError::Timeout),
+        }
     }
 
     /// Returns reference to UART registers.
@@ -396,5 +487,81 @@ impl<Instance: UartMetadata> UART<Instance> {
             true => FILTERSELECT_A::ENABLED,
             false => FILTERSELECT_A::DISABLED,
         }
+    }
+
+    /// Writes a byte to be transmitted next into TX holding register.
+    ///
+    /// Doesn't perform any checks. This is simply a wrapper for register write.
+    #[inline(always)]
+    fn set_transmitted_byte(&mut self, byte: u8) {
+        self.registers_ref().thr.write(|w| w.txchr().variant(byte));
+    }
+
+    /// Returns the byte currently stored in received character register.
+    ///
+    /// Doesn't perform any checks. This is simply a wrapper for register read.
+    /// Will return `0` if no data has been received yet.
+    #[inline(always)]
+    fn get_received_byte(&self) -> u8 {
+        self.registers_ref().rhr.read().rxchr().bits()
+    }
+
+    /// Waits until provided functor returns `true`. Functor receives UART status and should return
+    /// the specific flag (or their combination).
+    ///
+    /// # Parameters
+    /// * `status_checker` - Functor, returning flag or combination of status flags to wait for
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to spend on waiting for the flag.
+    ///
+    /// # Returns
+    /// `Ok(u32)` if functor returned `true` before timeout, `Err(())` if timeout has been reached.
+    /// The value returned on success indicates how much CPU cycles are left for next timeout.
+    fn wait_for_status_flag<F>(&self, status_checker: F, timeout_cpu_cycles: u32) -> Result<u32, ()>
+    where
+        F: Fn(Status) -> bool,
+    {
+        for wasted_cycles in 0..timeout_cpu_cycles {
+            if status_checker(self.status()) {
+                return Ok(timeout_cpu_cycles - wasted_cycles);
+            }
+        }
+
+        Err(())
+    }
+
+    /// Blocks the CPU until either the transmission is complete, or timeout is hit.
+    ///
+    /// # Parameters
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission should take.
+    ///
+    /// # Returns
+    /// `Ok(u32)` if transmission was completed before timeout, `Err(())` if timeout has been reached.
+    /// The value returned on success indicates how much CPU cycles are left for next timeout.
+    fn wait_for_transmission_to_complete(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.transmitter_empty, timeout_cpu_cycles)
+    }
+
+    /// Blocks the CPU until transmit holding register is empty and ready for next byte.
+    ///
+    /// # Parameters
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for the transmitter.
+    ///
+    /// # Returns
+    /// `Ok(u32)` if transmitter became ready before timeout, `Err(())` if timeout has been reached.
+    /// The value returned on success indicates how much CPU cycles are left for next timeout.
+    fn wait_for_transmitter_ready(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.transmitter_ready, timeout_cpu_cycles)
+    }
+
+    /// Blocks the CPU until a byte is received.
+    ///
+    /// # Parameters
+    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for reception.
+    ///
+    /// # Returns
+    /// `Ok(u32)` if byte was received before timeout, `Err(())` if timeout has been reached.
+    /// The value returned on success indicates how much CPU cycles are left for next timeout.
+    fn wait_for_byte_reception(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.receiver_ready, timeout_cpu_cycles)
     }
 }
