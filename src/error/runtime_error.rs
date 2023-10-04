@@ -17,6 +17,4 @@ pub enum RuntimeError {
     DataQueueFull,
     /// Event with given ID was not found.
     EventNotFound(EventId),
-    /// Enqueued event to a full event queue.
-    EventQueueFull,
 }

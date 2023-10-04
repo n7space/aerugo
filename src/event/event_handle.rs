@@ -3,7 +3,6 @@
 //! This module contains event handle implementation, which can be used to reference an event in
 //! the system.
 
-use crate::error::RuntimeError;
 use crate::event::Event;
 
 /// Event handle.
@@ -26,20 +25,8 @@ impl EventHandle {
     }
 
     /// Emits this event.
-    ///
-    /// # Return
-    /// `()` if successful, `RuntimeError` otherwise.
     #[inline(always)]
-    pub fn emit(&self) -> Result<(), RuntimeError> {
+    pub fn emit(&self) {
         self.event.emit()
-    }
-
-    /// Cancels this event.
-    ///
-    /// # Return
-    /// `()` if successful, `RuntimeError` otherwise.
-    #[inline(always)]
-    pub fn cancel(&self) -> Result<(), RuntimeError> {
-        self.event.cancel()
     }
 }

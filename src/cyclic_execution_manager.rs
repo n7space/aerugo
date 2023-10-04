@@ -65,7 +65,7 @@ impl CyclicExecutionManager {
         Ok(self.cyclic_executions.last().unwrap())
     }
 
-    /// Wakes all cyclic tasklets.
+    /// Wakes tasklet which next activation is scheduled for the current time.
     pub(crate) fn wake_tasklets(&'static self) {
         for ce in &self.cyclic_executions {
             let system_time = self.time_source.system_time();

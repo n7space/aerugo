@@ -14,7 +14,35 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn cancel_event(&'static self, _event_id: EventId) -> Result<(), RuntimeError> {
+    fn schedule_event(
+        &'static self,
+        _event_id: EventId,
+        _time: Instant,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn schedule_event_at(
+        &'static self,
+        _event_id: EventId,
+        _time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn schedule_event_in(
+        &'static self,
+        _event_id: EventId,
+        _time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn is_event_scheduled(&'static self, _event_id: EventId) -> Result<bool, RuntimeError> {
+        todo!()
+    }
+
+    fn cancel_event(&'static self, _event_id: EventId) -> Result<bool, RuntimeError> {
         todo!()
     }
 
@@ -30,19 +58,15 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn get_startup_time(&'static self) -> Option<Duration> {
-        todo!()
-    }
-
-    fn get_time_since_startup(&'static self) -> Option<Instant> {
-        todo!()
-    }
-
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
+    fn get_startup_duration(&'static self) -> Duration {
         todo!()
     }
 
     fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
+        todo!()
+    }
+
+    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 

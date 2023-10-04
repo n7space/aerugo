@@ -41,7 +41,7 @@ static EXECUTOR: Executor = Executor::new(AERUGO.time_source());
 ///
 /// Singleton instance of the event manager. Used directly only by the [Aerugo]
 /// structure.
-static EVENT_MANAGER: EventManager = EventManager::new();
+static EVENT_MANAGER: EventManager = EventManager::new(AERUGO.time_source());
 /// Time manager.
 ///
 /// Singleton instance of the time manager. Used directly only by the [Aerugo]
@@ -110,6 +110,7 @@ impl Aerugo {
                 .execute_next_tasklet()
                 .expect("Failure in tasklet execution");
 
+            EVENT_MANAGER.activate_scheduled_events();
             CYCLIC_EXECUTION_MANAGER.wake_tasklets();
 
             Hal::feed_watchdog();
@@ -964,11 +965,7 @@ impl InitApi for Aerugo {
     fn start(&'static self) -> ! {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
-        unsafe {
-            self.time_source
-                .set_system_start()
-                .expect("Failed to set system start time");
-        }
+        unsafe { self.time_source.set_system_start() }
 
         self.run()
     }
@@ -979,7 +976,39 @@ impl RuntimeApi for Aerugo {
         EVENT_MANAGER.emit(event_id)
     }
 
-    fn cancel_event(&'static self, event_id: EventId) -> Result<(), RuntimeError> {
+    fn schedule_event(
+        &'static self,
+        event_id: EventId,
+        time: Instant,
+    ) -> Result<bool, RuntimeError> {
+        EVENT_MANAGER.schedule(event_id, time)
+    }
+
+    fn schedule_event_at(
+        &'static self,
+        event_id: EventId,
+        time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        let absolute_time = self.time_source.calculate_absolute_time(time);
+
+        EVENT_MANAGER.schedule(event_id, absolute_time)
+    }
+
+    fn schedule_event_in(
+        &'static self,
+        event_id: EventId,
+        time: Duration,
+    ) -> Result<bool, RuntimeError> {
+        let absolute_time = self.get_system_time() + time;
+
+        EVENT_MANAGER.schedule(event_id, absolute_time)
+    }
+
+    fn is_event_scheduled(&'static self, event_id: EventId) -> Result<bool, RuntimeError> {
+        EVENT_MANAGER.is_scheduled(event_id)
+    }
+
+    fn cancel_event(&'static self, event_id: EventId) -> Result<bool, RuntimeError> {
         EVENT_MANAGER.cancel(event_id)
     }
 
@@ -997,20 +1026,14 @@ impl RuntimeApi for Aerugo {
         unsafe { self.time_source.set_user_offset(offset) }
     }
 
-    /// Returns time elapsed between system initialization and start of the scheduler.
-    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_startup_time(&'static self) -> Option<Duration> {
-        self.time_source.startup_duration()
-    }
-
-    /// Returns time elapsed since scheduler's start.
-    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
-    fn get_time_since_startup(&'static self) -> Option<Instant> {
-        self.time_source.time_since_start()
-    }
-
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
+    }
+
+    /// Returns time elapsed between system initialization and start of the scheduler.
+    /// If called before [`Aerugo::start`](crate::Aerugo::start), returns `None`.
+    fn get_startup_duration(&'static self) -> Duration {
+        self.time_source.startup_duration()
     }
 
     fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {

@@ -4,7 +4,7 @@ use heapless::spsc::Queue;
 
 use crate::aerugo::Aerugo;
 use crate::data_provider::DataProvider;
-use crate::error::RuntimeError;
+use crate::error::SystemError;
 use crate::event::EventId;
 use crate::event_manager::EventManager;
 use crate::mutex::Mutex;
@@ -40,8 +40,9 @@ impl EventSet {
     /// * `event_id` - Event ID to activate.
     ///
     /// # Return
-    /// `true` if successfully activated event, `false` if event was already on the event queue and is waiting for trigger, `RuntimeError` otherwise.
-    pub(crate) fn activate_event(&self, event_id: EventId) -> Result<bool, RuntimeError> {
+    /// `true` if successfully activated event, `false` if event was already on the event queue
+    /// and is waiting for trigger, `SystemError` otherwise.
+    pub(crate) fn activate_event(&self, event_id: EventId) -> Result<bool, SystemError> {
         let event_activated = self.event_queue.lock(|event_queue| {
             let found_event = event_queue.iter().find(|&&id| id == event_id);
 
@@ -49,7 +50,7 @@ impl EventSet {
                 Some(_) => Ok(false),
                 None => match event_queue.enqueue(event_id) {
                     Ok(_) => Ok(true),
-                    Err(_) => Err(RuntimeError::EventQueueFull),
+                    Err(_) => Err(SystemError::EventQueueFull),
                 },
             }
         })?;
@@ -59,61 +60,6 @@ impl EventSet {
         }
 
         Ok(event_activated)
-    }
-
-    /// Deactivates event
-    ///
-    /// # Parameters
-    /// * `event_id` - Event ID to deactivate.
-    ///
-    /// # Return
-    /// `()` if successful, `RuntimeError` otherwise.
-    #[allow(dead_code)]
-    pub(crate) fn deactivate_event(&self, event_id: EventId) -> Result<(), RuntimeError> {
-        self.event_queue.lock(|event_queue| {
-            let found_event_index = event_queue.iter().position(|&id| id == event_id);
-
-            match found_event_index {
-                Some(idx) => {
-                    let queue_len = event_queue.len();
-
-                    for _ in 0..idx {
-                        // This is safe, because we are iterating over size of the queue.
-                        unsafe {
-                            let event_id = event_queue.dequeue_unchecked();
-                            event_queue.enqueue_unchecked(event_id);
-                        }
-                    }
-
-                    event_queue.dequeue();
-
-                    for _ in (idx + 1)..queue_len {
-                        // This is safe, because we are iterating over size of the queue.
-                        unsafe {
-                            let event_id = event_queue.dequeue_unchecked();
-                            event_queue.enqueue_unchecked(event_id);
-                        }
-                    }
-
-                    Ok(())
-                }
-                None => Ok(()),
-            }
-        })
-    }
-
-    /// Deactivates all events in the set.
-    pub(crate) fn clear(&self) {
-        self.event_queue.lock(|event_queue| {
-            let queue_len = event_queue.len();
-
-            for _ in 0..queue_len {
-                // This is safe, because we are iterating over size of the queue.
-                unsafe {
-                    event_queue.dequeue_unchecked();
-                }
-            }
-        })
     }
 }
 
