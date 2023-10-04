@@ -101,3 +101,5 @@ impl DataProvider<bool> for BooleanCondition {
         false
     }
 }
+
+unsafe impl Sync for BooleanCondition {}
