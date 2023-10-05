@@ -29,6 +29,8 @@
 //!
 //! The peripheral clock frequency must be at least three times higher than PCK.
 
+extern crate embedded_io;
+
 use core::marker::PhantomData;
 
 use samv71q21_pac::uart0::mr::FILTERSELECT_A;
