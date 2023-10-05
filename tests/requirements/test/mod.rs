@@ -4,6 +4,7 @@ mod test_boolean_condition_interrupt;
 mod test_event;
 mod test_event_cancellation;
 mod test_event_clear_queue;
+mod test_event_interrupt;
 mod test_event_scheduled;
 mod test_hal_nvic;
 mod test_hal_pio;

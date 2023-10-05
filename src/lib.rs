@@ -36,7 +36,7 @@ pub use self::api::{InitApi, RuntimeApi};
 pub use self::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,
 };
-pub use self::event::{EventId, EventStorage};
+pub use self::event::{EventHandle, EventId, EventStorage};
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::mutex::Mutex;
 pub use self::tasklet::{TaskletConfig, TaskletStorage};

@@ -79,3 +79,5 @@ impl PartialEq for Event {
         self.id.eq(&other.id)
     }
 }
+
+unsafe impl Sync for Event {}
