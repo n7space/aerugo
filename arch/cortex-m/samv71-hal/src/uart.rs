@@ -50,14 +50,61 @@ pub mod interrupt;
 pub mod metadata;
 pub mod status;
 
-/// Structure representing UART driver
-pub struct UART<Metadata: UartMetadata> {
-    /// PAC UART instance metadata.
-    _meta: PhantomData<Metadata>,
-}
-
 /// Constant representing oversampling ratio, which is used in baudrate calculations.
 const OVERSAMPLING_RATIO: u32 = 16;
+
+/// Meta-trait representing UART state.
+pub trait State {}
+
+/// Meta-trait representing UART with enabled receiver.
+pub trait CanReceive: State {}
+
+/// Meta-trait representing UART with enabled transmitter.
+pub trait CanTransmit: State {}
+
+/// Empty struct representing UART in not configured, usually post-reset state.
+pub struct NotConfigured;
+
+/// Empty struct representing UART with enabled received
+pub struct Receiver;
+
+/// Empty struct representing UART with enabled transmitter
+pub struct Transmitter;
+
+/// Empty struct representing UART with enabled transmitter and received.
+pub struct TransmitterReceiver;
+
+impl State for NotConfigured {}
+impl State for Receiver {}
+impl State for Transmitter {}
+impl State for TransmitterReceiver {}
+
+impl CanReceive for Receiver {}
+impl CanReceive for TransmitterReceiver {}
+
+impl CanTransmit for Transmitter {}
+impl CanTransmit for TransmitterReceiver {}
+
+/// Structure representing UART driver.
+///
+/// This structure is implemented using typestate pattern.
+/// In order to use it, you must first create it's instance with [`UART::new`] method.
+/// This method consumes PAC UART instance, which prevents from creating multiple UART
+/// driver instances for the same UART peripheral (which would invalidate `Send` implementation
+/// for this structure, so it should never be allowed).
+///
+/// [`UART::new`] will return `UART<_, NotConfigured>`, which you have to initialize by converting
+/// it to one of three valid states: `UART<_, Receiver>`, `UART<_, Transmitter>` or
+/// `UART<_, TransmitterReceiver>`. To do that, use `UART::into_X`, where `X` is the desired state.
+///
+/// These functions expect [`Config`]. It does not implement [Default] trait, but it provides
+/// convenience functions with reasonable defaults (wherever applicable).
+pub struct UART<Metadata: UartMetadata, CurrentState: State> {
+    /// PAC UART instance metadata.
+    _meta: PhantomData<Metadata>,
+    /// State metadata.
+    _state: PhantomData<CurrentState>,
+}
 
 /// Enumeration representing an invalid baudrate.
 /// This error indicates that the baudrate passed to [`UART::set_baudrate`]
@@ -74,11 +121,14 @@ pub enum InvalidBaudrate {
     TooHigh,
 }
 
-impl<Instance: UartMetadata> UART<Instance> {
+impl<Instance: UartMetadata> UART<Instance, NotConfigured> {
     /// Create UART instance. Consumes PAC UART instance to prevent creating multiple instances
     /// of UART driver for the same UART peripheral.
     pub fn new(_uart: Instance) -> Self {
-        Self { _meta: PhantomData }
+        Self {
+            _meta: PhantomData,
+            _state: PhantomData,
+        }
     }
 
     /// Returns current UART status.
