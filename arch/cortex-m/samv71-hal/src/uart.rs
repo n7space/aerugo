@@ -293,7 +293,7 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// manually, use [insert a function when it's done here].
     ///
     /// Clock divisor is defined as source clock frequency divided by
-    /// 16*baudrate.
+    /// (16*baudrate).
     ///
     /// Clock source can be changed with [`UART::set_clock_source`]
     /// and [`UART::set_config`].
@@ -310,7 +310,7 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// manually, use [insert a function when it's done here].
     ///
     /// Clock divisor is defined as source clock frequency divided by
-    /// 16*baudrate.
+    /// (16*baudrate).
     ///
     /// Clock source can be changed with [`UART::set_clock_source`]
     /// and [`UART::set_config`].
@@ -371,8 +371,7 @@ impl<Instance: UartMetadata> UART<Instance> {
         }
 
         // If provided baudrate is small enough, it will cause the divisor to be
-        // larger than (2^16) - 1, which would cause an integer overflow if tried
-        // to be converted to it's type.
+        // larger than (2^16) - 1, which would cause an integer overflow.
         if divisor > (u16::MAX as u32) {
             return Err(InvalidBaudrate::TooLow);
         }
@@ -511,18 +510,19 @@ impl<Instance: UartMetadata> UART<Instance> {
     ///
     /// # Parameters
     /// * `status_checker` - Functor, returning flag or combination of status flags to wait for
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to spend on waiting for the flag.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to spend on waiting for the flag.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(u32)` if functor returned `true` before timeout, `Err(())` if timeout has been reached.
-    /// The value returned on success indicates how much CPU cycles are left for next timeout.
-    fn wait_for_status_flag<F>(&self, status_checker: F, timeout_cpu_cycles: u32) -> Result<u32, ()>
+    /// The value returned on success indicates how much "cycles" are left for next timeout.
+    fn wait_for_status_flag<F>(&self, status_checker: F, timeout_cycles: u32) -> Result<u32, ()>
     where
         F: Fn(Status) -> bool,
     {
-        for wasted_cycles in 0..timeout_cpu_cycles {
+        for wasted_cycles in 0..timeout_cycles {
             if status_checker(self.status()) {
-                return Ok(timeout_cpu_cycles - wasted_cycles);
+                return Ok(timeout_cycles - wasted_cycles);
             }
         }
 
@@ -532,36 +532,39 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// Blocks the CPU until either the transmission is complete, or timeout is hit.
     ///
     /// # Parameters
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission should take.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" the transmission should take.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(u32)` if transmission was completed before timeout, `Err(())` if timeout has been reached.
     /// The value returned on success indicates how much CPU cycles are left for next timeout.
-    fn wait_for_transmission_to_complete(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
-        self.wait_for_status_flag(|status| status.transmitter_empty, timeout_cpu_cycles)
+    fn wait_for_transmission_to_complete(&self, timeout_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.transmitter_empty, timeout_cycles)
     }
 
     /// Blocks the CPU until transmit holding register is empty and ready for next byte.
     ///
     /// # Parameters
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for the transmitter.
+    /// * `timeout_cycles` - Maximum amount arbitrary "cycles" to wait for the transmitter.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(u32)` if transmitter became ready before timeout, `Err(())` if timeout has been reached.
     /// The value returned on success indicates how much CPU cycles are left for next timeout.
-    fn wait_for_transmitter_ready(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
-        self.wait_for_status_flag(|status| status.transmitter_ready, timeout_cpu_cycles)
+    fn wait_for_transmitter_ready(&self, timeout_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.transmitter_ready, timeout_cycles)
     }
 
     /// Blocks the CPU until a byte is received.
     ///
     /// # Parameters
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for reception.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(u32)` if byte was received before timeout, `Err(())` if timeout has been reached.
     /// The value returned on success indicates how much CPU cycles are left for next timeout.
-    fn wait_for_byte_reception(&self, timeout_cpu_cycles: u32) -> Result<u32, ()> {
-        self.wait_for_status_flag(|status| status.receiver_ready, timeout_cpu_cycles)
+    fn wait_for_byte_reception(&self, timeout_cycles: u32) -> Result<u32, ()> {
+        self.wait_for_status_flag(|status| status.receiver_ready, timeout_cycles)
     }
 }
