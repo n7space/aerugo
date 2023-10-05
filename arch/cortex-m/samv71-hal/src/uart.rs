@@ -37,6 +37,8 @@ use samv71q21_pac::uart0::mr::FILTERSELECT_A;
 
 use self::metadata::{RegisterBlock, UartMetadata};
 
+pub use embedded_io::ErrorKind as Error;
+
 pub use super::time::HertzU32 as Frequency;
 
 pub use self::config::{ClockSource, Config, Mode, ParityBit};
@@ -70,14 +72,6 @@ pub enum InvalidBaudrate {
     /// Specified baudrate is too high, and it would cause the clock divisor
     /// to be zero, effectively disabling baudrate clock.
     TooHigh,
-}
-
-/// Enumeration representing UART I/O errors.
-/// These errors might happen either when reception or transmission fails.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum IOError {
-    /// Timeout was reached.
-    Timeout,
 }
 
 impl<Instance: UartMetadata> UART<Instance> {
@@ -399,16 +393,16 @@ impl<Instance: UartMetadata> UART<Instance> {
     ///
     /// # Returns
     /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.                         
-    pub fn transmit_byte(&mut self, byte: u8, timeout_cpu_cycles: u32) -> Result<(), IOError> {
+    pub fn transmit_byte(&mut self, byte: u8, timeout_cpu_cycles: u32) -> Result<(), Error> {
         if let Ok(timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
             self.set_transmitted_byte(byte);
             return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
                 Ok(_) => Ok(()),
-                Err(_) => Err(IOError::Timeout),
+                Err(_) => Err(Error::TimedOut),
             };
         }
 
-        Err(IOError::Timeout)
+        Err(Error::TimedOut)
     }
 
     /// Transmits multiple bytes. Blocks until the transmission is completed, or timeout
@@ -424,23 +418,23 @@ impl<Instance: UartMetadata> UART<Instance> {
     ///
     /// # Returns
     /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.
-    pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cpu_cycles: u32) -> Result<(), IOError> {
+    pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cpu_cycles: u32) -> Result<(), Error> {
         if let Ok(mut timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
             for &byte in bytes {
                 self.set_transmitted_byte(byte);
                 match self.wait_for_transmitter_ready(timeout_cpu_cycles) {
                     Ok(remaining_timeout) => timeout_cpu_cycles = remaining_timeout,
-                    Err(_) => return Err(IOError::Timeout),
+                    Err(_) => return Err(Error::TimedOut),
                 }
             }
 
             return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
                 Ok(_) => Ok(()),
-                Err(_) => Err(IOError::Timeout),
+                Err(_) => Err(Error::TimedOut),
             };
         }
 
-        Err(IOError::Timeout)
+        Err(Error::TimedOut)
     }
 
     /// Receives a single byte. Blocks until a byte is received, or timeout is hit.
@@ -451,10 +445,10 @@ impl<Instance: UartMetadata> UART<Instance> {
     /// # Returns
     /// `Ok(u8)` if reception was successful, the value is the received byte.
     /// `Err(())` on timeout.
-    pub fn receive_byte(&self, timeout_cpu_cycles: u32) -> Result<u8, IOError> {
+    pub fn receive_byte(&self, timeout_cpu_cycles: u32) -> Result<u8, Error> {
         match self.wait_for_byte_reception(timeout_cpu_cycles) {
             Ok(_) => Ok(self.get_received_byte()),
-            Err(_) => Err(IOError::Timeout),
+            Err(_) => Err(Error::TimedOut),
         }
     }
 
