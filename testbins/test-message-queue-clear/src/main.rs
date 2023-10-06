@@ -76,7 +76,7 @@ fn main() -> ! {
     let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
     let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, None, None);
     aerugo.subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle);
 
     aerugo.start();

@@ -128,7 +128,7 @@ fn main() -> ! {
     aerugo.create_tasklet(done_config, done, &DONE_STORAGE);
 
     let setup_handle = SETUP_STORAGE.create_handle().unwrap();
-    aerugo.subscribe_tasklet_to_cyclic(&setup_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&setup_handle, None, None);
     aerugo.set_tasklet_conditions(
         &setup_handle,
         BooleanConditionSet::from(setup_condition_handle),

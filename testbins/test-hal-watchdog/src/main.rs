@@ -81,8 +81,8 @@ fn initialize_tasks(aerugo: &'static impl InitApi) {
 
     let long_task_handle = LONG_TASK_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&short_task_handle, None);
-    aerugo.subscribe_tasklet_to_cyclic(&long_task_handle, None);
+    aerugo.subscribe_tasklet_to_cyclic(&short_task_handle, None, None);
+    aerugo.subscribe_tasklet_to_cyclic(&long_task_handle, None, None);
 }
 
 #[entry]

@@ -67,7 +67,7 @@ fn main() -> ! {
     aerugo.create_tasklet(task_b_config, task_b, &TASK_B_STORAGE);
 
     let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
-    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)), None);
 
     let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
     aerugo.subscribe_tasklet_to_events(&task_b_handle, [MyEvents::ScheduledEvent.into()]);

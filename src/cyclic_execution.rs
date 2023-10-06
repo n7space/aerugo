@@ -20,9 +20,25 @@ pub(crate) struct CyclicExecution {
 
 impl CyclicExecution {
     /// Creates new instance.
-    pub(crate) fn new(tasklet: TaskletPtr, period: Option<Duration>) -> Self {
+    ///
+    /// # Parameters
+    /// * `tasklet` - Tasklet which should be executed cyclically.
+    /// * `period` - Period of execution, `None` if should be woke whenever possible.
+    /// * `offset` - Offset of first execution after scheduled start, `None` if should be executed instantly.
+    /// executed instantly.
+    pub(crate) fn new(
+        tasklet: TaskletPtr,
+        period: Option<Duration>,
+        offset: Option<Duration>,
+    ) -> Self {
+        let next_execution_time = match offset {
+            Some(offset) => Instant::from_ticks(offset.ticks()),
+            None => Instant::from_ticks(0),
+        }
+        .into();
+
         CyclicExecution {
-            next_execution_time: Instant::from_ticks(0).into(),
+            next_execution_time,
             period,
             tasklet,
         }

@@ -44,6 +44,11 @@ impl CyclicExecutionManager {
     /// * `tasklet`: Tasklet that will be executed
     /// * `period`: Period for execution, `None` if tasklet shall be executed without waits
     ///
+    /// # Parameters
+    /// * `tasklet` - Tasklet which should be executed cyclically.
+    /// * `period` - Period of execution, `None` if should be woke whenever possible.
+    /// * `offset` - Offset of first execution after scheduled start, `None` if should be executed instantly.
+    ///
     /// # Return
     /// Reference to the cyclic execution data if successful, `SystemError` otherwise.
     ///
@@ -54,8 +59,9 @@ impl CyclicExecutionManager {
         &'static self,
         tasklet: TaskletPtr,
         period: Option<Duration>,
+        offset: Option<Duration>,
     ) -> Result<&'static CyclicExecution, SystemError> {
-        let cyclic_execution = CyclicExecution::new(tasklet, period);
+        let cyclic_execution = CyclicExecution::new(tasklet, period, offset);
 
         match self.cyclic_executions.add(cyclic_execution) {
             Ok(_) => (),

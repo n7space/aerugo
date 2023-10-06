@@ -184,7 +184,7 @@ fn main() -> ! {
 
     let producer_handle = PRODUCER_STORAGE.create_handle().unwrap();
     aerugo.set_tasklet_conditions(&producer_handle, producer_condition_set);
-    aerugo.subscribe_tasklet_to_cyclic(&producer_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&producer_handle, Some(Duration::secs(1)), None);
 
     let distributor_handle = DISTRIBUTOR_STORAGE.create_handle().unwrap();
     aerugo.subscribe_tasklet_to_queue(&distributor_handle, &elem_queue_handle);

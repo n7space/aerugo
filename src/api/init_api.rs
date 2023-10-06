@@ -160,7 +160,8 @@ pub trait InitApi {
     ///
     /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
-    /// * `period` - Time period of the execution.
+    /// * `period` - Period of execution, `None` if should be woke whenever possible.
+    /// * `offset` - Offset of first execution after scheduled start, `None` if should be executed instantly.
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
@@ -168,6 +169,7 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
         period: Option<Duration>,
+        offset: Option<Duration>,
     );
 
     /// Sets tasklet condition set.

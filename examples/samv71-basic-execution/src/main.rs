@@ -44,7 +44,7 @@ fn main() -> ! {
 
     logln!("Subscribing tasks...");
 
-    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&dummy_task_handle, Some(Duration::secs(1)), None);
 
     logln!("Starting the system!");
 

@@ -68,7 +68,7 @@ fn initialize_tasks(aerugo: &'static impl InitApi) {
 
     let timer_test_task_handle = TIMER_TEST_TASK_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&timer_test_task_handle, Some(Duration::millis(100)));
+    aerugo.subscribe_tasklet_to_cyclic(&timer_test_task_handle, Some(Duration::millis(100)), None);
 }
 
 fn initialize_nvic() {

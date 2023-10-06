@@ -73,7 +73,7 @@ fn main() -> ! {
     let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
     let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)), None);
     aerugo.subscribe_tasklet_to_queue(&task_b_handle, &queue_x_handle);
 
     let task_a_condition_set = BooleanConditionSet::from(enable_condition_handle);

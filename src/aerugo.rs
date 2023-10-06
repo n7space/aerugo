@@ -837,7 +837,8 @@ impl InitApi for Aerugo {
     ///
     /// # Parameters
     /// * `tasklet` - Handle to the target tasklet.
-    /// * `period` - Time period of the execution.
+    /// * `period` - Period of execution, `None` if should be woke whenever possible.
+    /// * `offset` - Offset of first execution after scheduled start, `None` if should be executed instantly.
     ///
     /// # Return
     /// `()` if successful, `InitError` otherwise.
@@ -862,20 +863,21 @@ impl InitApi for Aerugo {
     ///     #
     ///     let task_handle = TASK_STORAGE.create_handle().unwrap();
     ///
-    ///     aerugo.subscribe_tasklet_to_cyclic(&task_handle, None);
+    ///     aerugo.subscribe_tasklet_to_cyclic(&task_handle, None, None);
     /// }
     /// ```
     fn subscribe_tasklet_to_cyclic<C, const COND_COUNT: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<(), C, COND_COUNT>,
         period: Option<Duration>,
+        offset: Option<Duration>,
     ) {
         let tasklet = tasklet_handle.tasklet();
 
         // SAFETY: This is safe as long as this function is called only during system initialization.
         unsafe {
             let cyclic_execution = CYCLIC_EXECUTION_MANAGER
-                .create_cyclic_execution(tasklet.ptr(), period)
+                .create_cyclic_execution(tasklet.ptr(), period, offset)
                 .expect("Failed to create a cyclic execution");
 
             tasklet
