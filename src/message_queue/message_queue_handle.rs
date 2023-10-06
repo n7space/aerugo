@@ -41,6 +41,11 @@ impl<T, const N: usize> MessageQueueHandle<T, N> {
         self.queue.send_data(data)
     }
 
+    /// Clears stored queue.
+    pub fn clear(&self) {
+        self.queue.clear()
+    }
+
     /// Returns reference to the queue.
     pub(crate) fn queue(&self) -> &'static MessageQueue<T, N> {
         self.queue
