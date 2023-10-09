@@ -90,7 +90,7 @@ fn init_tasks(aerugo: &'static impl InitApi) {
 
     logln!("Subscribing tasks...");
 
-    aerugo.subscribe_tasklet_to_cyclic(&uart_task_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&uart_task_handle, Some(Duration::secs(1)), None);
 }
 
 #[entry]
