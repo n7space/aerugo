@@ -106,6 +106,8 @@ impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
     }
 }
 
+unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,5 +127,3 @@ mod tests {
         assert_eq!(queue100u64_size, stub_size);
     }
 }
-
-unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
