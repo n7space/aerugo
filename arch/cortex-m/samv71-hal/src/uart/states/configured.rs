@@ -39,10 +39,11 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// UART states.
     ///
     /// See
-    /// * [`UART::switch_to_normal_mode`]
-    /// * [`UART::switch_to_automatic_echo_mode`]
-    /// * [`UART::switch_to_local_loopback_mode`]
+    /// * [`UART::switch_to_normal_mode`],
+    /// * [`UART::switch_to_automatic_echo_mode`],
+    /// * [`UART::switch_to_local_loopback_mode`], and
     /// * [`UART::switch_to_remote_loopback_mode`]
+    ///
     /// for details.
     pub fn loopback_mode(&self) -> LoopbackMode {
         self.registers_ref().mr.read().chmode().variant().into()
@@ -134,11 +135,19 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
 
     /// Calculates the clock divider for provided baudrate and writes it to UART registers.
     ///
+    /// Formula for baudrate is `(source clock frequency) / (16 * clock divider)`.
+    /// **Calculated clock divider may not always precisely represent desired baudrate.**
+    /// Make sure to choose source clock and baudrate values according to this formula
+    /// to prevent issues with data transmission or reception. You can calculate the divider
+    /// for any baudrate and clock using [`calculate_clock_divider`], and the baudrate for
+    /// any clock and it's divider using [`calculate_baudrate`](crate::uart::config::calculate_baudrate). You can also check the
+    /// real baudrate with [`UART::baudrate`].
+    ///
     /// # Parameters
     /// * `baudrate` - New baudrate to be set
     ///
     /// # Returns
-    /// [Ok(())] if baudrate was set successfully, [Err(ConfigurationError)] if baudrate
+    /// `Ok(())` if baudrate was set successfully, `Err(ConfigurationError)` if baudrate
     /// is invalid for current clock configuration.
     pub fn set_baudrate(&mut self, baudrate: u32) -> Result<(), ConfigurationError> {
         // Safety: In `Configured` state, clock source frequency must be set.
@@ -190,8 +199,8 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// Returns current clock divider.
     ///
     /// Clock divider is used for calculating baudrate.
-    /// If you intend to set specific baudrate, instead of calculating it
-    /// manually, use [insert a function when it's done here].
+    /// If you intend to get/set specific baudrate, instead of calculating it
+    /// manually, use [`UART::baudrate`]/[`UART::set_baudrate`].
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
@@ -212,6 +221,8 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
+    ///
+    /// Clock source can only be changed by state transition.
     ///
     /// # Safety
     /// If the divider is equal to 0, baud rate clock is disabled.

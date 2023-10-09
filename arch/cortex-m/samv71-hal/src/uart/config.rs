@@ -259,7 +259,7 @@ impl Config {
 /// Validates provided baudrate and calculates clock divider.
 ///
 /// If you intend to configure the UART, you should use [`Config`] or one
-/// of the [`UART`](super::UART) methods instead, as they are performing baudrate validation.
+/// of the [`UART`](super::UART) methods instead, as they perform baudrate validation too.
 ///
 /// This function should be used only if you want to validate UART baudrate
 /// manually, as there's plenty of methods for baudrate configuration
@@ -270,8 +270,8 @@ impl Config {
 /// * `baudrate_clock_frequency` - Frequency of the clock driving the baudrate.
 ///
 /// # Returns
-/// [`Ok(u16)`] with clock divider if provided baudrate is valid for provided clock
-/// frequency, [`Err(ConfigurationError)`] otherwise.
+/// `Ok(u16)` with clock divider if provided baudrate is valid for provided clock
+/// frequency, `Err(ConfigurationError)` otherwise.
 pub const fn calculate_clock_divider(
     baudrate: u32,
     baudrate_clock_frequency: Frequency,

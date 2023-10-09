@@ -3,6 +3,7 @@
 //! Before using UART, make sure to
 //! - Enable UART peripheral clock using PMC driver
 //! - Set appropriate pins mode to peripheral mode using PIO driver
+//!
 //! Consult the SAMV71 datasheet and [Safety](#safety) section for details.
 //!
 //! This driver allows you to configure and use any available UART peripheral in safe way.
@@ -132,17 +133,22 @@ impl<T> ReceiveTransmit for T where T: Receive + Transmit {}
 /// [`UART::new`] will return `UART<_, NotConfigured>`, which you have to initialize by converting
 /// it to one of three valid states: `UART<_, Receiver>`, `UART<_, Transmitter>` or
 /// `UART<_, Bidirectional>`. To do that, use `UART::into_X` function, where `X` is the desired state.
-/// See [`UART::into_transmitter`], [`UART::into_receiver`] and [`UART::into_bidirectional`] for
-/// details.
+/// See
+/// * [`UART::into_transmitter`],
+/// * [`UART::into_receiver`],
+/// * [`UART::into_bidirectional`], and
+/// * [`UART::disable`]
+///
+/// for details.
 ///
 /// These functions expect some kind of config struct(s). [`Config`] is the generic configuration
 /// for UART in any state, however, some state transitions may require additional configuration,
-/// and if that's the case, additional configuration structure must be provided. For example - RX
-/// filter configuration is applicable only to UART in `Receiver` or `Bidirectional` state, so it's
-/// not present in [`Config`] but rather in [`ReceiverConfig`] structure.
+/// and if that's the case, additional configuration structure must be provided. RX filter configuration
+/// is applicable only to UART in `Receiver` or `Bidirectional` state, so it's not present in [`Config`]
+/// but rather in [`ReceiverConfig`] structure.
 ///
 /// # Safety
-/// **UART driver must be manually notified about baudrate clock frequency changes.**
+/// **UART driver must be manually notified about source clock frequency changes.**
 /// As described in module documentation, unless you drive UART using programmable clock,
 /// **and** you're changing main clock frequency using it's prescaler, **you must de-initialize
 /// UART using [`UART::disable`] before changing clock settings**, and re-initialize it by
@@ -170,7 +176,12 @@ impl<Instance: UartMetadata> UART<Instance, NotConfigured> {
     /// # Returns
     /// UART driver instance in `NotConfigured` state. It must be converted to valid
     /// state using `into_X` method to be usable.
-    /// See [`UART::into_transmitter`], [`UART::into_receiver`] and [`UART::into_bidirectional`]
+    /// See
+    /// * [`UART::into_transmitter`],
+    /// * [`UART::into_receiver`],
+    /// * [`UART::into_bidirectional`], and
+    /// * [`UART::disable`]
+    ///
     /// for details.
     pub fn new(_uart: Instance) -> Self {
         Self {
