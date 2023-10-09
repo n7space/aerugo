@@ -113,6 +113,11 @@ impl Config {
     /// To change other settings, use appropriate chained methods of [`Config`],
     /// or change their fields directly.
     ///
+    /// Provided baudrate will be internally re-calculated after calculating clock
+    /// divider for it, because clock divider might not be able to precisely
+    /// scale the clock for it. If you need to know the precise baudrate, you can
+    /// check it with [`Config::baudrate`] method.
+    ///
     /// # Parameters
     /// * `baudrate` - UART Baudrate in bits per second.
     /// * `peripheral_clock_frequency` - Frequency of peripheral clock.
@@ -124,6 +129,8 @@ impl Config {
         peripheral_clock_frequency: Frequency,
     ) -> Result<Self, ConfigurationError> {
         let clock_divider = calculate_clock_divider(baudrate, peripheral_clock_frequency)?;
+        // Clock divider changed, baudrate must be recalculated
+        let baudrate = calculate_baudrate(clock_divider, peripheral_clock_frequency);
 
         Ok(Self {
             baudrate,
@@ -141,6 +148,11 @@ impl Config {
 
     /// Consumes config and returns a new instance with specified baudrate.
     ///
+    /// Provided baudrate will be internally re-calculated after calculating clock
+    /// divider for it, because clock divider might not be able to precisely
+    /// scale the clock for it. If you need to know the precise baudrate, you can
+    /// check it with [`Config::baudrate`] method.
+    ///
     /// Use this to chain-construct new config, or create modified instance of
     /// existing one, for example:
     /// ```
@@ -151,6 +163,8 @@ impl Config {
     /// You can chain multiple configuration methods.
     pub fn with_baudrate(self, baudrate: u32) -> Result<Self, ConfigurationError> {
         let clock_divider = calculate_clock_divider(baudrate, self.clock_source_frequency)?;
+        // Clock divider changed, baudrate must be recalculated
+        let baudrate = calculate_baudrate(clock_divider, self.clock_source_frequency);
 
         Ok(Self {
             baudrate,
@@ -183,6 +197,11 @@ impl Config {
 
     /// Consumes config and returns a new instance with specified clock source frequency.
     ///
+    /// Original baudrate will be internally re-calculated after calculating clock
+    /// divider for it, because clock divider might not be able to precisely
+    /// scale the clock for it. If you need to know the precise baudrate, you can
+    /// check it with [`Config::baudrate`] method.
+    ///
     /// Use this to chain-construct new config, or create modified instance of
     /// existing one, for example:
     /// ```
@@ -196,8 +215,11 @@ impl Config {
         clock_source_frequency: Frequency,
     ) -> Result<Self, ConfigurationError> {
         let clock_divider = calculate_clock_divider(self.baudrate, clock_source_frequency)?;
+        // Clock divider changed, baudrate must be recalculated
+        let baudrate = calculate_baudrate(clock_divider, clock_source_frequency);
 
         Ok(Self {
+            baudrate,
             clock_source_frequency,
             clock_divider,
             ..self
@@ -300,7 +322,7 @@ pub const fn calculate_clock_divider(
 /// Calculates and returns UART baudrate.
 ///
 /// # Parameters
-/// * `clock_divider` - Baudrate clock divider
+/// * `clock_divider` - Baudrate clock divider. **Cannot be 0**, as it will cause this function to panic.
 /// * `baudrate_clock_frequency` - Frequency of the clock driving the baudrate.
 ///
 /// # Returns
