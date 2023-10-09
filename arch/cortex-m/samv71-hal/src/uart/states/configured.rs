@@ -1,7 +1,7 @@
 //! Module with implementation of UART for all states implementing [`Configured`] typestate trait
 
 use crate::uart::{
-    config::{calculate_clock_divider, ConfigurationError},
+    config::{calculate_clock_divider, ConfigurationError, LoopbackMode},
     metadata::UartMetadata,
     ClockSource, Config, Configured, Frequency, Interrupt, ParityBit, Status, UART,
 };
@@ -28,7 +28,45 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// **This function should usually be called immediately after reading the status.**
     #[inline(always)]
     pub fn reset_status(&mut self) {
-        self.internal_reset_status();
+        self.internal_reset_status()
+    }
+
+    /// Returns current loopback mode of UART.
+    ///
+    /// By default, loopback is disabled (and therefore, this function
+    /// should return [`LoopbackMode::None`]). Loopback modes can be
+    /// enabled with dedicated functions, which are implemented for compatible
+    /// UART states.
+    ///
+    /// See
+    /// * [`UART::switch_to_normal_mode`]
+    /// * [`UART::switch_to_automatic_echo_mode`]
+    /// * [`UART::switch_to_local_loopback_mode`]
+    /// * [`UART::switch_to_remote_loopback_mode`]
+    /// for details.
+    pub fn loopback_mode(&self) -> LoopbackMode {
+        self.registers_ref().mr.read().chmode().variant().into()
+    }
+
+    /// Switches UART into normal mode. This is the default mode of operation.
+    ///
+    /// In this mode, transmitter is connected to TX line and receiver to RX line.
+    #[inline(always)]
+    pub fn switch_to_normal_mode(&mut self) {
+        self.internal_switch_to_normal_mode()
+    }
+
+    /// Switches UART into remote loopback mode.
+    ///
+    /// In this mode, RX line is internally connected to TX line.
+    /// **Transmitter and receiver are disconnected from TX and RX lines.**
+    /// Receiver is pulled to Vdd.
+    ///
+    /// Communication is impossible in this mode.
+    pub fn switch_to_remote_loopback_mode(&mut self) {
+        self.registers_ref()
+            .mr
+            .modify(|_, w| w.chmode().remote_loopback());
     }
 
     /// Returns `true` if specified interrupt is currently enabled.
@@ -88,7 +126,9 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// Returns current UART baudrate (in bits per second).
     #[inline(always)]
     pub fn baudrate(&self) -> u32 {
-        // Safety:
+        // Safety: `internal_get_baudrate` panics when it's called while
+        // source clock is not configured. This UART state (`Configured`)
+        // guarantees that's not the case.
         unsafe { self.internal_get_baudrate() }
     }
 
@@ -180,7 +220,7 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// side-effect.
     #[inline(always)]
     pub unsafe fn set_clock_divider(&mut self, divider: u16) {
-        self.internal_set_clock_divider(divider);
+        self.internal_set_clock_divider(divider)
     }
 
     /// Waits until provided functor returns `true`. Functor receives UART status and should return

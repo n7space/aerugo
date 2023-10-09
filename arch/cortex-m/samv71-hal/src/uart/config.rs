@@ -1,6 +1,6 @@
 //! Module with structures and enumerations representing UART configuration.
 
-use samv71q21_pac::uart0::mr::{BRSRCCKSELECT_A, FILTERSELECT_A, PARSELECT_A};
+use samv71q21_pac::uart0::mr::{BRSRCCKSELECT_A, CHMODESELECT_A, FILTERSELECT_A, PARSELECT_A};
 
 use super::{Frequency, OVERSAMPLING_RATIO};
 
@@ -83,6 +83,24 @@ pub enum ParityBit {
     /// No parity bit
     #[default]
     None,
+}
+
+/// Enumeration representing available loopback modes.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum LoopbackMode {
+    /// Loopback disabled, UART operates normally
+    None,
+    /// RX line is internally connected to TX line.
+    /// Transmitter is disconnected from TX line.
+    AutomaticEcho,
+    /// Transmitter is internally connected to receiver.
+    /// RX and TX lines are disconnected from receiver and transmitter.
+    /// TX line is pulled to Vdd.
+    LocalLoopback,
+    /// RX line is internally connected to TX line.
+    /// Transmitter and receiver are disconnected from TX and RX lines.
+    /// Receiver is pulled to Vdd.
+    RemoteLoopback,
 }
 
 impl Config {
@@ -347,6 +365,28 @@ impl From<ParityBit> for PARSELECT_A {
             ParityBit::Space => PARSELECT_A::SPACE,
             ParityBit::Mark => PARSELECT_A::MARK,
             ParityBit::None => PARSELECT_A::NO,
+        }
+    }
+}
+
+impl From<CHMODESELECT_A> for LoopbackMode {
+    fn from(value: CHMODESELECT_A) -> Self {
+        match value {
+            CHMODESELECT_A::NORMAL => LoopbackMode::None,
+            CHMODESELECT_A::AUTOMATIC => LoopbackMode::AutomaticEcho,
+            CHMODESELECT_A::LOCAL_LOOPBACK => LoopbackMode::LocalLoopback,
+            CHMODESELECT_A::REMOTE_LOOPBACK => LoopbackMode::RemoteLoopback,
+        }
+    }
+}
+
+impl From<LoopbackMode> for CHMODESELECT_A {
+    fn from(value: LoopbackMode) -> Self {
+        match value {
+            LoopbackMode::None => CHMODESELECT_A::NORMAL,
+            LoopbackMode::AutomaticEcho => CHMODESELECT_A::AUTOMATIC,
+            LoopbackMode::LocalLoopback => CHMODESELECT_A::LOCAL_LOOPBACK,
+            LoopbackMode::RemoteLoopback => CHMODESELECT_A::REMOTE_LOOPBACK,
         }
     }
 }

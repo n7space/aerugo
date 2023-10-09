@@ -190,7 +190,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// # Returns
     /// UART in `Transmitter` state, with only the transmission-related functions available.
-    pub fn into_transmitter(mut self, config: Config) -> Self {
+    pub fn into_transmitter(mut self, config: Config) -> UART<Instance, Transmitter> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -210,7 +210,11 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// # Returns
     /// UART in `Receiver` state, with only the reception-related functions available.
-    pub fn into_receiver(mut self, config: Config, receiver_config: ReceiverConfig) -> Self {
+    pub fn into_receiver(
+        mut self,
+        config: Config,
+        receiver_config: ReceiverConfig,
+    ) -> UART<Instance, Receiver> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -232,7 +236,11 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// # Returns
     /// UART in `Bidirectional` state, with both reception- and transmission-related functions
     /// available.
-    pub fn into_bidirectional(mut self, config: Config, receiver_config: ReceiverConfig) -> Self {
+    pub fn into_bidirectional(
+        mut self,
+        config: Config,
+        receiver_config: ReceiverConfig,
+    ) -> UART<Instance, Bidirectional> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -241,6 +249,25 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
         self.internal_set_rx_filter_state(receiver_config.rx_filter_enabled);
         self.enable_transmitter();
         self.enable_receiver();
+
+        UART::transform(self)
+    }
+
+    /// Disables UART by disabling both receiver and transmitter, and stopping baudrate clock.
+    ///
+    /// Does not disable any interrupts. If you want to do that, use [`UART::disable_all_interrupts`].
+    ///
+    /// # Returns
+    /// UART in `NotConfigured` state.
+    pub fn disable(mut self) -> UART<Instance, NotConfigured> {
+        self.disable_receiver();
+        self.disable_transmitter();
+        // Safety: This is intentional, as it disables baudrate clock.
+        unsafe {
+            self.internal_set_clock_divider(0);
+        }
+        self.internal_switch_to_normal_mode();
+        self.internal_reset_status();
 
         UART::transform(self)
     }
@@ -298,8 +325,9 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// The receiver is automatically enabled on conversion into `Receiver` or `Bidirectional`
     /// state, so this function is useful only if you've disabled it manually.
     ///
-    /// This function is private, as it should be used only in state transition code.
-    fn enable_receiver(&mut self) {
+    /// This function is private, as it should be used only in state transition or loopback
+    /// configuration code.
+    pub(super) fn enable_receiver(&mut self) {
         self.registers_ref().cr.write(|w| w.rxen().set_bit());
     }
 
@@ -307,8 +335,9 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// If a byte is being processed, reception is completed before receiver is stopped.
     ///
-    /// This function is private, as it should be used only in state transition code.
-    fn disable_receiver(&mut self) {
+    /// This function is private, as it should be used only in state transition or loopback
+    /// configuration code.
+    pub(super) fn disable_receiver(&mut self) {
         self.registers_ref().cr.write(|w| w.rxdis().set_bit());
     }
 
@@ -317,8 +346,9 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// The transmitter is automatically enabled on conversion into `Transmitter` or `Bidirectional`
     /// state, so this function is useful only if you've disabled it manually.
     ///
-    /// This function is private, as it should be used only in state transition code.
-    fn enable_transmitter(&mut self) {
+    /// This function is private, as it should be used only in state transition or loopback
+    /// configuration code.
+    pub(super) fn enable_transmitter(&mut self) {
         self.registers_ref().cr.write(|w| w.txen().set_bit());
     }
 
@@ -327,9 +357,20 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// If a byte is being processed, and a byte has been written to UART holding
     /// register, both bytes are transmitted before the transmitter is stopped.
     ///
-    /// This function is private, as it should be used only in state transition code.
-    fn disable_transmitter(&mut self) {
+    /// This function is private, as it should be used only in state transition or loopback
+    /// configuration code.
+    pub(super) fn disable_transmitter(&mut self) {
         self.registers_ref().cr.write(|w| w.txdis().set_bit());
+    }
+
+    /// Switches UART into normal mode. This is the default mode of operation.
+    ///
+    /// This function is private - it might be re-exported (defined in public scope
+    /// without prefix) in concrete state implementation, where it's safe to use.
+    ///
+    /// In this mode, transmitter is connected to TX line and receiver to RX line.
+    pub(super) fn internal_switch_to_normal_mode(&mut self) {
+        self.registers_ref().mr.modify(|_, w| w.chmode().normal());
     }
 
     /// Returns current UART baudrate (in bits per second).

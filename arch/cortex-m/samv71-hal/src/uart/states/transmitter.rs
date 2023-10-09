@@ -1,8 +1,8 @@
 //! Module with implementation of UART in transmitter mode.
 //!
-use crate::uart::{metadata::UartMetadata, Error, Transmitter, UART};
+use crate::uart::{metadata::UartMetadata, Error, Transmit, UART};
 
-impl<Instance: UartMetadata> UART<Instance, Transmitter> {
+impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     /// Resets UART transmitter.
     ///
     /// Any pending byte transmission is aborted when the transmitter is reset.
