@@ -101,3 +101,7 @@ impl DataProvider<bool> for BooleanCondition {
         false
     }
 }
+
+/// SAFETY: This is safe, because that structure is only stored by the [BooleanConditionStorage]
+/// which ensures safe access.
+unsafe impl Sync for BooleanCondition {}

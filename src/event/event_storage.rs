@@ -98,6 +98,8 @@ impl EventStorage {
     }
 }
 
+/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
+/// then access to the stored Event can be only done with [EventHandle] or via [InitApi](crate::api::InitApi)
 unsafe impl Sync for EventStorage {}
 
 #[cfg(test)]

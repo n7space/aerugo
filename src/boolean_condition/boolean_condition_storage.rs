@@ -102,6 +102,8 @@ impl BooleanConditionStorage {
     }
 }
 
+/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
+/// then access to the stored BooleanCondition can be only done with [BooleanConditionHandle].
 unsafe impl Sync for BooleanConditionStorage {}
 
 #[cfg(test)]

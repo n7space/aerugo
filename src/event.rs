@@ -79,3 +79,7 @@ impl PartialEq for Event {
         self.id.eq(&other.id)
     }
 }
+
+/// SAFETY: This is safe, because that structure is only stored by the [EventStorage]
+/// which ensures safe access.
+unsafe impl Sync for Event {}

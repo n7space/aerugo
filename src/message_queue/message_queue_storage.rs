@@ -108,6 +108,8 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     }
 }
 
+/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
+/// then access to the stored MessageQueue can be only done with [MessageQueueHandle].
 unsafe impl<T, const N: usize> Sync for MessageQueueStorage<T, N> {}
 
 #[cfg(test)]

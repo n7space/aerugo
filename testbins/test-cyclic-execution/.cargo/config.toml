@@ -1,0 +1,11 @@
+[build]
+target = "thumbv7em-none-eabihf"
+
+[env]
+AERUGO_TASKLET_COUNT = { value = "1" }
+
+[target.thumbv7em-none-eabihf]
+rustflags = [
+    "-C", "link-arg=--nmagic", # Disable page alignment of sections (to prevent issues with binary size)
+    "-C", "link-arg=-Tlink.x", # Use cortex-m-rt's linker script
+]

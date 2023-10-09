@@ -58,13 +58,6 @@ impl<T, const N: usize> MessageQueue<T, N> {
         }
     }
 
-    /// Wakes tasklets registered to this queue.
-    fn wake_tasklets(&self) {
-        for t in &self.registered_tasklets {
-            Aerugo::wake_tasklet(t);
-        }
-    }
-
     /// Sends given data to this queue.
     ///
     /// # Parameters
@@ -81,6 +74,18 @@ impl<T, const N: usize> MessageQueue<T, N> {
         self.wake_tasklets();
 
         Ok(())
+    }
+
+    /// Clears this queue.
+    pub(crate) fn clear(&self) {
+        self.data_queue.lock(|q| while q.dequeue().is_some() {})
+    }
+
+    /// Wakes tasklets registered to this queue.
+    fn wake_tasklets(&self) {
+        for t in &self.registered_tasklets {
+            Aerugo::wake_tasklet(t);
+        }
     }
 }
 
@@ -100,6 +105,10 @@ impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
         self.data_queue.lock(|q| !q.is_empty())
     }
 }
+
+/// SAFETY: This is safe, because that structure is only stored by the [MessageQueueStorage]
+/// which ensures safe access.
+unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
 
 #[cfg(test)]
 mod tests {

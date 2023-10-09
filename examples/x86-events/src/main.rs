@@ -96,7 +96,7 @@ fn main() -> ! {
     let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
     let task_c_handle = TASK_C_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)), None);
 
     let task_b_events = [MyEvents::Event1.into(), MyEvents::Event42.into()];
     aerugo.subscribe_tasklet_to_events(&task_b_handle, task_b_events);

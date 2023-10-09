@@ -47,10 +47,10 @@ fn main() -> ! {
     aerugo.create_tasklet_with_context(task_b_config, task_b, task_b_context, &TASK_B_STORAGE);
 
     let task_a_handle = TASK_A_STORAGE.create_handle().unwrap();
-    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)));
+    aerugo.subscribe_tasklet_to_cyclic(&task_a_handle, Some(Duration::secs(1)), None);
 
     let task_b_handle = TASK_B_STORAGE.create_handle().unwrap();
-    aerugo.subscribe_tasklet_to_cyclic(&task_b_handle, Some(Duration::secs(5)));
+    aerugo.subscribe_tasklet_to_cyclic(&task_b_handle, Some(Duration::secs(5)), None);
 
     aerugo.start();
 }
