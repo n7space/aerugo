@@ -1,58 +1,54 @@
 //! Module with structures and enumerations representing UART configuration.
 
-use samv71q21_pac::uart0::mr::{BRSRCCKSELECT_A, CHMODESELECT_A, PARSELECT_A};
+use samv71q21_pac::uart0::mr::{BRSRCCKSELECT_A, FILTERSELECT_A, PARSELECT_A};
+
+use super::{Frequency, OVERSAMPLING_RATIO};
 
 /// Structure representing UART configuration.
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+///
+/// Public members of this structure can be changed directly, or
+/// via chained functions `with_X`, where `X` is the member name..
+///
+/// Private members can be accessed and modified only via dedicated
+/// functions, as their values may depend on each other.
+///
+/// This structure makes sure that provided UART configuration is
+/// always correct. It should not be possible to create [Config]
+/// instance that contains invalid configuration. Linked fields are
+/// always updated when one of them is being changed (for example,
+/// clock divider is always updated when changing baudrate or source
+/// clock frequency).
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Config {
-    /// Mode (normal/loopback).
-    pub mode: Mode,
-    /// Clock source.
+    /// Baudrate.
+    baudrate: u32,
+    /// clock source.
     pub clock_source: ClockSource,
+    /// clock source frequency.
+    clock_source_frequency: Frequency,
     /// Parity bit configuration.
-    pub parity: ParityBit,
+    pub parity_bit: ParityBit,
+    /// Baudrate clock divider.
+    clock_divider: u16,
+}
+
+/// Structure representing additional UART settings, applicable only
+/// for receiver or bidirectional mode.
+pub struct ReceiverConfig {
     /// If `true`, UART will filter the receive line using a three-sample
     /// filter (16x-bit clock, 2 over 3 majority).
     pub rx_filter_enabled: bool,
 }
 
-/// Enumeration representing UART channel modes.
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
-pub enum Mode {
-    /// Normal mode, UART communicates using I/O pins.
-    #[default]
-    Normal,
-    /// Automatic echo mode, RX data pin is internally connected to TX data pin.
-    /// Receiver works normally, transmitter is disabled.
-    AutomaticEcho,
-    /// Local loopback mode, transmitter is internally connected to receiver and pins are disconnected.
-    /// TX data pin is pulled to VDD in this mode.
-    LocalLoopback,
-    /// Remote loopback mode, RX data pin is connected to TX data pin.
-    /// Receiver nad transmitter are disabled in this mode, and receiver is pulled to VDD.
-    RemoteLoopback,
-}
-
-impl From<CHMODESELECT_A> for Mode {
-    fn from(value: CHMODESELECT_A) -> Self {
-        match value {
-            CHMODESELECT_A::NORMAL => Mode::Normal,
-            CHMODESELECT_A::AUTOMATIC => Mode::AutomaticEcho,
-            CHMODESELECT_A::LOCAL_LOOPBACK => Mode::LocalLoopback,
-            CHMODESELECT_A::REMOTE_LOOPBACK => Mode::RemoteLoopback,
-        }
-    }
-}
-
-impl From<Mode> for CHMODESELECT_A {
-    fn from(value: Mode) -> Self {
-        match value {
-            Mode::Normal => CHMODESELECT_A::NORMAL,
-            Mode::AutomaticEcho => CHMODESELECT_A::AUTOMATIC,
-            Mode::LocalLoopback => CHMODESELECT_A::LOCAL_LOOPBACK,
-            Mode::RemoteLoopback => CHMODESELECT_A::REMOTE_LOOPBACK,
-        }
-    }
+/// Enumeration representing configuration error.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ConfigurationError {
+    /// Specified baudrate is too low, and it would result in clock divider
+    /// larger than maximum possible value.
+    BaudrateTooLow,
+    /// Specified baudrate is too high, and it would cause the clock divider
+    /// to be zero, effectively disabling baudrate clock.
+    BaudrateTooHigh,
 }
 
 /// Enumeration representing UART clock source.
@@ -73,6 +69,246 @@ pub enum ClockSource {
     ProgrammableClock,
 }
 
+/// Enumeration representing UART parity bit configuration.
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+pub enum ParityBit {
+    /// Even parity
+    Even,
+    /// Odd parity
+    Odd,
+    /// Parity forced to 0
+    Space,
+    /// Parity forced to 1
+    Mark,
+    /// No parity bit
+    #[default]
+    None,
+}
+
+impl Config {
+    /// Creates [`Config`] instance with provided baudrate and following defaults:
+    /// * Clock source is peripheral clock (must be enabled via PMC)
+    /// * No parity bit
+    ///
+    /// This function should be used to create new instance of [`Config`].
+    ///
+    /// To change other settings, use appropriate chained methods of [`Config`],
+    /// or change their fields directly.
+    ///
+    /// # Parameters
+    /// * `baudrate` - UART Baudrate in bits per second.
+    /// * `peripheral_clock_frequency` - Frequency of peripheral clock.
+    ///
+    /// # Returns
+    /// Ok([Config]), or Err([ConfigurationError]) if provided configuration is invalid.
+    pub fn new(
+        baudrate: u32,
+        peripheral_clock_frequency: Frequency,
+    ) -> Result<Self, ConfigurationError> {
+        let clock_divider = calculate_clock_divider(baudrate, peripheral_clock_frequency)?;
+
+        Ok(Self {
+            baudrate,
+            clock_source: ClockSource::PeripheralClock,
+            clock_source_frequency: peripheral_clock_frequency,
+            parity_bit: ParityBit::None,
+            clock_divider,
+        })
+    }
+
+    /// Returns configured baudrate.
+    pub fn baudrate(&self) -> u32 {
+        self.baudrate
+    }
+
+    /// Consumes config and returns a new instance with specified baudrate.
+    ///
+    /// Use this to chain-construct new config, or create modified instance of
+    /// existing one, for example:
+    /// ```
+    /// # let old_config = Config::new(9600, 10_000_000.to_Hz());
+    /// let config = old_config.with_baudrate(115200);
+    /// ```
+    ///
+    /// You can chain multiple configuration methods.
+    pub fn with_baudrate(self, baudrate: u32) -> Result<Self, ConfigurationError> {
+        let clock_divider = calculate_clock_divider(baudrate, self.clock_source_frequency)?;
+
+        Ok(Self {
+            baudrate,
+            clock_divider,
+            ..self
+        })
+    }
+
+    /// Consumes config and returns a new instance with specified clock source.
+    ///
+    /// Use this to chain-construct new config, or create modified instance of
+    /// existing one, for example:
+    /// ```
+    /// let config = Config::with_baudrate(9600, 12_000_000.to_Hz())
+    ///              .with_clock_source(ClockSource::ProgrammableClock);
+    /// ```
+    ///
+    /// You can chain multiple configuration methods.
+    pub fn with_clock_source(self, clock_source: ClockSource) -> Self {
+        Self {
+            clock_source,
+            ..self
+        }
+    }
+
+    /// Returns configured frequency of clock source driving the baudrate.
+    pub fn clock_source_frequency(&self) -> Frequency {
+        self.clock_source_frequency
+    }
+
+    /// Consumes config and returns a new instance with specified clock source frequency.
+    ///
+    /// Use this to chain-construct new config, or create modified instance of
+    /// existing one, for example:
+    /// ```
+    /// # let old_config = Config::new(9600, 10_000_000.to_Hz());
+    /// let config = old_config.with_clock_source_frequency(12_000_000.to_Hz());
+    /// ```
+    ///
+    /// You can chain multiple configuration methods.
+    pub fn with_clock_source_frequency(
+        self,
+        clock_source_frequency: Frequency,
+    ) -> Result<Self, ConfigurationError> {
+        let clock_divider = calculate_clock_divider(self.baudrate, clock_source_frequency)?;
+
+        Ok(Self {
+            clock_source_frequency,
+            clock_divider,
+            ..self
+        })
+    }
+
+    /// Consumes config and returns a new instance with specified parity bit.
+    ///
+    /// Use this to chain-construct new config, or create modified instance of
+    /// existing one, for example:
+    /// ```
+    /// let config = Config::with_baudrate(9600, 12_000_000.to_Hz())
+    ///              .with_parity_bit(ParityBit::Odd);
+    /// ```
+    ///
+    /// You can chain multiple configuration methods.
+    pub fn with_parity_bit(self, parity_bit: ParityBit) -> Self {
+        Self { parity_bit, ..self }
+    }
+
+    /// Returns configured clock divider.
+    ///
+    /// Clock divider is automatically updated by [`Config::new`] and all the functions
+    /// that modify baudrate or clock source frequency.
+    pub fn clock_divider(&self) -> u16 {
+        self.clock_divider
+    }
+
+    /// Consumes config and returns a new instance with specified clock source divider.
+    ///
+    /// Setting the clock divider automatically updates the baudrate stored in config.
+    ///
+    /// Use this to chain-construct new config, or create modified instance of
+    /// existing one, for example:
+    /// ```
+    /// # let old_config = Config::new(9600, 10_000_000.to_Hz());
+    /// let config = old_config.with_clock_divider(100);
+    /// ```
+    ///
+    /// You can chain multiple configuration methods.
+    ///
+    /// # Safety
+    /// Setting clock divider to `0` disables baudrate clock, which makes it a potentially
+    /// unwanted side-effect.
+    /// Therefore, this function is `unsafe`. Use it at your own peril. If you want to
+    /// set or modify the baudrate, use baudrate-related functions which prevent UART from
+    /// having it's baudrate clock disabled in this way.
+    pub unsafe fn with_clock_divider(self, clock_divider: u16) -> Self {
+        let baudrate = calculate_baudrate(clock_divider, self.clock_source_frequency);
+
+        Self {
+            baudrate,
+            clock_divider,
+            ..self
+        }
+    }
+}
+
+/// Validates provided baudrate and calculates clock divider.
+///
+/// If you intend to configure the UART, you should use [`Config`] or one
+/// of the [`UART`] methods instead, as they are performing baudrate validation.
+///
+/// This function should be used only if you want to validate UART baudrate
+/// manually, as there's plenty of methods for baudrate configuration
+/// implemented by UART driver that use this function underneath.
+///
+/// # Parameters
+/// * `baudrate` - Baudrate to be validated.
+/// * `baudrate_clock_frequency` - Frequency of the clock driving the baudrate.
+///
+/// # Returns
+/// [`Ok(u16)`] with clock divider if provided baudrate is valid for provided clock
+/// frequency, [`Err(ConfigurationError)`] otherwise.
+pub const fn calculate_clock_divider(
+    baudrate: u32,
+    baudrate_clock_frequency: Frequency,
+) -> Result<u16, ConfigurationError> {
+    let divider = baudrate_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * baudrate);
+
+    // If provided baudrate is larger than clock source frequency / 16, it will
+    // cause the divider to be truncated to 0, which will disable the baudrate clock.
+    // If you intend to disable the baudrate clock that way, set the divider to 0
+    // directly, using `UART::set_clock_divider`.
+    if divider == 0 {
+        return Err(ConfigurationError::BaudrateTooHigh);
+    }
+
+    // If provided baudrate is small enough, it will cause the divider to be
+    // larger than (2^16) - 1, which would cause an integer overflow.
+    if divider > (u16::MAX as u32) {
+        return Err(ConfigurationError::BaudrateTooLow);
+    }
+
+    // This cast is safe, because we validated that `divider` can be represented
+    // as 16-bit unsigned.
+    Ok(divider as u16)
+}
+
+/// Calculates and returns UART baudrate.
+///
+/// # Parameters
+/// * `clock_divider` - Baudrate clock divider
+/// * `baudrate_clock_frequency` - Frequency of the clock driving the baudrate.
+///
+/// # Returns
+/// Baudrate in bits per second.
+pub const fn calculate_baudrate(clock_divider: u16, baudrate_clock_frequency: Frequency) -> u32 {
+    baudrate_clock_frequency.to_Hz() / (OVERSAMPLING_RATIO * (clock_divider as u32))
+}
+
+/// Converts RX filter configuration from PAC to boolean value.
+#[inline(always)]
+pub(super) const fn rx_filter_config_to_bool(config: FILTERSELECT_A) -> bool {
+    match config {
+        FILTERSELECT_A::DISABLED => false,
+        FILTERSELECT_A::ENABLED => true,
+    }
+}
+
+/// Converts boolean value into RX filter configuration from PAC.
+#[inline(always)]
+pub(super) const fn bool_to_rx_filter_config(filter_enabled: bool) -> FILTERSELECT_A {
+    match filter_enabled {
+        true => FILTERSELECT_A::ENABLED,
+        false => FILTERSELECT_A::DISABLED,
+    }
+}
+
 impl From<BRSRCCKSELECT_A> for ClockSource {
     fn from(value: BRSRCCKSELECT_A) -> Self {
         match value {
@@ -89,22 +325,6 @@ impl From<ClockSource> for BRSRCCKSELECT_A {
             ClockSource::ProgrammableClock => BRSRCCKSELECT_A::PMC_PCK,
         }
     }
-}
-
-/// Enumeration representing UART parity bit configuration.
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
-pub enum ParityBit {
-    /// Even parity
-    Even,
-    /// Odd parity
-    Odd,
-    /// Parity forced to 0
-    Space,
-    /// Parity forced to 1
-    Mark,
-    /// No parity bit
-    #[default]
-    None,
 }
 
 impl From<PARSELECT_A> for ParityBit {
