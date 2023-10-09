@@ -23,9 +23,8 @@ impl CyclicExecution {
     ///
     /// # Parameters
     /// * `tasklet` - Tasklet which should be executed cyclically.
-    /// * `period` - Period of execution, `None` if should be woke whenever possible.
+    /// * `period` - Period of execution, `None` if should be awaken whenever possible.
     /// * `offset` - Offset of first execution after scheduled start, `None` if should be executed instantly.
-    /// executed instantly.
     pub(crate) fn new(
         tasklet: TaskletPtr,
         period: Option<Duration>,
