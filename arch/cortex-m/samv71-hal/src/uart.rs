@@ -26,17 +26,24 @@
 //! For details about usage, see [`UART`] struct documentation.
 //!
 //! # Safety
+//! **Make sure to read and understand this safety remark before switching UART to PCK
+//! clock and/or trying to change MCU clocks while using UART**.
+//!
 //! UART can be driven by either peripheral or programmable clock.
 //! If programmable clock (PCK4) is selected, the baud rate is independent of the
 //! processor/bus clock, thus the processor clock can be changed while UART is enabled.
-//! However, only setting of processor clock that can be changed while UART is enabled is,
+//! However, **only the baud rate clock is driven using PCK in that case, parts of UART
+//! peripheral are still driven by peripheral clock, so UART is never fully independent
+//! from peripheral clock**.
+//! Only setting of processor clock that can be changed while UART is enabled is,
 //! per reference manual, Main Clock (MCK) prescaler. Other methods to modify the
 //! processor/bus clock frequency (PLL multiplier, etc.) are forbidden when UART is enabled.
 //!
 //! Therefore, UART must be de-initialized before changing the processor clock in any other
 //! way, and re-initialized afterwards.
 //!
-//! The peripheral clock frequency must be at least three times higher than PCK.
+//! **The peripheral clock frequency must be at least three times higher than PCK.**
+//! In other words, PCK frequency can be equal to at most 1/3rd peripheral clock frequency.
 
 extern crate embedded_io;
 
