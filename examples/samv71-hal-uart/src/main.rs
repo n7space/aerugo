@@ -11,15 +11,16 @@ use aerugo::Mutex;
 
 use aerugo::hal::drivers::pio::{pin::Peripheral, Port};
 use aerugo::hal::drivers::pmc::config::PeripheralId;
-use aerugo::hal::drivers::uart::{Frequency, Mode, UART};
+use aerugo::hal::drivers::uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, UART};
 use aerugo::hal::user_peripherals::{PIOD, PMC, UART4};
+use aerugo::time::RateExtU32;
 use aerugo::{
     logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage,
 };
 use rt::entry;
 
-static UART: Mutex<RefCell<Option<UART<UART4>>>> = Mutex::new(RefCell::new(None));
+static UART: Mutex<RefCell<Option<UART<UART4, Bidirectional>>>> = Mutex::new(RefCell::new(None));
 
 fn uart_task(_: (), context: &mut UartTaskContext, _: &'static dyn RuntimeApi) {
     UART.lock(|uart| {
@@ -55,12 +56,15 @@ fn init_pio(port: Port<PIOD>) {
     pins[19].take().unwrap().into_peripheral_pin(Peripheral::C);
 }
 
-fn init_uart(mut uart: UART<UART4>) {
-    uart.set_mode(Mode::LocalLoopback);
-    uart.set_baudrate(12000, Frequency::MHz(12)).unwrap();
-    uart.enable_receiver();
-    uart.enable_transmitter();
-    uart.reset_status();
+fn init_uart(uart: UART<UART4, NotConfigured>) {
+    let mut uart = uart.into_bidirectional(
+        Config::new(9600, 12.MHz()).unwrap(),
+        ReceiverConfig {
+            rx_filter_enabled: true,
+        },
+    );
+
+    uart.switch_to_local_loopback_mode();
 
     UART.lock(|uart_ref| uart_ref.replace(Some(uart)));
 }
@@ -93,12 +97,12 @@ fn init_tasks(aerugo: &'static impl InitApi) {
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    logln!("Hello, world! Aerugo initialized!");
+    logln!("Hello, world! Aerugo initialized! Initializing hardware...");
 
-    logln!("Initializing hardware...");
     let port = Port::new(peripherals.pio_d.take().unwrap());
     let pmc = peripherals.pmc.unwrap();
     let uart = UART::new(peripherals.uart_4.take().unwrap());
+
     init_clocks(pmc);
     init_pio(port);
     init_uart(uart);
