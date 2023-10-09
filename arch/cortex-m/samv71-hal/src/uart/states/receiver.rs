@@ -1,9 +1,7 @@
 //! Module with implementation of UART in receiver mode.
 
 use crate::uart::{
-    config::{bool_to_rx_filter_config, rx_filter_config_to_bool},
-    metadata::UartMetadata,
-    Error, Receiver, UART,
+    config::rx_filter_config_to_bool, metadata::UartMetadata, Error, Receiver, UART,
 };
 
 impl<Instance: UartMetadata> UART<Instance, Receiver> {
@@ -24,10 +22,9 @@ impl<Instance: UartMetadata> UART<Instance, Receiver> {
     /// Sets receive line filtering state.
     ///
     /// Filtering is done using a three-sample filter (16x-bit clock, 2 over 3 majority).
+    #[inline(always)]
     pub fn set_rx_filter_state(&mut self, enabled: bool) {
-        self.registers_ref()
-            .mr
-            .modify(|_, w| w.filter().variant(bool_to_rx_filter_config(enabled)));
+        self.internal_set_rx_filter_state(enabled);
     }
 
     /// Receives a single byte. Blocks until a byte is received, or timeout is hit.
