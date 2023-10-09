@@ -196,8 +196,7 @@ impl<Instance: UartMetadata, State: Configured> UART<Instance, State> {
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
     ///
-    /// Clock source can be changed with [`UART::set_clock_source`]
-    /// after UART is configured for the first time via `into_X` method.
+    /// Clock source can only be changed by state transition.
     ///
     /// If the divider is equal to 0, baud rate clock is disabled.
     #[inline(always)]

@@ -259,7 +259,7 @@ impl Config {
 /// Validates provided baudrate and calculates clock divider.
 ///
 /// If you intend to configure the UART, you should use [`Config`] or one
-/// of the [`UART`] methods instead, as they are performing baudrate validation.
+/// of the [`UART`](super::UART) methods instead, as they are performing baudrate validation.
 ///
 /// This function should be used only if you want to validate UART baudrate
 /// manually, as there's plenty of methods for baudrate configuration

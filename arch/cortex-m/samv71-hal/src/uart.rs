@@ -145,7 +145,7 @@ impl<T> ReceiveTransmit for T where T: Receive + Transmit {}
 /// **UART driver must be manually notified about baudrate clock frequency changes.**
 /// As described in module documentation, unless you drive UART using programmable clock,
 /// **and** you're changing main clock frequency using it's prescaler, **you must de-initialize
-/// UART using [`UART::deinitialize`] before changing clock settings**, and re-initialize it by
+/// UART using [`UART::disable`] before changing clock settings**, and re-initialize it by
 /// converting it into desired state after the clock is configured.
 pub struct UART<Metadata: UartMetadata, CurrentState: State> {
     /// Frequency of the clock driving UART baudrate.
@@ -403,8 +403,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
     ///
-    /// Clock source can be changed with [`UART::set_clock_source`]
-    /// after UART is configured for the first time via `into_X` method.
+    /// Clock source can only be changed by state transition.
     ///
     /// This function is private - it might be re-exported (defined in public scope
     /// without prefix) in private state implementation, where it's safe to use.
