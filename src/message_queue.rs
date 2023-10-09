@@ -106,6 +106,8 @@ impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
     }
 }
 
+/// SAFETY: This is safe, because that structure is only stored by the [MessageQueueStorage]
+/// which ensures safe access.
 unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
 
 #[cfg(test)]
