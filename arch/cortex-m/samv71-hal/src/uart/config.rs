@@ -23,11 +23,11 @@ pub struct Config {
     /// Baudrate.
     baudrate: u32,
     /// clock source.
-    pub clock_source: ClockSource,
+    clock_source: ClockSource,
     /// clock source frequency.
     clock_source_frequency: Frequency,
     /// Parity bit configuration.
-    pub parity_bit: ParityBit,
+    parity_bit: ParityBit,
     /// Baudrate clock divider.
     clock_divider: u16,
 }
@@ -173,6 +173,11 @@ impl Config {
         })
     }
 
+    /// Returns configured clock source.
+    pub fn clock_source(&self) -> ClockSource {
+        self.clock_source
+    }
+
     /// Consumes config and returns a new instance with specified clock source.
     ///
     /// Use this to chain-construct new config, or create modified instance of
@@ -224,6 +229,11 @@ impl Config {
             clock_divider,
             ..self
         })
+    }
+
+    /// Returns configured parity bit
+    pub fn parity_bit(&self) -> ParityBit {
+        self.parity_bit
     }
 
     /// Consumes config and returns a new instance with specified parity bit.

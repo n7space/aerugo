@@ -483,6 +483,8 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private - it might be re-exported (defined in public scope
     /// without prefix) in concrete state implementation, where it's safe to use.
     fn internal_set_config(&mut self, config: Config) {
+        self.clock_source_frequency
+            .replace(config.clock_source_frequency());
         // Disable baudrate clock before changing the configuration.
         // Safety: This is intentional. Setting divider to 0 disabled baudrate clock.
         unsafe {
@@ -494,9 +496,9 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
             w.chmode()
                 .normal()
                 .brsrcck()
-                .variant(config.clock_source.into())
+                .variant(config.clock_source().into())
                 .par()
-                .variant(config.parity_bit.into())
+                .variant(config.parity_bit().into())
                 .filter()
                 .disabled()
         });
