@@ -7,7 +7,6 @@ use aerugo::time::RateExtU32;
 use calldwell::write_str;
 
 fn test_divider_calculation_functions() {
-    // UART internally uses both these functions for all baudrate/divider-related checks.
     assert_eq!(calculate_baudrate(1, 100.kHz()), 100_000 / 16);
     assert_eq!(calculate_baudrate(2, 100.kHz()), 100_000 / 32);
     assert_eq!(calculate_baudrate(3, 100.kHz()), 100_000 / 48);
@@ -117,6 +116,29 @@ fn test_uart_config_methods() {
     let config = unsafe { config.with_clock_divider(123) };
     assert_eq!(config.clock_divider(), 123);
     assert_eq!(config.baudrate(), 10_162);
+
+    // Check if config cannot be tail-changed to an invalid value
+    Config::new(100_000, 16.MHz())
+        .unwrap()
+        .with_baudrate(1)
+        .expect_err(
+            "1bps @ 16MHz should be invalid, as it would produce divider larger than 65535",
+        );
+    Config::new(100_000, 16.MHz())
+        .unwrap()
+        .with_baudrate(10_000_000)
+        .expect_err("10Mbps @ 16MHz should be invalid, as it would produce divider lesser than 1");
+
+    Config::new(100, 16.MHz())
+        .unwrap()
+        .with_clock_source_frequency(200.MHz())
+        .expect_err(
+            "100bps @ 200MHz should be invalid, as it would produce divider larger than 65535",
+        );
+    Config::new(100_000, 16.MHz())
+        .unwrap()
+        .with_clock_source_frequency(100.Hz())
+        .expect_err("100kbps @ 100Hz should be invalid, as it would produce divider lesser than 1");
 
     write_str("UART `Config` methods test successful");
 }

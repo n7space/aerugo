@@ -103,8 +103,8 @@ fn main() -> ! {
     logln!("Hello, world! Aerugo initialized! Initializing hardware...");
 
     let port = Port::new(peripherals.pio_d.take().unwrap());
-    let pmc = peripherals.pmc.unwrap();
     let uart = UART::new(peripherals.uart_4.take().unwrap());
+    let pmc = peripherals.pmc.unwrap();
 
     init_clocks(pmc);
     init_pio(port);
