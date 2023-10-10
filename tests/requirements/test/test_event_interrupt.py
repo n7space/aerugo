@@ -1,4 +1,4 @@
-"""Integration test for changing value of boolean condition in an interrupt"""
+"""Integration test for event handling from interrupt context"""
 
 
 from __future__ import annotations
