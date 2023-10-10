@@ -12,6 +12,7 @@ description = "Crate containing drivers for SAMV71 peripherals"
 [dependencies]
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 embedded-hal = "1.0.0-rc.1"
+embedded-io = "0.6"
 fugit = "0.3.7"
 heapless = "0.7.16"
 samv71q21-pac = { version = "0.1.0", path = "../samv71q21-pac" }
