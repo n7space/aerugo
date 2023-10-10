@@ -23,6 +23,7 @@ use aerugo::{
     },
     Aerugo, InitApi, SystemHardwareConfig,
 };
+use calldwell::write_str;
 use rt::entry;
 
 fn configure_pmc(pmc: &mut PMC) {
@@ -68,6 +69,8 @@ fn main() -> ! {
     let uart = UART::new(peripherals.uart_4.take().unwrap());
     config_tests::test_uart_config();
     uart_tests::test_uart(uart);
+
+    write_str("All UART tests finished successfully.");
 
     aerugo.start();
 }

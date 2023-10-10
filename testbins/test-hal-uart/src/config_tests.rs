@@ -12,7 +12,7 @@ pub fn test_uart_config() {
     test_uart_config_creation();
     test_uart_config_methods();
 
-    write_str("UART `Config` and calcs tests successful");
+    write_str("All UART `Config` and calcs tests successful");
 }
 
 fn test_divider_calculation_functions() {
