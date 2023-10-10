@@ -6,11 +6,9 @@ use super::{Frequency, OVERSAMPLING_RATIO};
 
 /// Structure representing UART configuration.
 ///
-/// Public members of this structure can be changed directly, or
-/// via chained functions `with_X`, where `X` is the member name..
-///
-/// Private members can be accessed and modified only via dedicated
-/// functions, as their values may depend on each other.
+/// For consistency, all members of this structure are private, but
+/// can be changed via `with_X` method (for example, [`Config::with_baudrate`]),
+/// and accessed via standard getters (for example, [`Config::baudrate`]).
 ///
 /// This structure makes sure that provided UART configuration is
 /// always correct. It should not be possible to create [Config]
