@@ -6,6 +6,15 @@ use aerugo::hal::drivers::uart::{
 use aerugo::time::RateExtU32;
 use calldwell::write_str;
 
+/// Tests UART configuration structures, as they are responsible for validating UART config.
+pub fn test_uart_config() {
+    test_divider_calculation_functions();
+    test_uart_config_creation();
+    test_uart_config_methods();
+
+    write_str("UART `Config` and calcs tests successful");
+}
+
 fn test_divider_calculation_functions() {
     assert_eq!(calculate_baudrate(1, 100.kHz()), 100_000 / 16);
     assert_eq!(calculate_baudrate(2, 100.kHz()), 100_000 / 32);
@@ -79,9 +88,9 @@ fn test_uart_config_methods() {
     // Nice, precise config.
     let config = Config::new(100_000, 16.MHz()).unwrap();
     assert_eq!(config.baudrate(), 100_000);
-    assert_eq!(config.clock_source, ClockSource::PeripheralClock);
+    assert_eq!(config.clock_source(), ClockSource::PeripheralClock);
     assert_eq!(config.clock_source_frequency(), Frequency::MHz(16));
-    assert_eq!(config.parity_bit, ParityBit::None);
+    assert_eq!(config.parity_bit(), ParityBit::None);
     assert_eq!(config.clock_divider(), 10);
 
     // Bit more ugly config, as 9600 cannot be nicely made out of 6MHz clock.
@@ -90,9 +99,9 @@ fn test_uart_config_methods() {
         .with_clock_source(ClockSource::ProgrammableClock)
         .with_parity_bit(ParityBit::Mark);
     assert_eq!(config.baudrate(), 9_615);
-    assert_eq!(config.clock_source, ClockSource::ProgrammableClock);
+    assert_eq!(config.clock_source(), ClockSource::ProgrammableClock);
     assert_eq!(config.clock_source_frequency(), Frequency::MHz(6));
-    assert_eq!(config.parity_bit, ParityBit::Mark);
+    assert_eq!(config.parity_bit(), ParityBit::Mark);
     assert_eq!(config.clock_divider(), 39);
 
     // Another seemingly ugly config, but this time, tail-change it's baudrate
@@ -101,9 +110,9 @@ fn test_uart_config_methods() {
         .with_baudrate(123456)
         .unwrap();
     assert_eq!(config.baudrate(), 128_600);
-    assert_eq!(config.clock_source, ClockSource::PeripheralClock);
+    assert_eq!(config.clock_source(), ClockSource::PeripheralClock);
     assert_eq!(config.clock_source_frequency(), Frequency::Hz(12_345_678));
-    assert_eq!(config.parity_bit, ParityBit::None);
+    assert_eq!(config.parity_bit(), ParityBit::None);
     assert_eq!(config.clock_divider(), 6);
 
     // And also change the clock source frequency. Baudrate should be close to original.
@@ -141,13 +150,4 @@ fn test_uart_config_methods() {
         .expect_err("100kbps @ 100Hz should be invalid, as it would produce divider lesser than 1");
 
     write_str("UART `Config` methods test successful");
-}
-
-/// Tests UART configuration structures, as they are responsible for validating UART config.
-pub fn test_uart_config() {
-    test_divider_calculation_functions();
-    test_uart_config_creation();
-    test_uart_config_methods();
-
-    write_str("UART `Config` and calcs tests successful");
 }
