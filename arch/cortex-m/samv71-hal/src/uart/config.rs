@@ -34,6 +34,7 @@ pub struct Config {
 
 /// Structure representing additional UART settings, applicable only
 /// for receiver or bidirectional mode.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct ReceiverConfig {
     /// If `true`, UART will filter the receive line using a three-sample
     /// filter (16x-bit clock, 2 over 3 majority).
