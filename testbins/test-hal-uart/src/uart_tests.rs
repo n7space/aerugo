@@ -62,6 +62,20 @@ fn test_uart_configuration<Instance: UartMetadata>(
     uart.set_baudrate(1_000_000)
         .expect_err("1Mbps @ 12MHz is invalid, as it would result in divider smaller than 1");
 
+    // Check receiver configuration
+    let mut uart = uart.into_receiver(
+        expected_config,
+        ReceiverConfig {
+            rx_filter_enabled: true,
+        },
+    );
+    assert!(uart.is_rx_filter_enabled());
+
+    uart.set_rx_filter_state(false);
+    assert!(!uart.is_rx_filter_enabled());
+    uart.set_rx_filter_state(true);
+    assert!(uart.is_rx_filter_enabled());
+
     write_str("UART configuration test finished successfully");
     uart.disable()
 }
