@@ -1,3 +1,4 @@
+use aerugo::hal::drivers::uart::config::LoopbackMode;
 use aerugo::hal::drivers::uart::{
     Config as UartConfig, NotConfigured, ParityBit, ReceiverConfig, UartMetadata, UART,
 };
@@ -16,7 +17,8 @@ use calldwell::write_str;
 /// of communication functions multiple times with different data.
 pub fn test_uart<Instance: UartMetadata>(uart: UART<Instance, NotConfigured>) {
     let uart = test_uart_configuration(uart);
-    let _uart = test_uart_state_transition(uart);
+    let uart = test_uart_state_transition(uart);
+    let _uart = test_uart_local_loopback(uart);
     write_str("All UART functional tests finished successfully.");
 }
 
@@ -118,7 +120,6 @@ fn test_uart_state_transition<Instance: UartMetadata>(
 
     // Check that again, but this time de-initialize UART before changing the state.
     let uart = uart.disable();
-
     let uart = uart.into_receiver(test_config_a, test_receiver_config_a);
     assert_eq!(uart.config(), test_config_a);
     assert_eq!(
@@ -139,5 +140,35 @@ fn test_uart_state_transition<Instance: UartMetadata>(
     );
 
     write_str("UART state transition test finished successfully");
+    uart.disable()
+}
+
+fn test_uart_local_loopback<Instance: UartMetadata>(
+    uart: UART<Instance, NotConfigured>,
+) -> UART<Instance, NotConfigured> {
+    let test_config = UartConfig::new(115200, 12.MHz()).unwrap();
+    let mut uart = uart.into_bidirectional(
+        test_config,
+        ReceiverConfig {
+            rx_filter_enabled: false,
+        },
+    );
+
+    // Validate default state and loopback config
+    assert_eq!(uart.loopback_mode(), LoopbackMode::None);
+    uart.switch_to_local_loopback_mode();
+    assert_eq!(uart.loopback_mode(), LoopbackMode::LocalLoopback);
+
+    // Validate that all possible byte values can be transmitted via UART
+    for byte in u8::MIN..=u8::MAX {
+        uart.transmit_byte(byte, 10).unwrap();
+        assert_eq!(uart.receive_byte(10).unwrap(), byte);
+    }
+
+    // Disabling UART also switches it to normal mode. Let's validate that.
+    let uart = uart.disable().into_transmitter(test_config);
+    assert_eq!(uart.loopback_mode(), LoopbackMode::None);
+
+    write_str("UART local loopback test finished successfully");
     uart.disable()
 }
