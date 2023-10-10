@@ -6,13 +6,14 @@ impl<Instance: UartMetadata, State: Receive> UART<Instance, State> {
     /// Receives a single byte. Blocks until a byte is received, or timeout is hit.
     ///
     /// # Parameters
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles to wait for the character.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to spend on waiting for the flag.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(u8)` if reception was successful, the value is the received byte.
     /// `Err(())` on timeout.
-    pub fn receive_byte(&self, timeout_cpu_cycles: u32) -> Result<u8, Error> {
-        match self.wait_for_byte_reception(timeout_cpu_cycles) {
+    pub fn receive_byte(&self, timeout_cycles: u32) -> Result<u8, Error> {
+        match self.wait_for_byte_reception(timeout_cycles) {
             Ok(_) => Ok(self.get_received_byte()),
             Err(_) => Err(Error::TimedOut),
         }

@@ -19,14 +19,15 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///
     /// # Parameters
     /// * `byte` - Byte to transmit
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission should take.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.                         
-    pub fn transmit_byte(&mut self, byte: u8, timeout_cpu_cycles: u32) -> Result<(), Error> {
-        if let Ok(timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
+    pub fn transmit_byte(&mut self, byte: u8, timeout_cycles: u32) -> Result<(), Error> {
+        if let Ok(timeout_cycles) = self.wait_for_transmitter_ready(timeout_cycles) {
             self.set_transmitted_byte(byte);
-            return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
+            return match self.wait_for_transmission_to_complete(timeout_cycles) {
                 Ok(_) => Ok(()),
                 Err(_) => Err(Error::TimedOut),
             };
@@ -44,21 +45,22 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///
     /// # Parameters
     /// * `bytes` - Bytes to transmit.
-    /// * `timeout_cpu_cycles` - Maximum amount of CPU cycles the transmission of whole buffer should take.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
     /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.
-    pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cpu_cycles: u32) -> Result<(), Error> {
-        if let Ok(mut timeout_cpu_cycles) = self.wait_for_transmitter_ready(timeout_cpu_cycles) {
+    pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cycles: u32) -> Result<(), Error> {
+        if let Ok(mut timeout_cycles) = self.wait_for_transmitter_ready(timeout_cycles) {
             for &byte in bytes {
                 self.set_transmitted_byte(byte);
-                match self.wait_for_transmitter_ready(timeout_cpu_cycles) {
-                    Ok(remaining_timeout) => timeout_cpu_cycles = remaining_timeout,
+                match self.wait_for_transmitter_ready(timeout_cycles) {
+                    Ok(remaining_timeout) => timeout_cycles = remaining_timeout,
                     Err(_) => return Err(Error::TimedOut),
                 }
             }
 
-            return match self.wait_for_transmission_to_complete(timeout_cpu_cycles) {
+            return match self.wait_for_transmission_to_complete(timeout_cycles) {
                 Ok(_) => Ok(()),
                 Err(_) => Err(Error::TimedOut),
             };
