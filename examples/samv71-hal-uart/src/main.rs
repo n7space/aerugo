@@ -5,10 +5,6 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
-use core::cell::RefCell;
-
-use aerugo::Mutex;
-
 use aerugo::hal::drivers::pio::{pin::Peripheral, Port};
 use aerugo::hal::drivers::pmc::config::PeripheralId;
 use aerugo::hal::drivers::uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, UART};
@@ -20,26 +16,22 @@ use aerugo::{
 };
 use rt::entry;
 
-static UART: Mutex<RefCell<Option<UART<UART4, Bidirectional>>>> = Mutex::new(RefCell::new(None));
-
 fn uart_task(_: (), context: &mut UartTaskContext, _: &'static dyn RuntimeApi) {
-    UART.lock(|uart| {
-        let uart = uart.get_mut().as_mut().unwrap();
-        uart.transmit_byte(context.byte_to_transmit, 1_000_000)
-            .unwrap();
-        let received_byte = uart.receive_byte(1_000_000).unwrap();
-        logln!(
-            "Transmitted {:#02X}, received {:#02X}",
-            context.byte_to_transmit,
-            received_byte
-        );
-    });
+    let uart = &mut context.uart;
+    uart.transmit_byte(context.byte_to_transmit, 1_000_000)
+        .unwrap();
+    let received_byte = uart.receive_byte(1_000_000).unwrap();
+    logln!(
+        "Transmitted {:#02X}, received {:#02X}",
+        context.byte_to_transmit,
+        received_byte
+    );
 
     context.byte_to_transmit = context.byte_to_transmit.wrapping_add(1);
 }
 
-#[derive(Default)]
 struct UartTaskContext {
+    pub uart: UART<UART4, Bidirectional>,
     pub byte_to_transmit: u8,
 }
 
@@ -56,7 +48,7 @@ fn init_pio(port: Port<PIOD>) {
     pins[19].take().unwrap().into_peripheral_pin(Peripheral::C);
 }
 
-fn init_uart(uart: UART<UART4, NotConfigured>) {
+fn init_uart(uart: UART<UART4, NotConfigured>) -> UART<UART4, Bidirectional> {
     let mut uart = uart.into_bidirectional(
         Config::new(9600, 12.MHz()).unwrap(),
         ReceiverConfig {
@@ -65,11 +57,10 @@ fn init_uart(uart: UART<UART4, NotConfigured>) {
     );
 
     uart.switch_to_local_loopback_mode();
-
-    UART.lock(|uart_ref| uart_ref.replace(Some(uart)));
+    uart
 }
 
-fn init_tasks(aerugo: &'static impl InitApi) {
+fn init_tasks(aerugo: &'static impl InitApi, uart: UART<UART4, Bidirectional>) {
     logln!("Initializing tasks...");
 
     let uart_task_config = TaskletConfig {
@@ -77,7 +68,10 @@ fn init_tasks(aerugo: &'static impl InitApi) {
         ..Default::default()
     };
 
-    let uart_task_context = UartTaskContext::default();
+    let uart_task_context = UartTaskContext {
+        uart,
+        byte_to_transmit: 0,
+    };
 
     aerugo.create_tasklet_with_context(
         uart_task_config,
@@ -105,9 +99,7 @@ fn main() -> ! {
 
     init_clocks(pmc);
     init_pio(port);
-    init_uart(uart);
-
-    init_tasks(aerugo);
+    init_tasks(aerugo, init_uart(uart));
 
     logln!("Starting the system!");
     aerugo.start();
