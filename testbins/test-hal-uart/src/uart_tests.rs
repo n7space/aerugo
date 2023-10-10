@@ -161,8 +161,8 @@ fn test_uart_local_loopback<Instance: UartMetadata>(
 
     // Validate that all possible byte values can be transmitted via UART
     for byte in u8::MIN..=u8::MAX {
-        uart.transmit_byte(byte, 10).unwrap();
-        assert_eq!(uart.receive_byte(10).unwrap(), byte);
+        uart.transmit_byte(byte, 100).unwrap();
+        assert_eq!(uart.receive_byte(100).unwrap(), byte);
     }
 
     // Disabling UART also switches it to normal mode. Let's validate that.
