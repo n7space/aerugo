@@ -18,9 +18,11 @@ use rt::entry;
 
 fn uart_task(_: (), context: &mut UartTaskContext, _: &'static dyn RuntimeApi) {
     let uart = &mut context.uart;
+    
     uart.transmit_byte(context.byte_to_transmit, 1_000_000)
         .unwrap();
     let received_byte = uart.receive_byte(1_000_000).unwrap();
+    
     logln!(
         "Transmitted {:#02X}, received {:#02X}",
         context.byte_to_transmit,
