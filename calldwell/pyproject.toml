@@ -64,7 +64,9 @@ select = [
     "PERF", # perflint
     "RUF",  # ruff-specific rules
 ]
-ignore = []
+ignore = [
+    "TD003", # We don't want to link stuff to TODOs
+]
 
 [tool.ruff.pylint]
 max-args = 6
@@ -101,6 +103,7 @@ logging-not-lazy,
 locally-disabled,
 suppressed-message,
 import-error,
+use-implicit-booleaness-not-comparison-to-zero,
 '''
 
 
