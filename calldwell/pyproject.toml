@@ -13,9 +13,9 @@ paramiko = "^3.3.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
-mypy = "^1.5.1"
-pylint = "^2.17.5"
-ruff = "^0.0.289"
+mypy = "^1.6.0"
+pylint = "^3.0.1"
+ruff = "^0.0.292"
 types-paramiko = "^3.3.0.0"
 
 [tool.black]
