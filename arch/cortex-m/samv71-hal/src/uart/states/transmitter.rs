@@ -10,12 +10,8 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
         self.registers_ref().cr.write(|w| w.rsttx().set_bit());
     }
 
-    /// Transmits a single byte. Blocks until the transmission is completed, or timeout
-    /// is hit.
-    ///
-    /// UART has no direct PMC dependency, and PMC doesn't support clock frequency calculations
-    /// yet, therefore the timeout is specified as amount of CPU cycles to wait until UART
-    /// finishes the transmission.
+    /// Transmits a single byte.
+    /// Does not wait until transmission is completed, use [`UART::flush`] for that.
     ///
     /// # Parameters
     /// * `byte` - Byte to transmit
@@ -23,25 +19,19 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
-    /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.                         
+    /// `Ok(())` on successful transmission, `Err(Error::TimedOut)` if timeout has been reached.                         
     pub fn transmit_byte(&mut self, byte: u8, timeout_cycles: u32) -> Result<(), Error> {
-        if let Ok(timeout_cycles) = self.wait_for_transmitter_ready(timeout_cycles) {
-            self.set_transmitted_byte(byte);
-            return match self.wait_for_transmission_to_complete(timeout_cycles) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(Error::TimedOut),
-            };
+        match self.wait_for_transmitter_ready(timeout_cycles) {
+            Ok(_) => {
+                self.set_transmitted_byte(byte);
+                Ok(())
+            }
+            Err(_) => Err(Error::TimedOut),
         }
-
-        Err(Error::TimedOut)
     }
 
     /// Transmits multiple bytes. Blocks until the transmission is completed, or timeout
-    /// is hit.
-    ///
-    /// This function is more optimal than calling [`UART::transmit_byte`] in a loop, as
-    /// it will feed the holding register as soon as possible, instead of waiting for transmission
-    /// to finish. It should be preferred for this kind of operations.
+    /// is hit. Flushes the UART after transmitting last byte.
     ///
     /// # Parameters
     /// * `bytes` - Bytes to transmit.
@@ -49,7 +39,7 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
-    /// `Ok(())` on successful transmission, `Err(())` if timeout has been reached.
+    /// `Ok(())` on successful transmission, `Err(Error::TimedOut)` if timeout has been reached.
     pub fn transmit_bytes(&mut self, bytes: &[u8], timeout_cycles: u32) -> Result<(), Error> {
         if let Ok(mut timeout_cycles) = self.wait_for_transmitter_ready(timeout_cycles) {
             for &byte in bytes {
@@ -60,13 +50,24 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
                 }
             }
 
-            return match self.wait_for_transmission_to_complete(timeout_cycles) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(Error::TimedOut),
-            };
+            return self.flush(timeout_cycles);
         }
 
         Err(Error::TimedOut)
+    }
+
+    /// Flushes the UART by waiting until currently transmitted character is processed.
+    ///
+    /// # Parameters
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    ///                      This is basically an amount of loop iterations with status checks.
+    ///
+    /// # Returns
+    /// `Ok(())` on successful flush, `Err(Error::TimedOut)` if timeout has been reached.
+    pub fn flush(&mut self, timeout_cycles: u32) -> Result<(), Error> {
+        self.wait_for_transmission_to_complete(timeout_cycles)
+            .map(|_| ())
+            .map_err(|_| Error::TimedOut)
     }
 
     /// Writes a byte to be transmitted next into TX holding register.
