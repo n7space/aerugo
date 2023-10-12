@@ -15,7 +15,7 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///
     /// # Parameters
     /// * `byte` - Byte to transmit
-    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait until transmitter is ready.
     ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
@@ -35,7 +35,8 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     ///
     /// # Parameters
     /// * `bytes` - Bytes to transmit.
-    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait until transmission is complete.
+    ///                      **Timeout is defined for the whole transaction**, not for single byte's transmission.
     ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
@@ -59,7 +60,7 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     /// Flushes the UART by waiting until currently transmitted character is processed.
     ///
     /// # Parameters
-    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait for byte reception.
+    /// * `timeout_cycles` - Maximum amount of arbitrary "cycles" to wait until a single byte is transmitted.
     ///                      This is basically an amount of loop iterations with status checks.
     ///
     /// # Returns
