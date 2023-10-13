@@ -1,8 +1,8 @@
 //! Module with implementation of UART in bidirectional mode.
 //!
-use crate::uart::{metadata::UartMetadata, Bidirectional, UART};
+use crate::uart::{metadata::UARTMetadata, Bidirectional, UART};
 
-impl<Instance: UartMetadata> UART<Instance, Bidirectional> {
+impl<Instance: UARTMetadata> UART<Instance, Bidirectional> {
     /// Switches UART into local loopback mode.
     ///
     /// In this mode, transmitter is internally connected to receiver.
@@ -12,7 +12,7 @@ impl<Instance: UartMetadata> UART<Instance, Bidirectional> {
     /// Effectively, every sent byte should be automatically received by
     /// the same UART.
     pub fn switch_to_local_loopback_mode(&mut self) {
-        self.registers_ref()
+        Instance::registers()
             .mr
             .modify(|_, w| w.chmode().local_loopback());
     }

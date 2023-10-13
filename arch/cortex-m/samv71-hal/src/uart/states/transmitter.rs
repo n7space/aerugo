@@ -1,13 +1,13 @@
 //! Module with implementation of UART in transmitter mode.
 //!
-use crate::uart::{metadata::UartMetadata, Error, Transmit, UART};
+use crate::uart::{metadata::UARTMetadata, Error, Transmit, UART};
 
-impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
+impl<Instance: UARTMetadata, State: Transmit> UART<Instance, State> {
     /// Resets UART transmitter.
     ///
     /// Any pending byte transmission is aborted when the transmitter is reset.
     pub fn reset_transmitter(&mut self) {
-        self.registers_ref().cr.write(|w| w.rsttx().set_bit());
+        Instance::registers().cr.write(|w| w.rsttx().set_bit());
     }
 
     /// Transmits a single byte.
@@ -76,7 +76,7 @@ impl<Instance: UartMetadata, State: Transmit> UART<Instance, State> {
     /// Doesn't perform any checks. This is simply a wrapper for register write.
     #[inline(always)]
     fn set_transmitted_byte(&mut self, byte: u8) {
-        self.registers_ref().thr.write(|w| w.txchr().variant(byte));
+        Instance::registers().thr.write(|w| w.txchr().variant(byte));
     }
 
     /// Blocks the CPU until either the transmission is complete, or timeout is hit.

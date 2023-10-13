@@ -1,8 +1,8 @@
 //! Module with implementation of UART in receiver mode.
 
-use crate::uart::{config::rx_filter_config_to_bool, metadata::UartMetadata, Error, Receive, UART};
+use crate::uart::{config::rx_filter_config_to_bool, metadata::UARTMetadata, Error, Receive, UART};
 
-impl<Instance: UartMetadata, State: Receive> UART<Instance, State> {
+impl<Instance: UARTMetadata, State: Receive> UART<Instance, State> {
     /// Receives a single byte. Blocks until a byte is received, or timeout is hit.
     ///
     /// # Parameters
@@ -25,21 +25,21 @@ impl<Instance: UartMetadata, State: Receive> UART<Instance, State> {
     /// Will return `0` if no data has been received yet.
     #[inline(always)]
     fn get_received_byte(&self) -> u8 {
-        self.registers_ref().rhr.read().rxchr().bits()
+        Instance::registers().rhr.read().rxchr().bits()
     }
 
     /// Resets UART receiver.
     ///
     /// Any pending byte reception is aborted when the receiver is reset.
     pub fn reset_receiver(&mut self) {
-        self.registers_ref().cr.write(|w| w.rstrx().set_bit());
+        Instance::registers().cr.write(|w| w.rstrx().set_bit());
     }
 
     /// Returns true if receive line is filtered.
     ///
     /// Filtering is done using a three-sample filter (16x-bit clock, 2 over 3 majority).
     pub fn is_rx_filter_enabled(&self) -> bool {
-        rx_filter_config_to_bool(self.registers_ref().mr.read().filter().variant())
+        rx_filter_config_to_bool(Instance::registers().mr.read().filter().variant())
     }
 
     /// Sets receive line filtering state.
@@ -56,7 +56,7 @@ impl<Instance: UartMetadata, State: Receive> UART<Instance, State> {
     /// **Transmitter is disconnected from TX line, and therefore unusable in this mode**.
     /// Receiver operates normally in this mode.
     pub fn switch_to_automatic_echo_mode(&mut self) {
-        self.registers_ref()
+        Instance::registers()
             .mr
             .modify(|_, w| w.chmode().automatic());
     }
