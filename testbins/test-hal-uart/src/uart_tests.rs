@@ -1,6 +1,6 @@
 use aerugo::hal::drivers::uart::config::LoopbackMode;
 use aerugo::hal::drivers::uart::{
-    Config as UartConfig, NotConfigured, ParityBit, ReceiverConfig, UartMetadata, UART,
+    Config as UartConfig, NotConfigured, ParityBit, ReceiverConfig, UARTMetadata, UART,
 };
 use aerugo::time::RateExtU32;
 use calldwell::write_str;
@@ -15,14 +15,14 @@ use calldwell::write_str;
 ///
 /// Both transmission and reception test should check synchronous and asynchronous communication, and all variants
 /// of communication functions multiple times with different data.
-pub fn test_uart<Instance: UartMetadata>(uart: UART<Instance, NotConfigured>) {
+pub fn test_uart<Instance: UARTMetadata>(uart: UART<Instance, NotConfigured>) {
     let uart = test_uart_configuration(uart);
     let uart = test_uart_state_transition(uart);
     let _uart = test_uart_local_loopback(uart);
     write_str("All UART functional tests finished successfully.");
 }
 
-fn test_uart_configuration<Instance: UartMetadata>(
+fn test_uart_configuration<Instance: UARTMetadata>(
     uart: UART<Instance, NotConfigured>,
 ) -> UART<Instance, NotConfigured> {
     let expected_config = UartConfig::new(125_000, 12.MHz()).unwrap();
@@ -82,7 +82,7 @@ fn test_uart_configuration<Instance: UartMetadata>(
     uart.disable()
 }
 
-fn test_uart_state_transition<Instance: UartMetadata>(
+fn test_uart_state_transition<Instance: UARTMetadata>(
     uart: UART<Instance, NotConfigured>,
 ) -> UART<Instance, NotConfigured> {
     // "dummy" configs can be set, as long as they are not used. It's user's responsibility to
@@ -143,7 +143,7 @@ fn test_uart_state_transition<Instance: UartMetadata>(
     uart.disable()
 }
 
-fn test_uart_local_loopback<Instance: UartMetadata>(
+fn test_uart_local_loopback<Instance: UARTMetadata>(
     uart: UART<Instance, NotConfigured>,
 ) -> UART<Instance, NotConfigured> {
     let test_config = UartConfig::new(115200, 12.MHz()).unwrap();
@@ -159,10 +159,13 @@ fn test_uart_local_loopback<Instance: UartMetadata>(
     uart.switch_to_local_loopback_mode();
     assert_eq!(uart.loopback_mode(), LoopbackMode::LocalLoopback);
 
+    let mut reader = uart.take_reader().expect("UART reader not available!");
+    let mut writer = uart.take_writer().expect("UART writer not available!");
+
     // Validate that all possible byte values can be transmitted via UART
     for byte in u8::MIN..=u8::MAX {
-        uart.transmit_byte(byte, 100).unwrap();
-        assert_eq!(uart.receive_byte(100).unwrap(), byte);
+        writer.transmit_byte(byte, 100).unwrap();
+        assert_eq!(reader.receive_byte(100).unwrap(), byte);
     }
 
     // Disabling UART also switches it to normal mode. Let's validate that.
