@@ -7,6 +7,8 @@ extern crate panic_rtt_target;
 
 use aerugo::hal::drivers::pio::{pin::Peripheral, Port};
 use aerugo::hal::drivers::pmc::config::PeripheralId;
+use aerugo::hal::drivers::uart::reader::Reader;
+use aerugo::hal::drivers::uart::writer::Writer;
 use aerugo::hal::drivers::uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, UART};
 use aerugo::hal::user_peripherals::{PIOD, PMC, UART4};
 use aerugo::time::RateExtU32;
@@ -17,11 +19,11 @@ use aerugo::{
 use rt::entry;
 
 fn uart_task(_: (), context: &mut UartTaskContext, _: &'static dyn RuntimeApi) {
-    let uart = &mut context.uart;
-
-    uart.transmit_byte(context.byte_to_transmit, 1_000_000)
+    context
+        .writer
+        .transmit_byte(context.byte_to_transmit, 1_000_000)
         .unwrap();
-    let received_byte = uart.receive_byte(1_000_000).unwrap();
+    let received_byte = context.reader.receive_byte(1_000_000).unwrap();
 
     logln!(
         "Transmitted {:#02X}, received {:#02X}",
@@ -33,7 +35,8 @@ fn uart_task(_: (), context: &mut UartTaskContext, _: &'static dyn RuntimeApi) {
 }
 
 struct UartTaskContext {
-    pub uart: UART<UART4, Bidirectional>,
+    pub writer: Writer<UART4>,
+    pub reader: Reader<UART4>,
     pub byte_to_transmit: u8,
 }
 
@@ -62,7 +65,7 @@ fn init_uart(uart: UART<UART4, NotConfigured>) -> UART<UART4, Bidirectional> {
     uart
 }
 
-fn init_tasks(aerugo: &'static impl InitApi, uart: UART<UART4, Bidirectional>) {
+fn init_tasks(aerugo: &'static impl InitApi, mut uart: UART<UART4, Bidirectional>) {
     logln!("Initializing tasks...");
 
     let uart_task_config = TaskletConfig {
@@ -70,8 +73,12 @@ fn init_tasks(aerugo: &'static impl InitApi, uart: UART<UART4, Bidirectional>) {
         ..Default::default()
     };
 
+    let reader = uart.take_reader().unwrap();
+    let writer = uart.take_writer().unwrap();
+
     let uart_task_context = UartTaskContext {
-        uart,
+        reader,
+        writer,
         byte_to_transmit: 0,
     };
 
