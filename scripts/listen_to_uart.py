@@ -91,7 +91,7 @@ def main() -> None:
         sys.exit(1)
 
     while True:
-        if (data := uart.read_any()) is not None:
+        if (data := uart.read_bytes()) is not None:
             print(data)
 
 
