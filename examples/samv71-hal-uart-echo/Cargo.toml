@@ -1,0 +1,26 @@
+[package]
+name = "samv71-hal-uart-echo"
+authors = ["Wojciech Olech <wojciech_olech@hotmail.com>"]
+edition = "2021"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aerugo = { version = "0.1.0", path = "../..", features = [
+    "use-aerugo-cortex-m",
+    "rt",
+] }
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
+cortex-m-rt = { version = "0.7.3", features = ["device"] }
+critical-section = "1.1.2"
+lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
+panic-rtt-target = { version = "0.1.2", features = ["cortex-m"] }
+
+[features]
+rt = ["aerugo/rt"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+debug = true
