@@ -104,6 +104,7 @@ locally-disabled,
 suppressed-message,
 import-error,
 use-implicit-booleaness-not-comparison-to-zero,
+duplicate-code,
 '''
 
 
