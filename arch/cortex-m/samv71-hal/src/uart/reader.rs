@@ -35,13 +35,16 @@ impl<Instance: UARTMetadata> Reader<Instance> {
     /// [`Reader::get_received_byte`] instead, as it doesn't perform the additional status check.
     /// However, this function will also work fine in that context, it'll just double-check that.
     ///
+    /// This function requires mutable access to Reader, as reading the character from RX holding
+    /// register while "receiver ready" flag is set will reset it's state and clear this flag.
+    ///
     /// # Parameters
     /// * `timeout` - Maximum amount of UART status checks before declaring timeout.
     ///
     /// # Returns
     /// `Ok(u8)` if reception was successful, with the value of received byte.
     /// `Err(())` on timeout.
-    pub fn receive_byte(&self, timeout: u32) -> Result<u8, Error> {
+    pub fn receive_byte(&mut self, timeout: u32) -> Result<u8, Error> {
         self.wait_for_byte_reception(timeout)
             // This is safe, as we just verified that receiver is ready and RX holding register
             // contains a received byte.
@@ -55,6 +58,9 @@ impl<Instance: UARTMetadata> Reader<Instance> {
     /// This function is meant to be used primarily in interrupt handlers, as a slightly faster
     /// version of [`Reader::receive_byte`] that avoids double-checking the status register.
     ///
+    /// This function requires mutable access to Reader, as reading the character from RX holding
+    /// register while "receiver ready" flag is set will reset it's state and clear this flag.
+    ///
     /// # Safety
     /// This function doesn't wait for UART to indicate that there's data in RX register, and will
     /// return `0` if there's no received data there, instead of an error.
@@ -66,7 +72,7 @@ impl<Instance: UARTMetadata> Reader<Instance> {
     /// Received byte, if UART status flag indicates that there's one in RX register.
     /// `0`` otherwise.
     #[inline(always)]
-    pub unsafe fn get_received_byte(&self) -> u8 {
+    pub unsafe fn get_received_byte(&mut self) -> u8 {
         Instance::registers().rhr.read().rxchr().bits()
     }
 
