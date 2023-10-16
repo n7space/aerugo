@@ -50,6 +50,8 @@ extern crate embedded_io;
 use core::marker::PhantomData;
 
 use self::config::{bool_to_rx_filter_config, calculate_baudrate};
+use self::reader::Reader;
+use self::writer::Writer;
 
 pub use embedded_io::ErrorKind as Error;
 
@@ -58,8 +60,10 @@ pub use super::time::HertzU32 as Frequency;
 pub mod config;
 pub mod interrupt;
 pub mod metadata;
+pub mod reader;
 pub mod states;
 pub mod status;
+pub mod writer;
 
 pub use self::config::{ClockSource, Config, ParityBit, ReceiverConfig};
 pub use self::interrupt::Interrupt;
@@ -166,6 +170,14 @@ pub struct UART<Instance: UARTMetadata, CurrentState: State> {
     /// the clock source or it's frequency, otherwise
     /// UART will not work correctly.
     clock_source_frequency: Option<Frequency>,
+    /// UART Reader instance.
+    /// Can be taken using [`UART::take_reader`] in Receiver mode.
+    /// Can be put here after taking it using [`UART::put_reader`] in Receiver mode.
+    reader: Option<Reader<Instance>>,
+    /// UART Writer instance.
+    /// Can be taken using [`UART::take_writer`] in Transmitter mode.
+    /// Can be put here after taking it using [`UART::put_writer`] in Transmitter mode.
+    writer: Option<Writer<Instance>>,
     /// PAC UART instance metadata.
     _meta: PhantomData<Instance>,
     /// State metadata.
@@ -192,6 +204,8 @@ impl<Instance: UARTMetadata> UART<Instance, NotConfigured> {
     pub fn new(_uart: Instance) -> Self {
         Self {
             clock_source_frequency: None,
+            reader: Some(Reader::new()),
+            writer: Some(Writer::new()),
             _meta: PhantomData,
             _state: PhantomData,
         }
@@ -321,6 +335,8 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     const fn transform<NewState: State>(uart: UART<Instance, NewState>) -> Self {
         Self {
             clock_source_frequency: uart.clock_source_frequency,
+            reader: uart.reader,
+            writer: uart.writer,
             _meta: PhantomData,
             _state: PhantomData,
         }

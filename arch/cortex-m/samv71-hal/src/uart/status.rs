@@ -1,5 +1,7 @@
 //! Module with structures and enumerations representing UART status.
 
+use samv71q21_pac::uart0::sr;
+
 /// Structure representing UART status.
 pub struct Status {
     /// `true` if received character matches the programmed comparison criteria.
@@ -19,4 +21,18 @@ pub struct Status {
     pub transmitter_ready: bool,
     /// `true` if RX holding register contains a complete character, ready to be read.
     pub receiver_ready: bool,
+}
+
+impl From<sr::R> for Status {
+    fn from(reg: sr::R) -> Self {
+        Status {
+            comparison_matched: reg.cmp().bit_is_set(),
+            transmitter_empty: reg.txempty().bit_is_set(),
+            parity_error: reg.pare().bit_is_set(),
+            framing_error: reg.frame().bit_is_set(),
+            overrun_error: reg.ovre().bit_is_set(),
+            transmitter_ready: reg.txrdy().bit_is_set(),
+            receiver_ready: reg.rxrdy().bit_is_set(),
+        }
+    }
 }
