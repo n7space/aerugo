@@ -31,8 +31,9 @@ use aerugo::{
 use lazy_static::lazy_static;
 use rt::entry;
 
-// This is storage dedicated to UART IRQ handler.
-// Non-IRQ code must initialize it before enabling UART IRQ, and must never touch it again.
+/// This storage is dedicated to UART IRQ handler.
+/// It must be initialized before enabling UART IRQ.
+/// This storage can be safely accessed outside of UART IRQ code only when UART IRQ is disabled.
 static mut UART_READER_STORAGE: Option<Reader<UART4>> = None;
 
 const UART_DATA_QUEUE_SIZE: usize = 128;
