@@ -12,6 +12,7 @@ mod uart_tests;
 use aerugo::{
     hal::{
         drivers::{
+            nvic::NVIC,
             pio::{pin::Peripheral, Port},
             pmc::config::{
                 pck::{PCKConfig, PCKPrescaler, PCKSource, PCK},
@@ -63,12 +64,14 @@ fn main() -> ! {
     let mut pmc = peripherals.pmc.take().unwrap();
     configure_pmc(&mut pmc);
 
+    let nvic = NVIC::new(peripherals.nvic.take().unwrap());
+
     let port_d = Port::new(peripherals.pio_d.take().unwrap());
     configure_pio(port_d);
 
     let uart = UART::new(peripherals.uart_4.take().unwrap());
     config_tests::test_uart_config();
-    uart_tests::test_uart(uart);
+    uart_tests::test_uart(uart, nvic);
 
     write_str("All UART tests finished successfully.");
 
