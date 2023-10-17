@@ -1,6 +1,6 @@
 use aerugo::hal::drivers::uart::config::LoopbackMode;
 use aerugo::hal::drivers::uart::{
-    Config as UartConfig, NotConfigured, ParityBit, ReceiverConfig, UARTMetadata, UART,
+    Config as UartConfig, Error, NotConfigured, ParityBit, ReceiverConfig, UARTMetadata, UART,
 };
 use aerugo::time::RateExtU32;
 use calldwell::write_str;
@@ -13,11 +13,12 @@ use calldwell::write_str;
 /// * Test transmission with test host
 /// * Test reception with test host
 ///
-/// Both transmission and reception test should check synchronous and asynchronous communication, and all variants
-/// of communication functions multiple times with different data.
+/// Both transmission and reception test should check synchronous and asynchronous communication,
+/// and all variants of communication functions multiple times with different data.
 pub fn test_uart<Instance: UARTMetadata>(uart: UART<Instance, NotConfigured>) {
     let uart = test_uart_configuration(uart);
     let uart = test_uart_state_transition(uart);
+    let uart = test_reader_writer(uart);
     let _uart = test_uart_local_loopback(uart);
     write_str("All UART functional tests finished successfully.");
 }
@@ -78,7 +79,7 @@ fn test_uart_configuration<Instance: UARTMetadata>(
     uart.set_rx_filter_state(true);
     assert!(uart.is_rx_filter_enabled());
 
-    write_str("UART configuration test finished successfully");
+    write_str("UART configuration test finished successfully.");
     uart.disable()
 }
 
@@ -139,16 +140,59 @@ fn test_uart_state_transition<Instance: UARTMetadata>(
         test_receiver_config_b.rx_filter_enabled
     );
 
-    write_str("UART state transition test finished successfully");
+    write_str("UART state transition test finished successfully.");
     uart.disable()
+}
+
+fn test_reader_writer<Instance: UARTMetadata>(
+    uart: UART<Instance, NotConfigured>,
+) -> UART<Instance, NotConfigured> {
+    let uart_config = UartConfig::new(115200, 12.MHz()).unwrap();
+    let mut uart = uart.into_bidirectional(
+        uart_config,
+        ReceiverConfig {
+            rx_filter_enabled: false,
+        },
+    );
+
+    assert!(uart.has_reader());
+    assert!(uart.has_writer());
+
+    // Check if reader and writer can be taken from UART.
+    let mut reader = uart.take_reader().expect("UART reader not available!");
+    let mut writer = uart.take_writer().expect("UART writer not available!");
+
+    assert!(!uart.has_reader());
+    assert!(!uart.has_writer());
+
+    // Disable UART and check if reader and writer will time-out.
+    // I/O functions of reader/writer are tested in other test cases.
+    let mut uart = uart.disable();
+
+    assert_eq!(
+        writer.transmit_byte(0xAA, 10_000).unwrap_err(),
+        Error::TimedOut
+    );
+    assert_eq!(reader.receive_byte(10_000).unwrap_err(), Error::TimedOut);
+
+    uart.put_reader(reader);
+    assert!(uart.has_reader());
+    assert!(!uart.has_writer());
+
+    uart.put_writer(writer);
+    assert!(uart.has_reader());
+    assert!(uart.has_writer());
+
+    write_str("UART Reader/Writer test finished successfully.");
+    uart
 }
 
 fn test_uart_local_loopback<Instance: UARTMetadata>(
     uart: UART<Instance, NotConfigured>,
 ) -> UART<Instance, NotConfigured> {
-    let test_config = UartConfig::new(115200, 12.MHz()).unwrap();
+    let uart_config = UartConfig::new(115200, 12.MHz()).unwrap();
     let mut uart = uart.into_bidirectional(
-        test_config,
+        uart_config,
         ReceiverConfig {
             rx_filter_enabled: false,
         },
@@ -169,9 +213,12 @@ fn test_uart_local_loopback<Instance: UARTMetadata>(
     }
 
     // Disabling UART also switches it to normal mode. Let's validate that.
-    let uart = uart.disable().into_transmitter(test_config);
+    let mut uart = uart.disable().into_transmitter(uart_config);
     assert_eq!(uart.loopback_mode(), LoopbackMode::None);
 
-    write_str("UART local loopback test finished successfully");
+    uart.put_reader(reader);
+    uart.put_writer(writer);
+
+    write_str("UART local loopback test finished successfully.");
     uart.disable()
 }

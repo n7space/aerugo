@@ -12,7 +12,7 @@ pub fn test_uart_config() {
     test_uart_config_creation();
     test_uart_config_methods();
 
-    write_str("All UART `Config` and calcs tests successful");
+    write_str("All UART `Config` and calcs tests successful.");
 }
 
 fn test_divider_calculation_functions() {
@@ -43,7 +43,7 @@ fn test_divider_calculation_functions() {
     calculate_clock_divider(1_000_000, 100.kHz())
         .expect_err("Reaching 1Mbps @ 100kHz would require divider lesser than 1, therefore should not be possible");
 
-    write_str("UART baudrate and divider calculation test successful");
+    write_str("UART baudrate and divider calculation test successful.");
 }
 
 fn test_uart_config_creation() {
@@ -81,7 +81,7 @@ fn test_uart_config_creation() {
         "10bps @ 10485600Hz should be valid, as it's more than (source clock frequency)/(16*65535)",
     );
 
-    write_str("UART `Config` creation test successful");
+    write_str("UART `Config` creation test successful.");
 }
 
 fn test_uart_config_methods() {
@@ -149,5 +149,5 @@ fn test_uart_config_methods() {
         .with_clock_source_frequency(100.Hz())
         .expect_err("100kbps @ 100Hz should be invalid, as it would produce divider lesser than 1");
 
-    write_str("UART `Config` methods test successful");
+    write_str("UART `Config` methods test successful.");
 }
