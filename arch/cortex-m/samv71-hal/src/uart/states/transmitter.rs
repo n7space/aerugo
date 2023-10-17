@@ -15,16 +15,6 @@ impl<Instance: UARTMetadata, State: Transmit> UART<Instance, State> {
         self.writer.take()
     }
 
-    /// Stores [`Writer`] instance inside UART.
-    pub fn put_writer(&mut self, writer: Writer<Instance>) {
-        self.writer.replace(writer);
-    }
-
-    /// Returns `true` if UART currently has [`Writer`] instance.
-    pub fn has_writer(&self) -> bool {
-        self.writer.is_some()
-    }
-
     /// Resets UART transmitter.
     ///
     /// Any pending byte transmission is aborted when the transmitter is reset.
