@@ -259,13 +259,28 @@ class RemoteUARTConnection:
             return Err(buffer_read_result.unwrap_err())
 
         if (terminator_index := self._rx_buffer.find(terminator)) >= 0:
-            return Ok(self._take_bytes_out_of_rx_buffer(terminator_index).decode("UTF-8"))
+            return Ok(
+                self._take_bytes_out_of_rx_buffer(terminator_index + len(terminator)).decode(
+                    "UTF-8",
+                ),
+            )
 
         # If a valid string isn't yet available in the buffer, try to read it again, but in
-        # blocking mode:
-        buffer_read_result = self._read_bytes_to_internal_buffer(timeout_seconds, maximum_length)
-        if buffer_read_result.is_ok and (terminator_index := self._rx_buffer.find(terminator)) >= 0:
-            return Ok(self._take_bytes_out_of_rx_buffer(terminator_index).decode("UTF-8"))
+        # blocking mode. Repeat until timeout is hit to make sure that data in chunks is
+        # received correctly.
+
+        while (
+            buffer_read_result := self._read_bytes_to_internal_buffer(
+                timeout_seconds,
+                maximum_length,
+            )
+        ).is_ok:
+            if (terminator_index := self._rx_buffer.find(terminator)) >= 0:
+                return Ok(
+                    self._take_bytes_out_of_rx_buffer(terminator_index + len(terminator)).decode(
+                        "UTF-8",
+                    ),
+                )
 
         # If `read_result` is not an integer, then it's an error which should be propagated.
         # Received data will stay in RX buffer until it's taken via `read_bytes` or some other
@@ -360,6 +375,9 @@ class RemoteUARTConnection:
             self._socat_pid = 0
 
     def __del__(self: RemoteUARTConnection) -> None:
+        # If you get an exception there, fix your destruction order manually.
+        # It may happen if SSH session is killed before UART.
+        # Make sure you close UART before closing the SSH session.
         self.close_uart()
 
     @staticmethod
