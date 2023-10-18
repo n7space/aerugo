@@ -12,6 +12,7 @@ mod test_hal_pmc;
 mod test_hal_scb;
 mod test_hal_systick;
 mod test_hal_timer;
+mod test_hal_uart;
 mod test_hal_watchdog;
 mod test_message_queue;
 mod test_message_queue_clear;
