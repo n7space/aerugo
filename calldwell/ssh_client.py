@@ -24,6 +24,7 @@ class SSHClient:
         * `password` - user password
         * `port` - SSH port, default: 22
         """
+        self._host = host
         self.client: paramiko.SSHClient = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.connect(hostname=host, port=port, username=login, password=password)
@@ -37,13 +38,19 @@ class SSHClient:
         stdout: ChannelFile
         stderr: ChannelStderrFile
 
+    @property
+    def host(self: SSHClient) -> str:
+        """Returns hostname of the client"""
+        return self._host
+
     def execute(
         self: SSHClient,
         command: str,
         timeout: float | None = None,
         environment: dict[str, str] | None = None,
-    ) -> CommandChannels:
-        """Executes a command on remote, returns `stdin`, `stdout`, `stderr` wrapped in dataclass.
+    ) -> tuple[int, CommandChannels]:
+        """Executes a command on remote, returns PID of created process and `stdin`, `stdout`,
+        `stderr` wrapped in dataclass.
 
         # Parameters
         * `command` - command (and arguments) to be executed, in form of a single string
@@ -52,12 +59,17 @@ class SSHClient:
         * `environment` - additional environment variables for executed program.
         """
 
+        # This will start a new shell, echo it's PID, and replace it with command.
+        # That way, we can safely get the PID of executed process before it starts.
         stdin, stdout, stderr = self.client.exec_command(
-            command,
+            f"sh -c 'echo $$; exec {command}'",
             timeout=timeout,
             environment=environment,
         )
-        return self.CommandChannels(stdin, stdout, stderr)
+
+        # Consume the PID from output
+        pid = int(stdout.readline())
+        return (pid, self.CommandChannels(stdin, stdout, stderr))
 
     def upload_file_to_remote(
         self: SSHClient,

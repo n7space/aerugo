@@ -10,12 +10,13 @@ readme = "README.md"
 python = "^3.9"
 pygdbmi = "^0.11.0.0"
 paramiko = "^3.3.1"
+option = "^2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
-mypy = "^1.5.1"
-pylint = "^2.17.5"
-ruff = "^0.0.289"
+mypy = "^1.6.0"
+pylint = "^3.0.1"
+ruff = "^0.0.292"
 types-paramiko = "^3.3.0.0"
 
 [tool.black]
@@ -64,7 +65,9 @@ select = [
     "PERF", # perflint
     "RUF",  # ruff-specific rules
 ]
-ignore = []
+ignore = [
+    "TD003", # We don't want to link stuff to TODOs
+]
 
 [tool.ruff.pylint]
 max-args = 6
@@ -101,6 +104,8 @@ logging-not-lazy,
 locally-disabled,
 suppressed-message,
 import-error,
+use-implicit-booleaness-not-comparison-to-zero,
+duplicate-code,
 '''
 
 

@@ -269,7 +269,7 @@ def _initialize_rtt(
     if not gdb.setup_rtt(rtt_address, RTT_SECTION_SEARCHED_MEMORY_LENGTH, RTT_SECTION_ID):
         logging.error(
             f"Could not setup RTT for section @ {rtt_address} "
-            "(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)",
+            f"(searched {RTT_SECTION_SEARCHED_MEMORY_LENGTH} bytes)",
         )
         return None
 
