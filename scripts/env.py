@@ -52,7 +52,5 @@ LOGGER_INIT_FUNCTION_NAME = "aerugo_cortex_m::logger::init_log"
 # Test scripts create a TCP socket using `socat` that serves as a network interface for UART.
 BOARD_UART_DEVICE = str(os.environ.get("AERUGO_BOARD_UART_DEVICE"))
 """Device path of UART on development setup"""
-BOARD_UART_BAUDRATE = int(str(os.environ.get("AERUGO_BOARD_UART_BAUDRATE")))
-"""Baudrate of UART on development setup"""
 BOARD_UART_PORT = int(str(os.environ.get("AERUGO_BOARD_UART_PORT")))
 """TCP port for UART bridge between development setup and machine running the tests"""

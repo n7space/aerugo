@@ -11,7 +11,6 @@ from test_utils import finish_test, init_test, wait_for_messages
 from calldwell import init_default_logger
 from calldwell.uart import RemoteUARTConfig, RemoteUARTConnection
 from scripts.env import (
-    BOARD_UART_BAUDRATE,
     BOARD_UART_DEVICE,
     BOARD_UART_PORT,
 )
@@ -47,7 +46,7 @@ def main() -> None:
     uart_config = RemoteUARTConfig(
         device_path=BOARD_UART_DEVICE,
         port=BOARD_UART_PORT,
-        baudrate=BOARD_UART_BAUDRATE,
+        baudrate=57600,
     )
     uart = RemoteUARTConnection(ssh, uart_config)
     if not uart.open_uart():
