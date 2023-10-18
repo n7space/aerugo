@@ -10,7 +10,11 @@ from test_utils import finish_test, init_test, wait_for_messages
 
 from calldwell import init_default_logger
 from calldwell.uart import RemoteUARTConfig, RemoteUARTConnection
-from scripts.env import BOARD_UART_BAUDRATE, BOARD_UART_DEVICE, BOARD_UART_PORT
+from scripts.env import (
+    BOARD_UART_BAUDRATE,
+    BOARD_UART_DEVICE,
+    BOARD_UART_PORT,
+)
 
 if TYPE_CHECKING:
     from calldwell.rtt_client import CalldwellRTTClient
@@ -50,7 +54,7 @@ def main() -> None:
         logging.critical("TEST FAILED, could not establish UART connection!")
         sys.exit(100)
 
-    perform_uart_io_tests(uart, rtt, ssh)
+    perform_uart_io_tests(uart, rtt, ssh, 1024)
 
     wait_for_messages(
         rtt,
@@ -69,18 +73,47 @@ def perform_uart_io_tests(
     uart: RemoteUARTConnection,
     rtt: CalldwellRTTClient,
     ssh: SSHClient,
+    data_length: int,
 ) -> None:
     """Tests UART I/O using UART interface that's connected to target board"""
     # Perform a simple handshake to make sure that the connection is established correctly
     # (baudrates are OK, etc.)
-    perform_uart_handshake(uart)
-    wait_for_messages(rtt, ssh, ["UART handshake done!"])
+    perform_uart_handshake(uart, rtt, ssh)
+
+    # Reception test (test host -> MCU) with large chunk of data
+    uart.write_bytes(bytes([i % 0x100 for i in range(data_length)]))
+    wait_for_messages(rtt, ssh, ["Data reception test successful!", "Test data transmitted!"])
+
+    # Transmission test (MCU -> test host) with large chunk of data
+    reception_result = uart.read_exact_bytes(data_length)
+    if reception_result.is_err:
+        logging.critical("TEST FAILED, could not receive all the data from target board!")
+        sys.exit(50)
+
+    received_data = reception_result.unwrap()
+    for byte, i in zip(received_data, range(data_length)):
+        if byte != (expected := i % 0x100):
+            logging.critical(
+                f"TEST FAILED, unexpected byte @ index {i}, expected {expected}, got {byte}",
+            )
+            sys.exit(60)
+
+    logging.info("Data transmission test successful!")
+    logging.info("All I/O test successful!")
 
 
-def perform_uart_handshake(uart: RemoteUARTConnection) -> None:
+def perform_uart_handshake(
+    uart: RemoteUARTConnection,
+    rtt: CalldwellRTTClient,
+    ssh: SSHClient,
+) -> None:
     """Performs a simple UART handshake."""
     handshake_message = b"hello, this is the test suite handshake message!"
     expected_response = "hello back, this is Aerugo's handshake message!"
+
+    wait_for_messages(rtt, ssh, ["Waiting for handshake..."])
+
+    logging.info("Performing UART handshake...")
     written_bytes, tx_error = uart.write_bytes(handshake_message)
 
     if tx_error is not None:
@@ -95,6 +128,8 @@ def perform_uart_handshake(uart: RemoteUARTConnection) -> None:
             f"{len(handshake_message)} bytes)",
         )
         sys.exit(20)
+
+    wait_for_messages(rtt, ssh, ["Handshake message received, responding..."])
 
     response = uart.read_string(b"!")
 
@@ -111,6 +146,8 @@ def perform_uart_handshake(uart: RemoteUARTConnection) -> None:
             f"'{response_message}'",
         )
         sys.exit(40)
+
+    wait_for_messages(rtt, ssh, ["Handshake done!"])
 
     logging.info("UART handshake successful!")
 

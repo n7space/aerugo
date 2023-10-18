@@ -229,8 +229,13 @@ fn test_uart_local_loopback(uart: UART<UART4, NotConfigured>) -> UART<UART4, Not
 /// This storage can be safely accessed outside of UART IRQ code only when UART IRQ is disabled.
 static mut UART_READER_STORAGE: Option<Reader<UART4>> = None;
 
+/// Amount of data transmitted during the I/O tests.
+/// Must be larger than the length of incoming handshake message.
+const TEST_DATA_LENGTH: usize = 1024;
+
 /// IRQ code should put all received data into this buffer.
-static UART_RX_BUFFER: Mutex<RefCell<Vec<u8, 1024>>> = Mutex::new(RefCell::new(Vec::new()));
+static UART_RX_BUFFER: Mutex<RefCell<Vec<u8, TEST_DATA_LENGTH>>> =
+    Mutex::new(RefCell::new(Vec::new()));
 
 fn test_uart_io(uart: UART<UART4, NotConfigured>, mut nvic: NVIC) {
     let uart_config = UartConfig::new(57600, 12.MHz()).unwrap();
@@ -259,6 +264,8 @@ fn test_uart_io(uart: UART<UART4, NotConfigured>, mut nvic: NVIC) {
 
     // Run all I/O tests now.
     perform_uart_handshake(&mut writer);
+    test_data_reception();
+    test_data_transmission(writer);
 
     // This should be the last test, so disable everything.
     nvic.disable(Interrupt::UART4);
@@ -269,6 +276,8 @@ fn test_uart_io(uart: UART<UART4, NotConfigured>, mut nvic: NVIC) {
 fn perform_uart_handshake(writer: &mut Writer<UART4>) {
     let expected_message = b"hello, this is the test suite handshake message!";
     let response = b"hello back, this is Aerugo's handshake message!";
+
+    write_str("Waiting for handshake...");
 
     if !wait_for_handshake_message(expected_message) {
         UART_RX_BUFFER.lock(|buffer_ref| {
@@ -281,11 +290,13 @@ fn perform_uart_handshake(writer: &mut Writer<UART4>) {
         })
     }
 
+    write_str("Handshake message received, responding...");
+
     writer
-        .transmit_bytes(response, 1_000_000)
+        .transmit_bytes(response, u32::MAX)
         .expect("transmitting UART handshake response has failed");
 
-    write_str("UART handshake done!");
+    write_str("Handshake done!");
 }
 
 fn wait_for_handshake_message(expected_message: &[u8]) -> bool {
@@ -311,6 +322,39 @@ fn wait_for_handshake_message(expected_message: &[u8]) -> bool {
     }
 
     handshake_received
+}
+
+fn test_data_reception() {
+    let mut reception_successful = false;
+    while !reception_successful {
+        UART_RX_BUFFER.lock(|buffer_ref| {
+            let buffer = buffer_ref.get_mut();
+
+            // Early return, same reason as in `wait_for_handshake_message`
+            if buffer.len() != TEST_DATA_LENGTH {
+                return;
+            }
+
+            for (index, &value) in buffer.iter().enumerate() {
+                if value != index as u8 {
+                    panic!(
+                        "Received invalid byte @ index {}, expected {}, got {}",
+                        index, index as u8, value
+                    );
+                }
+            }
+
+            reception_successful = true;
+        });
+    }
+
+    write_str("Data reception test successful!");
+}
+
+fn test_data_transmission(mut writer: Writer<UART4>) {
+    let tx_data: Vec<u8, TEST_DATA_LENGTH> = (0..TEST_DATA_LENGTH).map(|i| i as u8).collect();
+    writer.transmit_bytes(tx_data.as_slice(), u32::MAX).unwrap();
+    write_str("Test data transmitted!");
 }
 
 #[interrupt]
