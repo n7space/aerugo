@@ -54,6 +54,7 @@ use self::reader::Reader;
 use self::writer::Writer;
 
 pub use embedded_io::ErrorKind as Error;
+pub use embedded_io::{Read, ReadReady, Write, WriteReady};
 
 pub use super::time::HertzU32 as Frequency;
 
