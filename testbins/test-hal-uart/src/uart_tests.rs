@@ -173,10 +173,10 @@ fn test_reader_writer(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfig
     let mut uart = uart.disable();
 
     assert_eq!(
-        writer.transmit_byte(0xAA, 1_000_000).unwrap_err(),
+        writer.transmit_byte(0xAA, 100_000).unwrap_err(),
         Error::TimedOut
     );
-    assert_eq!(reader.receive_byte(1_000_000).unwrap_err(), Error::TimedOut);
+    assert_eq!(reader.receive_byte(100_000).unwrap_err(), Error::TimedOut);
 
     uart.put_reader(reader);
     assert!(uart.has_reader());
