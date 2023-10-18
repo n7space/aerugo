@@ -9,6 +9,7 @@ extern crate cortex_m_rt as rt;
 mod config_tests;
 mod uart_tests;
 
+use aerugo::time::MillisDurationU32 as WatchdogDuration;
 use aerugo::{
     hal::{
         drivers::{
@@ -58,7 +59,9 @@ fn configure_pio(port: Port<PIOD>) {
 #[entry]
 fn main() -> ! {
     calldwell::start_session();
-    let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
+    let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig {
+        watchdog_timeout: WatchdogDuration::secs(16),
+    });
 
     // Initialize peripheral clocks.
     let mut pmc = peripherals.pmc.take().unwrap();
