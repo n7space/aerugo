@@ -1,6 +1,7 @@
 mod test_basic_execution;
 mod test_boolean_condition;
 mod test_boolean_condition_interrupt;
+mod test_cyclic_execution;
 mod test_event;
 mod test_event_cancellation;
 mod test_event_clear_queue;
