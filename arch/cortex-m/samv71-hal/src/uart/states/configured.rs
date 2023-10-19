@@ -3,10 +3,10 @@
 use crate::uart::{
     config::{calculate_clock_divider, ConfigurationError, LoopbackMode},
     metadata::UARTMetadata,
-    ClockSource, Config, Configured, Frequency, Interrupt, ParityBit, Status, UART,
+    ClockSource, Config, Configured, Frequency, Interrupt, ParityBit, Status, Uart,
 };
 
-impl<Instance: UARTMetadata, State: Configured> UART<Instance, State> {
+impl<Instance: UARTMetadata, State: Configured> Uart<Instance, State> {
     /// Returns current UART status.
     ///
     /// In order to clear reception error flags, you must use [`Reader`](crate::uart::Reader)
@@ -23,10 +23,10 @@ impl<Instance: UARTMetadata, State: Configured> UART<Instance, State> {
     /// UART states.
     ///
     /// See
-    /// * [`UART::switch_to_normal_mode`],
-    /// * [`UART::switch_to_automatic_echo_mode`],
-    /// * [`UART::switch_to_local_loopback_mode`], and
-    /// * [`UART::switch_to_remote_loopback_mode`]
+    /// * [`Uart::switch_to_normal_mode`],
+    /// * [`Uart::switch_to_automatic_echo_mode`],
+    /// * [`Uart::switch_to_local_loopback_mode`], and
+    /// * [`Uart::switch_to_remote_loopback_mode`]
     ///
     /// for details.
     pub fn loopback_mode(&self) -> LoopbackMode {
@@ -125,7 +125,7 @@ impl<Instance: UARTMetadata, State: Configured> UART<Instance, State> {
     /// to prevent issues with data transmission or reception. You can calculate the divider
     /// for any baudrate and clock using [`calculate_clock_divider`], and the baudrate for
     /// any clock and it's divider using [`calculate_baudrate`](crate::uart::config::calculate_baudrate). You can also check the
-    /// real baudrate with [`UART::baudrate`].
+    /// real baudrate with [`Uart::baudrate`].
     ///
     /// # Parameters
     /// * `baudrate` - New baudrate to be set
@@ -184,7 +184,7 @@ impl<Instance: UARTMetadata, State: Configured> UART<Instance, State> {
     ///
     /// Clock divider is used for calculating baudrate.
     /// If you intend to get/set specific baudrate, instead of calculating it
-    /// manually, use [`UART::baudrate`]/[`UART::set_baudrate`].
+    /// manually, use [`Uart::baudrate`]/[`Uart::set_baudrate`].
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
@@ -201,7 +201,7 @@ impl<Instance: UARTMetadata, State: Configured> UART<Instance, State> {
     ///
     /// Clock divider is used for calculating baudrate.
     /// If you intend to get/set specific baudrate, instead of calculating it
-    /// manually, use [`UART::baudrate`]/[`UART::set_baudrate`].
+    /// manually, use [`Uart::baudrate`]/[`Uart::set_baudrate`].
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).

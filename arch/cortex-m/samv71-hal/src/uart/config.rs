@@ -290,7 +290,7 @@ impl Config {
 /// Validates provided baudrate and calculates clock divider.
 ///
 /// If you intend to configure the UART, you should use [`Config`] or one
-/// of the [`UART`](super::UART) methods instead, as they perform baudrate validation too.
+/// of the [`Uart`](super::Uart) methods instead, as they perform baudrate validation too.
 ///
 /// This function should be used only if you want to validate UART baudrate
 /// manually, as there's plenty of methods for baudrate configuration
@@ -312,7 +312,7 @@ pub const fn calculate_clock_divider(
     // If provided baudrate is larger than clock source frequency / 16, it will
     // cause the divider to be truncated to 0, which will disable the baudrate clock.
     // If you intend to disable the baudrate clock that way, set the divider to 0
-    // directly, using `UART::set_clock_divider`.
+    // directly, using `Uart::set_clock_divider`.
     if divider == 0 {
         return Err(ConfigurationError::BaudrateTooHigh);
     }

@@ -1,14 +1,14 @@
 //! Module with implementation of UART in receiver mode.
 
 use crate::uart::{
-    config::rx_filter_config_to_bool, metadata::UARTMetadata, reader::Reader, Receive, UART,
+    config::rx_filter_config_to_bool, metadata::UARTMetadata, reader::Reader, Receive, Uart,
 };
 
-impl<Instance: UARTMetadata, State: Receive> UART<Instance, State> {
+impl<Instance: UARTMetadata, State: Receive> Uart<Instance, State> {
     /// Takes [`Reader`] instance out of UART.
     /// There can only be a single instance of Reader per UART, and this is the only way to get it.
-    /// You can check whether UART stores Reader instance using [`UART::has_reader`].
-    /// Reader can be put back into UART using [`UART::put_reader`].
+    /// You can check whether UART stores Reader instance using [`Uart::has_reader`].
+    /// Reader can be put back into UART using [`Uart::put_reader`].
     ///
     /// # Returns
     /// `Some(Reader)` if instance of a reader is currently stored in UART.

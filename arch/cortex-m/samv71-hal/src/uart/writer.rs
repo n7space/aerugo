@@ -14,10 +14,10 @@ use super::UARTMetadata;
 
 /// This structure can be used to transmit data via UART.
 ///
-/// Writer instance is created by [`UART`](super::UART) and can be taken from it using
-/// [`UART::take_writer`](super::UART::take_writer) method.
-/// Once taken, it can be put inside UART again using [`UART::put_writer`](super::UART::put_writer)
-/// for storage.
+/// Writer instance is created by [`Uart`](super::Uart) and can be taken from it using
+/// [`Uart::take_writer`](super::Uart::take_writer) method.
+/// Once taken, it can be put inside UART driver instance again using
+/// [`Uart::put_writer`](super::Uart::put_writer) for storage.
 ///
 /// # Safety
 /// If Writer is used while UART transmitter is disabled, it will always return [`Error::TimedOut`]

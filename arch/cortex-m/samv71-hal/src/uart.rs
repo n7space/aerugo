@@ -23,7 +23,7 @@
 //! UART driver is implemented using typestate pattern. This approach prevents the
 //! user from using UART in invalid configuration, while having no runtime cost
 //! associated with error checking.
-//! For details about usage, see [`UART`] struct documentation.
+//! For details about usage, see [`Uart`] struct documentation.
 //!
 //! # Safety
 //! **Make sure to read and understand this safety remark before switching UART to PCK
@@ -136,19 +136,19 @@ impl<T> ReceiveTransmit for T where T: Receive + Transmit {}
 /// Structure representing UART driver.
 ///
 /// This structure is implemented using typestate pattern.
-/// In order to use it, you must first create it's instance with [`UART::new`] method.
+/// In order to use it, you must first create it's instance with [`Uart::new`] method.
 /// This method consumes PAC UART instance, which prevents from creating multiple UART
 /// driver instances for the same UART peripheral (which would invalidate `Send` implementation
 /// for this structure, so it should never be allowed).
 ///
-/// [`UART::new`] will return `UART<_, NotConfigured>`, which you have to initialize by converting
-/// it to one of three valid states: `UART<_, Receiver>`, `UART<_, Transmitter>` or
-/// `UART<_, Bidirectional>`. To do that, use `UART::into_X` function, where `X` is the desired state.
+/// [`Uart::new`] will return `Uart<_, NotConfigured>`, which you have to initialize by converting
+/// it to one of three valid states: `Uart<_, Receiver>`, `Uart<_, Transmitter>` or
+/// `Uart<_, Bidirectional>`. To do that, use `Uart::into_X` function, where `X` is the desired state.
 /// See
-/// * [`UART::into_transmitter`],
-/// * [`UART::into_receiver`],
-/// * [`UART::into_bidirectional`], and
-/// * [`UART::disable`]
+/// * [`Uart::into_transmitter`],
+/// * [`Uart::into_receiver`],
+/// * [`Uart::into_bidirectional`], and
+/// * [`Uart::disable`]
 ///
 /// for details.
 ///
@@ -162,9 +162,9 @@ impl<T> ReceiveTransmit for T where T: Receive + Transmit {}
 /// **UART driver must be manually notified about source clock frequency changes.**
 /// As described in module documentation, unless you drive UART using programmable clock,
 /// **and** you're changing main clock frequency using it's prescaler, **you must de-initialize
-/// UART using [`UART::disable`] before changing clock settings**, and re-initialize it by
+/// UART using [`Uart::disable`] before changing clock settings**, and re-initialize it by
 /// converting it into desired state after the clock is configured.
-pub struct UART<Instance: UARTMetadata, CurrentState: State> {
+pub struct Uart<Instance: UARTMetadata, CurrentState: State> {
     /// Frequency of the clock driving UART baudrate.
     /// Required for baudrate calculations. Must be
     /// manually updated by the user after changing
@@ -172,12 +172,12 @@ pub struct UART<Instance: UARTMetadata, CurrentState: State> {
     /// UART will not work correctly.
     clock_source_frequency: Option<Frequency>,
     /// UART Reader instance.
-    /// Can be taken using [`UART::take_reader`] in Receiver mode.
-    /// Can be put here after taking it using [`UART::put_reader`] in Receiver mode.
+    /// Can be taken using [`Uart::take_reader`] in Receiver mode.
+    /// Can be put here after taking it using [`Uart::put_reader`] in Receiver mode.
     reader: Option<Reader<Instance>>,
     /// UART Writer instance.
-    /// Can be taken using [`UART::take_writer`] in Transmitter mode.
-    /// Can be put here after taking it using [`UART::put_writer`] in Transmitter mode.
+    /// Can be taken using [`Uart::take_writer`] in Transmitter mode.
+    /// Can be put here after taking it using [`Uart::put_writer`] in Transmitter mode.
     writer: Option<Writer<Instance>>,
     /// PAC UART instance metadata.
     _meta: PhantomData<Instance>,
@@ -185,7 +185,7 @@ pub struct UART<Instance: UARTMetadata, CurrentState: State> {
     _state: PhantomData<CurrentState>,
 }
 
-impl<Instance: UARTMetadata> UART<Instance, NotConfigured> {
+impl<Instance: UARTMetadata> Uart<Instance, NotConfigured> {
     /// Creates new UART driver instance, consuming PAC UART instance to prevent creating
     /// duplicate drivers.
     ///
@@ -196,10 +196,10 @@ impl<Instance: UARTMetadata> UART<Instance, NotConfigured> {
     /// UART driver instance in `NotConfigured` state. It must be converted to valid
     /// state using `into_X` method to be usable.
     /// See
-    /// * [`UART::into_transmitter`],
-    /// * [`UART::into_receiver`],
-    /// * [`UART::into_bidirectional`], and
-    /// * [`UART::disable`]
+    /// * [`Uart::into_transmitter`],
+    /// * [`Uart::into_receiver`],
+    /// * [`Uart::into_bidirectional`], and
+    /// * [`Uart::disable`]
     ///
     /// for details.
     pub fn new(_uart: Instance) -> Self {
@@ -213,7 +213,7 @@ impl<Instance: UARTMetadata> UART<Instance, NotConfigured> {
     }
 }
 
-impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
+impl<Instance: UARTMetadata, AnyState: State> Uart<Instance, AnyState> {
     /// Transforms UART into `Transmitter` state. Resets UART status before
     /// changing the state. Disables loopback and RX filtering.
     ///
@@ -222,7 +222,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// # Returns
     /// UART in `Transmitter` state, with only the transmission-related functions available.
-    pub fn into_transmitter(mut self, config: Config) -> UART<Instance, Transmitter> {
+    pub fn into_transmitter(mut self, config: Config) -> Uart<Instance, Transmitter> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -230,7 +230,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         self.internal_set_config(config);
         self.enable_transmitter();
 
-        UART::transform(self)
+        Uart::transform(self)
     }
 
     /// Transforms UART into `Receiver` state. Resets UART status before
@@ -246,7 +246,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         mut self,
         config: Config,
         receiver_config: ReceiverConfig,
-    ) -> UART<Instance, Receiver> {
+    ) -> Uart<Instance, Receiver> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -255,7 +255,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         self.internal_set_rx_filter_state(receiver_config.rx_filter_enabled);
         self.enable_receiver();
 
-        UART::transform(self)
+        Uart::transform(self)
     }
 
     /// Transforms UART into `Bidirectional` state. Resets UART status before
@@ -272,7 +272,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         mut self,
         config: Config,
         receiver_config: ReceiverConfig,
-    ) -> UART<Instance, Bidirectional> {
+    ) -> Uart<Instance, Bidirectional> {
         self.disable_receiver();
         self.disable_transmitter();
 
@@ -282,16 +282,16 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         self.enable_transmitter();
         self.enable_receiver();
 
-        UART::transform(self)
+        Uart::transform(self)
     }
 
     /// Disables UART by disabling both receiver and transmitter, and stopping baudrate clock.
     ///
-    /// Does not disable any interrupts. If you want to do that, use [`UART::disable_all_interrupts`].
+    /// Does not disable any interrupts. If you want to do that, use [`Uart::disable_all_interrupts`].
     ///
     /// # Returns
     /// UART in `NotConfigured` state.
-    pub fn disable(mut self) -> UART<Instance, NotConfigured> {
+    pub fn disable(mut self) -> Uart<Instance, NotConfigured> {
         self.disable_receiver();
         self.disable_transmitter();
         // Safety: This is intentional, as it disables baudrate clock.
@@ -301,7 +301,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         self.internal_switch_to_normal_mode();
         self.internal_reset_status();
 
-        UART::transform(self)
+        Uart::transform(self)
     }
 
     /// Disables all UART interrupts.
@@ -353,7 +353,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// # Returns
     /// Transformed UART instance.
-    const fn transform<NewState: State>(uart: UART<Instance, NewState>) -> Self {
+    const fn transform<NewState: State>(uart: Uart<Instance, NewState>) -> Self {
         Self {
             clock_source_frequency: uart.clock_source_frequency,
             reader: uart.reader,
@@ -441,7 +441,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// Clock divider is used for calculating baudrate.
     /// If you intend to get/set specific baudrate, instead of calculating it
-    /// manually, use [`UART::baudrate`]/[`UART::set_baudrate`].
+    /// manually, use [`Uart::baudrate`]/[`Uart::set_baudrate`].
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).
@@ -461,7 +461,7 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// Clock divider is used for calculating baudrate.
     /// If you intend to get/set specific baudrate, instead of calculating it
-    /// manually, use [`UART::baudrate`]/[`UART::set_baudrate`].
+    /// manually, use [`Uart::baudrate`]/[`Uart::set_baudrate`].
     ///
     /// Clock divider is defined as clock source frequency divided by
     /// (16*baudrate).

@@ -9,7 +9,7 @@ use aerugo::hal::drivers::pio::{pin::Peripheral, Port};
 use aerugo::hal::drivers::pmc::config::PeripheralId;
 use aerugo::hal::drivers::uart::reader::Reader;
 use aerugo::hal::drivers::uart::writer::Writer;
-use aerugo::hal::drivers::uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, UART};
+use aerugo::hal::drivers::uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, Uart};
 use aerugo::hal::user_peripherals::{PIOD, PMC, UART4};
 use aerugo::time::RateExtU32;
 use aerugo::{
@@ -53,7 +53,7 @@ fn init_pio(port: Port<PIOD>) {
     pins[19].take().unwrap().into_peripheral_pin(Peripheral::C);
 }
 
-fn init_uart(uart: UART<UART4, NotConfigured>) -> UART<UART4, Bidirectional> {
+fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
     let mut uart = uart.into_bidirectional(
         Config::new(9600, 12.MHz()).unwrap(),
         ReceiverConfig {
@@ -65,7 +65,7 @@ fn init_uart(uart: UART<UART4, NotConfigured>) -> UART<UART4, Bidirectional> {
     uart
 }
 
-fn init_tasks(aerugo: &'static impl InitApi, mut uart: UART<UART4, Bidirectional>) {
+fn init_tasks(aerugo: &'static impl InitApi, mut uart: Uart<UART4, Bidirectional>) {
     logln!("Initializing tasks...");
 
     let uart_task_config = TaskletConfig {
@@ -103,7 +103,7 @@ fn main() -> ! {
     logln!("Hello, world! Aerugo initialized! Initializing hardware...");
 
     let port = Port::new(peripherals.pio_d.take().unwrap());
-    let uart = UART::new(peripherals.uart_4.take().unwrap());
+    let uart = Uart::new(peripherals.uart_4.take().unwrap());
     let pmc = peripherals.pmc.unwrap();
 
     init_clocks(pmc);
