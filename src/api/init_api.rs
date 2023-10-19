@@ -14,6 +14,12 @@ use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 use crate::time::Duration;
 
 /// System initialization API
+///
+/// # Safety
+/// This should only be exposed to the user during system initialization
+/// (with [Aerugo::initialize](crate::aerugo::Aerugo::initialize)), and used only before system is started
+/// (with [`InitApi::start`]). If that interface is leaked after the initialization, then all
+/// functions can be considered unsafe.
 pub trait InitApi {
     /// Creates new tasklet in the system.
     ///

@@ -11,6 +11,11 @@ use crate::tasklet::TaskletId;
 use crate::time::{Duration, Instant};
 
 /// System runtime API.
+///
+/// # Safety
+/// This should only be exposed to the user in tasklet step function (crate::tasklet::StepFn) and
+/// used only in the scope of that step function. If that interface is leaked then all functions
+/// can be considered unsafe.
 pub trait RuntimeApi {
     /// Emits event of given ID.
     ///
