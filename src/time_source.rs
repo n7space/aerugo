@@ -29,6 +29,22 @@ pub(crate) struct TimeSource {
     user_offset: OnceCell<Duration>,
 }
 
+/// SAFETY: It is safe assuming that TimeSource is not accessible from the IRQ context.
+/// This is ensured by one instance, owned by [Aerugo](crate::aerugo::Aerugo) structure which
+/// makes it inaccessible in IRQ context and initializes it before scheduler starts.
+///
+/// Internal `OnceCell`s for storing system start timestamps are only mutably accessed by
+/// [`TimeSource::set_system_start] which is called by [start function](crate::api::InitApi::start)
+/// from `InitApi`, which is not accessible from the IRQ context.
+///
+/// Internal `OnceCell` for user offset is only mutable accessed by [`TimeSource::set_user_offset`]
+/// which is called by [set_system_time_offset](crate::api::RuntimeApi::set_system_time_offset)
+/// from `RuntimeApi`, which is not accessible from the IRQ context.
+///
+/// If user somehow exposes `InitApi` or `RuntimeApi` trait interfaces to the IRQ context, any
+/// usage from that context can be considered unsafe.
+unsafe impl Sync for TimeSource {}
+
 impl TimeSource {
     /// Creates new instance of TimeSource
     pub(crate) const fn new() -> Self {
@@ -64,8 +80,8 @@ impl TimeSource {
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::startup_duration`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
+    /// Calling [`TimeSource::startup_duration`], [`TimeSource::calculate_absolute_time`] in parallel with this
+    /// function (interrupt is treated as different thread) is an undefined behavior.
     pub(crate) unsafe fn set_system_start(&self) {
         let current_time = Hal::get_system_time();
 
@@ -89,8 +105,8 @@ impl TimeSource {
     ///
     /// # Safety
     /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::apply_offset`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
+    /// Calling [`TimeSource::apply_offset`] or [`TimeSource::system_time`] in parallel with this function
+    /// (interrupt is treated as different thread) is an undefined behavior.
     ///
     /// # Parameters
     /// * `duration` - Duration to offset the time source with.
@@ -116,6 +132,11 @@ impl TimeSource {
     }
 
     /// Calculates absolute time based on system time.
+    ///
+    /// # Safety
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
+    /// Calling [`TimeSource::set_system_start`] in parallel with this function (interrupt is treated as different
+    /// thread) is an undefined behavior.
     pub(crate) fn calculate_absolute_time(&self, time: Duration) -> Instant {
         let system_start = self
             .system_start
@@ -159,7 +180,3 @@ impl TimeSource {
         })
     }
 }
-
-/// SAFETY: This is safe, because only [Aerugo](crate::aerugo::Aerugo) uses this. Access to it is
-/// not available from IRQ context, so it's safe on the single threading environment.
-unsafe impl Sync for TimeSource {}
