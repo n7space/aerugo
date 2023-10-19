@@ -30,6 +30,7 @@ pub struct Writer<Instance: UARTMetadata> {
 
 impl<Instance: UARTMetadata> Writer<Instance> {
     /// Transmits a single byte.
+    ///
     /// Waits for UART TX register to be empty.
     /// Does not wait until transmission is completed, use [`Writer::flush`] if you want to make sure
     /// of that.

@@ -84,6 +84,7 @@ impl<Instance: UARTMetadata> Reader<Instance> {
     }
 
     /// Resets UART status by clearing status flags.
+    ///
     /// **This function should usually be called immediately after reading the status.**
     #[inline(always)]
     pub fn reset_status(&mut self) {
