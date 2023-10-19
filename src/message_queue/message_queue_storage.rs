@@ -66,7 +66,8 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored queue and queue data buffers.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing storage from IRQ context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(&'static self) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);

@@ -129,6 +129,11 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     ///
     /// # Return
     /// `SystemError` if tasklet already has condition set, `()` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the condition set.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing tasklet from IRQ context during setting is undefined behaviour.
     pub(crate) unsafe fn set_condition_set(
         &self,
         condition_set: BooleanConditionSet<COND_COUNT>,
@@ -146,6 +151,11 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     ///
     /// # Return
     /// `SystemError` if tasklet already has data provider, `()` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the data provider.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing tasklet from IRQ context during subscribing is undefined behaviour.
     pub(crate) unsafe fn subscribe(
         &self,
         data_provider: &'static dyn DataProvider<T>,

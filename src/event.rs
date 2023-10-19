@@ -51,7 +51,8 @@ impl Event {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of event sets.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing event from IRQ context during adding to set is undefined behaviour.
     pub(crate) unsafe fn add_set(&self, event_set: &'static EventSet) -> Result<(), SystemError> {
         match self.sets.add(event_set) {
             Ok(_) => Ok(()),

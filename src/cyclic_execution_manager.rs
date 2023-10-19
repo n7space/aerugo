@@ -54,7 +54,7 @@ impl CyclicExecutionManager {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of cyclic executions.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
     pub(crate) unsafe fn create_cyclic_execution(
         &'static self,
         tasklet: TaskletPtr,

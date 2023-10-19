@@ -75,7 +75,8 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored tasklet buffer. This is safe to call
-    /// before the system initialization.
+    /// during system initialization (before scheduler is started). Accessing storage from IRQ
+    /// context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(
         &'static self,
         config: TaskletConfig,

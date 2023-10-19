@@ -68,7 +68,8 @@ impl BooleanCondition {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing condition from IRQ context during registering is undefined behaviour.
     pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), SystemError> {
         match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
