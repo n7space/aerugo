@@ -19,4 +19,5 @@ pub mod pio;
 pub mod pmc;
 pub mod timer;
 pub mod uart;
+pub mod utils;
 pub mod watchdog;

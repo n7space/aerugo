@@ -50,7 +50,8 @@ extern crate embedded_io;
 use core::marker::PhantomData;
 
 use self::config::{bool_to_rx_filter_config, calculate_baudrate};
-use self::metadata::RegisterBlock;
+use self::reader::Reader;
+use self::writer::Writer;
 
 pub use embedded_io::ErrorKind as Error;
 
@@ -59,12 +60,14 @@ pub use super::time::HertzU32 as Frequency;
 pub mod config;
 pub mod interrupt;
 pub mod metadata;
+pub mod reader;
 pub mod states;
 pub mod status;
+pub mod writer;
 
 pub use self::config::{ClockSource, Config, ParityBit, ReceiverConfig};
 pub use self::interrupt::Interrupt;
-pub use self::metadata::UartMetadata;
+pub use self::metadata::UARTMetadata;
 pub use self::status::Status;
 
 /// Constant representing oversampling ratio, which is used in baudrate and
@@ -160,20 +163,28 @@ impl<T> ReceiveTransmit for T where T: Receive + Transmit {}
 /// **and** you're changing main clock frequency using it's prescaler, **you must de-initialize
 /// UART using [`UART::disable`] before changing clock settings**, and re-initialize it by
 /// converting it into desired state after the clock is configured.
-pub struct UART<Metadata: UartMetadata, CurrentState: State> {
+pub struct UART<Instance: UARTMetadata, CurrentState: State> {
     /// Frequency of the clock driving UART baudrate.
     /// Required for baudrate calculations. Must be
     /// manually updated by the user after changing
     /// the clock source or it's frequency, otherwise
     /// UART will not work correctly.
     clock_source_frequency: Option<Frequency>,
+    /// UART Reader instance.
+    /// Can be taken using [`UART::take_reader`] in Receiver mode.
+    /// Can be put here after taking it using [`UART::put_reader`] in Receiver mode.
+    reader: Option<Reader<Instance>>,
+    /// UART Writer instance.
+    /// Can be taken using [`UART::take_writer`] in Transmitter mode.
+    /// Can be put here after taking it using [`UART::put_writer`] in Transmitter mode.
+    writer: Option<Writer<Instance>>,
     /// PAC UART instance metadata.
-    _meta: PhantomData<Metadata>,
+    _meta: PhantomData<Instance>,
     /// State metadata.
     _state: PhantomData<CurrentState>,
 }
 
-impl<Instance: UartMetadata> UART<Instance, NotConfigured> {
+impl<Instance: UARTMetadata> UART<Instance, NotConfigured> {
     /// Creates new UART driver instance, consuming PAC UART instance to prevent creating
     /// duplicate drivers.
     ///
@@ -193,13 +204,15 @@ impl<Instance: UartMetadata> UART<Instance, NotConfigured> {
     pub fn new(_uart: Instance) -> Self {
         Self {
             clock_source_frequency: None,
+            reader: Some(Reader::new()),
+            writer: Some(Writer::new()),
             _meta: PhantomData,
             _state: PhantomData,
         }
     }
 }
 
-impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
+impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
     /// Transforms UART into `Transmitter` state. Resets UART status before
     /// changing the state. Disables loopback and RX filtering.
     ///
@@ -292,7 +305,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
 
     /// Disables all UART interrupts.
     pub fn disable_all_interrupts(&mut self) {
-        self.registers_ref().idr.write(|w| {
+        Instance::registers().idr.write(|w| {
             w.cmp()
                 .set_bit()
                 .txempty()
@@ -322,20 +335,11 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     const fn transform<NewState: State>(uart: UART<Instance, NewState>) -> Self {
         Self {
             clock_source_frequency: uart.clock_source_frequency,
+            reader: uart.reader,
+            writer: uart.writer,
             _meta: PhantomData,
             _state: PhantomData,
         }
-    }
-
-    /// Returns reference to UART registers.
-    ///
-    /// # Safety
-    /// This function dereferences a raw pointer.
-    /// It's safe to use, as long as there aren't multiple instances
-    /// of UART sharing the same register.
-    #[inline(always)]
-    const fn registers_ref(&self) -> &RegisterBlock {
-        unsafe { &*Instance::REGISTERS }
     }
 
     /// Enables UART receiver.
@@ -346,7 +350,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private, as it should be used only in state transition or loopback
     /// configuration code.
     pub(super) fn enable_receiver(&mut self) {
-        self.registers_ref().cr.write(|w| w.rxen().set_bit());
+        Instance::registers().cr.write(|w| w.rxen().set_bit());
     }
 
     /// Disables UART receiver.
@@ -356,7 +360,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private, as it should be used only in state transition or loopback
     /// configuration code.
     pub(super) fn disable_receiver(&mut self) {
-        self.registers_ref().cr.write(|w| w.rxdis().set_bit());
+        Instance::registers().cr.write(|w| w.rxdis().set_bit());
     }
 
     /// Enables UART transmitter.
@@ -367,7 +371,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private, as it should be used only in state transition or loopback
     /// configuration code.
     pub(super) fn enable_transmitter(&mut self) {
-        self.registers_ref().cr.write(|w| w.txen().set_bit());
+        Instance::registers().cr.write(|w| w.txen().set_bit());
     }
 
     /// Disables UART transmitter.
@@ -378,7 +382,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private, as it should be used only in state transition or loopback
     /// configuration code.
     pub(super) fn disable_transmitter(&mut self) {
-        self.registers_ref().cr.write(|w| w.txdis().set_bit());
+        Instance::registers().cr.write(|w| w.txdis().set_bit());
     }
 
     /// Switches UART into normal mode. This is the default mode of operation.
@@ -388,7 +392,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     ///
     /// In this mode, transmitter is connected to TX line and receiver to RX line.
     pub(super) fn internal_switch_to_normal_mode(&mut self) {
-        self.registers_ref().mr.modify(|_, w| w.chmode().normal());
+        Instance::registers().mr.modify(|_, w| w.chmode().normal());
     }
 
     /// Returns current UART baudrate (in bits per second).
@@ -429,7 +433,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// # Returns
     /// UART clock divider. If the divider is equal to 0, baud rate clock is disabled.
     fn internal_get_clock_divider(&self) -> u16 {
-        self.registers_ref().brgr.read().cd().bits()
+        Instance::registers().brgr.read().cd().bits()
     }
 
     /// Sets the clock divider.
@@ -450,7 +454,9 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// side-effect.
     ///
     unsafe fn internal_set_clock_divider(&mut self, divider: u16) {
-        self.registers_ref().brgr.write(|w| w.cd().variant(divider));
+        Instance::registers()
+            .brgr
+            .write(|w| w.cd().variant(divider));
     }
 
     /// Sets the RX filtering state.
@@ -462,7 +468,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// * `enabled` - If `true`, RX filtering will be enabled.
     ///               If `false, RX filtering will be disabled.
     fn internal_set_rx_filter_state(&mut self, enabled: bool) {
-        self.registers_ref()
+        Instance::registers()
             .mr
             .modify(|_, w| w.filter().variant(bool_to_rx_filter_config(enabled)));
     }
@@ -473,7 +479,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
     /// This function is private - it might be re-exported (defined in public scope
     /// without prefix) in concrete state implementation, where it's safe to use.
     fn internal_reset_status(&mut self) {
-        self.registers_ref().cr.write(|w| w.rststa().set_bit());
+        Instance::registers().cr.write(|w| w.rststa().set_bit());
     }
 
     /// Configures UART using provided settings.
@@ -492,7 +498,7 @@ impl<Instance: UartMetadata, AnyState: State> UART<Instance, AnyState> {
         }
 
         // Set source clock and parity bit config, disable loopback and RX filtering.
-        self.registers_ref().mr.write(|w| {
+        Instance::registers().mr.write(|w| {
             w.chmode()
                 .normal()
                 .brsrcck()
