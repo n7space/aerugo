@@ -136,8 +136,6 @@ impl Executor {
     }
 }
 
-unsafe impl Sync for Executor {}
-
 #[cfg(any(doc, test))]
 mod tests {
     use super::*;
@@ -145,9 +143,6 @@ mod tests {
     use crate::boolean_condition::{BooleanConditionSet, BooleanConditionSetType};
     use crate::tasklet::{Tasklet, TaskletConfig};
     use crate::tests::{MockConditionSet, MockDataProvider, MockRuntimeApi};
-
-    /// There are no tasklets that are synced between threads in tests.
-    unsafe impl<T, C, const COND_COUNT: usize> Sync for Tasklet<T, C, COND_COUNT> {}
 
     /// @SRS{ROS-FUN-RTOS-050}
     /// @SRS{ROS-FUN-RTOS-060}
