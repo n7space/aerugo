@@ -46,6 +46,13 @@ pub(crate) struct EventManager {
     time_source: &'static TimeSource,
 }
 
+/// It is safe assuming that it's modified only during system initialization (before scheduler is
+/// started) and that those modifications cannot be interrupted.
+///
+/// EventManager stores a list of scheduled events which is guarded with [Mutex] which ensures that
+/// modifications cannot be interrupted.
+unsafe impl Sync for EventManager {}
+
 impl EventManager {
     /// Number of events in the system.
     #[read_env("AERUGO_EVENT_COUNT")]
@@ -71,7 +78,9 @@ impl EventManager {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of events.
-    /// This is safe to call before the system initialization.
+    /// This is safe if it's executed in a critical section during system initialization
+    /// (before scheduler is started).
+    /// Accessing `EventManager` from IRQ context during this function is undefined behaviour.
     pub(crate) unsafe fn add_event(
         &'static self,
         event: &'static Event,
@@ -109,7 +118,7 @@ impl EventManager {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of event sets.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
     pub(crate) unsafe fn create_event_set(
         &'static self,
         tasklet: TaskletPtr,
@@ -293,5 +302,3 @@ impl EventManager {
         })
     }
 }
-
-unsafe impl Sync for EventManager {}
