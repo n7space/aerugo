@@ -30,25 +30,43 @@ The repository structure is as follows:
 
 ## Building
 
-aerugo requires nightly, make sure you have it installed: \
-`rustup toolchain install nightly`
+aerugo requires nightly, make sure you have it installed:
 
-For the Cortex-M7 platform you first need to install that target via `rustup`: \
-`rustup target add thumbv7em-none-eabihf`
+```sh
+rustup toolchain install nightly
+```
 
-Then to build the system run: \
-`cargo build -p aerugo --features=use-aerugo-cortex-m --target=thumbv7em-none-eabihf`
+For the Cortex-M7 platform you first need to install that target via `rustup`:
 
-x86 target is also supported for development purposes: \
-`cargo build -p aerugo --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu`
+```sh
+rustup target add thumbv7em-none-eabihf
+```
+
+Then to build the system run:
+
+```sh
+cargo build -p aerugo --features=use-aerugo-cortex-m --target=thumbv7em-none-eabihf
+```
+
+x86 target is also supported for development purposes:
+
+```sh
+cargo build -p aerugo --features=use-aerugo-x86 --target=x86_64-unknown-linux-gnu
+```
 
 ## Tests
 
-Tests can be built and run using a bash script. For all tests run: \
-`./scripts/run_tests.sh`
+Tests can be built and run using a bash script. For all tests run:
 
-or for specific package run for example: \
-`./scripts/run_tests.sh aerugo_x86`
+```sh
+./scripts/run_tests.sh
+```
+
+or for specific package run for example:
+
+```sh
+./scripts/run_tests.sh aerugo_x86
+```
 
 Tests can also be run using `cargo test` with `--features` and `--target` flags.
 
@@ -82,7 +100,11 @@ You can either run each test manually, by invoking `./tests/requirements/test/te
 python ./tests/requirements/test/test_hal_watchdog.py
 ```
 
-Or you can run them all at once, via `./scripts/run_tests.sh aerugo_v71` command.
+Or you can run them all at once, with
+
+```sh
+./scripts/run_tests.sh aerugo_v71
+```
 
 **Warning: If running test via `cargo` for the first time, be aware that their build time will be contained in test execution time, which can potentially cause a timeout. It's recommended to build (or run) all test binaries manually for the first time.**
 Test binaries can be built either by running [`./scripts/build_hal_tests.sh`](./scripts/build_hal_tests.sh), or by invoking `cargo build` in test's project directory (in [`testbins`](./testbins/))!
