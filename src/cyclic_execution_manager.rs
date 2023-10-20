@@ -26,6 +26,10 @@ pub(crate) struct CyclicExecutionManager {
     time_source: &'static TimeSource,
 }
 
+/// It is safe assuming that it's modified only during system initialization (before scheduler is
+/// started) and those modifications cannot be interrupted.
+unsafe impl Sync for CyclicExecutionManager {}
+
 impl CyclicExecutionManager {
     /// Creates new cyclic execution manager instance.
     ///
@@ -79,5 +83,3 @@ impl CyclicExecutionManager {
         }
     }
 }
-
-unsafe impl Sync for CyclicExecutionManager {}
