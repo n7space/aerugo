@@ -35,12 +35,28 @@ pub struct TaskletStorage<T, C, const COND_COUNT: usize> {
     initialized: OnceCell<()>,
     /// Buffer for the tasklet structure.
     tasklet_buffer: OnceCell<TaskletBuffer>,
-    /// Storage for the context data.
-    tasklet_context: UnsafeCell<MaybeUninit<C>>,
     /// Storage for the tasklet conditions.
     tasklet_conditions: OnceCell<BooleanConditionSet<COND_COUNT>>,
+    /// Storage for the context data.
+    tasklet_context: UnsafeCell<MaybeUninit<C>>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
+}
+
+/// It is safe assuming that stored Tasklet is not available from the IRQ context before it is
+/// created and that initialization cannot be interrupted.
+///
+/// TaskletStorage is initialized only in
+/// [create_tasklet](crate::api::InitApi::create_tasklet), implemented in [Aerugo](crate::aerugo::Aerugo)
+/// which is not accessible from the IRQ context.
+///
+/// It's not possible to access the stored Tasklet via mutable reference. Tasklet is exposed
+/// to the user via TaskletHandle which provides necessary functionalities.
+///
+/// If any of those invariants are broken, then any usage can be considered unsafe.
+unsafe impl<T: 'static, C: 'static, const COND_COUNT: usize> Sync
+    for TaskletStorage<T, C, COND_COUNT>
+{
 }
 
 impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_COUNT> {
@@ -49,8 +65,8 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         TaskletStorage {
             initialized: OnceCell::new(),
             tasklet_buffer: OnceCell::new(),
-            tasklet_context: UnsafeCell::new(MaybeUninit::uninit()),
             tasklet_conditions: OnceCell::new(),
+            tasklet_context: UnsafeCell::new(MaybeUninit::uninit()),
             _data_type_marker: PhantomData,
         }
     }
@@ -137,9 +153,4 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             (_, _) => None,
         }
     }
-}
-
-unsafe impl<T: 'static, C: 'static, const COND_COUNT: usize> Sync
-    for TaskletStorage<T, C, COND_COUNT>
-{
 }
