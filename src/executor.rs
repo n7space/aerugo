@@ -29,6 +29,12 @@ pub(crate) struct Executor {
     time_source: &'static TimeSource,
 }
 
+/// Executor stores a queue of tasklets to be executed. That queue is guarded with [Mutex] which
+/// ensures that modifications cannot be interrupted. `TaskletPtr`s stored in that queue are not
+/// accessible from the IRQ context, and Tasklet is always statically allocated, so the pointer is
+/// valid for the whole application lifetime.
+unsafe impl Sync for Executor {}
+
 impl Executor {
     /// Creates new executor instance.
     ///
