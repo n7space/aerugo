@@ -25,9 +25,6 @@ pub(crate) struct TaskletPtr {
     vtable: &'static TaskletVTable,
 }
 
-unsafe impl Sync for TaskletPtr {}
-unsafe impl Send for TaskletPtr {}
-
 impl TaskletPtr {
     /// Creates new tasklet pointer from reference
     ///
