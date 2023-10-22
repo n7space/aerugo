@@ -21,3 +21,4 @@ pub mod timer;
 pub mod uart;
 pub mod utils;
 pub mod watchdog;
+pub mod xdmac;
