@@ -13,7 +13,7 @@ use heapless::Vec;
 use crate::api::RuntimeApi;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::error::SystemError;
-use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
+use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId};
 
 /// Type of the tasklet buffer storage.
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), (), 0>>() }>;
@@ -110,6 +110,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         tasklet_context.write(context);
 
         let tasklet = Tasklet::<T, C, COND_COUNT>::new(
+            TaskletId::get_next(),
             config,
             step_fn,
             // SAFETY: This is safe, because `tasklet_context` was just initialized.

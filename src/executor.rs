@@ -147,7 +147,7 @@ mod tests {
     use super::*;
 
     use crate::boolean_condition::{BooleanConditionSet, BooleanConditionSetType};
-    use crate::tasklet::{Tasklet, TaskletConfig};
+    use crate::tasklet::{Tasklet, TaskletConfig, TaskletId};
     use crate::tests::{MockConditionSet, MockDataProvider, MockRuntimeApi};
 
     /// @SRS{ROS-FUN-RTOS-050}
@@ -172,6 +172,7 @@ mod tests {
             priority: 0,
         };
         static tasklet: Tasklet<(), (), 0> = Tasklet::new(
+            TaskletId(0),
             unsafe { tasklet_config },
             |_, _, _| {},
             unsafe { &mut tasklet_context },

@@ -13,7 +13,7 @@
 
 use core::cmp::Ordering;
 
-use crate::tasklet::{tasklet_vtable, Tasklet, TaskletStatus, TaskletVTable};
+use crate::tasklet::{tasklet_vtable, Tasklet, TaskletId, TaskletStatus, TaskletVTable};
 use crate::time::Instant;
 
 /// Raw tasklet pointer.
@@ -37,6 +37,13 @@ impl TaskletPtr {
             ptr: tasklet as *const Tasklet<T, C, COND_COUNT> as *const (),
             vtable: tasklet_vtable::<T, C, COND_COUNT>(),
         }
+    }
+
+    /// See: [get_id](crate::tasklet::Tasklet::get_id())
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub(crate) fn get_id(&self) -> TaskletId {
+        (self.vtable.get_id)(self.ptr)
     }
 
     /// See: [get_name](crate::tasklet::Tasklet::get_name())

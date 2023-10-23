@@ -6,11 +6,13 @@
 //!
 //! For more information look at `TaskletPtr` structure.
 
-use crate::tasklet::{Tasklet, TaskletStatus};
+use crate::tasklet::{Tasklet, TaskletId, TaskletStatus};
 use crate::time::Instant;
 
 /// Hand-made tasklet virtual table.
 pub(crate) struct TaskletVTable {
+    /// Pointer to [get_id](get_id()) function.
+    pub(crate) get_id: fn(*const ()) -> TaskletId,
     /// Pointer to [get_name](get_name()) function.
     pub(crate) get_name: fn(*const ()) -> &'static str,
     /// Pointer to [get_priority](get_priority()) function.
@@ -39,6 +41,7 @@ pub(crate) struct TaskletVTable {
 pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
 ) -> &'static TaskletVTable {
     &TaskletVTable {
+        get_id: get_id::<T, C, COND_COUNT>,
         get_name: get_name::<T, C, COND_COUNT>,
         get_priority: get_priority::<T, C, COND_COUNT>,
         get_status: get_status::<T, C, COND_COUNT>,
@@ -49,6 +52,17 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
         is_active: is_active::<T, C, COND_COUNT>,
         execute: execute::<T, C, COND_COUNT>,
     }
+}
+
+/// "Virtual" call to the `get_id` `Tasklet` function.
+///
+/// See: [get_id](crate::tasklet::Tasklet::get_id())
+#[inline(always)]
+fn get_id<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> TaskletId {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
+    tasklet.get_id()
 }
 
 /// "Virtual" call to the `get_name` `Tasklet` function.

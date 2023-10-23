@@ -11,11 +11,13 @@
 
 mod tasklet_config;
 mod tasklet_handle;
+mod tasklet_id;
 mod tasklet_ptr;
 mod tasklet_status;
 mod tasklet_storage;
 mod tasklet_vtable;
 
+pub(crate) use self::tasklet_id::TaskletId;
 pub(crate) use self::tasklet_ptr::TaskletPtr;
 pub(crate) use self::tasklet_status::TaskletStatus;
 pub(crate) use self::tasklet_vtable::{tasklet_vtable, TaskletVTable};
@@ -36,9 +38,6 @@ use crate::time::Instant;
 /// Type of function that is executed by the tasklet in its step.
 pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);
 
-/// Tasklet unique ID.
-pub struct TaskletId(u32);
-
 /// Tasklet structure.
 ///
 /// # Generic Parameters
@@ -47,6 +46,8 @@ pub struct TaskletId(u32);
 /// * `COND_COUNT` - Number of conditions.
 #[repr(C)]
 pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
+    /// Tasklet ID.
+    id: TaskletId,
     /// Tasklet name.
     name: &'static str,
     /// Tasklet priority.
@@ -88,6 +89,7 @@ unsafe impl<T, C, const COND_COUNT: usize> Sync for Tasklet<T, C, COND_COUNT> {}
 impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Creates new `Tasklet`.
     pub(crate) const fn new(
+        id: TaskletId,
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: &'static mut C,
@@ -95,6 +97,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         runtime_api: &'static dyn RuntimeApi,
     ) -> Self {
         Tasklet {
+            id,
             name: config.name,
             priority: config.priority,
             status: Mutex::new(TaskletStatus::Sleeping),
@@ -105,6 +108,11 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             data_provider: OnceCell::new(),
             runtime_api,
         }
+    }
+
+    /// Returns task ID.
+    pub(crate) fn get_id(&self) -> TaskletId {
+        self.id
     }
 
     /// Returns task name.
