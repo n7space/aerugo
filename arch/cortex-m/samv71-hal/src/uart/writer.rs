@@ -2,6 +2,8 @@
 //!
 //! Writer can be used to transmit data via UART.
 
+pub use embedded_io::{ErrorKind, ErrorType, Write, WriteReady};
+
 use core::marker::PhantomData;
 
 use crate::utils::wait_until;
@@ -24,6 +26,12 @@ use super::UARTMetadata;
 /// Writer is thread-safe, as it doesn't share any (mutable) state with UART or Reader, and
 /// there can be only a single instance of Writer per UART.
 pub struct Writer<Instance: UARTMetadata> {
+    /// Timeout used for embedded-io functions.
+    /// Timeout is specified as maximum amount of UART status checks.
+    /// 1000 by default.
+    /// This timeout does not apply to low-level functions, as they require the timeout to be
+    /// passed as an argument.
+    pub timeout: u32,
     /// UART instance marker.
     _uart: PhantomData<Instance>,
 }
@@ -60,25 +68,22 @@ impl<Instance: UARTMetadata> Writer<Instance> {
     /// # Parameters
     /// * `bytes` - Bytes to transmit.
     /// * `timeout` - Maximum amount of UART status checks before declaring timeout.
-    ///               Timeout is defined for **the whole transaction**, not single byte transmission.
+    ///               Timeout is defined for transmission of single byte and should be relatively small.
     ///
     /// # Returns
     /// `Ok(())` on successful transmission, `Err(Error::TimedOut)` if timeout has been reached.
     pub fn transmit_bytes(&mut self, bytes: &[u8], timeout: u32) -> Result<(), Error> {
-        if let Some(mut timeout_cycles) = self.wait_for_transmitter_ready(timeout) {
+        if self.wait_for_transmitter_ready(timeout).is_some() {
             for &byte in bytes {
                 // Safety: this is safe, as we just verified that transmitter is ready.
-                unsafe {
-                    self.set_transmitted_byte(byte);
-                }
+                unsafe { self.set_transmitted_byte(byte) };
 
-                match self.wait_for_transmitter_ready(timeout_cycles) {
-                    Some(remaining_timeout) => timeout_cycles = remaining_timeout,
-                    None => return Err(Error::TimedOut),
+                if self.wait_for_transmitter_ready(timeout).is_none() {
+                    return Err(Error::TimedOut);
                 }
             }
 
-            return self.flush(timeout_cycles);
+            return self.flush(timeout);
         }
 
         Err(Error::TimedOut)
@@ -128,7 +133,10 @@ impl<Instance: UARTMetadata> Writer<Instance> {
     ///
     /// This function should be called only once for each UART instance.
     pub(super) fn new() -> Self {
-        Self { _uart: PhantomData }
+        Self {
+            timeout: 1_000,
+            _uart: PhantomData,
+        }
     }
 
     /// Blocks the CPU until either the transmission is complete, or timeout is hit.
@@ -140,10 +148,7 @@ impl<Instance: UARTMetadata> Writer<Instance> {
     /// `Some(u32)`, with amount of checks left before "timeout" is hit, or `None` if maximum
     /// checks amount has been reached.
     fn wait_for_transmission_to_complete(&self, timeout: u32) -> Option<u32> {
-        wait_until(
-            || Instance::registers().sr.read().txrdy().bit_is_set(),
-            timeout,
-        )
+        wait_until(|| self.status().transmitter_empty, timeout)
     }
 
     /// Blocks the CPU until transmit holding register is empty and ready for next byte.
@@ -155,9 +160,29 @@ impl<Instance: UARTMetadata> Writer<Instance> {
     /// `Some(u32)`, with amount of checks left before "timeout" is hit, or `None` if maximum
     /// checks amount has been reached.
     fn wait_for_transmitter_ready(&self, timeout: u32) -> Option<u32> {
-        wait_until(
-            || Instance::registers().sr.read().txempty().bit_is_set(),
-            timeout,
-        )
+        wait_until(|| self.status().transmitter_ready, timeout)
+    }
+}
+
+impl<Instance: UARTMetadata> ErrorType for Writer<Instance> {
+    type Error = ErrorKind;
+}
+
+impl<Instance: UARTMetadata> WriteReady for Writer<Instance> {
+    /// Returns `Ok(true)` if TX holding register is empty (transmitter is ready for the next byte).
+    /// Returns `Ok(false)` otherwise.
+    /// This function never fails, so it can be safely unwrapped.
+    fn write_ready(&mut self) -> Result<bool, Self::Error> {
+        Ok(self.status().transmitter_ready)
+    }
+}
+
+impl<Instance: UARTMetadata> Write for Writer<Instance> {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+        self.transmit_bytes(buf, self.timeout).map(|_| buf.len())
+    }
+
+    fn flush(&mut self) -> Result<(), Self::Error> {
+        self.flush(self.timeout)
     }
 }
