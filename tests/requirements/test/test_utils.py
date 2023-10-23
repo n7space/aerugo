@@ -28,10 +28,19 @@ if TYPE_CHECKING:
     from calldwell.ssh_client import SSHClient
 
 
-def init_test(test_name: str) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
+def init_test(
+    test_name: str,
+    debug_build: bool = False,
+) -> tuple[GDBClient, CalldwellRTTClient, SSHClient]:
     """Creates SSH connection to target board, initializes Calldwell."""
     project_path = INTEGRATION_TESTS_DIRECTORY / test_name
-    if (test_binary_path := build_cargo_app(project_path, BOARD_TARGET_TRIPLE)) is None:
+    if (
+        test_binary_path := build_cargo_app(
+            project_path,
+            BOARD_TARGET_TRIPLE,
+            release_build=not debug_build,
+        )
+    ) is None:
         sys.exit(100)
 
     logging.info("Starting the test, initializing the environment...")

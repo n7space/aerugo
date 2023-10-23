@@ -323,6 +323,26 @@ impl<Instance: UARTMetadata, AnyState: State> UART<Instance, AnyState> {
         });
     }
 
+    /// Stores [`Reader`] instance inside UART.
+    pub fn put_reader(&mut self, reader: Reader<Instance>) {
+        self.reader.replace(reader);
+    }
+
+    /// Returns `true` if UART currently has [`Reader`] instance.
+    pub fn has_reader(&self) -> bool {
+        self.reader.is_some()
+    }
+
+    /// Stores [`Writer`] instance inside UART.
+    pub fn put_writer(&mut self, writer: Writer<Instance>) {
+        self.writer.replace(writer);
+    }
+
+    /// Returns `true` if UART currently has [`Writer`] instance.
+    pub fn has_writer(&self) -> bool {
+        self.writer.is_some()
+    }
+
     /// Transforms UART into a type with different state.
     ///
     /// This is a helper function that reduces state transition boilerplate.

@@ -17,16 +17,6 @@ impl<Instance: UARTMetadata, State: Receive> UART<Instance, State> {
         self.reader.take()
     }
 
-    /// Stores [`Reader`] instance inside UART.
-    pub fn put_reader(&mut self, reader: Reader<Instance>) {
-        self.reader.replace(reader);
-    }
-
-    /// Returns `true` if UART currently has [`Reader`] instance.
-    pub fn has_reader(&self) -> bool {
-        self.reader.is_some()
-    }
-
     /// Resets UART receiver.
     ///
     /// Any pending byte reception is aborted when the receiver is reset.
