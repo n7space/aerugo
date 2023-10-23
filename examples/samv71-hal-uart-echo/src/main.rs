@@ -19,7 +19,7 @@ use aerugo::hal::drivers::pmc::config::PeripheralId;
 use aerugo::hal::drivers::uart::reader::Reader;
 use aerugo::hal::drivers::uart::writer::Writer;
 use aerugo::hal::drivers::uart::{
-    Bidirectional, Config, Interrupt as UartInterrupt, NotConfigured, ReceiverConfig, UART,
+    Bidirectional, Config, Interrupt as UartInterrupt, NotConfigured, ReceiverConfig, Uart,
 };
 use aerugo::hal::interrupt;
 use aerugo::hal::user_peripherals::{PIOD, PMC, UART4};
@@ -68,7 +68,7 @@ fn init_pio(port: Port<PIOD>) {
     pins[19].take().unwrap().into_peripheral_pin(Peripheral::C);
 }
 
-fn init_uart(uart: UART<UART4, NotConfigured>) -> UART<UART4, Bidirectional> {
+fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
     let mut uart = uart.into_bidirectional(
         Config::new(57600, 12.MHz()).unwrap(),
         ReceiverConfig {
@@ -85,7 +85,7 @@ fn init_nvic(mut nvic: NVIC) {
     nvic.enable(Interrupt::UART4);
 }
 
-fn init_system(aerugo: &'static impl InitApi, mut uart: UART<UART4, Bidirectional>) {
+fn init_system(aerugo: &'static impl InitApi, mut uart: Uart<UART4, Bidirectional>) {
     logln!("Initializing queues...");
 
     aerugo.create_message_queue(&UART_DATA_QUEUE);
@@ -124,7 +124,7 @@ fn main() -> ! {
 
     let port = Port::new(peripherals.pio_d.take().unwrap());
     let pmc = peripherals.pmc.unwrap();
-    let uart = UART::new(peripherals.uart_4.take().unwrap());
+    let uart = Uart::new(peripherals.uart_4.take().unwrap());
     let nvic = NVIC::new(peripherals.nvic.take().unwrap());
 
     init_clocks(pmc);

@@ -19,7 +19,7 @@ use aerugo::{
                 pck::{PCKConfig, PCKPrescaler, PCKSource, PCK},
                 PeripheralId,
             },
-            uart::UART,
+            uart::Uart,
         },
         user_peripherals::{PIOD, PMC},
     },
@@ -72,7 +72,7 @@ fn main() -> ! {
     let port_d = Port::new(peripherals.pio_d.take().unwrap());
     configure_pio(port_d);
 
-    let uart = UART::new(peripherals.uart_4.take().unwrap());
+    let uart = Uart::new(peripherals.uart_4.take().unwrap());
     config_tests::test_uart_config();
     uart_tests::test_uart(uart, nvic);
 

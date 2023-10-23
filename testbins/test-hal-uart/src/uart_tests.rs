@@ -8,7 +8,7 @@ use aerugo::hal::drivers::uart::reader::{Read, Reader};
 use aerugo::hal::drivers::uart::writer::{Write, Writer};
 use aerugo::hal::drivers::uart::{
     Config as UartConfig, Error, Interrupt as UartInterrupt, NotConfigured, ParityBit,
-    ReceiverConfig, UART,
+    ReceiverConfig, Uart,
 };
 use aerugo::hal::interrupt;
 use aerugo::hal::user_peripherals::UART4;
@@ -24,7 +24,7 @@ use heapless::Vec;
 /// * Test transmission and reception via loopback in blocking mode
 /// * Test transmission and reception with test host in interrupt mode
 /// * Test transmission and reception with test host using embedded-io traits implementation
-pub fn test_uart(uart: UART<UART4, NotConfigured>, nvic: NVIC) {
+pub fn test_uart(uart: Uart<UART4, NotConfigured>, nvic: NVIC) {
     let uart = test_uart_configuration(uart);
     let uart = test_uart_state_transition(uart);
     let uart = test_reader_writer(uart);
@@ -34,7 +34,7 @@ pub fn test_uart(uart: UART<UART4, NotConfigured>, nvic: NVIC) {
     write_str("All UART functional tests finished successfully.");
 }
 
-fn test_uart_configuration(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfigured> {
+fn test_uart_configuration(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, NotConfigured> {
     let expected_config = UartConfig::new(125_000, 12.MHz()).unwrap();
     let mut uart = uart.into_transmitter(expected_config);
 
@@ -92,7 +92,7 @@ fn test_uart_configuration(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotC
     uart.disable()
 }
 
-fn test_uart_state_transition(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfigured> {
+fn test_uart_state_transition(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, NotConfigured> {
     // "dummy" configs can be set, as long as they are not used. It's user's responsibility to
     // make sure that the settings they enter are valid, the code can just check whether they are "reasonably"
     // valid. At least until UART driver gets integrated with PMC.
@@ -151,7 +151,7 @@ fn test_uart_state_transition(uart: UART<UART4, NotConfigured>) -> UART<UART4, N
     uart.disable()
 }
 
-fn test_reader_writer(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfigured> {
+fn test_reader_writer(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, NotConfigured> {
     let uart_config = UartConfig::new(115200, 12.MHz()).unwrap();
     let mut uart = uart.into_bidirectional(
         uart_config,
@@ -192,7 +192,7 @@ fn test_reader_writer(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfig
     uart
 }
 
-fn test_uart_local_loopback(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfigured> {
+fn test_uart_local_loopback(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, NotConfigured> {
     let uart_config = UartConfig::new(115200, 12.MHz()).unwrap();
     let mut uart = uart.into_bidirectional(
         uart_config,
@@ -239,7 +239,7 @@ const TEST_DATA_LENGTH: usize = 1024;
 static UART_RX_BUFFER: Mutex<RefCell<Vec<u8, TEST_DATA_LENGTH>>> =
     Mutex::new(RefCell::new(Vec::new()));
 
-fn test_uart_io(uart: UART<UART4, NotConfigured>, mut nvic: NVIC) -> UART<UART4, NotConfigured> {
+fn test_uart_io(uart: Uart<UART4, NotConfigured>, mut nvic: NVIC) -> Uart<UART4, NotConfigured> {
     let uart_config = UartConfig::new(57600, 12.MHz()).unwrap();
     let mut uart = uart.into_bidirectional(
         uart_config,
@@ -393,7 +393,7 @@ fn UART4() {
     }
 }
 
-fn test_embedded_io(uart: UART<UART4, NotConfigured>) -> UART<UART4, NotConfigured> {
+fn test_embedded_io(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, NotConfigured> {
     let uart_config = UartConfig::new(57600, 12.MHz()).unwrap();
     let mut uart = uart.into_bidirectional(
         uart_config,

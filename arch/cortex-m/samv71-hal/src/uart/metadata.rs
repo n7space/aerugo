@@ -5,7 +5,7 @@ pub use crate::pac::{UART0, UART1, UART2, UART3, UART4};
 /// Trait for PAC UART instances.
 ///
 /// This trait erases the type of UART instance, so it can be used as
-/// generic argument for [`UART`](super::UART) instead of concrete type.
+/// generic argument for [`Uart`](super::Uart) instead of concrete type.
 pub trait UARTMetadata {
     /// Pointer to UART registers.
     const REGISTERS: *const RegisterBlock;

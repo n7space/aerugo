@@ -14,10 +14,10 @@ use super::UARTMetadata;
 
 /// This structure can be used to receive data via UART.
 ///
-/// Reader instance is created by [`UART`](super::UART) and can be taken from it using
-/// [`UART::take_reader`](super::UART::take_reader) method.
-/// Once taken, it can be put inside UART again using [`UART::put_reader`](super::UART::put_reader)
-/// for storage.
+/// Reader instance is created by [`Uart`](super::Uart) and can be taken from it using
+/// [`Uart::take_reader`](super::Uart::take_reader) method.
+/// Once taken, it can be put inside UART driver instance again using
+/// [`Uart::put_reader`](super::Uart::put_reader) for storage.
 ///
 /// # Safety
 /// If Reader is used while UART receiver is disabled, it will always return [`Error::TimedOut`] on
