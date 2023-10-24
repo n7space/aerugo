@@ -99,7 +99,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         step_fn: StepFn<T, C>,
         context: C,
         runtime_api: &'static dyn RuntimeApi,
-    ) -> Result<(), SystemError> {
+    ) -> Result<&Tasklet<T, C, COND_COUNT>, SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
         }
@@ -137,7 +137,8 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             Err(_) => Err(SystemError::StorageInitializedAlreadySet),
         }?;
 
-        Ok(())
+        // Tasklet was just initialized
+        Ok(self.tasklet().unwrap())
     }
 
     /// Returns a reference to the stored Tasklet structure.

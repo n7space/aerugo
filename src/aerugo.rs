@@ -16,14 +16,17 @@ use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
-use crate::error::RuntimeError;
+use crate::error::{RuntimeError, SystemError};
 use crate::event::{EventId, EventStorage};
 use crate::event_manager::EventManager;
 use crate::execution_monitoring::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
+use crate::internal_list::InternalList;
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
-use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
+use crate::tasklet::{
+    StepFn, Tasklet, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage,
+};
 use crate::time::{Duration, Instant};
 use crate::time_source::TimeSource;
 
@@ -53,9 +56,18 @@ static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
 ///
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 pub struct Aerugo {
+    /// Tasklets that are created in the system.
+    tasklets: InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>,
+    /// IDs of tasklets that are created in the system.
+    tasklet_ids: InternalList<TaskletId, { Aerugo::TASKLET_COUNT }>,
     /// Time source, responsible for creating timestamps.
     time_source: TimeSource,
 }
+
+/// This structure stores a list of tasklets that were created in a system. Adding new elements to
+/// that list is safe only during initialization (before scheduler is started) and this operation
+/// cannot be interrupted.
+unsafe impl Sync for Aerugo {}
 
 impl Aerugo {
     /// Maximum number of tasklets registered in the system.
@@ -68,6 +80,8 @@ impl Aerugo {
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
         Aerugo {
+            tasklets: InternalList::new(),
+            tasklet_ids: InternalList::new(),
             time_source: TimeSource::new(),
         }
     }
@@ -115,6 +129,34 @@ impl Aerugo {
 
             Hal::feed_watchdog();
         }
+    }
+
+    /// Adds new tasklet and new tasklet ID to the lists.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Tasklet to add.
+    ///
+    /// # Result
+    /// `()` if successful, `SystemError` otherwise.
+    ///
+    /// # Safety
+    /// This is safe to call only during system initialization (before scheduler is started) and it
+    /// cannot be interrupted.
+    unsafe fn add_tasklet<T, C, const COND_COUNT: usize>(
+        &'static self,
+        tasklet: &'static Tasklet<T, C, COND_COUNT>,
+    ) -> Result<(), SystemError> {
+        match self.tasklets.add(tasklet.ptr()) {
+            Ok(_) => (),
+            Err(_) => return Err(SystemError::TaskletListFull),
+        };
+
+        match self.tasklet_ids.add(tasklet.get_id()) {
+            Ok(_) => (),
+            Err(_) => return Err(SystemError::TaskletListFull),
+        };
+
+        Ok(())
     }
 }
 
@@ -215,9 +257,12 @@ impl InitApi for Aerugo {
         // SAFETY: This is safe, as long as this function is called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
-            storage
+            let tasklet = storage
                 .init(config, step_fn, C::default(), self)
                 .expect("Failed to initialize storage for tasklet");
+
+            self.add_tasklet(tasklet)
+                .expect("Failed to add tasklet to a list");
         });
     }
 
@@ -325,9 +370,12 @@ impl InitApi for Aerugo {
         // SAFETY: This is safe as long as this function is called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
-            storage
+            let tasklet = storage
                 .init(config, step_fn, context, self)
                 .expect("Failed to initialize storage for tasklet");
+
+            self.add_tasklet(tasklet)
+                .expect("Failed to add tasklet to a list");
         });
     }
 
@@ -1040,7 +1088,7 @@ impl RuntimeApi for Aerugo {
     }
 
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
-        todo!()
+        self.tasklet_ids.iter()
     }
 
     /// Returns time elapsed between system initialization and start of the scheduler.
