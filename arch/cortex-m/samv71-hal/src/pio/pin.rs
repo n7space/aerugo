@@ -3,7 +3,6 @@
 use core::fmt::Debug;
 use core::marker::PhantomData;
 
-pub use super::input_pin::*;
 pub use super::output_pin::*;
 pub use super::peripheral_pin::*;
 use super::port_metadata::{IoPortMetadata, RegisterBlock};
