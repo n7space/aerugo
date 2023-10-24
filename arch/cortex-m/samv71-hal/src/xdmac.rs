@@ -117,13 +117,9 @@ impl Xdmac {
     pub fn get_channel(&mut self, id: usize) -> Option<Channel> {
         if self.is_channel_available(id) {
             self.channel_taken[id] = true;
-            // `as` safety: We validated that ID is valid.
             // Unwrap: If this fails, it's 100% HAL dev's fault for not having the
             // SUPPORTED_CHANNELS constant be equal to the amount of supported channels.
-            Some(Channel::new(
-                id as u8,
-                self.get_channel_registers(id).unwrap(),
-            ))
+            Some(Channel::new(id, self.get_channel_registers(id).unwrap()))
         } else {
             None
         }
@@ -143,7 +139,7 @@ impl Xdmac {
 
     /// Returns previously taken channel, making it possible to take it again.
     pub fn return_channel(&mut self, channel: Channel) {
-        self.channel_taken[channel.id() as usize] = false;
+        self.channel_taken[channel.id()] = false;
     }
 
     /// Returns the number of available peripheral requests.
@@ -165,10 +161,12 @@ impl Xdmac {
     /// doesn't exist.
     fn get_channel_registers(&self, channel: usize) -> Option<&ChannelRegisters> {
         // This is lots of boilerplate to avoid manual pointer operations.
-        // On one hand, this is perfectly safe as it avoid pointers.
+        // On one hand, this is perfectly safe as it avoid making pointers manually.
         // On the other hand, make sure to port it appropriately if number of XDMAC channels
         // ever changes.
-        // I blame `svd2rust` for not making this an array.
+        // I blame `svd2rust` for not putting this in an indexed container, i can understand why
+        // it cannot be an array (notice the padding between CHID instances in XDMAC's register
+        // block), but c'mon.
         match channel {
             0 => Some(&self.xdmac.xdmac_chid0),
             1 => Some(&self.xdmac.xdmac_chid1),
