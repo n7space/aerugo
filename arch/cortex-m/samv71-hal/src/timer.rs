@@ -18,10 +18,7 @@ pub use channel::*;
 pub use tc_metadata::*;
 pub use timer_error::*;
 
-use self::{
-    timer_config::{ExternalClock, ExternalClockSource},
-    timer_error::TimerConfigurationError,
-};
+use self::timer_config::{ExternalClock, ExternalClockSource};
 use core::marker::PhantomData;
 
 /// Structure representing a Timer instance.
