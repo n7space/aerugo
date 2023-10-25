@@ -3,6 +3,7 @@
 use samv71q21_pac::uart0::sr;
 
 /// Structure representing UART status.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Status {
     /// `true` if received character matches the programmed comparison criteria.
     pub comparison_matched: bool,

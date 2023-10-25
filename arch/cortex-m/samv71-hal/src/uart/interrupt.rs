@@ -1,6 +1,7 @@
 //! Module with structures and enumerations representing UART interrupts.
 
 /// Enumeration representing available UART interrupts.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Interrupt {
     /// Comparison interrupt, triggered on successful character comparison.
     Comparison,
