@@ -22,22 +22,35 @@
 //!
 //! # Using the driver
 //!
-//! Main XDMAC structure allows you to fetch XDMAC info (number of available peripheral requests,
-//! FIFO size, number of channels), configure it's global settings, get an instance of XDMAC
-//! channel that can be used to configure and control transfers.
+//! Main [`Xdmac`] structure allows you to fetch XDMAC info (number of available peripheral requests,
+//! FIFO size, number of channels), get an instance of XDMAC [`Channel`].
+//!
+//! Channels can be selected automatically with [`Xdmac::take_next_free_channel`], or manually, using
+//! [`Xdmac::take_channel`]. You can check channel's availability with [`Xdmac::is_channel_available`].
+//!
+//! After receiving instance of [`Channel`] from [`Xdmac`], you can use it to configure the transfer
+//! list, and manage channel's state.
+//!
+//! Both [`Xdmac`] and [`Channel`] provide status reader objects -
+//! [`StatusReader`] and [`ChannelStatusReader`](channel::ChannelStatusReader), that should be given
+//! to interrupt handlers to check IRQ-related flags, or can be used to check the status manually in
+//! interrupt-less systems.
 //!
 //! # Thread/interrupt safety
 //!
 //! Due to the fact that some channel-related XDMAC functionality is stored in main XDMAC registers,
 //! which means that they must be shared between [`Xdmac`] and all [`Channel`] instances,
-//! [`Channel`]s are not thread-safe - even if we assume that the register read/write operation are
-//! atomic, some registers might require read-modify-write operation to apply certain settings,
-//! which usually isn't atomic. Therefore, if you intend to share the [`Channel`] instances, you
-//! must provide appropriate synchronization mechanisms (for example, Mutex) to prevent simultaneous
-//! access to XDMAC registers from happening.
+//! [`Channel`]s are not thread-safe, as they share the state - even if we assume that the register
+//! read/write operation are atomic, some registers might require read-modify-write operation to apply
+//! certain settings, which usually isn't atomic. Therefore, if you intend to share the [`Channel`]
+//! instances, you must provide appropriate synchronization mechanisms (for example, Mutex) to
+//! prevent simultaneous access to XDMAC registers from happening.
 //!
-//! Channels can be selected automatically with [`Xdmac::get_next_free_channel`], or manually, using
-//! [`Xdmac::get_channel`]. You can check channel's availability with [`Xdmac::is_channel_available`].
+//! With that in mind, both [`Xdmac`] and [`Channel`] provide status reader objects that can be
+//! passed safely to IRQ handlers, as mentioned above, instead of sharing the [`Channel`] and
+//! [`Xdmac`] instances. Status readers have exclusive access to status registers, and assuming
+//! that the [`Xdmac`] object is not misused, there should always be at most 1 [`Channel`] instance
+//! per XDMAC channel, and therefore there should be at most 1 status reader per XDMAC channel.
 //!
 //! # MATRIX connections
 //!
@@ -78,8 +91,11 @@ use samv71q21_pac::xdmac::xdmac_chid::XDMAC_CHID as ChannelRegisters;
 use samv71q21_pac::XDMAC;
 
 use self::channel::Channel;
+use self::status::StatusReader;
 
 pub mod channel;
+pub mod interrupts;
+pub mod status;
 
 /// XDMAC driver.
 pub struct Xdmac {
@@ -87,6 +103,8 @@ pub struct Xdmac {
     xdmac: XDMAC,
     /// Array with flags indicating if channel was taken.
     channel_taken: [bool; Self::SUPPORTED_CHANNELS],
+    /// Xdmac's status reader.
+    status_reader: Option<StatusReader>,
 }
 
 impl Xdmac {
@@ -101,20 +119,20 @@ impl Xdmac {
         Xdmac {
             xdmac,
             channel_taken: [false; Self::SUPPORTED_CHANNELS],
+            status_reader: Some(StatusReader {}),
         }
     }
 
-    /// Returns `True` if specified channel is available and can be taken with [`Xdmac::get_channel`].
-    /// Returns `False` if the channel is already taken.
+    /// Returns `true` if specified channel is available and can be taken with [`Xdmac::take_channel`].
+    /// Returns `false` if the channel is already taken.
     pub fn is_channel_available(&self, id: usize) -> bool {
         id < Self::SUPPORTED_CHANNELS && !self.channel_taken[id]
     }
 
     /// Tries to get a channel with specified ID.
     ///
-    /// Returns it, if it's available (wasn't taken out of [`Xdmac`] before).
-    /// Returns `None` otherwise.
-    pub fn get_channel(&mut self, id: usize) -> Option<Channel> {
+    /// Returns it, if it's available. Returns `None` otherwise.
+    pub fn take_channel(&mut self, id: usize) -> Option<Channel> {
         if self.is_channel_available(id) {
             self.channel_taken[id] = true;
             // Unwrap: If this fails, it's 100% HAL dev's fault for not having the
@@ -127,9 +145,9 @@ impl Xdmac {
 
     /// Looks for next available channel and returns it.
     /// Returns `None` if all channels are taken.
-    pub fn get_next_free_channel(&mut self) -> Option<Channel> {
+    pub fn take_next_free_channel(&mut self) -> Option<Channel> {
         for id in 0..Self::SUPPORTED_CHANNELS {
-            if let Some(channel) = self.get_channel(id) {
+            if let Some(channel) = self.take_channel(id) {
                 return Some(channel);
             }
         }
@@ -139,7 +157,37 @@ impl Xdmac {
 
     /// Returns previously taken channel, making it possible to take it again.
     pub fn return_channel(&mut self, channel: Channel) {
-        self.channel_taken[channel.id()] = false;
+        // Safety: This is safe, because channel's ownership is returned and it will be dropped at
+        // the end of this function.
+        unsafe { self.mark_channel_as_free(channel.id()) };
+    }
+
+    /// Marks the channel with specified ID as "free", which means that it's instance no longer
+    /// exists, and a new instance of this channel can be safely created.
+    ///
+    /// # Safety
+    ///
+    /// You can call this function safely only if you can guarantee that the channel it marks as
+    /// "free" no longer exists, or will be dropped shortly after marking it "free". Having multiple
+    /// instances of a single Channel breaks the safety invariants of XDMAC driver, and may result
+    /// in data races or undefined behaviors.
+    pub unsafe fn mark_channel_as_free(&mut self, channel_id: usize) {
+        self.channel_taken[channel_id] = false;
+    }
+
+    /// Returns status reader, if available. Returns `None` if it was already taken and not returned.
+    pub fn take_status_reader(&mut self) -> Option<StatusReader> {
+        self.status_reader.take()
+    }
+
+    /// Returns status reader's ownership to Xdmac.
+    pub fn return_status_reader(&mut self, status_reader: StatusReader) {
+        self.status_reader.replace(status_reader);
+    }
+
+    /// Returns `true` if status reader is currently owned by Xdmac driver.
+    pub fn is_status_reader_available(&self) -> bool {
+        self.status_reader.is_some()
     }
 
     /// Returns the number of available peripheral requests.
