@@ -6,7 +6,7 @@ pub use super::events::ChannelEvents;
 
 /// Helper structure, use it to read XDMAC's channel status.
 ///
-/// After getting it's instance from [`Channel`], you can use it to check which interrupts are
+/// After getting it's instance from [`Channel`](super::Channel), you can use it to check which interrupts are
 /// currently pending for this channel.
 ///
 /// # Safety
@@ -37,7 +37,8 @@ impl ChannelStatusReader {
         self.id
     }
 
-    /// Creates new instance of [`ChannelStatusReader`]. Should be called only by [`Channel`].
+    /// Creates new instance of [`ChannelStatusReader`]. Should be called only by
+    /// [`Channel`](super::Channel).
     /// You should never create it's instance manually.
     pub(super) fn new(id: usize, channel_status_register: *const CIS) -> Self {
         Self {
