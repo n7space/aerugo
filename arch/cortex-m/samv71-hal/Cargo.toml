@@ -10,6 +10,7 @@ license.workspace = true
 description = "Crate containing drivers for SAMV71 peripherals"
 
 [dependencies]
+bitvec = { version = "1", default-features = false, features = ["atomic"] }
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 embedded-hal = "1.0.0-rc.1"
 embedded-io = "0.6"
