@@ -94,7 +94,8 @@ use self::channel::Channel;
 use self::status::StatusReader;
 
 pub mod channel;
-pub mod interrupts;
+pub mod channel_status;
+pub mod events;
 pub mod status;
 
 /// XDMAC driver.

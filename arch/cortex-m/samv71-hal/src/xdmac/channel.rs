@@ -1,11 +1,12 @@
 //! Implementation of XDMAC's channel.
 
 use samv71q21_pac::{
-    xdmac::{xdmac_chid::CIS, xdmac_chid::XDMAC_CHID as ChannelRegisters, RegisterBlock},
+    xdmac::{xdmac_chid::XDMAC_CHID as ChannelRegisters, RegisterBlock},
     XDMAC,
 };
 
-pub use super::interrupts::{ChannelInterrupts, InterruptStatus};
+pub use super::channel_status::ChannelStatusReader;
+pub use super::events::{ChannelEvents, EventState};
 
 /// XDMAC channel.
 ///
@@ -34,7 +35,7 @@ pub use super::interrupts::{ChannelInterrupts, InterruptStatus};
 /// IRQs, you should use [`ChannelStatusReader`] along [`StatusReader`](super::status::StatusReader).
 pub struct Channel {
     /// Pointer to channel's registers.
-    _channel_registers: *const ChannelRegisters,
+    channel_registers: *const ChannelRegisters,
     /// Channel's numeric identifier.
     id: usize,
     /// Channel's status reader.
@@ -42,9 +43,85 @@ pub struct Channel {
 }
 
 impl Channel {
-    /// Returns channel's ID.
-    pub fn id(&self) -> usize {
-        self.id
+    /// Enables channel's global interrupt.
+    ///
+    /// While channel's global interrupt is enabled, IRQ will be triggered when one of the enabled
+    /// channel events is triggered.
+    pub fn enable_interrupts(&mut self) {
+        self.xdmac_registers_ref()
+            .gie
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
+    /// Disables channel's global interrupt.
+    ///
+    /// While channel's global interrupt is disabled, IRQ will **not** be triggered when one of the
+    /// enabled channel events is triggered.
+    pub fn disable_interrupts(&mut self) {
+        self.xdmac_registers_ref()
+            .gid
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
+    /// Returns `true` if channel's global interrupt is enabled.
+    pub fn interrupts_state(&self) -> bool {
+        self.xdmac_registers_ref().gim.read().bits() & self.channel_bitmask() != 0
+    }
+
+    /// Sets channel events state (enabled/disabled). Channel events are usually handled via IRQs,
+    /// make sure to enable channel's global interrupt using [`Channel::enable_interrupts`] if you
+    /// indent to do that.
+    pub fn set_events_state(&mut self, events_state: ChannelEvents) {
+        self.channel_registers_ref().cie.write(|w| {
+            w.roie()
+                .bit(events_state.request_overflow_error.into())
+                .wbie()
+                .bit(events_state.write_bus_error.into())
+                .rbie()
+                .bit(events_state.read_bus_error.into())
+                .fie()
+                .bit(events_state.end_of_flush.into())
+                .die()
+                .bit(events_state.end_of_disable.into())
+                .lie()
+                .bit(events_state.end_of_list.into())
+                .bie()
+                .bit(events_state.end_of_block.into())
+        });
+
+        self.channel_registers_ref().cid.write(|w| {
+            w.roid()
+                .bit(!events_state.request_overflow_error.into_bool())
+                .wbeid()
+                .bit(!events_state.write_bus_error.into_bool())
+                .rbeid()
+                .bit(!events_state.read_bus_error.into_bool())
+                .fid()
+                .bit(!events_state.end_of_flush.into_bool())
+                .did()
+                .bit(!events_state.end_of_disable.into_bool())
+                .lid()
+                .bit(!events_state.end_of_list.into_bool())
+                .bid()
+                .bit(!events_state.end_of_block.into_bool())
+        });
+    }
+
+    /// Returns channel events state (enabled/disabled).
+    pub fn events_state(&self) -> ChannelEvents {
+        let reg = self.channel_registers_ref().cim.read();
+
+        ChannelEvents {
+            end_of_block: reg.bim().bit_is_set().into(),
+            end_of_list: reg.lim().bit_is_set().into(),
+            end_of_disable: reg.dim().bit_is_set().into(),
+            end_of_flush: reg.fim().bit_is_set().into(),
+            read_bus_error: reg.rbeim().bit_is_set().into(),
+            write_bus_error: reg.wbeim().bit_is_set().into(),
+            request_overflow_error: reg.roim().bit_is_set().into(),
+        }
     }
 
     /// Takes the status reader out of Channel.
@@ -64,6 +141,11 @@ impl Channel {
         self.status_reader.is_some()
     }
 
+    /// Returns channel's ID.
+    pub fn id(&self) -> usize {
+        self.id
+    }
+
     /// Creates a new channel.
     pub(super) fn new(id: usize, registers: *const ChannelRegisters) -> Self {
         // Safety: This is safe, as channel registers pointer is provided by Xdmac (and therefore
@@ -71,66 +153,32 @@ impl Channel {
         let status_register = &unsafe { &*registers }.cis;
         Self {
             id,
-            _channel_registers: registers,
+            channel_registers: registers,
             status_reader: Some(ChannelStatusReader::new(id, status_register)),
         }
     }
 
     /// Returns a reference to channel's registers.
-    fn _channel_registers_ref(&self) -> &ChannelRegisters {
+    #[inline(always)]
+    fn channel_registers_ref(&self) -> &ChannelRegisters {
         // Safety: This is safe, as the address of the register is guaranteed to be valid by Xdmac.
-        unsafe { &*self._channel_registers }
+        unsafe { &*self.channel_registers }
     }
 
     /// Returns a reference to XDMAC's registers.
-    fn _xdmac_registers_ref(&self) -> &RegisterBlock {
+    #[inline(always)]
+    fn xdmac_registers_ref(&self) -> &RegisterBlock {
         // Safety: This is safe, as the address of XDMAC register is guaranteed to be valid by Xdmac.
-        unsafe { &*Self::_XDMAC_REGISTERS }
+        unsafe { &*Self::XDMAC_REGISTERS }
+    }
+
+    /// Returns channel's bitmask (`1` shifted by `n` bits, where `n` is channel's ID)
+    /// This function will return valid value as long, as channel's ID is also valid.
+    #[inline(always)]
+    fn channel_bitmask(&self) -> u32 {
+        1 << self.id
     }
 
     /// Pointer to XDMAC's registers.
-    const _XDMAC_REGISTERS: *const RegisterBlock = XDMAC::PTR;
-}
-
-/// Helper structure, use it to read XDMAC's channel status.
-///
-/// After getting it's instance from [`Channel`], you can use it to check which interrupts are
-/// currently pending for this channel.
-///
-/// # Safety
-///
-/// **Reading the status register clears the flags inside it, so you should always handle pending
-/// interrupts as soon as possible after the status is read.**
-pub struct ChannelStatusReader {
-    /// Channel's numeric identifier.
-    id: usize,
-    /// Pointer to channel's registers.
-    channel_status_register: *const CIS,
-}
-
-impl ChannelStatusReader {
-    /// Returns channel's pending interrupts.
-    ///
-    /// # Safety
-    ///
-    /// **Reading the status register clears the flags inside it, so you should always handle
-    /// pending interrupts as soon as possible after the status is read.**
-    pub fn get_pending_interrupts(&mut self) -> ChannelInterrupts {
-        // Safety: This is safe, because pointer address is valid, as it's provided by Channel.
-        unsafe { &*self.channel_status_register }.read().into()
-    }
-
-    /// Returns ID of the channel this reader belongs to.
-    pub fn id(&self) -> usize {
-        self.id
-    }
-
-    /// Creates new instance of [`ChannelStatusReader`]. Should be called only by [`Channel`].
-    /// You should never create it's instance manually.
-    pub(super) fn new(id: usize, channel_status_register: *const CIS) -> Self {
-        Self {
-            id,
-            channel_status_register,
-        }
-    }
+    const XDMAC_REGISTERS: *const RegisterBlock = XDMAC::PTR;
 }

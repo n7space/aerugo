@@ -3,7 +3,8 @@
 use samv71q21_pac::xdmac::xdmac_chid::cis::R as ChannelStatusRegisterReader;
 
 /// Enumeration representing IRQ status.
-pub enum InterruptStatus {
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum EventState {
     /// IRQ is disabled.
     Disabled,
     /// IRQ is enabled.
@@ -11,35 +12,56 @@ pub enum InterruptStatus {
 }
 
 /// Represents the state of XDMAC channel's interrupts status.
-pub struct ChannelInterrupts {
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct ChannelEvents {
     /// End of block interrupt.
-    pub end_of_block: InterruptStatus,
+    pub end_of_block: EventState,
     /// End of transfer list interrupt.
-    pub end_of_list: InterruptStatus,
+    pub end_of_list: EventState,
     /// End of disable interrupt.
-    pub end_of_disable: InterruptStatus,
+    pub end_of_disable: EventState,
     /// End of flush interrupt.
-    pub end_of_flush: InterruptStatus,
+    pub end_of_flush: EventState,
     /// Read bus error interrupt.
-    pub read_bus_error: InterruptStatus,
+    pub read_bus_error: EventState,
     /// Write bus error interrupt.
-    pub write_bus_error: InterruptStatus,
+    pub write_bus_error: EventState,
     /// Request overflow error interrupt.
-    pub request_overflow_error: InterruptStatus,
+    pub request_overflow_error: EventState,
 }
 
-impl From<bool> for InterruptStatus {
+impl EventState {
+    /// Shorthand for converting the event state into `bool`.
+    /// Reverse operation can be done with `.into()`.
+    ///
+    /// Converting into a `bool` using `.into()` is also allowed, but sometimes the syntax is very
+    /// nasty.
+    pub fn into_bool(self) -> bool {
+        self.into()
+    }
+}
+
+impl From<bool> for EventState {
     fn from(value: bool) -> Self {
         match value {
-            true => InterruptStatus::Enabled,
-            false => InterruptStatus::Disabled,
+            true => EventState::Enabled,
+            false => EventState::Disabled,
         }
     }
 }
 
-impl From<ChannelStatusRegisterReader> for ChannelInterrupts {
+impl From<EventState> for bool {
+    fn from(value: EventState) -> Self {
+        match value {
+            EventState::Disabled => false,
+            EventState::Enabled => true,
+        }
+    }
+}
+
+impl From<ChannelStatusRegisterReader> for ChannelEvents {
     fn from(reg: ChannelStatusRegisterReader) -> Self {
-        ChannelInterrupts {
+        ChannelEvents {
             end_of_block: reg.bis().bit_is_set().into(),
             end_of_list: reg.lis().bit_is_set().into(),
             end_of_disable: reg.dis().bit_is_set().into(),
