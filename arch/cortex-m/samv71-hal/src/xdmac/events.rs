@@ -1,74 +1,50 @@
 //! Interrupt-related XDMAC items.
 
-use samv71q21_pac::xdmac::xdmac_chid::cis::R as ChannelStatusRegisterReader;
-
-/// Enumeration representing IRQ status.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum EventState {
-    /// IRQ is disabled.
-    Disabled,
-    /// IRQ is enabled.
-    Enabled,
-}
+use samv71q21_pac::xdmac::xdmac_chid::{cim::R as CIMReader, cis::R as CISReader};
 
 /// Represents the state of XDMAC channel's interrupts status.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct ChannelEvents {
     /// End of block interrupt.
-    pub end_of_block: EventState,
+    pub end_of_block: bool,
     /// End of transfer list interrupt.
-    pub end_of_list: EventState,
+    pub end_of_list: bool,
     /// End of disable interrupt.
-    pub end_of_disable: EventState,
+    pub end_of_disable: bool,
     /// End of flush interrupt.
-    pub end_of_flush: EventState,
+    pub end_of_flush: bool,
     /// Read bus error interrupt.
-    pub read_bus_error: EventState,
+    pub read_bus_error: bool,
     /// Write bus error interrupt.
-    pub write_bus_error: EventState,
+    pub write_bus_error: bool,
     /// Request overflow error interrupt.
-    pub request_overflow_error: EventState,
+    pub request_overflow_error: bool,
 }
 
-impl EventState {
-    /// Shorthand for converting the event state into `bool`.
-    /// Reverse operation can be done with `.into()`.
-    ///
-    /// Converting into a `bool` using `.into()` is also allowed, but sometimes the syntax is very
-    /// nasty.
-    pub fn into_bool(self) -> bool {
-        self.into()
-    }
-}
-
-impl From<bool> for EventState {
-    fn from(value: bool) -> Self {
-        match value {
-            true => EventState::Enabled,
-            false => EventState::Disabled,
-        }
-    }
-}
-
-impl From<EventState> for bool {
-    fn from(value: EventState) -> Self {
-        match value {
-            EventState::Disabled => false,
-            EventState::Enabled => true,
-        }
-    }
-}
-
-impl From<ChannelStatusRegisterReader> for ChannelEvents {
-    fn from(reg: ChannelStatusRegisterReader) -> Self {
+impl From<CISReader> for ChannelEvents {
+    fn from(reg: CISReader) -> Self {
         ChannelEvents {
-            end_of_block: reg.bis().bit_is_set().into(),
-            end_of_list: reg.lis().bit_is_set().into(),
-            end_of_disable: reg.dis().bit_is_set().into(),
-            end_of_flush: reg.fis().bit_is_set().into(),
-            read_bus_error: reg.rbeis().bit_is_set().into(),
-            write_bus_error: reg.wbeis().bit_is_set().into(),
-            request_overflow_error: reg.rois().bit_is_set().into(),
+            end_of_block: reg.bis().bit_is_set(),
+            end_of_list: reg.lis().bit_is_set(),
+            end_of_disable: reg.dis().bit_is_set(),
+            end_of_flush: reg.fis().bit_is_set(),
+            read_bus_error: reg.rbeis().bit_is_set(),
+            write_bus_error: reg.wbeis().bit_is_set(),
+            request_overflow_error: reg.rois().bit_is_set(),
+        }
+    }
+}
+
+impl From<CIMReader> for ChannelEvents {
+    fn from(reg: CIMReader) -> Self {
+        ChannelEvents {
+            end_of_block: reg.bim().bit_is_set(),
+            end_of_list: reg.lim().bit_is_set(),
+            end_of_disable: reg.dim().bit_is_set(),
+            end_of_flush: reg.fim().bit_is_set(),
+            read_bus_error: reg.rbeim().bit_is_set(),
+            write_bus_error: reg.wbeim().bit_is_set(),
+            request_overflow_error: reg.roim().bit_is_set(),
         }
     }
 }

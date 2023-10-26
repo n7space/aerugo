@@ -6,7 +6,7 @@ use samv71q21_pac::{
 };
 
 pub use super::channel_status::ChannelStatusReader;
-pub use super::events::{ChannelEvents, EventState};
+pub use super::events::ChannelEvents;
 
 /// XDMAC channel.
 ///
@@ -22,6 +22,9 @@ pub use super::events::{ChannelEvents, EventState};
 /// [`Xdmac::return_channel`](super::Xdmac::return_channel):
 /// [`Xdmac::mark_channel_as_free`](super::Xdmac::mark_channel_as_free). You can call this function
 /// safely if you can guarantee that the Reader won't exist when Channel's ownership is returned.
+///
+/// In order to configure an XDMAC transfer, you must create transfer block(s), and pass the first
+/// one to the Channel. Then, you can start the transfer by enabling the channel.
 ///
 /// # Safety
 ///
@@ -47,7 +50,7 @@ impl Channel {
     ///
     /// While channel's global interrupt is enabled, IRQ will be triggered when one of the enabled
     /// channel events is triggered.
-    pub fn enable_interrupts(&mut self) {
+    pub fn enable_interrupt(&mut self) {
         self.xdmac_registers_ref()
             .gie
             // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
@@ -58,7 +61,7 @@ impl Channel {
     ///
     /// While channel's global interrupt is disabled, IRQ will **not** be triggered when one of the
     /// enabled channel events is triggered.
-    pub fn disable_interrupts(&mut self) {
+    pub fn disable_interrupt(&mut self) {
         self.xdmac_registers_ref()
             .gid
             // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
@@ -66,7 +69,7 @@ impl Channel {
     }
 
     /// Returns `true` if channel's global interrupt is enabled.
-    pub fn interrupts_state(&self) -> bool {
+    pub fn is_interrupt_enabled(&self) -> bool {
         self.xdmac_registers_ref().gim.read().bits() & self.channel_bitmask() != 0
     }
 
@@ -76,52 +79,42 @@ impl Channel {
     pub fn set_events_state(&mut self, events_state: ChannelEvents) {
         self.channel_registers_ref().cie.write(|w| {
             w.roie()
-                .bit(events_state.request_overflow_error.into())
+                .bit(events_state.request_overflow_error)
                 .wbie()
-                .bit(events_state.write_bus_error.into())
+                .bit(events_state.write_bus_error)
                 .rbie()
-                .bit(events_state.read_bus_error.into())
+                .bit(events_state.read_bus_error)
                 .fie()
-                .bit(events_state.end_of_flush.into())
+                .bit(events_state.end_of_flush)
                 .die()
-                .bit(events_state.end_of_disable.into())
+                .bit(events_state.end_of_disable)
                 .lie()
-                .bit(events_state.end_of_list.into())
+                .bit(events_state.end_of_list)
                 .bie()
-                .bit(events_state.end_of_block.into())
+                .bit(events_state.end_of_block)
         });
 
         self.channel_registers_ref().cid.write(|w| {
             w.roid()
-                .bit(!events_state.request_overflow_error.into_bool())
+                .bit(!events_state.request_overflow_error)
                 .wbeid()
-                .bit(!events_state.write_bus_error.into_bool())
+                .bit(!events_state.write_bus_error)
                 .rbeid()
-                .bit(!events_state.read_bus_error.into_bool())
+                .bit(!events_state.read_bus_error)
                 .fid()
-                .bit(!events_state.end_of_flush.into_bool())
+                .bit(!events_state.end_of_flush)
                 .did()
-                .bit(!events_state.end_of_disable.into_bool())
+                .bit(!events_state.end_of_disable)
                 .lid()
-                .bit(!events_state.end_of_list.into_bool())
+                .bit(!events_state.end_of_list)
                 .bid()
-                .bit(!events_state.end_of_block.into_bool())
+                .bit(!events_state.end_of_block)
         });
     }
 
     /// Returns channel events state (enabled/disabled).
     pub fn events_state(&self) -> ChannelEvents {
-        let reg = self.channel_registers_ref().cim.read();
-
-        ChannelEvents {
-            end_of_block: reg.bim().bit_is_set().into(),
-            end_of_list: reg.lim().bit_is_set().into(),
-            end_of_disable: reg.dim().bit_is_set().into(),
-            end_of_flush: reg.fim().bit_is_set().into(),
-            read_bus_error: reg.rbeim().bit_is_set().into(),
-            write_bus_error: reg.wbeim().bit_is_set().into(),
-            request_overflow_error: reg.roim().bit_is_set().into(),
-        }
+        self.channel_registers_ref().cim.read().into()
     }
 
     /// Takes the status reader out of Channel.
