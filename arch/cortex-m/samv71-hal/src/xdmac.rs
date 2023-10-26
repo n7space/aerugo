@@ -28,8 +28,11 @@
 //! Channels can be selected automatically with [`Xdmac::take_next_free_channel`], or manually, using
 //! [`Xdmac::take_channel`]. You can check channel's availability with [`Xdmac::is_channel_available`].
 //!
-//! After receiving instance of [`Channel`] from [`Xdmac`], you can use it to configure the transfer
-//! list, and manage channel's state.
+//! After receiving instance of [`Channel`] from [`Xdmac`], you can use it to configure the transfer,
+//! and manage channel's state.
+//!
+//! Only a single-block operation mode is supported. Linked list transfers are not implemented.
+//! Data striding and memset operation is also not supported.
 //!
 //! Both [`Xdmac`] and [`Channel`] provide status reader objects -
 //! [`StatusReader`] and [`ChannelStatusReader`](channel::ChannelStatusReader), that should be given
@@ -97,6 +100,7 @@ pub mod channel;
 pub mod channel_status;
 pub mod events;
 pub mod status;
+pub mod transfer;
 
 /// XDMAC driver.
 pub struct Xdmac {

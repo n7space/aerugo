@@ -23,8 +23,8 @@ pub use super::events::ChannelEvents;
 /// [`Xdmac::mark_channel_as_free`](super::Xdmac::mark_channel_as_free). You can call this function
 /// safely if you can guarantee that the Reader won't exist when Channel's ownership is returned.
 ///
-/// In order to configure an XDMAC transfer, you must create transfer block(s), and pass the first
-/// one to the Channel. Then, you can start the transfer by enabling the channel.
+/// In order to configure an XDMAC transfer, you must create transfer block, and pass it to the
+/// Channel. Then, you can start the transaction by enabling the channel.
 ///
 /// # Safety
 ///
@@ -74,7 +74,7 @@ impl Channel {
     }
 
     /// Sets channel events state (enabled/disabled). Channel events are usually handled via IRQs,
-    /// make sure to enable channel's global interrupt using [`Channel::enable_interrupts`] if you
+    /// make sure to enable channel's global interrupt using `Channel::enable_interrupts` if you
     /// indent to do that.
     pub fn set_events_state(&mut self, events_state: ChannelEvents) {
         self.channel_registers_ref().cie.write(|w| {
