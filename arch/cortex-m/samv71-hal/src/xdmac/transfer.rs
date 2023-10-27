@@ -21,8 +21,11 @@ use samv71q21_pac::xdmac;
 /// undefined behavior. Drive responsibly.**
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct TransferBlock {
-    /// Transfer's location
-    location: TransferLocation,
+    /// Transfer's source
+    source: TransferLocation,
+
+    /// Transfer's destination
+    destination: TransferLocation,
 
     /// Amount of data units in the microblock.
     ///
@@ -113,12 +116,6 @@ pub enum AddressingMode {
     /// Incremental addressing mode. XDMAC will read continuous segment of memory starting with
     /// specified address, which will be incremented every time data is read.
     Incremented,
-    /// The microblock stride is added at the microblock boundary. **Striding is currently not
-    /// supported.**
-    MicroblockStride,
-    /// The microblock stride is added at the microblock boundary, and the data stride is added
-    /// at the data boundary. **Striding is currently not supported.**
-    MicroblockAndDataStride,
 }
 
 /// Memory burst size.
@@ -178,3 +175,145 @@ pub type MicroblockLength = BoundedU32<0, 0xFFFFFF>;
 /// Block length type, limited to maximum amount of microblocks in a block.
 /// Must be at least 1.
 pub type BlockLength = BoundedU16<1, 0x1000>;
+
+impl TransferBlock {
+    /// Validates provided configuration and creates a new `TransferBlock`, with following
+    /// default settings:
+    ///
+    /// * Microblock length = 1 data unit
+    /// * Block length = 1 microblock
+    /// * Memory burst size = 1 data unit
+    /// * Chunk size = 1 data unit
+    ///
+    /// These settings can be changed with chained methods (i.e. [`TransferBlock::with_chunk_size`]).
+    ///
+    /// If provided configuration is not valid (i.e. address is not aligned), `None` is returned
+    /// instead.
+    ///
+    /// # Parameters
+    ///
+    /// * `source` - Transfer's source location configuration.
+    /// * `destination` - Transfer's destination location configuration.
+    /// * `transfer_type` - Transfer's type.
+    /// * `data_width` - Size of one transferred data unit.
+    pub fn new(
+        source: TransferLocation,
+        destination: TransferLocation,
+        transfer_type: TransferType,
+        data_width: DataWidth,
+    ) -> Option<Self> {
+        if source.is_aligned_to(data_width) && destination.is_aligned_to(data_width) {
+            Some(Self {
+                source,
+                destination,
+                microblock_length: MicroblockLength::new(1).unwrap(),
+                block_length: BlockLength::new(1).unwrap(),
+                transfer_type,
+                memory_burst_size: MemoryBurstSize::Single,
+                chunk_size: ChunkSize::OneData,
+                data_width,
+            })
+        } else {
+            None
+        }
+    }
+
+    /// Returns a new instance of `TransferBlock` with provided microblock length.
+    pub fn with_microblock_length(self, microblock_length: MicroblockLength) -> Self {
+        Self {
+            microblock_length,
+            ..self
+        }
+    }
+
+    /// Returns a new instance of `TransferBlock` with provided block length.
+    pub fn with_block_length(self, block_length: BlockLength) -> Self {
+        Self {
+            block_length,
+            ..self
+        }
+    }
+
+    /// Returns a new instance of `TransferBlock` with provided chunk size.
+    pub fn with_chunk_size(self, chunk_size: ChunkSize) -> Self {
+        Self { chunk_size, ..self }
+    }
+
+    /// Returns a new instance of `TransferBlock` with provided memory burst size.
+    pub fn with_memory_burst_size(self, memory_burst_size: MemoryBurstSize) -> Self {
+        Self {
+            memory_burst_size,
+            ..self
+        }
+    }
+
+    /// Returns transfer's source.
+    pub fn source(&self) -> TransferLocation {
+        self.source
+    }
+
+    /// Returns transfer's destination.
+    pub fn destination(&self) -> TransferLocation {
+        self.destination
+    }
+
+    /// Returns transfer's microblock length.
+    pub fn microblock_length(&self) -> MicroblockLength {
+        self.microblock_length
+    }
+
+    /// Returns transfer's block length.
+    pub fn block_length(&self) -> BlockLength {
+        self.block_length
+    }
+
+    /// Returns transfer's transfer type.
+    pub fn transfer_type(&self) -> TransferType {
+        self.transfer_type
+    }
+
+    /// Returns transfer's memory burst size.
+    pub fn memory_burst_size(&self) -> MemoryBurstSize {
+        self.memory_burst_size
+    }
+
+    /// Returns transfer's chunk size.
+    pub fn chunk_size(&self) -> ChunkSize {
+        self.chunk_size
+    }
+
+    /// Returns transfer's data width.
+    pub fn data_width(&self) -> DataWidth {
+        self.data_width
+    }
+}
+
+impl TransferLocation {
+    /// Returns `true` if location's address is aligned to specified data width.
+    pub fn is_aligned_to(&self, data_width: DataWidth) -> bool {
+        self.address.align_offset(data_width.into()) == 0
+    }
+}
+
+impl From<DataWidth> for usize {
+    fn from(value: DataWidth) -> Self {
+        match value {
+            DataWidth::Byte => 1,
+            DataWidth::TwoBytes => 2,
+            DataWidth::FourBytes => 4,
+        }
+    }
+}
+
+impl TryFrom<usize> for DataWidth {
+    type Error = ();
+
+    fn try_from(value: usize) -> Result<DataWidth, Self::Error> {
+        match value {
+            1 => Ok(DataWidth::Byte),
+            2 => Ok(DataWidth::TwoBytes),
+            4 => Ok(DataWidth::FourBytes),
+            _ => Err(()),
+        }
+    }
+}
