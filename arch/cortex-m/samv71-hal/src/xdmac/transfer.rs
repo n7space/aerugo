@@ -3,7 +3,7 @@
 use crate::utils::{BoundedU16, BoundedU32};
 use samv71q21_pac::xdmac;
 
-/// Structure representing a single block of XDMAC transfer.
+/// A single block of XDMAC transfer.
 ///
 /// # Safety
 ///
@@ -46,7 +46,7 @@ pub struct TransferBlock {
     data_width: DataWidth,
 }
 
-/// Structure representing transfer location (destination or source) configuration.
+/// Transfer location (destination or source) configuration.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct TransferLocation {
     /// Transfer's address.
@@ -58,18 +58,25 @@ pub struct TransferLocation {
     ///
     /// For peripheral transfers, this must point to the source/destination peripheral's data
     /// register.
-    address: *const (),
+    pub address: *const (),
 
     /// Bus interface that allows the access to the memory pointed by `address`.
     /// For details, check [`xdmac`](crate::xdmac#matrix-connections) module documentation.
-    interface: SystemBus,
+    pub interface: SystemBus,
 
     /// Addressing mode - can either be fixed (address does not change during transfer), or
     /// incrementing (address is incremented after reading a data unit).
-    addressing_mode: AddressingMode,
+    pub addressing_mode: AddressingMode,
 }
 
-/// Enumeration representing transfer type.
+/// `TransferLocation` is only a storage for the pointer and it does not dereference it, so it's safe
+/// to send it to other threads as it doesn't use the shared memory.
+unsafe impl Send for TransferLocation {}
+/// `TransferLocation` is only a storage for the pointer and it does not dereference it, so it's safe
+/// to share as it doesn't use the shared memory.
+unsafe impl Sync for TransferLocation {}
+
+/// Transfer type.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TransferType {
     /// Memory-to-memory transfer.
@@ -89,7 +96,7 @@ pub enum TransferType {
     MemoryToPeripheral(Peripheral, TriggerSource),
 }
 
-/// Enumeration representing system bus interfaces used by XDMAC.
+/// System bus interfaces used by XDMAC.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum SystemBus {
     /// System bus interface 0.
@@ -98,7 +105,7 @@ pub enum SystemBus {
     Interface1,
 }
 
-/// Enumeration representing XDMAC addressing modes.
+/// XDMAC addressing modes.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum AddressingMode {
     /// Fixed addressing mode. Address will not change during block transfer.
@@ -114,7 +121,7 @@ pub enum AddressingMode {
     MicroblockAndDataStride,
 }
 
-/// Enumeration representing memory burst size.
+/// Memory burst size.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MemoryBurstSize {
     /// Single data unit handled in single burst.
@@ -127,7 +134,7 @@ pub enum MemoryBurstSize {
     Sixteen,
 }
 
-/// Enumeration representing trigger source for a transfer.
+/// Trigger source for a transfer.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TriggerSource {
     /// Transfer is software-triggered.
@@ -136,7 +143,7 @@ pub enum TriggerSource {
     Hardware,
 }
 
-/// Enumeration representing transfer's chunk size.
+/// Transfer's chunk size.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ChunkSize {
     /// One data unit per chunk.
@@ -151,7 +158,7 @@ pub enum ChunkSize {
     SixteenData,
 }
 
-/// Enumeration representing transfer's data width (size).
+/// Transfer's data width (size).
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DataWidth {
     /// One data is a byte
@@ -162,7 +169,7 @@ pub enum DataWidth {
     FourBytes,
 }
 
-/// Type representing XDMAC peripheral connection.
+/// XDMAC peripheral connection.
 pub type Peripheral = xdmac::xdmac_chid::cc::PERIDSELECT_A;
 
 /// Microblock length type, limited to maximum amount of data units in a microblock.
@@ -171,21 +178,3 @@ pub type MicroblockLength = BoundedU32<0, 0xFFFFFF>;
 /// Block length type, limited to maximum amount of microblocks in a block.
 /// Must be at least 1.
 pub type BlockLength = BoundedU16<1, 0x1000>;
-
-/*
-What can be split into separate sub-objects:
-
-Destination/source configs:
-* Address
-* Interface
-* Addressing mode
-
-Depending on type of transfer:
-* Memory-to-memory transfers don't use peripheral ID and trigger request source (they are always
-software-triggered).
-
-Proposed split:
-
-TransferBlock containing Source/Destination config, type of transfer (if peripheral-synchronized,
-then with peripheral ID), and remaining, common transfer settings.
-*/

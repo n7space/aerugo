@@ -2,7 +2,7 @@
 
 use samv71q21_pac::xdmac::xdmac_chid::{cim::R as CIMReader, cis::R as CISReader};
 
-/// Represents the state of XDMAC channel's interrupts status.
+/// State of XDMAC channel's interrupts status.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct ChannelEvents {
     /// End of block interrupt.
