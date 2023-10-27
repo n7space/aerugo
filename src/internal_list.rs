@@ -1,4 +1,4 @@
-//! This module stores list used for internals of the system.
+//! This module includes a list used for internals of the system.
 
 use core::cell::UnsafeCell;
 use core::iter::IntoIterator;
