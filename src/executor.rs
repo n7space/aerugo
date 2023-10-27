@@ -9,6 +9,7 @@ use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::Aerugo;
 use crate::error::SystemError;
+use crate::execution_monitor::ExecutionData;
 use crate::mutex::Mutex;
 use crate::tasklet::{TaskletPtr, TaskletStatus};
 use crate::time_source::TimeSource;
@@ -55,26 +56,37 @@ impl Executor {
     ///
     /// # Returns
     /// Value indicating if tasklet was executed, `SystemError` otherwise.
-    pub(crate) fn execute_next_tasklet(&'static self) -> Result<bool, SystemError> {
+    pub(crate) fn execute_next_tasklet(
+        &'static self,
+    ) -> Result<Option<ExecutionData>, SystemError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
+            let mut execution_data = ExecutionData::new(tasklet.get_id());
+
             if !tasklet.is_active() {
                 tasklet.set_status(TaskletStatus::Sleeping);
-                return Ok(false);
+                return Ok(Some(execution_data));
             }
 
             tasklet.set_status(TaskletStatus::Working);
 
+            let execution_start_timestamp = self.time_source.system_time();
             let executed = tasklet.execute();
+            let execution_end_timestamp = self.time_source.system_time();
+
             if executed {
+                execution_data.set_executed();
+                execution_data.set_execution_start(execution_start_timestamp);
+                execution_data.set_execution_end(execution_end_timestamp);
+
                 let system_time = self.time_source.system_time();
                 tasklet.set_last_execution_time(system_time);
             }
 
             self.try_reschedule_tasklet(tasklet)?;
 
-            Ok(executed)
+            Ok(Some(execution_data))
         } else {
-            Ok(false)
+            Ok(None)
         }
     }
 
@@ -202,8 +214,8 @@ mod tests {
         }
 
         // Tasklet that is being executed is `Working`.
-        let execution_result = executor.execute_next_tasklet();
-        assert!(execution_result.is_ok());
-        assert!(execution_result.unwrap());
+        let execution_data = executor.execute_next_tasklet();
+        assert!(execution_data.is_ok());
+        assert!(execution_data.unwrap().unwrap().was_executed());
     }
 }
