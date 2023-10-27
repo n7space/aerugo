@@ -16,7 +16,7 @@ pub use super::events::ChannelEvents;
 /// To check channel's status, you must use [`ChannelStatusReader`] instance that can be acquired
 /// from Channel via [`Channel::take_status_reader`]. It can be taken only once - but can be
 /// returned, and it must be present when giving the Channel back to [`Xdmac`](super::Xdmac), to
-/// make sure that there's no dangling Reader after returning ownership of Channel.
+/// make sure that there's no dangling Reader after returning ownership of a Channel.
 ///
 /// This requirement may be ignored with `unsafe` variant of
 /// [`Xdmac::return_channel`](super::Xdmac::return_channel):
@@ -46,6 +46,40 @@ pub struct Channel {
 }
 
 impl Channel {
+    /// Returns `true` if Channel is currently enabled and XDMAC transaction is in progress.
+    pub fn is_busy(&self) -> bool {
+        self.is_channels_bit_set(self.xdmac_registers_ref().gs.read().bits())
+    }
+
+    /// Enables the channel and starts the transaction, if the channel is not busy.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the channel was successfully enabled. `false` if the channel is busy.
+    pub fn enable(&mut self) -> bool {
+        if self.is_busy() {
+            return false;
+        }
+
+        self.xdmac_registers_ref()
+            .ge
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+        true
+    }
+
+    /// Disables the channel, stopping ongoing transaction (if any is in progress).
+    ///
+    /// If the channel is performing peripheral-to-memory transaction, the pending bytes from XDMAC
+    /// FIFO are written to destination memory. Otherwise, the transaction is terminated immediately.
+    ///
+    /// Hardware-synchronized transactions automatically disable the channel when they're completed.
+    pub fn disable(&mut self) {
+        self.xdmac_registers_ref()
+            .gd
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
     /// Enables channel's global interrupt.
     ///
     /// While channel's global interrupt is enabled, IRQ will be triggered when one of the enabled
@@ -70,7 +104,7 @@ impl Channel {
 
     /// Returns `true` if channel's global interrupt is enabled.
     pub fn is_interrupt_enabled(&self) -> bool {
-        self.xdmac_registers_ref().gim.read().bits() & self.channel_bitmask() != 0
+        self.is_channels_bit_set(self.xdmac_registers_ref().gim.read().bits())
     }
 
     /// Sets channel events state (enabled/disabled). Channel events are usually handled via IRQs,
@@ -170,6 +204,13 @@ impl Channel {
     #[inline(always)]
     fn channel_bitmask(&self) -> u32 {
         1 << self.id
+    }
+
+    /// Returns `true` if channel's bit is set in specified value.
+    /// The value should usually be a register's content.
+    #[inline(always)]
+    fn is_channels_bit_set(&self, value: u32) -> bool {
+        value & self.channel_bitmask() != 0
     }
 
     /// Pointer to XDMAC's registers.
