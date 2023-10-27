@@ -37,18 +37,15 @@ static AERUGO: Aerugo = Aerugo::new();
 
 /// System scheduler.
 ///
-/// Singleton instance of the scheduler. Used directly only by the [Aerugo]
-/// structure, which exposes some functionality via it's API.
+/// Singleton instance of the scheduler. Used directly only by the [Aerugo] structure.
 static EXECUTOR: Executor = Executor::new(AERUGO.time_source());
 /// Event manager.
 ///
-/// Singleton instance of the event manager. Used directly only by the [Aerugo]
-/// structure.
+/// Singleton instance of the event manager. Used directly only by the [Aerugo] structure.
 static EVENT_MANAGER: EventManager = EventManager::new(AERUGO.time_source());
 /// Time manager.
 ///
-/// Singleton instance of the time manager. Used directly only by the [Aerugo]
-/// structure.
+/// Singleton instance of the time manager. Used directly only by the [Aerugo] structure.
 static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
     CyclicExecutionManager::new(AERUGO.time_source());
 
