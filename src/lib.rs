@@ -18,7 +18,7 @@ mod data_provider;
 mod error;
 mod event;
 mod event_manager;
-mod execution_monitoring;
+mod execution_monitor;
 mod executor;
 mod internal_list;
 mod message_queue;

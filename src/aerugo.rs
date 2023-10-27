@@ -19,7 +19,7 @@ use crate::cyclic_execution_manager::CyclicExecutionManager;
 use crate::error::{RuntimeError, SystemError};
 use crate::event::{EventId, EventStorage};
 use crate::event_manager::EventManager;
-use crate::execution_monitoring::ExecutionStats;
+use crate::execution_monitor::ExecutionStats;
 use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
 use crate::internal_list::InternalList;
@@ -1097,7 +1097,7 @@ impl RuntimeApi for Aerugo {
         self.time_source.startup_duration()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
+    fn get_execution_statistics(&'static self, _tasklet_id: &TaskletId) -> Option<ExecutionStats> {
         todo!()
     }
 

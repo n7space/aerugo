@@ -3,7 +3,7 @@ use critical_section::CriticalSection;
 use crate::api::RuntimeApi;
 use crate::error::RuntimeError;
 use crate::event::EventId;
-use crate::execution_monitoring::ExecutionStats;
+use crate::execution_monitor::ExecutionStats;
 use crate::tasklet::TaskletId;
 use crate::time::{Duration, Instant};
 
@@ -62,7 +62,7 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
+    fn get_execution_statistics(&'static self, _tasklet_id: &TaskletId) -> Option<ExecutionStats> {
         todo!()
     }
 

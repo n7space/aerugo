@@ -6,7 +6,7 @@ use critical_section::CriticalSection;
 
 use crate::error::RuntimeError;
 use crate::event::EventId;
-use crate::execution_monitoring::ExecutionStats;
+use crate::execution_monitor::ExecutionStats;
 use crate::tasklet::TaskletId;
 use crate::time::{Duration, Instant};
 
@@ -117,7 +117,7 @@ pub trait RuntimeApi {
     ///
     /// # Return
     /// Execution statistics for this tasklet.
-    fn get_execution_statistics(&'static self, task_id: TaskletId) -> ExecutionStats;
+    fn get_execution_statistics(&'static self, tasklet_id: &TaskletId) -> Option<ExecutionStats>;
 
     /// Returns an iterator to the list with IDs of registered tasklets.
     fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
