@@ -199,6 +199,24 @@ impl<AnyState: State> Channel<AnyState> {
         value & self.channel_bitmask() != 0
     }
 
+    /// Transforms Channel into a type with different state.
+    ///
+    /// This is a helper function that reduces state transition boilerplate.
+    ///
+    /// # Parameters
+    /// * `channel` - Channel instance to be consumed and transformed.
+    ///
+    /// # Returns
+    /// Transformed Channel instance.
+    const fn transform<NewState: State>(channel: Channel<NewState>) -> Self {
+        Self {
+            channel_registers: channel.channel_registers,
+            id: channel.id,
+            status_reader: channel.status_reader,
+            _state: PhantomData,
+        }
+    }
+
     /// Pointer to XDMAC's registers.
     const XDMAC_REGISTERS: *const RegisterBlock = XDMAC::PTR;
 }
@@ -207,7 +225,7 @@ impl Channel<NotConfigured> {
     /// Configures an XDMAC transaction on this channel.
     /// Consumes channel's instance, and returns one with new state.
     pub fn configure_transaction(self) -> Option<Channel<Configured>> {
-        todo!()
+        Some(Channel::transform(self))
     }
 
     /// Enables channel's global interrupt.
@@ -296,10 +314,35 @@ impl Channel<NotConfigured> {
 }
 
 impl Channel<Configured> {
-    /// Restores channel's state to default configuration.
+    /// Restores it's default configuration.
     /// Consumes channel's instance, and returns one with new state.
-    pub fn reset_state(self) -> Channel<NotConfigured> {
-        todo!()
+    /// Channel must be disabled before calling this function.
+    ///
+    /// # Details
+    ///
+    /// This function will reset only the transaction-related configuration registers.
+    /// Event/interrupt settings and global XDMAC configuration will not be modified.
+    ///
+    /// # Returns
+    ///
+    /// Channel with default configuration, or `None` if channel is currently enabled.
+    pub fn reset_state(self) -> Option<Channel<NotConfigured>> {
+        if self.is_busy() {
+            return None;
+        }
+
+        self.channel_registers_ref().csa.reset();
+        self.channel_registers_ref().cda.reset();
+        self.channel_registers_ref().cnda.reset();
+        self.channel_registers_ref().cndc.reset();
+        self.channel_registers_ref().cubc.reset();
+        self.channel_registers_ref().cbc.reset();
+        self.channel_registers_ref().cc.reset();
+        self.channel_registers_ref().cds_msp.reset();
+        self.channel_registers_ref().csus.reset();
+        self.channel_registers_ref().cdus.reset();
+
+        Some(Channel::transform(self))
     }
 
     /// Returns `true` if Channel is currently enabled and XDMAC transaction is in progress.
