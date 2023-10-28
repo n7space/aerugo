@@ -179,6 +179,88 @@ impl Channel {
         }
     }
 
+    /// Returns `true` if source requests for this channel are suspended.
+    pub fn is_read_suspended(&self) -> bool {
+        self.is_channels_bit_set(self.xdmac_registers_ref().grs.read().bits())
+    }
+
+    /// Returns `true` if destination requests for this channel are suspended.
+    pub fn is_write_suspended(&self) -> bool {
+        self.is_channels_bit_set(self.xdmac_registers_ref().gws.read().bits())
+    }
+
+    /// Suspends source requests for the channel.
+    /// Source requests for this channel are no longer serviced by the system scheduler.
+    ///
+    /// # Safety
+    /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
+    /// with that if you share the Channels between threads/IRQs.
+    pub fn suspend_read(&mut self) {
+        self.xdmac_registers_ref()
+            .grs
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
+            .modify(|r, w| unsafe { w.bits(r.bits() & self.channel_bitmask()) });
+    }
+
+    /// Suspends destination requests for the channel.
+    /// Destination requests for this channel are no longer routed to the scheduler.
+    ///
+    /// # Safety
+    /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
+    /// with that if you share the Channels between threads/IRQs.
+    pub fn suspend_write(&mut self) {
+        self.xdmac_registers_ref()
+            .gws
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
+            .modify(|r, w| unsafe { w.bits(r.bits() & self.channel_bitmask()) });
+    }
+
+    /// Suspends read and write operations at the same time.
+    pub fn suspend_read_and_write(&mut self) {
+        self.xdmac_registers_ref()
+            .grws
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
+    /// Resumes source requests for the channel.
+    ///
+    /// # Safety
+    /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
+    /// with that if you share the Channels between threads/IRQs.
+    pub fn resume_read(&mut self) {
+        self.xdmac_registers_ref()
+            .grs
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
+            // Channel bitmask must be negated, as this operation is supposed to clear the channel bit.
+            .modify(|r, w| unsafe { w.bits(r.bits() & !self.channel_bitmask()) });
+    }
+
+    /// Resumes destination requests for the channel.
+    ///
+    /// # Safety
+    /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
+    /// with that if you share the Channels between threads/IRQs.
+    pub fn resume_write(&mut self) {
+        self.xdmac_registers_ref()
+            .gws
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
+            // Channel bitmask must be negated, as this operation is supposed to clear the channel bit.
+            .modify(|r, w| unsafe { w.bits(r.bits() & !self.channel_bitmask()) });
+    }
+
+    /// Resumes read and write operations at the same time.
+    pub fn resume_read_and_write(&mut self) {
+        self.xdmac_registers_ref()
+            .grwr
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
     /// Returns channel's ID.
     pub fn id(&self) -> usize {
         self.id
