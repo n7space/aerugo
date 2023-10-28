@@ -83,7 +83,7 @@ impl Channel {
     /// Enables channel's global interrupt.
     ///
     /// While channel's global interrupt is enabled, IRQ will be triggered when one of the enabled
-    /// channel events is triggered.
+    /// channel events happens.
     pub fn enable_interrupt(&mut self) {
         self.xdmac_registers_ref()
             .gie
@@ -94,7 +94,7 @@ impl Channel {
     /// Disables channel's global interrupt.
     ///
     /// While channel's global interrupt is disabled, IRQ will **not** be triggered when one of the
-    /// enabled channel events is triggered.
+    /// enabled channel events happens.
     pub fn disable_interrupt(&mut self) {
         self.xdmac_registers_ref()
             .gid
@@ -108,7 +108,7 @@ impl Channel {
     }
 
     /// Sets channel events state (enabled/disabled). Channel events are usually handled via IRQs,
-    /// make sure to enable channel's global interrupt using `Channel::enable_interrupts` if you
+    /// make sure to enable channel's global interrupt using [`Channel::enable_interrupt`] if you
     /// indent to do that.
     pub fn set_events_state(&mut self, events_state: ChannelEvents) {
         self.channel_registers_ref().cie.write(|w| {
@@ -168,6 +168,37 @@ impl Channel {
         self.status_reader.is_some()
     }
 
+    /// Requests a DMA transfer for this channel, if the request is not pending already.
+    /// This function must be used to trigger a software-synchronized DMA transfer.
+    ///
+    /// # Returns
+    ///
+    /// `true` if channel was successfully triggered, `false` if a request is already pending.
+    pub fn trigger(&mut self) {
+        if !self.is_software_request_pending() {
+            // Safety: This is safe, because we just verified that a request is not pending.
+            unsafe { self.force_trigger() };
+        }
+    }
+
+    /// Returns `true` if a software request is currently pending on the channel.
+    pub fn is_software_request_pending(&self) -> bool {
+        self.is_channels_bit_set(self.xdmac_registers_ref().gsws.read().bits())
+    }
+
+    /// Requests a DMA transfer for this channel.
+    ///
+    /// # Safety
+    ///
+    /// This function does not check whether a software request is currently pending, or not.
+    /// If you want a safe function that performs that check automatically, use [`Channel::trigger`].
+    pub unsafe fn force_trigger(&mut self) {
+        self.xdmac_registers_ref()
+            .gswr
+            // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+            .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+    }
+
     /// Flushes the channel, if the channel is peripheral-synchronized.
     /// Otherwise, does nothing.
     pub fn flush(&mut self) {
@@ -193,6 +224,7 @@ impl Channel {
     /// Source requests for this channel are no longer serviced by the system scheduler.
     ///
     /// # Safety
+    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn suspend_read(&mut self) {
@@ -207,6 +239,7 @@ impl Channel {
     /// Destination requests for this channel are no longer routed to the scheduler.
     ///
     /// # Safety
+    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn suspend_write(&mut self) {
@@ -228,6 +261,7 @@ impl Channel {
     /// Resumes source requests for the channel.
     ///
     /// # Safety
+    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn resume_read(&mut self) {
@@ -242,6 +276,7 @@ impl Channel {
     /// Resumes destination requests for the channel.
     ///
     /// # Safety
+    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn resume_write(&mut self) {
