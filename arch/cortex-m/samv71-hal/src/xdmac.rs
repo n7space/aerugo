@@ -93,7 +93,7 @@
 use samv71q21_pac::xdmac::xdmac_chid::XDMAC_CHID as ChannelRegisters;
 use samv71q21_pac::XDMAC;
 
-use self::channel::Channel;
+use self::channel::{Channel, NotConfigured};
 use self::status::StatusReader;
 
 pub mod channel;
@@ -137,7 +137,7 @@ impl Xdmac {
     /// Tries to get a channel with specified ID.
     ///
     /// Returns it, if it's available. Returns `None` otherwise.
-    pub fn take_channel(&mut self, id: usize) -> Option<Channel> {
+    pub fn take_channel(&mut self, id: usize) -> Option<Channel<NotConfigured>> {
         if self.is_channel_available(id) {
             self.channel_taken[id] = true;
             // Unwrap: If this fails, it's 100% HAL dev's fault for not having the
@@ -150,7 +150,7 @@ impl Xdmac {
 
     /// Looks for next available channel and returns it.
     /// Returns `None` if all channels are taken.
-    pub fn take_next_free_channel(&mut self) -> Option<Channel> {
+    pub fn take_next_free_channel(&mut self) -> Option<Channel<NotConfigured>> {
         for id in 0..Self::SUPPORTED_CHANNELS {
             if let Some(channel) = self.take_channel(id) {
                 return Some(channel);
@@ -161,7 +161,7 @@ impl Xdmac {
     }
 
     /// Returns previously taken channel, making it possible to take it again.
-    pub fn return_channel(&mut self, channel: Channel) {
+    pub fn return_channel(&mut self, channel: Channel<NotConfigured>) {
         // Safety: This is safe, because channel's ownership is returned and it will be dropped at
         // the end of this function.
         unsafe { self.mark_channel_as_free(channel.id()) };
