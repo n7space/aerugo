@@ -168,6 +168,17 @@ impl Channel {
         self.status_reader.is_some()
     }
 
+    /// Flushes the channel, if the channel is peripheral-synchronized.
+    /// Otherwise, does nothing.
+    pub fn flush(&mut self) {
+        if self.is_peripheral_synchronized() {
+            self.xdmac_registers_ref()
+                .gswf
+                // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
+                .write(|w| unsafe { w.bits(self.channel_bitmask()) });
+        }
+    }
+
     /// Returns channel's ID.
     pub fn id(&self) -> usize {
         self.id
@@ -175,14 +186,19 @@ impl Channel {
 
     /// Creates a new channel.
     pub(super) fn new(id: usize, registers: *const ChannelRegisters) -> Self {
-        // Safety: This is safe, as channel registers pointer is provided by Xdmac (and therefore
-        // valid).
+        // Safety: This is safe, as channel registers pointer must be provided by Xdmac driver (and
+        // therefore be valid).
         let status_register = &unsafe { &*registers }.cis;
         Self {
             id,
             channel_registers: registers,
             status_reader: Some(ChannelStatusReader::new(id, status_register)),
         }
+    }
+
+    /// Returns `true` if the channel is currently configured as peripheral-synchronized.
+    fn is_peripheral_synchronized(&self) -> bool {
+        self.channel_registers_ref().cc.read().type_().is_per_tran()
     }
 
     /// Returns a reference to channel's registers.
