@@ -1,7 +1,13 @@
 //! Module with transfer-related items.
 
 use crate::utils::{BoundedU16, BoundedU32};
-use samv71q21_pac::xdmac;
+use samv71q21_pac::xdmac::{
+    self,
+    xdmac_chid::cc::{
+        CSIZESELECT_A, DAMSELECT_A, DIFSELECT_A, DSYNCSELECT_A, DWIDTHSELECT_A, MBSIZESELECT_A,
+        SAMSELECT_A, SIFSELECT_A, SWREQSELECT_A, TYPESELECT_A,
+    },
+};
 
 /// A single block of XDMAC transfer.
 ///
@@ -314,6 +320,117 @@ impl TryFrom<usize> for DataWidth {
             2 => Ok(DataWidth::TwoBytes),
             4 => Ok(DataWidth::FourBytes),
             _ => Err(()),
+        }
+    }
+}
+
+impl From<TransferType> for TYPESELECT_A {
+    fn from(value: TransferType) -> Self {
+        match value {
+            TransferType::MemoryToMemory => TYPESELECT_A::MEM_TRAN,
+            TransferType::PeripheralToMemory(_, _) => TYPESELECT_A::PER_TRAN,
+            TransferType::MemoryToPeripheral(_, _) => TYPESELECT_A::PER_TRAN,
+        }
+    }
+}
+
+impl From<TransferType> for DSYNCSELECT_A {
+    fn from(value: TransferType) -> Self {
+        match value {
+            // Documentation does not specify what value this field should have
+            // for mem2mem transfers. Therefore, we choose the "default" 0 value.
+            TransferType::MemoryToMemory => DSYNCSELECT_A::PER2MEM,
+            TransferType::PeripheralToMemory(_, _) => DSYNCSELECT_A::PER2MEM,
+            TransferType::MemoryToPeripheral(_, _) => DSYNCSELECT_A::MEM2PER,
+        }
+    }
+}
+
+impl From<TransferType> for SWREQSELECT_A {
+    fn from(value: TransferType) -> Self {
+        match value {
+            // mem2mem is always software-triggered
+            TransferType::MemoryToMemory => SWREQSELECT_A::SWR_CONNECTED,
+            TransferType::PeripheralToMemory(_, trigger_source) => trigger_source.into(),
+            TransferType::MemoryToPeripheral(_, trigger_source) => trigger_source.into(),
+        }
+    }
+}
+
+impl From<TriggerSource> for SWREQSELECT_A {
+    fn from(value: TriggerSource) -> Self {
+        match value {
+            TriggerSource::Software => SWREQSELECT_A::SWR_CONNECTED,
+            TriggerSource::Hardware => SWREQSELECT_A::HWR_CONNECTED,
+        }
+    }
+}
+
+impl From<MemoryBurstSize> for MBSIZESELECT_A {
+    fn from(value: MemoryBurstSize) -> Self {
+        match value {
+            MemoryBurstSize::Single => MBSIZESELECT_A::SINGLE,
+            MemoryBurstSize::Four => MBSIZESELECT_A::FOUR,
+            MemoryBurstSize::Eight => MBSIZESELECT_A::EIGHT,
+            MemoryBurstSize::Sixteen => MBSIZESELECT_A::SIXTEEN,
+        }
+    }
+}
+
+impl From<ChunkSize> for CSIZESELECT_A {
+    fn from(value: ChunkSize) -> Self {
+        match value {
+            ChunkSize::OneData => CSIZESELECT_A::CHK_1,
+            ChunkSize::TwoData => CSIZESELECT_A::CHK_2,
+            ChunkSize::FourData => CSIZESELECT_A::CHK_4,
+            ChunkSize::EightData => CSIZESELECT_A::CHK_8,
+            ChunkSize::SixteenData => CSIZESELECT_A::CHK_16,
+        }
+    }
+}
+
+impl From<DataWidth> for DWIDTHSELECT_A {
+    fn from(value: DataWidth) -> Self {
+        match value {
+            DataWidth::Byte => DWIDTHSELECT_A::BYTE,
+            DataWidth::TwoBytes => DWIDTHSELECT_A::HALFWORD,
+            DataWidth::FourBytes => DWIDTHSELECT_A::WORD,
+        }
+    }
+}
+
+impl From<SystemBus> for SIFSELECT_A {
+    fn from(value: SystemBus) -> Self {
+        match value {
+            SystemBus::Interface0 => SIFSELECT_A::AHB_IF0,
+            SystemBus::Interface1 => SIFSELECT_A::AHB_IF1,
+        }
+    }
+}
+
+impl From<SystemBus> for DIFSELECT_A {
+    fn from(value: SystemBus) -> Self {
+        match value {
+            SystemBus::Interface0 => DIFSELECT_A::AHB_IF0,
+            SystemBus::Interface1 => DIFSELECT_A::AHB_IF1,
+        }
+    }
+}
+
+impl From<AddressingMode> for SAMSELECT_A {
+    fn from(value: AddressingMode) -> Self {
+        match value {
+            AddressingMode::Fixed => SAMSELECT_A::FIXED_AM,
+            AddressingMode::Incremented => SAMSELECT_A::INCREMENTED_AM,
+        }
+    }
+}
+
+impl From<AddressingMode> for DAMSELECT_A {
+    fn from(value: AddressingMode) -> Self {
+        match value {
+            AddressingMode::Fixed => DAMSELECT_A::FIXED_AM,
+            AddressingMode::Incremented => DAMSELECT_A::INCREMENTED_AM,
         }
     }
 }

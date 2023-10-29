@@ -3,12 +3,19 @@
 use core::marker::PhantomData;
 
 use samv71q21_pac::{
-    xdmac::{xdmac_chid::XDMAC_CHID as ChannelRegisters, RegisterBlock},
+    xdmac::{
+        xdmac_chid::{
+            cc::{DAMSELECT_A, SAMSELECT_A},
+            XDMAC_CHID as ChannelRegisters,
+        },
+        RegisterBlock,
+    },
     XDMAC,
 };
 
 pub use super::channel_status::ChannelStatusReader;
 pub use super::events::ChannelEvents;
+use super::transfer::{AddressingMode, DataWidth, TransferBlock, TransferType};
 
 /// Typestate trait representing generic XDMAC channel's state.
 pub trait State {}
@@ -224,8 +231,86 @@ impl<AnyState: State> Channel<AnyState> {
 impl Channel<NotConfigured> {
     /// Configures an XDMAC transaction on this channel.
     /// Consumes channel's instance, and returns one with new state.
-    pub fn configure_transaction(self) -> Option<Channel<Configured>> {
-        Some(Channel::transform(self))
+    pub fn configure_transaction(self, block: TransferBlock) -> Channel<Configured> {
+        // Per the procedure described in SAMV71 datasheet:
+        // 1. Select a free channel - already done.
+        // 2. Clear pending event status bits by reading Channel Interrupt Status Register
+        self.channel_registers_ref().cis.read();
+
+        // 3. Write source address
+        self.channel_registers_ref()
+            .csa
+            .write(|w| w.sa().variant(block.source().address as u32));
+        // 4. Write destination address
+        self.channel_registers_ref()
+            .cda
+            .write(|w| w.da().variant(block.destination().address as u32));
+
+        // 5. Program number of data in a microblock
+        self.channel_registers_ref()
+            .cubc
+            .write(|w| w.ublen().variant(block.microblock_length().get()));
+
+        // 6. Program channel configuration register
+        // In order to prevent some issues described in errata, some fields must be set "manually"
+        let errata_config = ErrataTransferBlockConfig::from_transfer_block(&block);
+
+        self.channel_registers_ref().cc.write(|w| {
+            // Safety: Validity of all those fields is verified as much as possible.
+            // Some errata-specific things need unsafe handling.
+            unsafe {
+                w.type_()
+                    .variant(block.transfer_type().into())
+                    .mbsize()
+                    .variant(block.memory_burst_size().into())
+                    .dsync()
+                    .variant(block.transfer_type().into())
+                    .swreq()
+                    .variant(block.transfer_type().into())
+                    // Memset is not supported.
+                    .memset()
+                    .normal_mode()
+                    .csize()
+                    .variant(block.chunk_size().into())
+                    .dwidth()
+                    .variant(block.data_width().into())
+                    .sif()
+                    .variant(block.source().interface.into())
+                    .dif()
+                    .variant(block.destination().interface.into())
+                    .sam()
+                    .variant(errata_config.source_addressing_mode)
+                    .dam()
+                    .variant(errata_config.destination_addressing_mode)
+                    .perid()
+                    .bits(errata_config.peripheral_id)
+            }
+        });
+
+        // 7. Program the number of microblocks in data
+        self.channel_registers_ref()
+            .cbc
+            // -1 is required, as the value in register is offset by 1 (i.e. 0 in the register
+            // means that block has 1 microblock). Block length type is bound to valid range of
+            // values.
+            .write(|w| w.blen().variant(block.block_length().get() - 1));
+
+        // 7.5. Program errata-specific data striding
+        self.channel_registers_ref().cds_msp.write(|w| {
+            w.sds_msp()
+                .variant(errata_config.data_striding)
+                .dds_msp()
+                .variant(errata_config.data_striding)
+        });
+
+        // 8. Clear unused registers.
+        self.channel_registers_ref().cnda.reset();
+        self.channel_registers_ref().cndc.reset();
+        self.channel_registers_ref().csus.reset();
+        self.channel_registers_ref().cdus.reset();
+
+        // Now the user can configure interrupts/events and start the channel's operation.
+        Channel::transform(self)
     }
 
     /// Enables channel's global interrupt.
@@ -424,5 +509,62 @@ impl Channel<Configured> {
     /// Returns `true` if the channel is currently configured as peripheral-synchronized.
     fn is_peripheral_synchronized(&self) -> bool {
         self.channel_registers_ref().cc.read().type_().is_per_tran()
+    }
+}
+
+/// This structure contains XDMAC channel settings that are specific to errata issues.
+struct ErrataTransferBlockConfig {
+    /// Source and destination data striding. According to errata, section 2.5.2, this must be
+    /// set to -1 (in 24-bit two's complement) when transferring 8-bit or 16-bit data when
+    /// either destination or source is in fixed addressing mode. Otherwise **both** destination
+    /// and source addresses will increment by 8/16-bits.
+    /// Note: This is an u16, as PAC requires an u16 value. However, it's set manually to a valid
+    /// constant.
+    pub data_striding: u16,
+    /// Source addressing mode, when errata section 2.5.2 does not apply it's the value configured
+    /// by the user. Otherwise, it's set to microblock and data striding.
+    pub source_addressing_mode: SAMSELECT_A,
+    /// Destination addressing mode, when errata section 2.5.2 does not apply it's the value
+    /// configured by the user. Otherwise, it's set to microblock and data striding.
+    pub destination_addressing_mode: DAMSELECT_A,
+    /// XDMAC Peripheral ID. According to errata, section 2.5.3, this must be set to an unused
+    /// peripheral ID when mem2mem transfer is performed.
+    pub peripheral_id: u8,
+}
+
+impl ErrataTransferBlockConfig {
+    /// Creates an errata-specific config from standard transfer block configuration.
+    fn from_transfer_block(block: &TransferBlock) -> Self {
+        let peripheral_id = match block.transfer_type() {
+            // Per errata section 2.5.3, it must be set to an unused peripheral's ID when
+            // mem2mem transfer is performed. Therefore, it's set to maximum supported value (this
+            // field is 7-bit long).
+            TransferType::MemoryToMemory => 0b1111111u8,
+            TransferType::PeripheralToMemory(id, _) => id.into(),
+            TransferType::MemoryToPeripheral(id, _) => id.into(),
+        };
+
+        // Per errata section 2.5.2, if transfer is 8 or 16-bit, and either source or destination
+        // is in fixed addressing mode, to prevent (both?) addresses from being incremented,
+        // addressing mode must be set to microblock and data stride with microblock stride = 0
+        // and data stride = -1 (in 24-bit two's complement format)
+        if (block.data_width() != DataWidth::FourBytes)
+            && (block.source().addressing_mode == AddressingMode::Fixed
+                || block.destination().addressing_mode == AddressingMode::Fixed)
+        {
+            Self {
+                data_striding: 0xFFFFu16, // This is -1 in two's complement format.
+                source_addressing_mode: SAMSELECT_A::UBS_DS_AM,
+                destination_addressing_mode: DAMSELECT_A::UBS_DS_AM,
+                peripheral_id,
+            }
+        } else {
+            Self {
+                data_striding: 0,
+                source_addressing_mode: block.source().addressing_mode.into(),
+                destination_addressing_mode: block.destination().addressing_mode.into(),
+                peripheral_id,
+            }
+        }
     }
 }
