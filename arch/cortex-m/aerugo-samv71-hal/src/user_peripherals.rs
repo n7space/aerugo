@@ -2,7 +2,7 @@
 
 pub use samv71_hal::pac::{
     CHIPID, CPUID, NVIC, PIOA, PIOB, PIOC, PIOD, PIOE, SCB, SYST, TC1, TC2, TC3, UART0, UART1,
-    UART2, UART3, UART4,
+    UART2, UART3, UART4, XDMAC,
 };
 pub use samv71_hal::pmc::PMC;
 
@@ -52,4 +52,6 @@ pub struct UserPeripherals {
     pub uart_3: Option<UART3>,
     /// UART 4
     pub uart_4: Option<UART4>,
+    /// XDMAC
+    pub xdmac: Option<XDMAC>,
 }
