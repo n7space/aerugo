@@ -1,4 +1,12 @@
-// Test scenario:
+// Test scenario (SRS IDs in parentheses):
+// * Check channel management (take/give) capabilities
+// * Check interrupts and events configuration capabilities
+// * Check transfer configuration capabilities
+// * Check if mem2mem transfer can be performed (60, 70, 80)
+// * Check if per2mem and mem2per transfers can be performed using UART in loopback mode (20, 30,
+//   40, 50, 70, 80, 110)
+// * Check if per2mem transfer can be suspended and disabled using UART in loopback mode (90, 100)
+
 /// @SRS{ROS-FUN-BSP-XDMAC-020}
 /// @SRS{ROS-FUN-BSP-XDMAC-030}
 /// @SRS{ROS-FUN-BSP-XDMAC-040}
