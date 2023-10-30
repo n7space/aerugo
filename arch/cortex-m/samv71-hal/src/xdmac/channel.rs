@@ -3,19 +3,13 @@
 use core::marker::PhantomData;
 
 use samv71q21_pac::{
-    xdmac::{
-        xdmac_chid::{
-            cc::{DAMSELECT_A, SAMSELECT_A},
-            XDMAC_CHID as ChannelRegisters,
-        },
-        RegisterBlock,
-    },
+    xdmac::{xdmac_chid::XDMAC_CHID as ChannelRegisters, RegisterBlock},
     XDMAC,
 };
 
 pub use super::channel_status::ChannelStatusReader;
 pub use super::events::ChannelEvents;
-use super::transfer::{AddressingMode, DataWidth, TransferBlock, TransferType};
+use super::transfer::{ErrataTransferBlockConfig, TransferBlock};
 
 /// Typestate trait representing generic XDMAC channel's state.
 pub trait State {}
@@ -509,62 +503,5 @@ impl Channel<Configured> {
     /// Returns `true` if the channel is currently configured as peripheral-synchronized.
     fn is_peripheral_synchronized(&self) -> bool {
         self.channel_registers_ref().cc.read().type_().is_per_tran()
-    }
-}
-
-/// This structure contains XDMAC channel settings that are specific to errata issues.
-struct ErrataTransferBlockConfig {
-    /// Source and destination data striding. According to errata, section 2.5.2, this must be
-    /// set to -1 (in 24-bit two's complement) when transferring 8-bit or 16-bit data when
-    /// either destination or source is in fixed addressing mode. Otherwise **both** destination
-    /// and source addresses will increment by 8/16-bits.
-    /// Note: This is an u16, as PAC requires an u16 value. However, it's set manually to a valid
-    /// constant.
-    pub data_striding: u16,
-    /// Source addressing mode, when errata section 2.5.2 does not apply it's the value configured
-    /// by the user. Otherwise, it's set to microblock and data striding.
-    pub source_addressing_mode: SAMSELECT_A,
-    /// Destination addressing mode, when errata section 2.5.2 does not apply it's the value
-    /// configured by the user. Otherwise, it's set to microblock and data striding.
-    pub destination_addressing_mode: DAMSELECT_A,
-    /// XDMAC Peripheral ID. According to errata, section 2.5.3, this must be set to an unused
-    /// peripheral ID when mem2mem transfer is performed.
-    pub peripheral_id: u8,
-}
-
-impl ErrataTransferBlockConfig {
-    /// Creates an errata-specific config from standard transfer block configuration.
-    fn from_transfer_block(block: &TransferBlock) -> Self {
-        let peripheral_id = match block.transfer_type() {
-            // Per errata section 2.5.3, it must be set to an unused peripheral's ID when
-            // mem2mem transfer is performed. Therefore, it's set to maximum supported value (this
-            // field is 7-bit long).
-            TransferType::MemoryToMemory => 0b1111111u8,
-            TransferType::PeripheralToMemory(id, _) => id.into(),
-            TransferType::MemoryToPeripheral(id, _) => id.into(),
-        };
-
-        // Per errata section 2.5.2, if transfer is 8 or 16-bit, and either source or destination
-        // is in fixed addressing mode, to prevent (both?) addresses from being incremented,
-        // addressing mode must be set to microblock and data stride with microblock stride = 0
-        // and data stride = -1 (in 24-bit two's complement format)
-        if (block.data_width() != DataWidth::FourBytes)
-            && (block.source().addressing_mode == AddressingMode::Fixed
-                || block.destination().addressing_mode == AddressingMode::Fixed)
-        {
-            Self {
-                data_striding: 0xFFFFu16, // This is -1 in two's complement format.
-                source_addressing_mode: SAMSELECT_A::UBS_DS_AM,
-                destination_addressing_mode: DAMSELECT_A::UBS_DS_AM,
-                peripheral_id,
-            }
-        } else {
-            Self {
-                data_striding: 0,
-                source_addressing_mode: block.source().addressing_mode.into(),
-                destination_addressing_mode: block.destination().addressing_mode.into(),
-                peripheral_id,
-            }
-        }
     }
 }
