@@ -19,7 +19,7 @@ use crate::cyclic_execution_manager::CyclicExecutionManager;
 use crate::error::{RuntimeError, SystemError};
 use crate::event::{EventId, EventStorage};
 use crate::event_manager::EventManager;
-use crate::execution_monitor::ExecutionStats;
+use crate::execution_monitor::{ExecutionMonitor, ExecutionStats};
 use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
 use crate::internal_list::InternalList;
@@ -48,6 +48,10 @@ static EVENT_MANAGER: EventManager = EventManager::new(AERUGO.time_source());
 /// Singleton instance of the time manager. Used directly only by the [Aerugo] structure.
 static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
     CyclicExecutionManager::new(AERUGO.time_source());
+/// Execution monitor.
+///
+/// Singleton instance of the execution monitor. Used directly only by the [Aerugo] structure.
+static EXECUTION_MONITOR: ExecutionMonitor = ExecutionMonitor::new();
 
 /// System structure.
 ///
@@ -117,9 +121,14 @@ impl Aerugo {
     /// its internal components and hardware.
     fn run(&'static self) -> ! {
         loop {
-            EXECUTOR
+            let execution_data = EXECUTOR
                 .execute_next_tasklet()
                 .expect("Failure in tasklet execution");
+
+            if let Some(data) = execution_data {
+                // SAFETY: This is safe, as `EXECUTION_MONITOR` is not available from the IRQ context.
+                unsafe { EXECUTION_MONITOR.update(data) };
+            }
 
             EVENT_MANAGER.activate_scheduled_events();
             CYCLIC_EXECUTION_MANAGER.wake_tasklets();
@@ -1084,7 +1093,7 @@ impl RuntimeApi for Aerugo {
         unsafe { self.time_source.set_user_offset(offset) }
     }
 
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
+    fn query_tasklets(&'static self) -> core::slice::Iter<TaskletId> {
         self.tasklet_ids.iter()
     }
 
@@ -1094,8 +1103,9 @@ impl RuntimeApi for Aerugo {
         self.time_source.startup_duration()
     }
 
-    fn get_execution_statistics(&'static self, _tasklet_id: &TaskletId) -> Option<ExecutionStats> {
-        todo!()
+    fn get_execution_statistics(&'static self, tasklet_id: &TaskletId) -> Option<ExecutionStats> {
+        // This is safe, because `EXECUTION_MONITOR` is not available from the IRQ context.
+        unsafe { EXECUTION_MONITOR.get_stats(tasklet_id) }
     }
 
     fn execute_critical<F, R>(f: F) -> R

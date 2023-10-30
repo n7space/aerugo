@@ -120,7 +120,7 @@ pub trait RuntimeApi {
     fn get_execution_statistics(&'static self, tasklet_id: &TaskletId) -> Option<ExecutionStats>;
 
     /// Returns an iterator to the list with IDs of registered tasklets.
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId>;
+    fn query_tasklets(&'static self) -> core::slice::Iter<TaskletId>;
 
     /// Executes closure `f` in an interrupt-free context.
     ///

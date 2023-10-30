@@ -66,7 +66,7 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
+    fn query_tasklets(&'static self) -> core::slice::Iter<TaskletId> {
         todo!()
     }
 
