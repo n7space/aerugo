@@ -29,4 +29,9 @@ impl EventHandle {
     pub fn emit(&self) {
         self.event.emit()
     }
+
+    /// Returns reference to the event.
+    pub(crate) fn event(&self) -> &'static Event {
+        self.event
+    }
 }

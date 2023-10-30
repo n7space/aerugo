@@ -17,7 +17,7 @@ use crate::boolean_condition::{
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
 use crate::error::{RuntimeError, SystemError};
-use crate::event::{EventId, EventStorage};
+use crate::event::{EventHandle, EventId, EventStorage};
 use crate::event_manager::EventManager;
 use crate::execution_monitor::{ExecutionMonitor, ExecutionStats};
 use crate::executor::Executor;
@@ -1020,6 +1020,18 @@ impl InitApi for Aerugo {
                 .set_condition_set(condition_set)
                 .expect("Failed to set a condition set for tasklet");
         });
+    }
+
+    fn set_execution_time_exceeded_maximum_event(
+        &'static self,
+        event_handle: &EventHandle,
+        time: Duration,
+    ) {
+        unsafe {
+            EXECUTION_MONITOR
+                .set_time_exceeded_event(event_handle.event(), time)
+                .expect("Failed to set event for exceeding maximum tasklet execution time.")
+        };
     }
 
     /// Starts the system.

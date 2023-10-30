@@ -36,6 +36,8 @@ pub(crate) enum SystemError {
     CyclicExecutionListFull,
     /// Execution statistics list was full when tried to add a new one.
     ExecutionStatsListFull,
+    /// Event for tasklet execution exceeding maximum was already set.
+    TimeExceededEventAlreadySet,
 }
 
 impl fmt::Debug for SystemError {
@@ -122,6 +124,12 @@ impl fmt::Debug for SystemError {
                     to the maximum naumber of tasklets that can be created in the system. Each tasklet should have at
                     maximum only one execution statistics. This error means that there is some fault logic in execution
                     monitoring.")
+            }
+            SystemError::TimeExceededEventAlreadySet => {
+                write!(
+                    f,
+                    "Event for the tasklet execution exceeding maximum time was already set."
+                )
             }
         }
     }

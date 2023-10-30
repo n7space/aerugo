@@ -8,7 +8,7 @@
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
-use crate::event::{EventId, EventStorage};
+use crate::event::{EventHandle, EventId, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 use crate::time::Duration;
@@ -195,6 +195,13 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         condition_set: BooleanConditionSet<COND_COUNT>,
+    );
+
+    /// Sets an event which should be emitted when tasklet execution time exceedes the set maximum.
+    fn set_execution_time_exceeded_maximum_event(
+        &'static self,
+        event_handle: &EventHandle,
+        time: Duration,
     );
 
     /// Starts the system.
