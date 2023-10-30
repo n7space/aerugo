@@ -219,7 +219,7 @@ impl Xdmac {
         // ever changes.
         // I blame `svd2rust` for not putting this in an indexed container, i can understand why
         // it cannot be an array (notice the padding between CHID instances in XDMAC's register
-        // block), but c'mon.
+        // block), but c'mon, it could've been padding bytes stored in channel struct.
         match channel {
             0 => Some(&self.xdmac.xdmac_chid0),
             1 => Some(&self.xdmac.xdmac_chid1),
