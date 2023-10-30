@@ -2,6 +2,7 @@
 
 use core::fmt;
 
+use crate::execution_monitor::ExecutionData;
 use crate::tasklet::TaskletId;
 use crate::time::Duration;
 
@@ -72,6 +73,29 @@ impl ExecutionStats {
             Some(self.total_execution_time / self.execution_count)
         } else {
             None
+        }
+    }
+
+    /// Updates this statistics with new execution data.
+    pub(crate) fn update(&mut self, execution_data: ExecutionData) {
+        self.wake_count += 1;
+
+        if execution_data.was_executed() {
+            self.execution_count += 1;
+
+            let execution_time = execution_data
+                .execution_duration()
+                .expect("No execution time set for executed tasklet");
+
+            self.minimum_execution_time = self
+                .minimum_execution_time
+                .map(|time| core::cmp::min(time, execution_time));
+
+            self.maximum_execution_time = self
+                .maximum_execution_time
+                .map(|time| core::cmp::max(time, execution_time));
+
+            self.total_execution_time += execution_time;
         }
     }
 }
