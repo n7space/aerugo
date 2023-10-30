@@ -87,13 +87,15 @@ impl ExecutionStats {
                 .execution_duration()
                 .expect("No execution time set for executed tasklet");
 
-            self.minimum_execution_time = self
-                .minimum_execution_time
-                .map(|time| core::cmp::min(time, execution_time));
+            self.minimum_execution_time = Some(match self.minimum_execution_time {
+                Some(time) => core::cmp::min(time, execution_time),
+                None => execution_time,
+            });
 
-            self.maximum_execution_time = self
-                .maximum_execution_time
-                .map(|time| core::cmp::max(time, execution_time));
+            self.maximum_execution_time = Some(match self.maximum_execution_time {
+                Some(time) => core::cmp::max(time, execution_time),
+                None => execution_time,
+            });
 
             self.total_execution_time += execution_time;
         }
