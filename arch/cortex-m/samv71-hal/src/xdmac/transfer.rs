@@ -16,7 +16,7 @@ use samv71q21_pac::xdmac::{
 /// **XDMAC transfers are inherently unsafe, as they operate directly on raw memory.**
 ///
 /// In order to make sure that an XDMAC transfer will be performed safely, **you** must guarantee
-/// that the transfer configuration is valid, and will be valid during XDMAC transaction.
+/// that the transfer configuration is valid, and will be valid during XDMAC transfer.
 /// This mostly means that **you** must make sure the source and destination addresses point to
 /// valid, aligned locations/buffers in memory, and the transfer is configured appropriately for the
 /// buffer(s) size.

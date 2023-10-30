@@ -26,7 +26,7 @@ impl State for Configured {}
 /// XDMAC channel.
 ///
 /// Channels can be created only via [`Xdmac`](super::Xdmac). After acquiring a channel, it can be
-/// used to configure an XDMAC transaction and manage it (start, stop, suspend, flush).
+/// used to configure an XDMAC transfer and manage it (start, stop, suspend, flush).
 ///
 /// To check channel's status, you must use [`ChannelStatusReader`] instance that can be acquired
 /// from Channel via [`Channel::take_status_reader`]. It can be taken only once - but can be
@@ -39,7 +39,7 @@ impl State for Configured {}
 /// safely if you can guarantee that the Reader won't exist when Channel's ownership is returned.
 ///
 /// In order to configure an XDMAC transfer, you must create transfer block, and pass it to the
-/// Channel. Then, you can start the transaction by enabling the channel.
+/// Channel. Then, you can start the transfer by enabling the channel.
 ///
 /// # Safety
 ///
@@ -95,7 +95,6 @@ impl<AnyState: State> Channel<AnyState> {
     /// Source requests for this channel are no longer serviced by the system scheduler.
     ///
     /// # Safety
-    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn suspend_read(&mut self) {
@@ -110,7 +109,6 @@ impl<AnyState: State> Channel<AnyState> {
     /// Destination requests for this channel are no longer routed to the scheduler.
     ///
     /// # Safety
-    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn suspend_write(&mut self) {
@@ -132,7 +130,6 @@ impl<AnyState: State> Channel<AnyState> {
     /// Resumes source requests for the channel.
     ///
     /// # Safety
-    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn resume_read(&mut self) {
@@ -147,7 +144,6 @@ impl<AnyState: State> Channel<AnyState> {
     /// Resumes destination requests for the channel.
     ///
     /// # Safety
-    ///
     /// This is a read-modify-write operation that uses global XDMAC registers. Be very careful
     /// with that if you share the Channels between threads/IRQs.
     pub fn resume_write(&mut self) {
@@ -223,9 +219,9 @@ impl<AnyState: State> Channel<AnyState> {
 }
 
 impl Channel<NotConfigured> {
-    /// Configures an XDMAC transaction on this channel.
+    /// Configures an XDMAC transfer on this channel.
     /// Consumes channel's instance, and returns one with new state.
-    pub fn configure_transaction(self, block: TransferBlock) -> Channel<Configured> {
+    pub fn configure_transfer(self, block: TransferBlock) -> Channel<Configured> {
         // Per the procedure described in SAMV71 datasheet:
         // 1. Select a free channel - already done.
         // 2. Clear pending event status bits by reading Channel Interrupt Status Register
@@ -240,18 +236,18 @@ impl Channel<NotConfigured> {
             .cda
             .write(|w| w.da().variant(block.destination().address as u32));
 
-        // 5. Program number of data in a microblock
+        // 5. Program the amount of data in a microblock
         self.channel_registers_ref()
             .cubc
             .write(|w| w.ublen().variant(block.microblock_length().get()));
 
         // 6. Program channel configuration register
-        // In order to prevent some issues described in errata, some fields must be set "manually"
+        // In order to prevent some issues described in errata, some settings must be transformed
         let errata_config = ErrataTransferBlockConfig::from_transfer_block(&block);
 
         self.channel_registers_ref().cc.write(|w| {
-            // Safety: Validity of all those fields is verified as much as possible.
-            // Some errata-specific things need unsafe handling.
+            // Safety: some errata-specific things need unsafe handling, specifically - peripheral
+            // ID must be set to an "invalid" unused value to prevent a mem2mem transfer issue.
             unsafe {
                 w.type_()
                     .variant(block.transfer_type().into())
@@ -284,12 +280,12 @@ impl Channel<NotConfigured> {
         // 7. Program the number of microblocks in data
         self.channel_registers_ref()
             .cbc
-            // -1 is required, as the value in register is offset by 1 (i.e. 0 in the register
+            // -1 here is required, as the value in register is offset by 1 (i.e. 0 in the register
             // means that block has 1 microblock). Block length type is bound to valid range of
-            // values.
+            // values, so it cannot be 0.
             .write(|w| w.blen().variant(block.block_length().get() - 1));
 
-        // 7.5. Program errata-specific data striding
+        // 7.5. Program errata-specific data striding settings
         self.channel_registers_ref().cds_msp.write(|w| {
             w.sds_msp()
                 .variant(errata_config.data_striding)
@@ -398,12 +394,10 @@ impl Channel<Configured> {
     /// Channel must be disabled before calling this function.
     ///
     /// # Details
-    ///
-    /// This function will reset only the transaction-related configuration registers.
+    /// This function will reset only the transfer-related configuration registers.
     /// Event/interrupt settings and global XDMAC configuration will not be modified.
     ///
     /// # Returns
-    ///
     /// Channel with default configuration, or `None` if channel is currently enabled.
     pub fn reset_state(self) -> Option<Channel<NotConfigured>> {
         if self.is_busy() {
@@ -424,15 +418,14 @@ impl Channel<Configured> {
         Some(Channel::transform(self))
     }
 
-    /// Returns `true` if Channel is currently enabled and XDMAC transaction is in progress.
+    /// Returns `true` if Channel is currently enabled and XDMAC transfer is in progress.
     pub fn is_busy(&self) -> bool {
         self.is_channels_bit_set(self.xdmac_registers_ref().gs.read().bits())
     }
 
-    /// Enables the channel and starts the transaction, if the channel is not busy.
+    /// Enables the channel and starts the transfer, if the channel is not busy.
     ///
     /// # Returns
-    ///
     /// `true` if the channel was successfully enabled. `false` if the channel is busy.
     pub fn enable(&mut self) -> bool {
         if self.is_busy() {
@@ -446,12 +439,12 @@ impl Channel<Configured> {
         true
     }
 
-    /// Disables the channel, stopping ongoing transaction (if any is in progress).
+    /// Disables the channel, stopping ongoing transfer (if any is in progress).
     ///
-    /// If the channel is performing peripheral-to-memory transaction, the pending bytes from XDMAC
-    /// FIFO are written to destination memory. Otherwise, the transaction is terminated immediately.
+    /// If the channel is performing peripheral-to-memory transfer, the pending bytes from XDMAC
+    /// FIFO are written to destination memory. Otherwise, the transfer is terminated immediately.
     ///
-    /// Hardware-synchronized transactions automatically disable the channel when they're completed.
+    /// Hardware-synchronized transfers automatically disable the channel when they're completed.
     pub fn disable(&mut self) {
         self.xdmac_registers_ref()
             .gd
@@ -462,7 +455,6 @@ impl Channel<Configured> {
     /// This function must be used to trigger a software-synchronized DMA transfer.
     ///
     /// # Returns
-    ///
     /// `true` if channel was successfully triggered, `false` if a request is already pending.
     pub fn trigger(&mut self) {
         if !self.is_software_request_pending() {
@@ -479,7 +471,6 @@ impl Channel<Configured> {
     /// Requests a DMA transfer for this channel.
     ///
     /// # Safety
-    ///
     /// This function does not check whether a software request is currently pending, or not.
     /// If you want a safe function that performs that check automatically, use [`Channel::trigger`].
     pub unsafe fn force_trigger(&mut self) {
