@@ -164,6 +164,18 @@ impl Aerugo {
 
         Ok(())
     }
+
+    /// Check if system is valid and ready to start.
+    fn validate(&'static self) -> Result<(), SystemError> {
+        for tasklet_ptr in &self.tasklets {
+            if !tasklet_ptr.is_subscribed() {
+                let tasklet_name = tasklet_ptr.get_name();
+                return Err(SystemError::TaskletNotSubscribed(tasklet_name));
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl InitApi for Aerugo {
@@ -1042,6 +1054,8 @@ impl InitApi for Aerugo {
     /// # Safety
     /// This shouldn't be called more than once.
     fn start(&'static self) -> ! {
+        self.validate().expect("Failed to start the system");
+
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context
         unsafe { self.time_source.set_system_start() }
