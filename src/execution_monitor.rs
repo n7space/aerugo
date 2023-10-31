@@ -36,7 +36,6 @@ pub(crate) struct ExecutionMonitor {
 /// not accessible from the IRQ context.
 unsafe impl Sync for ExecutionMonitor {}
 
-#[allow(dead_code)]
 impl ExecutionMonitor {
     /// Creates new ExecutionMonitor instance.
     pub(crate) const fn new() -> Self {

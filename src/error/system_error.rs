@@ -26,7 +26,6 @@ pub(crate) enum SystemError {
     /// Event set list was full when tried to create a new one.
     EventSetListFull,
     /// Scheduled event list was full when tried to schedule a new one.
-    #[allow(dead_code)]
     ScheduledEventListFull,
     /// Enqueued event to a full event queue.
     EventQueueFull,

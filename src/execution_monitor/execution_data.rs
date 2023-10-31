@@ -15,7 +15,6 @@ pub(crate) struct ExecutionData {
     execution_end: Option<Instant>,
 }
 
-#[allow(dead_code)]
 impl ExecutionData {
     /// Creates new instance.
     pub(crate) const fn new(tasklet_id: TaskletId) -> Self {

@@ -23,7 +23,6 @@ pub struct ExecutionStats {
     maximum_execution_time: Option<Duration>,
 }
 
-#[allow(dead_code)]
 impl ExecutionStats {
     /// Creates new execution statistics.
     pub(crate) const fn new(tasklet_id: TaskletId) -> Self {

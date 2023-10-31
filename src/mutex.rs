@@ -41,7 +41,6 @@ impl<T: ?Sized> Mutex<T> {
     /// # Return
     /// Result of the executed lambda.
     #[inline(always)]
-    #[allow(dead_code)]
     pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
         unsafe { critical_section::with(|_| f(self.as_mut_ref())) }
     }

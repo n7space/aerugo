@@ -99,7 +99,6 @@ impl Executor {
     ///
     /// # Return
     /// Value indicating if tasklet was scheduled if successful, `SystemError` otherwise.
-    #[allow(dead_code)]
     pub(crate) fn schedule_tasklet(
         &'static self,
         tasklet: &TaskletPtr,
