@@ -93,6 +93,13 @@ impl TaskletPtr {
         (self.vtable.is_active)(self.ptr)
     }
 
+    /// See: [is_subscribed](crate::tasklet::Tasklet::is_subscribed())
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub(crate) fn is_subscribed(&self) -> bool {
+        (self.vtable.is_subscribed)(self.ptr)
+    }
+
     /// See: [execute](crate::tasklet::Tasklet::execute())
     #[inline(always)]
     pub(crate) fn execute(&self) -> bool {
