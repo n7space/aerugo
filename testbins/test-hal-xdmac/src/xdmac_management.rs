@@ -14,7 +14,7 @@ pub fn perform_test(xdmac: &mut Xdmac) {
     write_str("XDMAC management test finished successfully.");
 }
 
-pub fn check_xdmac_info(xdmac: &Xdmac) {
+fn check_xdmac_info(xdmac: &Xdmac) {
     assert_eq!(
         xdmac.number_of_peripheral_requests(),
         EXPECTED_NUMBER_OF_PERIPHERAL_REQUESTS,
@@ -34,7 +34,7 @@ pub fn check_xdmac_info(xdmac: &Xdmac) {
     write_str("XDMAC info test finished successfully.");
 }
 
-pub fn check_status_reader(xdmac: &mut Xdmac) {
+fn check_status_reader(xdmac: &mut Xdmac) {
     assert!(
         xdmac.is_status_reader_available(),
         "status reader has been taken out of Xdmac and not given back"
@@ -64,7 +64,7 @@ pub fn check_status_reader(xdmac: &mut Xdmac) {
     write_str("XDMAC status reader test finished successfully.");
 }
 
-pub fn check_channel_taking(xdmac: &mut Xdmac) {
+fn check_channel_taking(xdmac: &mut Xdmac) {
     // At this point, all the channels should be available.
     for id in 0..Xdmac::SUPPORTED_CHANNELS {
         assert!(
@@ -107,6 +107,17 @@ pub fn check_channel_taking(xdmac: &mut Xdmac) {
             id
         );
     }
+
+    // Take channel and mark it as "free". Check if it can be taken again.
+    // This requires a new scope to be safe, as the channel should never be marked as "free"
+    // if it's object exists.
+    {
+        xdmac.take_channel(5).unwrap();
+    }
+
+    assert!(!xdmac.is_channel_available(5));
+    unsafe { xdmac.mark_channel_as_free(5) };
+    assert!(xdmac.is_channel_available(5));
 
     write_str("XDMAC channel take/give test finished successfully.");
 }

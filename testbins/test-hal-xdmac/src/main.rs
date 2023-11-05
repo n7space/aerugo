@@ -6,6 +6,8 @@ extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
+use aerugo::hal::drivers::pmc::config::PeripheralId;
+use aerugo::hal::drivers::uart::Uart;
 use aerugo::hal::drivers::xdmac::Xdmac;
 use aerugo::time::MillisDurationU32 as WatchdogDuration;
 use aerugo::{
@@ -15,9 +17,14 @@ use aerugo::{
 use calldwell::write_str;
 use rt::entry;
 
+mod channel_management;
+mod transfer_config;
 mod xdmac_management;
 
-fn configure_pmc(_pmc: &mut PMC) {}
+fn configure_pmc(pmc: &mut PMC) {
+    pmc.enable_peripheral_clock(PeripheralId::XDMAC);
+    pmc.enable_peripheral_clock(PeripheralId::UART0);
+}
 
 #[entry]
 fn main() -> ! {
@@ -28,6 +35,7 @@ fn main() -> ! {
 
     let mut pmc = peripherals.pmc.take().unwrap();
     let _nvic = NVIC::new(peripherals.nvic.take().unwrap());
+    let _uart = Uart::new(peripherals.uart_0.take().unwrap());
     let mut xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
 
     configure_pmc(&mut pmc);
@@ -35,6 +43,8 @@ fn main() -> ! {
     write_str("Performing XDMAC tests...");
 
     xdmac_management::perform_test(&mut xdmac);
+    channel_management::perform_test(&mut xdmac);
+    transfer_config::perform_test();
 
     write_str("All XDMAC tests finished successfully.");
 
