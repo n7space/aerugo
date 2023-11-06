@@ -9,6 +9,7 @@ use heapless::Vec;
 
 use crate::error::SystemError;
 use crate::event::{Event, EventHandle, EventId};
+use crate::event_manager::EventManager;
 
 /// Type of the event data storage.
 type EventBuffer = Vec<u8, { core::mem::size_of::<Event>() }>;
@@ -23,6 +24,8 @@ pub struct EventStorage {
     initialized: OnceCell<()>,
     /// Buffer for the event structure.
     event_buffer: OnceCell<EventBuffer>,
+    /// Reference of the event manager.
+    event_manager: OnceCell<&'static EventManager>,
 }
 
 /// It is safe assuming that stored Event is not available from the IRQ context before it is
@@ -45,6 +48,7 @@ impl EventStorage {
         EventStorage {
             initialized: OnceCell::new(),
             event_buffer: OnceCell::new(),
+            event_manager: OnceCell::new(),
         }
     }
 
@@ -58,7 +62,10 @@ impl EventStorage {
     /// # Return
     /// `Some(handle)` if this storage has been initialized. `None` otherwise.
     pub fn create_handle(&'static self) -> Option<EventHandle> {
-        self.event().map(EventHandle::new)
+        match (self.event(), self.event_manager.get()) {
+            (Some(event), Some(event_manager)) => Some(EventHandle::new(event, event_manager)),
+            (_, _) => None,
+        }
     }
 
     /// Initializes this storage.
@@ -73,10 +80,18 @@ impl EventStorage {
     /// This is unsafe, because it mutably borrows the stored condition buffer.
     /// This is safe to call during system initialization (before scheduler is started).
     /// Accessing storage from IRQ context during initialization is undefined behaviour.
-    pub(crate) unsafe fn init(&'static self, event_id: EventId) -> Result<(), SystemError> {
+    pub(crate) unsafe fn init(
+        &'static self,
+        event_id: EventId,
+        event_manager: &'static EventManager,
+    ) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
         }
+
+        self.event_manager
+            .set(event_manager)
+            .unwrap_or_else(|_| panic!("Failed to set EventManager reference"));
 
         let event = Event::new(event_id);
 
@@ -116,6 +131,7 @@ impl EventStorage {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::time_source::TimeSource;
 
     #[test]
     fn create() {
@@ -126,20 +142,24 @@ mod tests {
 
     #[test]
     fn initialize() {
+        static TIME_SOURCE: TimeSource = TimeSource::new();
+        static EVENT_MANAGER: EventManager = EventManager::new(&TIME_SOURCE);
         static STORAGE: EventStorage = EventStorage::new();
 
-        let init_result = unsafe { STORAGE.init(0) };
+        let init_result = unsafe { STORAGE.init(0, &EVENT_MANAGER) };
         assert!(init_result.is_ok());
         assert!(STORAGE.is_initialized());
     }
 
     #[test]
     fn fail_double_initialization() {
+        static TIME_SOURCE: TimeSource = TimeSource::new();
+        static EVENT_MANAGER: EventManager = EventManager::new(&TIME_SOURCE);
         static STORAGE: EventStorage = EventStorage::new();
 
-        let init_result = unsafe { STORAGE.init(0) };
+        let init_result = unsafe { STORAGE.init(0, &EVENT_MANAGER) };
         assert!(init_result.is_ok());
-        let init_result = unsafe { STORAGE.init(1) };
+        let init_result = unsafe { STORAGE.init(1, &EVENT_MANAGER) };
 
         assert!(init_result.is_err());
         assert_eq!(
@@ -150,9 +170,11 @@ mod tests {
 
     #[test]
     fn create_handle() {
+        static TIME_SOURCE: TimeSource = TimeSource::new();
+        static EVENT_MANAGER: EventManager = EventManager::new(&TIME_SOURCE);
         static STORAGE: EventStorage = EventStorage::new();
 
-        let _ = unsafe { STORAGE.init(0) };
+        let _ = unsafe { STORAGE.init(0, &EVENT_MANAGER) };
 
         let handle = STORAGE.create_handle();
         assert!(handle.is_some());

@@ -554,7 +554,7 @@ impl InitApi for Aerugo {
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             storage
-                .init(event_id)
+                .init(event_id, &EVENT_MANAGER)
                 .expect("Failed to initialize storage for event");
         });
 
