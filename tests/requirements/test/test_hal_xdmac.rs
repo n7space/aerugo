@@ -19,7 +19,7 @@
 /// @SRS{ROS-FUN-BSP-XDMAC-110}
 #[cfg_attr(not(doc), test)]
 #[cfg(feature = "test-aerugo-cortex-m")]
-fn req_test_hal_uart() {
+fn req_test_hal_xdmac() {
     use assert_cmd::Command;
 
     // The script will build test binary
