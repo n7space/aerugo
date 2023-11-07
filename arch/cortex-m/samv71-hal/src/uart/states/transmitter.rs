@@ -21,4 +21,9 @@ impl<Instance: UARTMetadata, State: Transmit> Uart<Instance, State> {
     pub fn reset_transmitter(&mut self) {
         Instance::registers().cr.write(|w| w.rsttx().set_bit());
     }
+
+    /// Returns the address of TX holding register for XDMAC usage.
+    pub fn xdmac_tx_address(&mut self) -> *mut () {
+        Instance::registers().thr.as_ptr() as *mut ()
+    }
 }

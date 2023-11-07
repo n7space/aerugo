@@ -49,4 +49,9 @@ impl<Instance: UARTMetadata, State: Receive> Uart<Instance, State> {
             .mr
             .modify(|_, w| w.chmode().automatic());
     }
+
+    /// Returns the address of RX holding register for XDMAC usage.
+    pub fn xdmac_rx_address(&mut self) -> *const () {
+        Instance::registers().rhr.as_ptr() as *const ()
+    }
 }
