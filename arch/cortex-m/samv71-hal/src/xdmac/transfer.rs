@@ -334,17 +334,27 @@ impl ErrataTransferBlockConfig {
         };
 
         // Per errata section 2.5.2, if transfer is 8 or 16-bit, and either source or destination
-        // is in fixed addressing mode, to prevent (both?) addresses from being incremented,
+        // is in fixed addressing mode, to prevent either address from being incremented,
         // addressing mode must be set to microblock and data stride with microblock stride = 0
         // and data stride = -1 (in 24-bit two's complement format)
-        if (block.data_width() != DataWidth::FourBytes)
-            && (block.source().addressing_mode == AddressingMode::Fixed
-                || block.destination().addressing_mode == AddressingMode::Fixed)
-        {
+        let data_width_less_than_word = block.data_width() != DataWidth::FourBytes;
+        let source_addressing_fixed = block.source().addressing_mode == AddressingMode::Fixed;
+        let destination_addressing_fixed =
+            block.destination().addressing_mode == AddressingMode::Fixed;
+
+        if data_width_less_than_word && (source_addressing_fixed || destination_addressing_fixed) {
             Self {
                 data_striding: 0xFFFFu16, // This is -1 in two's complement format.
-                source_addressing_mode: SAMSELECT_A::UBS_DS_AM,
-                destination_addressing_mode: DAMSELECT_A::UBS_DS_AM,
+                source_addressing_mode: if source_addressing_fixed {
+                    SAMSELECT_A::UBS_DS_AM
+                } else {
+                    block.source().addressing_mode.into()
+                },
+                destination_addressing_mode: if destination_addressing_fixed {
+                    DAMSELECT_A::UBS_DS_AM
+                } else {
+                    block.destination().addressing_mode.into()
+                },
                 peripheral_id,
             }
         } else {
