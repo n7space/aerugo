@@ -18,6 +18,7 @@ use calldwell::write_str;
 use rt::entry;
 
 mod channel_management;
+mod transfer;
 mod transfer_config;
 mod xdmac_management;
 
@@ -34,8 +35,8 @@ fn main() -> ! {
     });
 
     let mut pmc = peripherals.pmc.take().unwrap();
-    let _nvic = NVIC::new(peripherals.nvic.take().unwrap());
-    let _uart = Uart::new(peripherals.uart_0.take().unwrap());
+    let nvic = NVIC::new(peripherals.nvic.take().unwrap());
+    let uart = Uart::new(peripherals.uart_0.take().unwrap());
     let mut xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
 
     configure_pmc(&mut pmc);
@@ -45,8 +46,9 @@ fn main() -> ! {
     xdmac_management::perform_test(&mut xdmac);
     channel_management::perform_test(&mut xdmac);
     transfer_config::perform_test();
+    transfer::perform_test(xdmac, nvic, uart);
 
-    write_str("All XDMAC tests finished successfully.");
+    write_str("All XDMAC tests done!");
 
     aerugo.start();
 }
