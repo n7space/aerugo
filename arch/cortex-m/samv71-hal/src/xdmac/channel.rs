@@ -415,7 +415,19 @@ impl Channel<Configured> {
         self.channel_registers_ref().csus.reset();
         self.channel_registers_ref().cdus.reset();
 
-        Some(Channel::transform(self))
+        let mut channel: Channel<NotConfigured> = Channel::transform(self);
+        channel.disable_interrupt();
+        channel.set_events_state(ChannelEvents {
+            end_of_block: false,
+            end_of_list: false,
+            end_of_disable: false,
+            end_of_flush: false,
+            read_bus_error: false,
+            write_bus_error: false,
+            request_overflow_error: false,
+        });
+
+        Some(channel)
     }
 
     /// Returns `true` if Channel is currently enabled and XDMAC transfer is in progress.
