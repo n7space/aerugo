@@ -8,12 +8,18 @@
 use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
-use crate::event::{EventId, EventStorage};
+use crate::event::{EventHandle, EventId, EventStorage};
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
 use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletStorage};
 use crate::time::Duration;
 
 /// System initialization API
+///
+/// # Safety
+/// This should only be exposed to the user during system initialization
+/// (with [Aerugo::initialize](crate::aerugo::Aerugo::initialize)), and used only before system is started
+/// (with [`InitApi::start`]). If that interface is leaked after the initialization, then all
+/// functions can be considered unsafe.
 pub trait InitApi {
     /// Creates new tasklet in the system.
     ///
@@ -189,6 +195,13 @@ pub trait InitApi {
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         condition_set: BooleanConditionSet<COND_COUNT>,
+    );
+
+    /// Sets an event which should be emitted when tasklet execution time exceedes the set maximum.
+    fn set_execution_time_exceeded_maximum_event(
+        &'static self,
+        event_handle: &EventHandle,
+        time: Duration,
     );
 
     /// Starts the system.

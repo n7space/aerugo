@@ -31,6 +31,21 @@ pub(crate) struct MessageQueue<T: 'static, const N: usize> {
     registered_tasklets: TaskletList,
 }
 
+/// It is safe assuming that MessageQueue is not available from IRQ context before it's created
+/// and that modifications cannot be interrupted.
+///
+/// MessageQueue structure is hidden from the user. Functionalities are exposed to the user via
+/// [MessageQueueHandle].
+///
+/// MessageQueue is only created by `MessageQueueStorage` with
+/// [create_message_queue](crate::api::InitApi::create_message_queue) which is not accessible from
+/// the IRQ context.
+///
+/// Initializations and modifications musn't be interrupted. MessageQueue is only accessible with
+/// an unmutable reference. All modifications are implemented with interior mutability using
+/// [Mutex] which ensures that those modifications cannot be interrupted.
+unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
+
 impl<T, const N: usize> MessageQueue<T, N> {
     /// Creates new `MessageQueue`.
     pub(crate) fn new(data_queue: &'static Mutex<QueueData<T, N>>) -> Self {
@@ -50,7 +65,9 @@ impl<T, const N: usize> MessageQueue<T, N> {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
-    /// This is safe to call before the system initialization.
+    /// This is safe if it's executed in a critical section during system initialization
+    /// (before scheduler is started).
+    /// Accessing queue from IRQ context during registering is undefined behaviour.
     pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), SystemError> {
         match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
@@ -105,10 +122,6 @@ impl<T, const N: usize> DataProvider<T> for MessageQueue<T, N> {
         self.data_queue.lock(|q| !q.is_empty())
     }
 }
-
-/// SAFETY: This is safe, because that structure is only stored by the [MessageQueueStorage]
-/// which ensures safe access.
-unsafe impl<T, const N: usize> Sync for MessageQueue<T, N> {}
 
 #[cfg(test)]
 mod tests {

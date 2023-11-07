@@ -9,6 +9,7 @@ use heapless::binary_heap::{BinaryHeap, Max};
 
 use crate::aerugo::Aerugo;
 use crate::error::SystemError;
+use crate::execution_monitor::ExecutionData;
 use crate::mutex::Mutex;
 use crate::tasklet::{TaskletPtr, TaskletStatus};
 use crate::time_source::TimeSource;
@@ -28,6 +29,12 @@ pub(crate) struct Executor {
     /// Time source.
     time_source: &'static TimeSource,
 }
+
+/// Executor stores a queue of tasklets to be executed. That queue is guarded with [Mutex] which
+/// ensures that modifications cannot be interrupted. `TaskletPtr`s stored in that queue are not
+/// accessible from the IRQ context, and Tasklet is always statically allocated, so the pointer is
+/// valid for the whole application lifetime.
+unsafe impl Sync for Executor {}
 
 impl Executor {
     /// Creates new executor instance.
@@ -49,26 +56,37 @@ impl Executor {
     ///
     /// # Returns
     /// Value indicating if tasklet was executed, `SystemError` otherwise.
-    pub(crate) fn execute_next_tasklet(&'static self) -> Result<bool, SystemError> {
+    pub(crate) fn execute_next_tasklet(
+        &'static self,
+    ) -> Result<Option<ExecutionData>, SystemError> {
         if let Some(tasklet) = self.get_tasklet_for_execution() {
+            let mut execution_data = ExecutionData::new(tasklet.get_id());
+
             if !tasklet.is_active() {
                 tasklet.set_status(TaskletStatus::Sleeping);
-                return Ok(false);
+                return Ok(Some(execution_data));
             }
 
             tasklet.set_status(TaskletStatus::Working);
 
+            let execution_start_timestamp = self.time_source.system_time();
             let executed = tasklet.execute();
+            let execution_end_timestamp = self.time_source.system_time();
+
             if executed {
+                execution_data.set_executed();
+                execution_data.set_execution_start(execution_start_timestamp);
+                execution_data.set_execution_end(execution_end_timestamp);
+
                 let system_time = self.time_source.system_time();
                 tasklet.set_last_execution_time(system_time);
             }
 
             self.try_reschedule_tasklet(tasklet)?;
 
-            Ok(executed)
+            Ok(Some(execution_data))
         } else {
-            Ok(false)
+            Ok(None)
         }
     }
 
@@ -81,7 +99,6 @@ impl Executor {
     ///
     /// # Return
     /// Value indicating if tasklet was scheduled if successful, `SystemError` otherwise.
-    #[allow(dead_code)]
     pub(crate) fn schedule_tasklet(
         &'static self,
         tasklet: &TaskletPtr,
@@ -136,18 +153,13 @@ impl Executor {
     }
 }
 
-unsafe impl Sync for Executor {}
-
 #[cfg(any(doc, test))]
 mod tests {
     use super::*;
 
     use crate::boolean_condition::{BooleanConditionSet, BooleanConditionSetType};
-    use crate::tasklet::{Tasklet, TaskletConfig};
+    use crate::tasklet::{Tasklet, TaskletConfig, TaskletId};
     use crate::tests::{MockConditionSet, MockDataProvider, MockRuntimeApi};
-
-    /// There are no tasklets that are synced between threads in tests.
-    unsafe impl<T, C, const COND_COUNT: usize> Sync for Tasklet<T, C, COND_COUNT> {}
 
     /// @SRS{ROS-FUN-RTOS-050}
     /// @SRS{ROS-FUN-RTOS-060}
@@ -171,6 +183,7 @@ mod tests {
             priority: 0,
         };
         static tasklet: Tasklet<(), (), 0> = Tasklet::new(
+            TaskletId(0),
             unsafe { tasklet_config },
             |_, _, _| {},
             unsafe { &mut tasklet_context },
@@ -200,8 +213,8 @@ mod tests {
         }
 
         // Tasklet that is being executed is `Working`.
-        let execution_result = executor.execute_next_tasklet();
-        assert!(execution_result.is_ok());
-        assert!(execution_result.unwrap());
+        let execution_data = executor.execute_next_tasklet();
+        assert!(execution_data.is_ok());
+        assert!(execution_data.unwrap().unwrap().was_executed());
     }
 }

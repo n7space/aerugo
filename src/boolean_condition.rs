@@ -28,6 +28,21 @@ pub(crate) struct BooleanCondition {
     registered_tasklets: TaskletList,
 }
 
+/// It is safe assuming that stored BooleanCondition is not available from the IRQ context before it is
+/// created and that initialization cannot be interrupted.
+///
+/// BooleanCondition structure is hidden from the user. Functionalities are exposed to the user via
+/// [BooleanConditionHandle]
+///
+/// BooleanCondition is only created by `BooleanConditionStorage` with
+/// [create_boolean_condition](crate::api::InitApi::create_boolean_condition) which is not
+/// accessible from the IRQ context.
+///
+/// Initializations and modifications mustn't be interrupted. BooleanCondition is only accessible
+/// with an unmutable reference. All modifications are implemented with interior mutability using
+/// [Mutex] which ensures that those modifications cannot be interrupted.
+unsafe impl Sync for BooleanCondition {}
+
 impl BooleanCondition {
     /// Creates new `BooleanCondition`
     pub(crate) fn new(value: bool) -> Self {
@@ -68,7 +83,8 @@ impl BooleanCondition {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of registered tasklets.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing condition from IRQ context during registering is undefined behaviour.
     pub(crate) unsafe fn register_tasklet(&self, tasklet: TaskletPtr) -> Result<(), SystemError> {
         match self.registered_tasklets.add(tasklet) {
             Ok(_) => Ok(()),
@@ -101,7 +117,3 @@ impl DataProvider<bool> for BooleanCondition {
         false
     }
 }
-
-/// SAFETY: This is safe, because that structure is only stored by the [BooleanConditionStorage]
-/// which ensures safe access.
-unsafe impl Sync for BooleanCondition {}

@@ -13,9 +13,8 @@ use core::cell::UnsafeCell;
 #[repr(transparent)]
 pub struct Mutex<T: ?Sized>(UnsafeCell<T>);
 
-/// Mutex is safe to share between threads because critical section prevents any access to the
-/// data from other threads or interrupts. Value cannot be borrowed outside of the
-/// critical section.
+/// Mutex is `Sync` because `aerugo` is a single-threaded system and critical section prevents any access
+/// to the data from interrupts. Value cannot be borrowed outside of the critical section.
 unsafe impl<T: Send + ?Sized> Sync for Mutex<T> {}
 
 impl<T> Mutex<T> {
@@ -42,7 +41,6 @@ impl<T: ?Sized> Mutex<T> {
     /// # Return
     /// Result of the executed lambda.
     #[inline(always)]
-    #[allow(dead_code)]
     pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
         unsafe { critical_section::with(|_| f(self.as_mut_ref())) }
     }

@@ -36,6 +36,21 @@ pub struct MessageQueueStorage<T, const N: usize> {
     queue_data: Mutex<QueueData<T, N>>,
 }
 
+/// It is safe assuming that stored MessageQueue is not available from the IRQ context before it is
+/// created and that initialization cannot be interrupted.
+///
+/// MessageQueueStorage is initialized only in
+/// [create_message_queue](crate::api::InitApi::create_message_queue), implemented in
+/// [Aerugo](crate::aerugo::Aerugo) which is not accessible from the IRQ context.
+///
+/// It's not possible to access the stored MessageQueue with mutable reference, so safety of
+/// MessageQueue modification are subject of its implementation, which should disable interrupts
+/// for the time of the mutable access. Interrupt can use some of the MessageQueue functionalities
+/// using [`MessageQueueHandle`].
+///
+/// If any of those invariants are broken, then any usage can be considered unsafe.
+unsafe impl<T, const N: usize> Sync for MessageQueueStorage<T, N> {}
+
 impl<T, const N: usize> MessageQueueStorage<T, N> {
     /// Creates new storage.
     pub const fn new() -> Self {
@@ -66,7 +81,8 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored queue and queue data buffers.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing storage from IRQ context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(&'static self) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
@@ -107,10 +123,6 @@ impl<T, const N: usize> MessageQueueStorage<T, N> {
         }
     }
 }
-
-/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
-/// then access to the stored MessageQueue can be only done with [MessageQueueHandle].
-unsafe impl<T, const N: usize> Sync for MessageQueueStorage<T, N> {}
 
 #[cfg(test)]
 mod tests {

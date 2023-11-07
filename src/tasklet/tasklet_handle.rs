@@ -3,7 +3,7 @@
 //! This module contains tasklet handle implementation, which is used to reference a tasklet in the
 //! system.
 
-use crate::tasklet::Tasklet;
+use crate::tasklet::{Tasklet, TaskletId};
 
 /// Tasklet handle.
 ///
@@ -27,6 +27,12 @@ impl<T, C, const COND_COUNT: usize> TaskletHandle<T, C, COND_COUNT> {
     /// * `tasklet` - Pointer to the tasklet.
     pub(crate) fn new(tasklet: &'static Tasklet<T, C, COND_COUNT>) -> Self {
         TaskletHandle { tasklet }
+    }
+
+    /// Returns ID of this tasklet.
+    #[inline(always)]
+    pub fn get_id(&self) -> TaskletId {
+        self.tasklet.get_id()
     }
 
     /// Returns name of this tasklet.

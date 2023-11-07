@@ -26,14 +26,17 @@ pub(crate) enum SystemError {
     /// Event set list was full when tried to create a new one.
     EventSetListFull,
     /// Scheduled event list was full when tried to schedule a new one.
-    #[allow(dead_code)]
     ScheduledEventListFull,
     /// Enqueued event to a full event queue.
     EventQueueFull,
     /// Event already exists in the system.
     EventAlreadyExists(EventId),
-    /// Cyclic execution was full when tried to create a new one.
+    /// Cyclic execution list was full when tried to create a new one.
     CyclicExecutionListFull,
+    /// Execution statistics list was full when tried to add a new one.
+    ExecutionStatsListFull,
+    /// Event for tasklet execution exceeding maximum was already set.
+    TimeExceededEventAlreadySet,
 }
 
 impl fmt::Debug for SystemError {
@@ -113,6 +116,19 @@ impl fmt::Debug for SystemError {
                     to the maximum number of tasklets that can be created in the system. Each tasklet should have at
                     maximum only one cyclic execution. This error means that there is some fault logic in cyclic
                     exection creation.")
+            }
+            SystemError::ExecutionStatsListFull => {
+                write!(f,
+                    "internal system error. Execution monitor stores a list of execution statistics of size equal
+                    to the maximum naumber of tasklets that can be created in the system. Each tasklet should have at
+                    maximum only one execution statistics. This error means that there is some fault logic in execution
+                    monitoring.")
+            }
+            SystemError::TimeExceededEventAlreadySet => {
+                write!(
+                    f,
+                    "Event for the tasklet execution exceeding maximum time was already set."
+                )
             }
         }
     }

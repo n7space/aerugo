@@ -7,6 +7,8 @@ mod test_event_cancellation;
 mod test_event_clear_queue;
 mod test_event_interrupt;
 mod test_event_scheduled;
+mod test_execution_monitoring;
+mod test_execution_time_exceeded;
 mod test_hal_nvic;
 mod test_hal_pio;
 mod test_hal_pmc;

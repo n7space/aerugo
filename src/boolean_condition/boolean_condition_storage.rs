@@ -27,6 +27,21 @@ pub struct BooleanConditionStorage {
     condition_buffer: OnceCell<BooleanConditionBuffer>,
 }
 
+/// SAFETY: It is safe assuming that BooleanConditionStorage is not modified in IRQ context and that
+/// modification of the stored BooleanCondition cannot be interrupted.
+///
+/// BooleanConditionStorage is initialized only in
+/// [create_boolean_condition](crate::api::InitApi::create_boolean_condition) implemented by
+/// [Aerugo](crate::aerugo::Aerugo) which is not accessible from the IRQ context.
+///
+/// It's not possible to access the stored BooleanCondition with mutable reference, so safety of
+/// BooleanCondition modification are subject of its implementation, which should disable interrupts
+/// for the time of the mutable access. Interrupt can use some of the BooleanCondition functionalities
+/// using [`BooleanConditionHandle`].
+///
+/// If any of those invariants are broken, then any usage can be considered unsafe.
+unsafe impl Sync for BooleanConditionStorage {}
+
 impl BooleanConditionStorage {
     /// Creates new storage.
     pub const fn new() -> Self {
@@ -59,7 +74,8 @@ impl BooleanConditionStorage {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored condition buffer.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing storage from IRQ context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(&'static self, value: bool) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
@@ -101,10 +117,6 @@ impl BooleanConditionStorage {
         }
     }
 }
-
-/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
-/// then access to the stored BooleanCondition can be only done with [BooleanConditionHandle].
-unsafe impl Sync for BooleanConditionStorage {}
 
 #[cfg(test)]
 mod tests {

@@ -27,6 +27,19 @@ pub(crate) struct Event {
     sets: EventSetList,
 }
 
+/// It is safe assuming that Event is not available from IRQ context before it's created and that
+/// modifications cannot be interrupted.
+///
+/// Event structure is hidden from the user. Functionalities are exposed to the user via
+/// [EventHandle] and [RuntimeApi](crate::api::RuntimeApi).
+///
+/// Event is only created by `EventStorage` with [create_event](crate::api::InitApi::create_event)
+/// which is not accessible from the IRQ context.
+///
+/// Initializations and modifications mustn't be interrupted. Event is only accessiable with an
+/// unmutable reference.
+unsafe impl Sync for Event {}
+
 impl Event {
     /// Creates new event.
     pub(crate) fn new(id: EventId) -> Self {
@@ -51,7 +64,9 @@ impl Event {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of event sets.
-    /// This is safe to call before the system initialization.
+    /// This is safe if it's executed in a critical section during system initialization
+    /// (before scheduler is started).
+    /// Accessing event from IRQ context during adding to set is undefined behaviour.
     pub(crate) unsafe fn add_set(&self, event_set: &'static EventSet) -> Result<(), SystemError> {
         match self.sets.add(event_set) {
             Ok(_) => Ok(()),
@@ -79,7 +94,3 @@ impl PartialEq for Event {
         self.id.eq(&other.id)
     }
 }
-
-/// SAFETY: This is safe, because that structure is only stored by the [EventStorage]
-/// which ensures safe access.
-unsafe impl Sync for Event {}

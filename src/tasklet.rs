@@ -11,11 +11,13 @@
 
 mod tasklet_config;
 mod tasklet_handle;
+mod tasklet_id;
 mod tasklet_ptr;
 mod tasklet_status;
 mod tasklet_storage;
 mod tasklet_vtable;
 
+pub(crate) use self::tasklet_id::TaskletId;
 pub(crate) use self::tasklet_ptr::TaskletPtr;
 pub(crate) use self::tasklet_status::TaskletStatus;
 pub(crate) use self::tasklet_vtable::{tasklet_vtable, TaskletVTable};
@@ -36,9 +38,6 @@ use crate::time::Instant;
 /// Type of function that is executed by the tasklet in its step.
 pub(crate) type StepFn<T, C> = fn(T, &mut C, &'static dyn RuntimeApi);
 
-/// Tasklet unique ID.
-pub struct TaskletId(u32);
-
 /// Tasklet structure.
 ///
 /// # Generic Parameters
@@ -47,6 +46,8 @@ pub struct TaskletId(u32);
 /// * `COND_COUNT` - Number of conditions.
 #[repr(C)]
 pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
+    /// Tasklet ID.
+    id: TaskletId,
     /// Tasklet name.
     name: &'static str,
     /// Tasklet priority.
@@ -67,9 +68,28 @@ pub(crate) struct Tasklet<T: 'static, C: 'static, const COND_COUNT: usize> {
     runtime_api: &'static dyn RuntimeApi,
 }
 
+/// It is safe assuming that Tasklet is not available from IRQ context before it's
+/// created and that modifications cannot be interrupted.
+///
+/// Tasklet structure is hidden from the user. Functionalities are exposed to the user via
+/// [TaskletHandle].
+///
+/// Tasklet is only created by `TaskletStorage` with [create_tasklet](crate::api::InitApi::create_tasklet)
+/// which is not accessible from the IRQ context.
+///
+/// Context is never leaked outside of the tasklet. It can be only accessible by the user in the
+/// tasklet functions which is executed by the system, one at a given time. There are no way to
+/// access tasklet context from the IRQ context.
+///
+/// Initializations and modifications mustn't be interrupted. Tasklet is only accessible with an
+/// unmutable reference. All modifications are implemented with interior mutability using [Mutex]
+/// which ensures that those modifications cannot be interrupted.
+unsafe impl<T, C, const COND_COUNT: usize> Sync for Tasklet<T, C, COND_COUNT> {}
+
 impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     /// Creates new `Tasklet`.
     pub(crate) const fn new(
+        id: TaskletId,
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: &'static mut C,
@@ -77,6 +97,7 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         runtime_api: &'static dyn RuntimeApi,
     ) -> Self {
         Tasklet {
+            id,
             name: config.name,
             priority: config.priority,
             status: Mutex::new(TaskletStatus::Sleeping),
@@ -87,6 +108,11 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
             data_provider: OnceCell::new(),
             runtime_api,
         }
+    }
+
+    /// Returns task ID.
+    pub(crate) fn get_id(&self) -> TaskletId {
+        self.id
     }
 
     /// Returns task name.
@@ -125,10 +151,34 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         self.last_execution_time.lock(|t| *t = time)
     }
 
+    /// Check if this tasklet is active.
+    ///
+    /// Tasklet is not active if it's condition evaluates to `false`.
+    pub(crate) fn is_active(&self) -> bool {
+        match self.condition_set.get() {
+            Some(condition_set) => condition_set.evaluate(),
+            None => true,
+        }
+    }
+
+    /// Checks if this tasklet has data waiting for processing.
+    pub(crate) fn has_work(&self) -> bool {
+        match self.data_provider.get() {
+            Some(data_provider) => data_provider.data_waiting(),
+            None => false,
+        }
+    }
+
     /// Sets this tasklet conditions.
     ///
     /// # Return
     /// `SystemError` if tasklet already has condition set, `()` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the condition set.
+    /// This is safe if it's executed in a critical section during system initialization
+    /// (before scheduler is started).
+    /// Accessing tasklet from IRQ context during setting is undefined behaviour.
     pub(crate) unsafe fn set_condition_set(
         &self,
         condition_set: BooleanConditionSet<COND_COUNT>,
@@ -146,6 +196,12 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
     ///
     /// # Return
     /// `SystemError` if tasklet already has data provider, `()` otherwise.
+    ///
+    /// # Safety
+    /// This is unsafe, because it mutably borrows the data provider.
+    /// This is safe if it's executed in a critical section during system initialization
+    /// (before scheduler is started).
+    /// Accessing tasklet from IRQ context during subscribing is undefined behaviour.
     pub(crate) unsafe fn subscribe(
         &self,
         data_provider: &'static dyn DataProvider<T>,
@@ -153,24 +209,6 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         match self.data_provider.set(data_provider) {
             Ok(_) => Ok(()),
             Err(_) => Err(SystemError::TaskletAlreadySubscribed(self.get_name())),
-        }
-    }
-
-    /// Checks if this tasklet has data waiting for processing.
-    pub(crate) fn has_work(&self) -> bool {
-        match self.data_provider.get() {
-            Some(data_provider) => data_provider.data_waiting(),
-            None => false,
-        }
-    }
-
-    /// Check if this tasklet is active.
-    ///
-    /// Tasklet is not active if it's condition evaluates to `false`.
-    pub(crate) fn is_active(&self) -> bool {
-        match self.condition_set.get() {
-            Some(condition_set) => condition_set.evaluate(),
-            None => true,
         }
     }
 

@@ -16,14 +16,17 @@ use crate::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionStorage,
 };
 use crate::cyclic_execution_manager::CyclicExecutionManager;
-use crate::error::RuntimeError;
-use crate::event::{EventId, EventStorage};
+use crate::error::{RuntimeError, SystemError};
+use crate::event::{EventHandle, EventId, EventStorage};
 use crate::event_manager::EventManager;
-use crate::execution_monitoring::ExecutionStats;
+use crate::execution_monitor::{ExecutionMonitor, ExecutionStats};
 use crate::executor::Executor;
 use crate::hal::{Hal, UserPeripherals};
+use crate::internal_list::InternalList;
 use crate::message_queue::{MessageQueueHandle, MessageQueueStorage};
-use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage};
+use crate::tasklet::{
+    StepFn, Tasklet, TaskletConfig, TaskletHandle, TaskletId, TaskletPtr, TaskletStorage,
+};
 use crate::time::{Duration, Instant};
 use crate::time_source::TimeSource;
 
@@ -34,28 +37,38 @@ static AERUGO: Aerugo = Aerugo::new();
 
 /// System scheduler.
 ///
-/// Singleton instance of the scheduler. Used directly only by the [Aerugo]
-/// structure, which exposes some functionality via it's API.
+/// Singleton instance of the scheduler. Used directly only by the [Aerugo] structure.
 static EXECUTOR: Executor = Executor::new(AERUGO.time_source());
 /// Event manager.
 ///
-/// Singleton instance of the event manager. Used directly only by the [Aerugo]
-/// structure.
+/// Singleton instance of the event manager. Used directly only by the [Aerugo] structure.
 static EVENT_MANAGER: EventManager = EventManager::new(AERUGO.time_source());
 /// Time manager.
 ///
-/// Singleton instance of the time manager. Used directly only by the [Aerugo]
-/// structure.
+/// Singleton instance of the time manager. Used directly only by the [Aerugo] structure.
 static CYCLIC_EXECUTION_MANAGER: CyclicExecutionManager =
     CyclicExecutionManager::new(AERUGO.time_source());
+/// Execution monitor.
+///
+/// Singleton instance of the execution monitor. Used directly only by the [Aerugo] structure.
+static EXECUTION_MONITOR: ExecutionMonitor = ExecutionMonitor::new();
 
 /// System structure.
 ///
 /// This shouldn't be created by hand by the user or anywhere else in the code.
 pub struct Aerugo {
+    /// Tasklets that are created in the system.
+    tasklets: InternalList<TaskletPtr, { Aerugo::TASKLET_COUNT }>,
+    /// IDs of tasklets that are created in the system.
+    tasklet_ids: InternalList<TaskletId, { Aerugo::TASKLET_COUNT }>,
     /// Time source, responsible for creating timestamps.
     time_source: TimeSource,
 }
+
+/// This structure stores a list of tasklets that were created in a system. Adding new elements to
+/// that list is safe only during initialization (before scheduler is started) and this operation
+/// must not be interrupted.
+unsafe impl Sync for Aerugo {}
 
 impl Aerugo {
     /// Maximum number of tasklets registered in the system.
@@ -68,6 +81,8 @@ impl Aerugo {
     /// This shouldn't be called in more that [one place](crate::aerugo::AERUGO).
     const fn new() -> Self {
         Aerugo {
+            tasklets: InternalList::new(),
+            tasklet_ids: InternalList::new(),
             time_source: TimeSource::new(),
         }
     }
@@ -106,15 +121,48 @@ impl Aerugo {
     /// its internal components and hardware.
     fn run(&'static self) -> ! {
         loop {
-            EXECUTOR
+            let execution_data = EXECUTOR
                 .execute_next_tasklet()
                 .expect("Failure in tasklet execution");
+
+            if let Some(data) = execution_data {
+                // SAFETY: This is safe, as `EXECUTION_MONITOR` is not available from the IRQ context.
+                unsafe { EXECUTION_MONITOR.update(data) };
+            }
 
             EVENT_MANAGER.activate_scheduled_events();
             CYCLIC_EXECUTION_MANAGER.wake_tasklets();
 
             Hal::feed_watchdog();
         }
+    }
+
+    /// Adds new tasklet and new tasklet ID to the lists.
+    ///
+    /// # Parameters
+    /// * `tasklet` - Tasklet to add.
+    ///
+    /// # Result
+    /// `()` if successful, `SystemError` otherwise.
+    ///
+    /// # Safety
+    /// This is safe to call only during system initialization (before scheduler is started) and it
+    /// must not be interrupted.
+    unsafe fn add_tasklet<T, C, const COND_COUNT: usize>(
+        &'static self,
+        tasklet: &'static Tasklet<T, C, COND_COUNT>,
+    ) -> Result<(), SystemError> {
+        match self.tasklets.add(tasklet.ptr()) {
+            Ok(_) => (),
+            Err(_) => return Err(SystemError::TaskletListFull),
+        };
+
+        match self.tasklet_ids.add(tasklet.get_id()) {
+            Ok(_) => (),
+            Err(_) => return Err(SystemError::TaskletListFull),
+        };
+
+        Ok(())
     }
 }
 
@@ -212,12 +260,16 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) {
-        // SAFETY: This is safe, as long as this function is called only during system initialization.
-        unsafe {
-            storage
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
+            let tasklet = storage
                 .init(config, step_fn, C::default(), self)
                 .expect("Failed to initialize storage for tasklet");
-        }
+
+            self.add_tasklet(tasklet)
+                .expect("Failed to add tasklet to a list");
+        });
     }
 
     /// Creates new tasklet in the system with initialized context data.
@@ -321,12 +373,16 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
-            storage
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
+            let tasklet = storage
                 .init(config, step_fn, context, self)
                 .expect("Failed to initialize storage for tasklet");
-        }
+
+            self.add_tasklet(tasklet)
+                .expect("Failed to add tasklet to a list");
+        });
     }
 
     /// Creates new message queue in the system.
@@ -403,12 +459,13 @@ impl InitApi for Aerugo {
         &'static self,
         storage: &'static MessageQueueStorage<T, QUEUE_SIZE>,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             storage
                 .init()
                 .expect("Failed to initialize storage for message queue");
-        }
+        });
     }
 
     /// Creates new event in the system.
@@ -481,24 +538,25 @@ impl InitApi for Aerugo {
     /// }
     /// ```
     fn create_event(&'static self, event_id: EventId, storage: &'static EventStorage) {
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             storage
                 .init(event_id)
                 .expect("Failed to initialize storage for event");
-        }
+        });
 
         let event = storage
             .event()
             .expect("Failed to get reference to the stored event");
 
-        // SAFETY: This is safe as long as this function is called only during system
-        // initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             EVENT_MANAGER
                 .add_event(event)
                 .expect("Failed to add event to the manager");
-        }
+        });
     }
 
     /// Creates new boolean condition in the system.
@@ -571,12 +629,13 @@ impl InitApi for Aerugo {
         value: bool,
         storage: &'static BooleanConditionStorage,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             storage
                 .init(value)
                 .expect("Failed to initialize storage for boolean condition");
-        }
+        });
     }
 
     /// Subscribes a tasklet to a queue.
@@ -645,8 +704,9 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let queue = queue_handle.queue();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             queue
                 .register_tasklet(tasklet.ptr())
                 .expect("Failed to register tasklet in a queue");
@@ -654,7 +714,7 @@ impl InitApi for Aerugo {
             tasklet
                 .subscribe(queue)
                 .expect("Failed to subscribe tasklet to a queue");
-        }
+        });
     }
 
     /// Subscribes a tasklet to events.
@@ -727,31 +787,33 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
+        // SAFETY: This is safe because this function can be called only during system initialization.
         let event_set = unsafe {
             EVENT_MANAGER
                 .create_event_set(tasklet.ptr())
                 .expect("Failed to create event set")
         };
 
-        for event_id in events {
-            let event = EVENT_MANAGER
-                .get_event(event_id)
-                .unwrap_or_else(|| panic!("Failed to get event with ID '{}'", event_id));
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
+            events
+                .iter()
+                .map(|&event_id| {
+                    EVENT_MANAGER
+                        .get_event(event_id)
+                        .unwrap_or_else(|| panic!("Failed to get event with ID '{}'", event_id))
+                })
+                .for_each(|event| {
+                    event
+                        .add_set(event_set)
+                        .expect("Failed to add set to an event");
+                });
 
-            // SAFETY: This is safe as long as this function is called only during system initialization.
-            unsafe {
-                event
-                    .add_set(event_set)
-                    .expect("Failed to add set to an event");
-            }
-        }
-
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
             tasklet
                 .subscribe(event_set)
                 .expect("Failed to subscribe tasklet to events");
-        }
+        });
     }
 
     /// Subscribes tasklet to the boolean condition.
@@ -810,8 +872,9 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let condition = condition_handle.condition();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             condition
                 .register_tasklet(tasklet.ptr())
                 .expect("Failed to register tasklet in a condition");
@@ -819,7 +882,7 @@ impl InitApi for Aerugo {
             tasklet
                 .subscribe(condition)
                 .expect("Failed to subscribe tasklet to a condition");
-        }
+        });
     }
 
     /// Subscribes tasklet to the cyclic execution.
@@ -874,8 +937,9 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             let cyclic_execution = CYCLIC_EXECUTION_MANAGER
                 .create_cyclic_execution(tasklet.ptr(), period, offset)
                 .expect("Failed to create a cyclic execution");
@@ -883,7 +947,7 @@ impl InitApi for Aerugo {
             tasklet
                 .subscribe(cyclic_execution)
                 .expect("Failed to subscribe tasklet to a cyclic exection");
-        }
+        });
     }
 
     /// Sets tasklet condition set.
@@ -945,8 +1009,9 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization.
-        unsafe {
+        // SAFETY: This is safe because this function can be called only during system initialization
+        // and can't be interrupted.
+        critical_section::with(|_| unsafe {
             condition_set
                 .register_tasklet(tasklet.ptr())
                 .expect("Failed to register a tasklet in a condition set");
@@ -954,7 +1019,19 @@ impl InitApi for Aerugo {
             tasklet
                 .set_condition_set(condition_set)
                 .expect("Failed to set a condition set for tasklet");
-        }
+        });
+    }
+
+    fn set_execution_time_exceeded_maximum_event(
+        &'static self,
+        event_handle: &EventHandle,
+        time: Duration,
+    ) {
+        unsafe {
+            EXECUTION_MONITOR
+                .set_time_exceeded_event(event_handle.event(), time)
+                .expect("Failed to set event for exceeding maximum tasklet execution time.")
+        };
     }
 
     /// Starts the system.
@@ -1028,8 +1105,8 @@ impl RuntimeApi for Aerugo {
         unsafe { self.time_source.set_user_offset(offset) }
     }
 
-    fn query_tasks(&'static self) -> core::slice::Iter<TaskletId> {
-        todo!()
+    fn query_tasklets(&'static self) -> core::slice::Iter<TaskletId> {
+        self.tasklet_ids.iter()
     }
 
     /// Returns time elapsed between system initialization and start of the scheduler.
@@ -1038,8 +1115,9 @@ impl RuntimeApi for Aerugo {
         self.time_source.startup_duration()
     }
 
-    fn get_execution_statistics(&'static self, _task_id: TaskletId) -> ExecutionStats {
-        todo!()
+    fn get_execution_statistics(&'static self, tasklet_id: &TaskletId) -> Option<ExecutionStats> {
+        // This is safe, because `EXECUTION_MONITOR` is not available from the IRQ context.
+        unsafe { EXECUTION_MONITOR.get_stats(tasklet_id) }
     }
 
     fn execute_critical<F, R>(f: F) -> R

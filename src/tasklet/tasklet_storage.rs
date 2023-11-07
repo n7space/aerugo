@@ -13,7 +13,7 @@ use heapless::Vec;
 use crate::api::RuntimeApi;
 use crate::boolean_condition::BooleanConditionSet;
 use crate::error::SystemError;
-use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle};
+use crate::tasklet::{StepFn, TaskletConfig, TaskletHandle, TaskletId};
 
 /// Type of the tasklet buffer storage.
 pub(crate) type TaskletBuffer = Vec<u8, { core::mem::size_of::<Tasklet<(), (), 0>>() }>;
@@ -35,12 +35,28 @@ pub struct TaskletStorage<T, C, const COND_COUNT: usize> {
     initialized: OnceCell<()>,
     /// Buffer for the tasklet structure.
     tasklet_buffer: OnceCell<TaskletBuffer>,
-    /// Storage for the context data.
-    tasklet_context: UnsafeCell<MaybeUninit<C>>,
     /// Storage for the tasklet conditions.
     tasklet_conditions: OnceCell<BooleanConditionSet<COND_COUNT>>,
+    /// Storage for the context data.
+    tasklet_context: UnsafeCell<MaybeUninit<C>>,
     /// Marker for the tasklet data type.
     _data_type_marker: PhantomData<T>,
+}
+
+/// It is safe assuming that stored Tasklet is not available from the IRQ context before it is
+/// created and that initialization cannot be interrupted.
+///
+/// TaskletStorage is initialized only in
+/// [create_tasklet](crate::api::InitApi::create_tasklet), implemented in [Aerugo](crate::aerugo::Aerugo)
+/// which is not accessible from the IRQ context.
+///
+/// It's not possible to access the stored Tasklet via mutable reference. Tasklet is exposed
+/// to the user via TaskletHandle which provides necessary functionalities.
+///
+/// If any of those invariants are broken, then any usage can be considered unsafe.
+unsafe impl<T: 'static, C: 'static, const COND_COUNT: usize> Sync
+    for TaskletStorage<T, C, COND_COUNT>
+{
 }
 
 impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_COUNT> {
@@ -49,8 +65,8 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         TaskletStorage {
             initialized: OnceCell::new(),
             tasklet_buffer: OnceCell::new(),
-            tasklet_context: UnsafeCell::new(MaybeUninit::uninit()),
             tasklet_conditions: OnceCell::new(),
+            tasklet_context: UnsafeCell::new(MaybeUninit::uninit()),
             _data_type_marker: PhantomData,
         }
     }
@@ -75,14 +91,15 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored tasklet buffer. This is safe to call
-    /// before the system initialization.
+    /// during system initialization (before scheduler is started). Accessing storage from IRQ
+    /// context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(
         &'static self,
         config: TaskletConfig,
         step_fn: StepFn<T, C>,
         context: C,
         runtime_api: &'static dyn RuntimeApi,
-    ) -> Result<(), SystemError> {
+    ) -> Result<&Tasklet<T, C, COND_COUNT>, SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
         }
@@ -93,6 +110,7 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
         tasklet_context.write(context);
 
         let tasklet = Tasklet::<T, C, COND_COUNT>::new(
+            TaskletId::get_next(),
             config,
             step_fn,
             // SAFETY: This is safe, because `tasklet_context` was just initialized.
@@ -119,7 +137,8 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             Err(_) => Err(SystemError::StorageInitializedAlreadySet),
         }?;
 
-        Ok(())
+        // Tasklet was just initialized
+        Ok(self.tasklet().unwrap())
     }
 
     /// Returns a reference to the stored Tasklet structure.
@@ -136,9 +155,4 @@ impl<T: 'static, C: 'static, const COND_COUNT: usize> TaskletStorage<T, C, COND_
             (_, _) => None,
         }
     }
-}
-
-unsafe impl<T: 'static, C: 'static, const COND_COUNT: usize> Sync
-    for TaskletStorage<T, C, COND_COUNT>
-{
 }

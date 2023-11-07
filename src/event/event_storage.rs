@@ -25,6 +25,20 @@ pub struct EventStorage {
     event_buffer: OnceCell<EventBuffer>,
 }
 
+/// It is safe assuming that stored Event is not available from the IRQ context before it is
+/// created and that initialization cannot be interrupted.
+///
+/// EventStorage is initialized only in
+/// [create_event](crate::api::InitApi::create_event) implemented in [Aerguo](crate::aerugo::Aerugo)
+/// which is not accessible from the IRQ context.
+///
+/// It's not possible to access the stored Event with mutable reference, so safety of Event
+/// modification are subject of its implementation, which should disable interrupts for the time
+/// of the mutable access. Interrupt can use some of the Event functionalities using [`EventHandle`].
+///
+/// If any of those invariants are broken, then any usage can be considered unsafe.
+unsafe impl Sync for EventStorage {}
+
 impl EventStorage {
     /// Creates new storage.
     pub const fn new() -> Self {
@@ -57,7 +71,8 @@ impl EventStorage {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the stored condition buffer.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
+    /// Accessing storage from IRQ context during initialization is undefined behaviour.
     pub(crate) unsafe fn init(&'static self, event_id: EventId) -> Result<(), SystemError> {
         if self.initialized.get().is_some() {
             return Err(SystemError::StorageAlreadyInitialized);
@@ -97,10 +112,6 @@ impl EventStorage {
         }
     }
 }
-
-/// SAFETY: This is safe, because mutable access (initialization) can be performed only once, and
-/// then access to the stored Event can be only done with [EventHandle] or via [InitApi](crate::api::InitApi)
-unsafe impl Sync for EventStorage {}
 
 #[cfg(test)]
 mod tests {

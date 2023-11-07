@@ -13,7 +13,7 @@
 
 use core::cmp::Ordering;
 
-use crate::tasklet::{tasklet_vtable, Tasklet, TaskletStatus, TaskletVTable};
+use crate::tasklet::{tasklet_vtable, Tasklet, TaskletId, TaskletStatus, TaskletVTable};
 use crate::time::Instant;
 
 /// Raw tasklet pointer.
@@ -24,9 +24,6 @@ pub(crate) struct TaskletPtr {
     /// Tasklet virtual table.
     vtable: &'static TaskletVTable,
 }
-
-unsafe impl Sync for TaskletPtr {}
-unsafe impl Send for TaskletPtr {}
 
 impl TaskletPtr {
     /// Creates new tasklet pointer from reference
@@ -42,16 +39,20 @@ impl TaskletPtr {
         }
     }
 
+    /// See: [get_id](crate::tasklet::Tasklet::get_id())
+    #[inline(always)]
+    pub(crate) fn get_id(&self) -> TaskletId {
+        (self.vtable.get_id)(self.ptr)
+    }
+
     /// See: [get_name](crate::tasklet::Tasklet::get_name())
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn get_name(&self) -> &'static str {
         (self.vtable.get_name)(self.ptr)
     }
 
     /// See: [get_priority](crate::tasklet::Tasklet::get_priority())
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn get_priority(&self) -> u8 {
         (self.vtable.get_priority)(self.ptr)
     }

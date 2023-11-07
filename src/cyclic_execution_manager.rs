@@ -26,6 +26,10 @@ pub(crate) struct CyclicExecutionManager {
     time_source: &'static TimeSource,
 }
 
+/// It is safe assuming that it's modified only during system initialization (before scheduler is
+/// started) and those modifications cannot be interrupted.
+unsafe impl Sync for CyclicExecutionManager {}
+
 impl CyclicExecutionManager {
     /// Creates new cyclic execution manager instance.
     ///
@@ -54,7 +58,7 @@ impl CyclicExecutionManager {
     ///
     /// # Safety
     /// This is unsafe, because it mutably borrows the list of cyclic executions.
-    /// This is safe to call before the system initialization.
+    /// This is safe to call during system initialization (before scheduler is started).
     pub(crate) unsafe fn create_cyclic_execution(
         &'static self,
         tasklet: TaskletPtr,
@@ -79,5 +83,3 @@ impl CyclicExecutionManager {
         }
     }
 }
-
-unsafe impl Sync for CyclicExecutionManager {}
