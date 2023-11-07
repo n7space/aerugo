@@ -260,7 +260,7 @@ impl InitApi for Aerugo {
         step_fn: StepFn<T, C>,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) {
-        // SAFETY: This is safe, as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             let tasklet = storage
@@ -373,7 +373,7 @@ impl InitApi for Aerugo {
         context: C,
         storage: &'static TaskletStorage<T, C, COND_COUNT>,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             let tasklet = storage
@@ -459,7 +459,7 @@ impl InitApi for Aerugo {
         &'static self,
         storage: &'static MessageQueueStorage<T, QUEUE_SIZE>,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             storage
@@ -538,7 +538,7 @@ impl InitApi for Aerugo {
     /// }
     /// ```
     fn create_event(&'static self, event_id: EventId, storage: &'static EventStorage) {
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             storage
@@ -550,7 +550,7 @@ impl InitApi for Aerugo {
             .event()
             .expect("Failed to get reference to the stored event");
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             EVENT_MANAGER
@@ -629,7 +629,7 @@ impl InitApi for Aerugo {
         value: bool,
         storage: &'static BooleanConditionStorage,
     ) {
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             storage
@@ -704,7 +704,7 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let queue = queue_handle.queue();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             queue
@@ -787,14 +787,14 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization.
+        // SAFETY: This is safe because this function can be called only during system initialization.
         let event_set = unsafe {
             EVENT_MANAGER
                 .create_event_set(tasklet.ptr())
                 .expect("Failed to create event set")
         };
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             events
@@ -872,7 +872,7 @@ impl InitApi for Aerugo {
         let tasklet = tasklet_handle.tasklet();
         let condition = condition_handle.condition();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             condition
@@ -937,7 +937,7 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             let cyclic_execution = CYCLIC_EXECUTION_MANAGER
@@ -1009,7 +1009,7 @@ impl InitApi for Aerugo {
     ) {
         let tasklet = tasklet_handle.tasklet();
 
-        // SAFETY: This is safe as long as this function is called only during system initialization
+        // SAFETY: This is safe because this function can be called only during system initialization
         // and can't be interrupted.
         critical_section::with(|_| unsafe {
             condition_set
