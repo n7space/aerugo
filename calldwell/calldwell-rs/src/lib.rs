@@ -60,7 +60,7 @@ fn initialize() {
         let channels = rtt_init! {
             up: {
                 0: {
-                    size: 1024
+                    size: 4096
                     name: "CalldwellStdout"
                 }
             }
