@@ -102,7 +102,7 @@ impl<AnyState: State> Channel<AnyState> {
             .grs
             // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
             // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
-            .modify(|r, w| unsafe { w.bits(r.bits() & self.channel_bitmask()) });
+            .modify(|r, w| unsafe { w.bits(r.bits() | self.channel_bitmask()) });
     }
 
     /// Suspends destination requests for the channel.
@@ -116,7 +116,7 @@ impl<AnyState: State> Channel<AnyState> {
             .gws
             // Safety: This is safe, because channel's ID must be valid for a Channel to exist.
             // Also, channel bits are correctly masked with old value, as this is an R-M-W operation.
-            .modify(|r, w| unsafe { w.bits(r.bits() & self.channel_bitmask()) });
+            .modify(|r, w| unsafe { w.bits(r.bits() | self.channel_bitmask()) });
     }
 
     /// Suspends read and write operations at the same time.
