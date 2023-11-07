@@ -67,7 +67,7 @@ pub struct Aerugo {
 
 /// This structure stores a list of tasklets that were created in a system. Adding new elements to
 /// that list is safe only during initialization (before scheduler is started) and this operation
-/// cannot be interrupted.
+/// must not be interrupted.
 unsafe impl Sync for Aerugo {}
 
 impl Aerugo {
@@ -147,7 +147,7 @@ impl Aerugo {
     ///
     /// # Safety
     /// This is safe to call only during system initialization (before scheduler is started) and it
-    /// cannot be interrupted.
+    /// must not be interrupted.
     unsafe fn add_tasklet<T, C, const COND_COUNT: usize>(
         &'static self,
         tasklet: &'static Tasklet<T, C, COND_COUNT>,
