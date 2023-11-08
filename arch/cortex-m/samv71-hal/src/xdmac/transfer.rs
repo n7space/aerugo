@@ -29,28 +29,21 @@ use samv71q21_pac::xdmac::{
 pub struct TransferBlock {
     /// Transfer's source
     source: TransferLocation,
-
     /// Transfer's destination
     destination: TransferLocation,
-
     /// Amount of data units in the microblock.
     ///
     /// Data unit size is configured in `data_width` field.
     microblock_length: MicroblockLength,
-
     /// Amount of microblocks in a transfer block.
     block_length: BlockLength,
-
     /// Transfer's type (memory-to-memory, peripheral-to-memory, memory-to-peripheral), and
     /// peripheral ID in case of peripheral transfer.
     transfer_type: TransferType,
-
     /// Memory burst size.
     memory_burst_size: MemoryBurstSize,
-
     /// Channel's chunk size, amount of data transferred in a single chunk.
     chunk_size: ChunkSize,
-
     /// Data width for a single transfer (smallest data unit).
     data_width: DataWidth,
 }
@@ -68,11 +61,9 @@ pub struct TransferLocation {
     /// For peripheral transfers, this must point to the source/destination peripheral's data
     /// register.
     pub address: *const (),
-
     /// Bus interface that allows the access to the memory pointed by `address`.
     /// For details, check [`xdmac`](crate::xdmac#matrix-connections) module documentation.
     pub interface: SystemBus,
-
     /// Addressing mode - can either be fixed (address does not change during transfer), or
     /// incrementing (address is incremented after reading a data unit).
     pub addressing_mode: AddressingMode,
