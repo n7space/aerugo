@@ -17,6 +17,7 @@ mod test_hal_systick;
 mod test_hal_timer;
 mod test_hal_uart;
 mod test_hal_watchdog;
+mod test_hal_xdmac;
 mod test_message_queue;
 mod test_message_queue_clear;
 mod test_message_queue_interrupt;

@@ -76,6 +76,7 @@ impl Hal {
                     uart_2: Some(mcu_peripherals.UART2),
                     uart_3: Some(mcu_peripherals.UART3),
                     uart_4: Some(mcu_peripherals.UART4),
+                    xdmac: Some(mcu_peripherals.XDMAC),
                 })
             } else {
                 None
