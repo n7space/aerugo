@@ -19,6 +19,8 @@ pub(crate) enum SystemError {
     TaskletAlreadyHasConditionSet(&'static str),
     /// Tasklet is already subscribed to a data provider.
     TaskletAlreadySubscribed(&'static str),
+    /// Tasklet is not subscribed to any data provider.
+    TaskletNotSubscribed(&'static str),
     /// Tasklet list was full when tried to add a new one.
     TaskletListFull,
     /// Event list was full when tried to create a new one.
@@ -72,8 +74,14 @@ impl fmt::Debug for SystemError {
             }
             SystemError::TaskletAlreadySubscribed(tasklet_name) => {
                 write!(f,
-                    "tasklet '{}' is already subscribed to a data provider. Tasklet can only have at maximum one
+                    "tasklet '{}' is already subscribed to a data provider. Tasklet can only have only one
                     data provider.",
+                    tasklet_name)
+            }
+            SystemError::TaskletNotSubscribed(tasklet_name) => {
+                write!(f,
+                    "tasklet '{}' is not subscribed to any data provider. Each tasklet has to be subscribed to
+                    exactly one data provider.",
                     tasklet_name)
             }
             SystemError::TaskletListFull => {

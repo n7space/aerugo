@@ -189,6 +189,11 @@ impl<T, C, const COND_COUNT: usize> Tasklet<T, C, COND_COUNT> {
         }
     }
 
+    /// Checks if tasklet is subscribed to any data provider.
+    pub(crate) fn is_subscribed(&self) -> bool {
+        self.data_provider.get().is_some()
+    }
+
     /// Subscribes itself to the given data provider.
     ///
     /// # Parameters

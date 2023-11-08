@@ -20,5 +20,6 @@ mod test_hal_watchdog;
 mod test_message_queue;
 mod test_message_queue_clear;
 mod test_message_queue_interrupt;
+mod test_tasklet_not_subscribed;
 mod test_tasklet_priority;
 mod test_tasklet_priority_multiple_queues;

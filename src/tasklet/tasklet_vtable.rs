@@ -29,6 +29,8 @@ pub(crate) struct TaskletVTable {
     pub(crate) has_work: fn(*const ()) -> bool,
     /// Pointer to [is_active](is_active()) function.
     pub(crate) is_active: fn(*const ()) -> bool,
+    /// Pointer to [is_subscribed](is_subscribed()) function.
+    pub(crate) is_subscribed: fn(*const ()) -> bool,
     /// Pointer to [execute](execute()) function.
     pub(crate) execute: fn(*const ()) -> bool,
 }
@@ -50,6 +52,7 @@ pub(crate) fn tasklet_vtable<T: 'static, C: 'static, const COND_COUNT: usize>(
         set_last_execution_time: set_last_execution_time::<T, C, COND_COUNT>,
         has_work: has_work::<T, C, COND_COUNT>,
         is_active: is_active::<T, C, COND_COUNT>,
+        is_subscribed: is_subscribed::<T, C, COND_COUNT>,
         execute: execute::<T, C, COND_COUNT>,
     }
 }
@@ -159,6 +162,17 @@ fn is_active<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) ->
     // and so is the only type that we store in the `*const ()`.
     let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
     tasklet.is_active()
+}
+
+/// "Virtual" call to the `is_subscribed` `Tasklet` function.
+///
+/// See: [is_active](crate::tasklet::Tasklet::is_subscribed())
+#[inline(always)]
+fn is_subscribed<T: 'static, C: 'static, const COND_COUNT: usize>(ptr: *const ()) -> bool {
+    // SAFETY: This is safe, because `Tasklet` is the only structure that implements `Task` trait,
+    // and so is the only type that we store in the `*const ()`.
+    let tasklet = unsafe { &*(ptr as *const Tasklet<T, C, COND_COUNT>) };
+    tasklet.is_subscribed()
 }
 
 /// "Virtual" call to the `execute` `Tasklet` function.
