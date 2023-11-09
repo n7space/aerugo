@@ -17,6 +17,7 @@ pub use pac::interrupt;
 pub mod nvic;
 pub mod pio;
 pub mod pmc;
+pub mod spi;
 pub mod timer;
 pub mod uart;
 pub mod utils;
