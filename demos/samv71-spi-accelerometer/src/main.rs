@@ -59,6 +59,8 @@ static mut STATUS_READER_STORAGE: Option<StatusReader> = None;
 /// progress.
 static mut CHANNEL_STATUS_READER_STORAGE: Option<ChannelStatusReader> = None;
 
+static mut RX_CHANNEL: Option<Channel<Configured>> = None;
+
 #[entry]
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
@@ -73,16 +75,16 @@ fn main() -> ! {
     let mut uart = init_uart(uart);
 
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
-    let mut rx_channel = init_xdmac(xdmac, &mut uart);
+    init_xdmac(xdmac, &mut uart);
 
-    unsafe { CHANNEL_STATUS_READER_STORAGE.replace(rx_channel.take_status_reader().unwrap()) };
+    unsafe { CHANNEL_STATUS_READER_STORAGE.replace(RX_CHANNEL.as_mut().unwrap().take_status_reader().unwrap()) };
 
     init_tasks(aerugo, uart);
 
     let mut nvic = NVIC::new(peripherals.nvic.take().unwrap());
     nvic.enable(Interrupt::XDMAC);
 
-    rx_channel.enable();
+    unsafe { RX_CHANNEL.as_mut().unwrap().enable(); }
 
     aerugo.start();
 }
@@ -114,7 +116,7 @@ fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
     uart.into_bidirectional(uart_config, recv_config)
 }
 
-fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) -> Channel<Configured> {
+fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     // Place XDMAC status reader in IRQ storage.
     // This is safe, because XDMAC IRQ should be disabled.
     unsafe { STATUS_READER_STORAGE.replace(xdmac.take_status_reader().unwrap()) };
@@ -157,7 +159,9 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) -> Channe
     });
     rx_channel.enable_interrupt();
 
-    rx_channel.configure_transfer(rx_transfer)
+    let rx_channel = rx_channel.configure_transfer(rx_transfer);
+
+    unsafe { RX_CHANNEL.replace(rx_channel); }
 }
 
 fn init_tasks(aerugo: &'static impl InitApi, mut uart: Uart<UART4, Bidirectional>) {
@@ -196,18 +200,16 @@ fn XDMAC() {
     if status[channel_status_reader.id()] {
         let events = channel_status_reader.get_pending_events();
 
-        // It's not necessary to validate errors in test code, as they are validated immediately
-        // here.
         if events.read_bus_error {
             panic!("XDMAC read bus error detected");
         }
-
         if events.write_bus_error {
             panic!("XDMAC write bus error detected");
         }
-
         if events.request_overflow_error {
             panic!("XDMAC request overflow error detected");
         }
     }
+
+    unsafe { RX_CHANNEL.as_mut().unwrap().enable(); }
 }
