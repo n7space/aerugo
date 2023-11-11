@@ -31,23 +31,36 @@
 
 use core::marker::PhantomData;
 
-use self::metadata::SPIMetadata;
+use self::{config::MasterConfig, metadata::SPIMetadata};
 
+pub mod chip_select;
+pub mod config;
+pub mod interrupts;
 pub mod master;
 pub mod metadata;
 pub mod status;
 pub mod status_reader;
 
+/// Amount of supported chip select signals and configurations.
+pub const SUPPORTED_CHIP_AMOUNT: usize = 4;
+
 /// Typestate trait representing generic SPI state.
 ///
 /// This is a super-trait for all SPI states.
-pub trait State {}
+pub trait State: Default {}
 
 /// Typestate struct representing SPI in not configured, post-reset state.
+#[derive(Default)]
 pub struct NotConfigured;
 
 /// Typestate struct representing SPI in configured Master state.
-pub struct Master;
+#[derive(Default)]
+pub struct Master {
+    /// If this flag is set, then the chip with ID equal to the index is configured and can be used
+    /// for transactions. Trying to start a transaction with unconfigured chip should always result
+    /// in a runtime error.
+    _is_chip_select_configured: [bool; SUPPORTED_CHIP_AMOUNT],
+}
 
 impl State for NotConfigured {}
 impl State for Master {}
@@ -60,7 +73,7 @@ pub struct Spi<Instance: SPIMetadata, CurrentState: State> {
     /// PAC SPI instance metadata.
     _meta: PhantomData<Instance>,
     /// State metadata.
-    _state: PhantomData<CurrentState>,
+    _state: CurrentState,
 }
 
 impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
@@ -76,9 +89,90 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
     pub fn new(_spi: Instance) -> Self {
         Self {
             _meta: PhantomData,
-            _state: PhantomData,
+            _state: NotConfigured,
         }
+        .reset()
+    }
+
+    /// Configures and enables SPI in Master mode with provided configuration.
+    /// Chip-specific settings must be configured with [`Spi::configure_chip`] before starting
+    /// transaction. Trying to perform transaction with unconfigured chip will result in runtime
+    /// error.
+    pub fn into_master(mut self, config: MasterConfig) -> Spi<Instance, Master> {
+        Instance::registers().mr.write(|w| {
+            w.mstr()
+                .master() // Master mode
+                .ps()
+                .clear_bit() // Fixed peripheral selection
+                .pcsdec()
+                .clear_bit() // Chip-select signal is connected directly to periph.
+                .modfdis()
+                .set_bit() // Mode fault detection disabled
+                .wdrbt()
+                .variant(config.enable_overrun_detection)
+                .llb()
+                .clear_bit() // Loopback disabled
+                .pcs()
+                .variant(config.selected_chip.into())
+                .dlybcs()
+                .variant(config.chip_selection_delay.get())
+        });
+        self.enable_hardware();
+
+        Spi::transform(self)
     }
 }
 
-impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {}
+impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
+    /// Disables SPI and restores the configuration to defaults.
+    pub fn reset(mut self) -> Spi<Instance, NotConfigured> {
+        self.disable_hardware();
+        self.disable_all_irqs();
+        self.reset_hardware();
+        Spi::transform(self)
+    }
+
+    /// Triggers a hardware reset of the SPI interface.
+    fn reset_hardware(&mut self) {
+        Instance::registers().cr.write(|w| w.swrst().set_bit());
+    }
+
+    /// Enables SPI.
+    fn enable_hardware(&mut self) {
+        Instance::registers().cr.write(|w| w.spien().set_bit());
+    }
+
+    /// Disables SPI.
+    fn disable_hardware(&mut self) {
+        Instance::registers().cr.write(|w| w.spidis().set_bit());
+    }
+
+    /// Disables all SPI interrupts.
+    fn disable_all_irqs(&mut self) {
+        Instance::registers().idr.write(|w| {
+            w.rdrf()
+                .set_bit()
+                .tdre()
+                .set_bit()
+                .modf()
+                .set_bit()
+                .ovres()
+                .set_bit()
+                .nssr()
+                .set_bit()
+                .txempty()
+                .set_bit()
+                .undes()
+                .set_bit()
+        })
+    }
+
+    /// Transforms SPI into a different state. All state-related fields are reset to default in
+    /// this process.
+    fn transform<OldState: State>(_spi: Spi<Instance, OldState>) -> Self {
+        Self {
+            _meta: PhantomData,
+            _state: Default::default(),
+        }
+    }
+}
