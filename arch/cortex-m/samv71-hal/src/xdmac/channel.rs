@@ -1,7 +1,5 @@
 //! Implementation of XDMAC's channel.
 
-use core::marker::PhantomData;
-
 use samv71q21_pac::{
     xdmac::{xdmac_chid::XDMAC_CHID as ChannelRegisters, RegisterBlock},
     XDMAC,
@@ -18,7 +16,10 @@ pub trait State {}
 pub struct NotConfigured;
 
 /// Typestate struct representing XDMAC channel in configured state.
-pub struct Configured;
+pub struct Configured {
+    /// Currently configured transfer.
+    configured_transfer: TransferBlock,
+}
 
 impl State for NotConfigured {}
 impl State for Configured {}
@@ -58,12 +59,12 @@ pub struct Channel<CurrentState: State> {
     id: usize,
     /// Channel's status reader.
     status_reader: Option<ChannelStatusReader>,
-    /// Channel's state metadata
-    _state: PhantomData<CurrentState>,
+    /// Channel's state information
+    state: CurrentState,
 }
 
 /// Implementation of Channel functions available in every state.
-impl<AnyState: State> Channel<AnyState> {
+impl<CurrentState: State> Channel<CurrentState> {
     /// Takes the status reader out of Channel.
     /// If the reader was already taken, and not put back, this function will return `None`.
     /// To return the status reader to the channel, use [`Channel::return_status_reader`].
@@ -205,23 +206,20 @@ impl<AnyState: State> Channel<AnyState> {
     ///
     /// # Returns
     /// Transformed Channel instance.
-    const fn transform<NewState: State>(channel: Channel<NewState>) -> Self {
+    fn transform<OldState: State>(channel: Channel<OldState>, state_data: CurrentState) -> Self {
         Self {
             channel_registers: channel.channel_registers,
             id: channel.id,
             status_reader: channel.status_reader,
-            _state: PhantomData,
+            state: state_data,
         }
     }
 
-    /// Pointer to XDMAC's registers.
-    const XDMAC_REGISTERS: *const RegisterBlock = XDMAC::PTR;
-}
-
-impl Channel<NotConfigured> {
     /// Configures an XDMAC transfer on this channel.
     /// Consumes channel's instance, and returns one with new state.
-    pub fn configure_transfer(self, block: TransferBlock) -> Channel<Configured> {
+    ///
+    /// This is an internal version of this function that is accessible publicly only from some states.
+    fn internal_configure_transfer(&mut self, block: TransferBlock) {
         // Per the procedure described in SAMV71 datasheet:
         // 1. Select a free channel - already done.
         // 2. Clear pending event status bits by reading Channel Interrupt Status Register
@@ -298,9 +296,26 @@ impl Channel<NotConfigured> {
         self.channel_registers_ref().cndc.reset();
         self.channel_registers_ref().csus.reset();
         self.channel_registers_ref().cdus.reset();
+    }
+
+    /// Pointer to XDMAC's registers.
+    const XDMAC_REGISTERS: *const RegisterBlock = XDMAC::PTR;
+}
+
+impl Channel<NotConfigured> {
+    /// Configures an XDMAC transfer on this channel.
+    /// Consumes channel's instance, and returns one with new state.
+    #[inline(always)]
+    pub fn configure_transfer(mut self, block: TransferBlock) -> Channel<Configured> {
+        self.internal_configure_transfer(block);
 
         // Now the user can configure interrupts/events and start the channel's operation.
-        Channel::transform(self)
+        Channel::transform(
+            self,
+            Configured {
+                configured_transfer: block,
+            },
+        )
     }
 
     /// Enables channel's global interrupt.
@@ -383,7 +398,7 @@ impl Channel<NotConfigured> {
             id,
             channel_registers: registers,
             status_reader: Some(ChannelStatusReader::new(id, status_register)),
-            _state: PhantomData,
+            state: NotConfigured {},
         }
     }
 }
@@ -415,7 +430,7 @@ impl Channel<Configured> {
         self.channel_registers_ref().csus.reset();
         self.channel_registers_ref().cdus.reset();
 
-        let mut channel: Channel<NotConfigured> = Channel::transform(self);
+        let mut channel: Channel<NotConfigured> = Channel::transform(self, NotConfigured {});
         channel.disable_interrupt();
         channel.set_events_state(ChannelEvents {
             end_of_block: false,
@@ -428,6 +443,11 @@ impl Channel<Configured> {
         });
 
         Some(channel)
+    }
+
+    /// Restarts last configured transaction.
+    pub fn repeat_transfer(&mut self) {
+        self.internal_configure_transfer(self.state.configured_transfer);
     }
 
     /// Returns `true` if Channel is currently enabled and XDMAC transfer is in progress.
