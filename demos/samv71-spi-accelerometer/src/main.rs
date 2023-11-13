@@ -27,6 +27,7 @@ use aerugo::{
         interrupt,
         user_peripherals::{PIOD, PMC, UART4},
     },
+    logln,
     time::RateExtU32,
     Aerugo, BooleanConditionStorage, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage,
@@ -35,7 +36,9 @@ use rt::entry;
 
 struct TaskUartReaderContext {}
 
-fn task_uart_reader(_: bool, _: &mut TaskUartReaderContext, _: &'static dyn RuntimeApi) {}
+fn task_uart_reader(val: bool, _: &mut TaskUartReaderContext, _: &'static dyn RuntimeApi) {
+    logln!("HENLO: {}", val);
+}
 
 const TRANSFER_LENGTH: usize = 7;
 static mut MESSAGE_BUFFER: [u8; TRANSFER_LENGTH] = [0; TRANSFER_LENGTH];
@@ -178,7 +181,7 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     });
     rx_channel.enable_interrupt();
 
-    let rx_channel = rx_channel.configure_transfer(rx_transfer);
+    let mut rx_channel = rx_channel.configure_transfer(rx_transfer);
 
     unsafe { XDMAC_CHANNEL_STATUS_READER.replace(rx_channel.take_status_reader().unwrap()) };
 
@@ -211,4 +214,7 @@ fn XDMAC() {
 
     rx_channel.repeat_transfer();
     rx_channel.enable();
+
+    let condition_handle = CONDITION_COMMAND_READY_STORAGE.create_handle().unwrap();
+    condition_handle.set_value(true);
 }
