@@ -9,13 +9,13 @@ pub enum CommandType {
 }
 
 impl CommandType {
-    pub const fn from_byte(val: u8) -> Self {
+    pub const fn from_byte(val: u8) -> Option<Self> {
         match val {
-            0x10 => CommandType::Start,
-            0x20 => CommandType::Stop,
-            0x30 => CommandType::SetAccelerometerScale,
-            0x40 => CommandType::SetGyroscopeScale,
-            _ => unreachable!(),
+            0x10 => Some(CommandType::Start),
+            0x20 => Some(CommandType::Stop),
+            0x30 => Some(CommandType::SetAccelerometerScale),
+            0x40 => Some(CommandType::SetGyroscopeScale),
+            _ => None
         }
     }
 }
@@ -26,15 +26,21 @@ pub struct Command {
 }
 
 impl Command {
-    pub const fn from_array(arr: TransferArrayType) -> Option<Self> {
+    pub fn from_array(arr: TransferArrayType) -> Option<Self> {
         let data_length = ((arr[4] as u16) << 8) | (arr[5] as u16);
 
         if data_length != 1 {
             return None;
         }
 
+        let command_type = CommandType::from_byte(arr[3]);
+
+        if command_type.is_none() {
+            return None;
+        }
+
         Some(Self {
-            command_type: CommandType::from_byte(arr[3]),
+            command_type: command_type.unwrap(),
             argument: arr[6],
         })
     }
