@@ -20,4 +20,9 @@ impl<Instance: SPIMetadata> StatusReader<Instance> {
     pub fn status(&mut self) -> SpiStatus {
         Instance::registers().sr.read().into()
     }
+
+    /// Private constructor that allows SPI instance to create it's StatusReader.
+    pub(super) fn new() -> Self {
+        StatusReader { _meta: PhantomData }
+    }
 }

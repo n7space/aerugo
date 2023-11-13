@@ -31,7 +31,7 @@
 
 use core::marker::PhantomData;
 
-use self::{config::MasterConfig, metadata::SPIMetadata};
+use self::{config::MasterConfig, metadata::SPIMetadata, status_reader::StatusReader};
 
 pub mod chip_select;
 pub mod config;
@@ -70,6 +70,8 @@ impl State for Master {}
 /// # Generic parameters
 /// * `Instance` - PAC SPI instance.
 pub struct Spi<Instance: SPIMetadata, CurrentState: State> {
+    /// Status reader instance storage.
+    status_reader: Option<StatusReader<Instance>>,
     /// PAC SPI instance metadata.
     _meta: PhantomData<Instance>,
     /// State metadata.
@@ -88,6 +90,7 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
     /// `into_X` method, for example [`into_master`](Spi::into_master).
     pub fn new(_spi: Instance) -> Self {
         Self {
+            status_reader: Some(StatusReader::new()),
             _meta: PhantomData,
             _state: NotConfigured,
         }
@@ -132,6 +135,21 @@ impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
         Spi::transform(self)
     }
 
+    /// Returns status reader (or None if it's already been taken)
+    pub fn take_status_reader(&mut self) -> Option<StatusReader<Instance>> {
+        self.status_reader.take()
+    }
+
+    /// Puts status reader back into SPI driver instance.
+    pub fn return_status_reader(&mut self, status_reader: StatusReader<Instance>) {
+        self.status_reader.replace(status_reader);
+    }
+
+    /// Returns `true` if status reader is currently stored inside SPI instance.
+    pub fn is_status_reader_available(&self) -> bool {
+        self.status_reader.is_some()
+    }
+
     /// Triggers a hardware reset of the SPI interface.
     fn reset_hardware(&mut self) {
         Instance::registers().cr.write(|w| w.swrst().set_bit());
@@ -169,8 +187,9 @@ impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
 
     /// Transforms SPI into a different state. All state-related fields are reset to default in
     /// this process.
-    fn transform<OldState: State>(_spi: Spi<Instance, OldState>) -> Self {
+    fn transform<OldState: State>(spi: Spi<Instance, OldState>) -> Self {
         Self {
+            status_reader: spi.status_reader,
             _meta: PhantomData,
             _state: Default::default(),
         }

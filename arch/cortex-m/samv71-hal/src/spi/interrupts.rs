@@ -1,5 +1,5 @@
 //! Module with interrupt-related SPI items.
-use crate::pac::spi0::sr::R as StatusReader;
+use crate::pac::spi0::{imr::R as IrqStateReader, sr::R as StatusReader};
 
 /// Structure representing supported SPI interrupts.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -25,6 +25,20 @@ pub struct Interrupts {
 
 impl From<StatusReader> for Interrupts {
     fn from(reg: StatusReader) -> Self {
+        Interrupts {
+            rx_data_register_full: reg.rdrf().bit_is_set(),
+            tx_data_register_empty: reg.tdre().bit_is_set(),
+            mode_fault_error: reg.modf().bit_is_set(),
+            overrun_error: reg.ovres().bit_is_set(),
+            nss_rising: reg.nssr().bit_is_set(),
+            tx_registers_empty: reg.txempty().bit_is_set(),
+            underrun_error: reg.undes().bit_is_set(),
+        }
+    }
+}
+
+impl From<IrqStateReader> for Interrupts {
+    fn from(reg: IrqStateReader) -> Self {
         Interrupts {
             rx_data_register_full: reg.rdrf().bit_is_set(),
             tx_data_register_empty: reg.tdre().bit_is_set(),
