@@ -5,6 +5,7 @@ use samv71q21_pac::spi0::mr::PCSSELECT_A;
 use crate::utils::BoundedU8;
 
 /// Structure with Master mode configuration.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct MasterConfig {
     /// Delay between the inactivation and activation of chip select signal.
     pub chip_selection_delay: ChipSelectionDelay,
@@ -20,6 +21,7 @@ pub struct MasterConfig {
 pub type ChipSelectionDelay = BoundedU8<6, { u8::MAX }>;
 
 /// Chip select signal selection.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum SelectedChip {
     /// Peripheral connected to CS0
     Chip0,
