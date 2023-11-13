@@ -29,19 +29,24 @@ use aerugo::{
     },
     logln,
     time::RateExtU32,
-    Aerugo, BooleanConditionStorage, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage,
+    Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
+    TaskletConfig, TaskletStorage,
 };
 use rt::entry;
 
 struct TaskUartReaderContext {}
 
-fn task_uart_reader(val: bool, _: &mut TaskUartReaderContext, _: &'static dyn RuntimeApi) {
-    logln!("HENLO: {}", val);
+fn task_uart_reader(
+    val: TransferArrayType,
+    _: &mut TaskUartReaderContext,
+    _: &'static dyn RuntimeApi,
+) {
+    logln!("HENLO: {:?}", val);
 }
 
+type TransferArrayType = [u8; TRANSFER_LENGTH];
 const TRANSFER_LENGTH: usize = 7;
-static mut MESSAGE_BUFFER: [u8; TRANSFER_LENGTH] = [0; TRANSFER_LENGTH];
+static mut MESSAGE_BUFFER: TransferArrayType = [0; TRANSFER_LENGTH];
 
 /// This is used for passing XDMAC's status reader to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
@@ -60,10 +65,13 @@ static mut XDMAC_CHANNEL_STATUS_READER: Option<ChannelStatusReader> = None;
 /// This can be safely accessed outside of XDMAC IRQ only when no XDMAC transactions are in
 /// progress.
 static mut XDMAC_RX_CHANNEL: Option<Channel<Configured>> = None;
+static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayType, 10>> = None;
 
-static TASK_UART_READER_STORAGE: TaskletStorage<bool, TaskUartReaderContext, 0> =
+static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
     TaskletStorage::new();
-static CONDITION_COMMAND_READY_STORAGE: BooleanConditionStorage = BooleanConditionStorage::new();
+
+static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
+    MessageQueueStorage::new();
 
 #[entry]
 fn main() -> ! {
@@ -81,8 +89,8 @@ fn main() -> ! {
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
     init_xdmac(xdmac, &mut uart);
 
-    aerugo.create_boolean_condition(false, &CONDITION_COMMAND_READY_STORAGE);
-    let condition_command_ready_handle = CONDITION_COMMAND_READY_STORAGE.create_handle().unwrap();
+    aerugo.create_message_queue(&QUEUE_COMMAND_STORAGE);
+    let queue_command_handle = QUEUE_COMMAND_STORAGE.create_handle().unwrap();
 
     let task_uart_reader_config = TaskletConfig {
         name: "UartReader",
@@ -98,13 +106,14 @@ fn main() -> ! {
     );
     let task_uart_reader_handle = TASK_UART_READER_STORAGE.create_handle().unwrap();
 
-    aerugo
-        .subscribe_tasklet_to_condition(&task_uart_reader_handle, &condition_command_ready_handle);
+    aerugo.subscribe_tasklet_to_queue(&task_uart_reader_handle, &queue_command_handle);
 
     let mut nvic = NVIC::new(peripherals.nvic.take().unwrap());
     nvic.enable(Interrupt::XDMAC);
 
     unsafe {
+        XDMAC_COMMAND_QUEUE_HANDLE.replace(queue_command_handle.clone());
+
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
 
@@ -192,6 +201,8 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
 
 #[interrupt]
 fn XDMAC() {
+    logln!("XDMAC");
+
     let rx_channel = unsafe { XDMAC_RX_CHANNEL.as_mut().unwrap() };
 
     let channel_status_reader = unsafe { XDMAC_CHANNEL_STATUS_READER.as_mut().unwrap() };
@@ -212,9 +223,13 @@ fn XDMAC() {
         }
     }
 
+    unsafe {
+        XDMAC_COMMAND_QUEUE_HANDLE
+            .unwrap()
+            .send_data(MESSAGE_BUFFER)
+            .expect("Failed to send command to the queue");
+    }
+
     rx_channel.repeat_transfer();
     rx_channel.enable();
-
-    let condition_handle = CONDITION_COMMAND_READY_STORAGE.create_handle().unwrap();
-    condition_handle.set_value(true);
 }
