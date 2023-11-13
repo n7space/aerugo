@@ -5,6 +5,12 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
+pub mod command;
+pub mod task_uart_reader;
+
+use crate::command::*;
+use crate::task_uart_reader::*;
+
 use aerugo::{
     hal::{
         drivers::{
@@ -29,23 +35,14 @@ use aerugo::{
     },
     logln,
     time::RateExtU32,
-    Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, RuntimeApi, SystemHardwareConfig,
-    TaskletConfig, TaskletStorage,
+    Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, SystemHardwareConfig, TaskletConfig,
+    TaskletStorage,
 };
 use rt::entry;
 
-struct TaskUartReaderContext {}
-
-fn task_uart_reader(
-    val: TransferArrayType,
-    _: &mut TaskUartReaderContext,
-    _: &'static dyn RuntimeApi,
-) {
-    logln!("HENLO: {:?}", val);
-}
-
-type TransferArrayType = [u8; TRANSFER_LENGTH];
 const TRANSFER_LENGTH: usize = 7;
+type TransferArrayType = [u8; TRANSFER_LENGTH];
+
 static mut MESSAGE_BUFFER: TransferArrayType = [0; TRANSFER_LENGTH];
 
 /// This is used for passing XDMAC's status reader to IRQ.
@@ -56,15 +53,16 @@ static mut XDMAC_STATUS_READER: Option<StatusReader> = None;
 /// This is used for passing XDMAC's channel status reader to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
 /// program may panic.
-/// This can be safely accessed outside of XDMAC IRQ only when no XDMAC transactions are in
-/// progress.
+/// This can be safely accessed outside of XDMAC IRQ only when no XDMAC transactions are in progress.
 static mut XDMAC_CHANNEL_STATUS_READER: Option<ChannelStatusReader> = None;
 /// This is used for passing XDMAC's channel to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
 /// program may panic.
-/// This can be safely accessed outside of XDMAC IRQ only when no XDMAC transactions are in
-/// progress.
+/// This can be safely accessed outside of XDMAC IRQ only when no XDMAC transactions are in progress.
 static mut XDMAC_RX_CHANNEL: Option<Channel<Configured>> = None;
+/// This is used for passing command queue handle to IRQ.
+/// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
+/// probram may panic.
 static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayType, 10>> = None;
 
 static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
