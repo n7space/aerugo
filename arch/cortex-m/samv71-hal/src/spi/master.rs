@@ -5,8 +5,16 @@ use super::{
     config::SelectedChip,
     interrupts::Interrupts,
     metadata::SPIMetadata,
+    reader::Reader,
+    writer::Writer,
     Master, Spi,
 };
+
+/// Enumeration listing SPI errors
+pub enum SpiError {
+    /// Transaction tried to be started on unconfigured chip.
+    ChipNotConfigured,
+}
 
 impl<Instance: SPIMetadata> Spi<Instance, Master> {
     /// Sets interrupts state.
@@ -138,6 +146,11 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
             .into()
     }
 
+    /// Returns `true` if currently selected chip has been configured and is ready for transaction.
+    pub fn is_current_chip_configured(&self) -> bool {
+        self.state.is_chip_select_configured[self.selected_chip() as usize]
+    }
+
     /// Enables loopback mode.
     pub fn enable_loopback(&mut self) {
         Instance::registers().mr.modify(|_, w| w.llb().set_bit());
@@ -161,5 +174,37 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     /// Returns an address to SPI TX register for XDMAC.
     pub fn xdmac_tx_address(&mut self) -> *const () {
         Instance::registers().tdr.as_ptr() as *const ()
+    }
+
+    /// Returns Reader instance, or None if Reader has already been taken.
+    pub fn take_reader(&mut self) -> Option<Reader<Instance>> {
+        self.reader.take()
+    }
+
+    /// Takes Reader and puts it back in SPI instance. After returning, it can be taken again with
+    /// [`Spi::take_reader`].
+    pub fn return_reader(&mut self, reader: Reader<Instance>) {
+        self.reader.replace(reader);
+    }
+
+    /// Returns `true` if Reader's instance is currently stored in SPI instance.
+    pub fn is_reader_available(&self) -> bool {
+        self.reader.is_some()
+    }
+
+    /// Returns Writer instance, or None if Writer has already been taken.
+    pub fn take_writer(&mut self) -> Option<Writer<Instance>> {
+        self.writer.take()
+    }
+
+    /// Takes Writer and puts it back in SPI instance. After returning, it can be taken again with
+    /// [`Spi::take_writer`].
+    pub fn return_writer(&mut self, reader: Writer<Instance>) {
+        self.writer.replace(reader);
+    }
+
+    /// Returns `true` if Writer's instance is currently stored in SPI instance.
+    pub fn is_writer_available(&self) -> bool {
+        self.writer.is_some()
     }
 }

@@ -31,15 +31,20 @@
 
 use core::marker::PhantomData;
 
-use self::{config::MasterConfig, metadata::SPIMetadata, status_reader::StatusReader};
+use self::{
+    config::MasterConfig, metadata::SPIMetadata, reader::Reader, status_reader::StatusReader,
+    writer::Writer,
+};
 
 pub mod chip_select_config;
 pub mod config;
 pub mod interrupts;
 pub mod master;
 pub mod metadata;
+pub mod reader;
 pub mod status;
 pub mod status_reader;
+pub mod writer;
 
 /// Amount of supported chip select signals and configurations.
 pub const SUPPORTED_CHIP_AMOUNT: usize = 4;
@@ -74,6 +79,10 @@ pub struct Spi<Instance: SPIMetadata, CurrentState: State> {
     _meta: PhantomData<Instance>,
     /// State metadata.
     state: CurrentState,
+    /// Reader instance
+    reader: Option<Reader<Instance>>,
+    /// Writer instance
+    writer: Option<Writer<Instance>>,
 }
 
 impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
@@ -91,6 +100,8 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
             status_reader: Some(StatusReader::new()),
             _meta: PhantomData,
             state: NotConfigured,
+            reader: Some(Reader::new()),
+            writer: Some(Writer::new()),
         }
         .reset()
     }
@@ -195,6 +206,8 @@ impl<Instance: SPIMetadata, CurrentState: State> Spi<Instance, CurrentState> {
             status_reader: spi.status_reader,
             _meta: PhantomData,
             state: new_state,
+            reader: spi.reader,
+            writer: spi.writer,
         }
     }
 }
