@@ -16,7 +16,10 @@ pub fn task_uart_reader(
                 api.emit_event(CommandEvent::Start.into())
                     .expect("Failed to emit CommandEvent::Start");
             }
-            CommandType::Stop => logln!("Got Stop"),
+            CommandType::Stop => {
+                api.emit_event(CommandEvent::Stop.into())
+                    .expect("Failed to emit CommandEvent::Stop");
+            }
             CommandType::SetAccelerometerScale => logln!("Got SetAccelerometerScale"),
             CommandType::SetGyroscopeScale => logln!("Got SetGyroscopeScale"),
         },

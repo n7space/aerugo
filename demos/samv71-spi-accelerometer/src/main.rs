@@ -8,11 +8,13 @@ extern crate panic_rtt_target;
 pub mod command;
 pub mod events;
 pub mod task_start_measurements;
+pub mod task_stop_measurements;
 pub mod task_uart_reader;
 
 use crate::command::*;
 use crate::events::*;
 use crate::task_start_measurements::*;
+use crate::task_stop_measurements::*;
 use crate::task_uart_reader::*;
 
 use aerugo::{
@@ -72,6 +74,8 @@ static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayTy
 static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
     TaskletStorage::new();
 static TASK_START_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStartMeasurementsContext, 0> =
+    TaskletStorage::new();
+static TASK_STOP_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStopMeasurementsContext, 0> =
     TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
@@ -226,7 +230,25 @@ fn init_system(aerugo: &'static impl InitApi) {
 
     let task_start_measurements_handle = TASK_START_MEASUREMENTS_STORAGE.create_handle().unwrap();
 
-    aerugo.subscribe_tasklet_to_events(&task_start_measurements_handle, [CommandEvent::Start.into()]);
+    aerugo.subscribe_tasklet_to_events(
+        &task_start_measurements_handle,
+        [CommandEvent::Start.into()],
+    );
+
+    // Stop measurements
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "StopMeasurements",
+            ..Default::default()
+        },
+        task_stop_measurements,
+        &TASK_STOP_MEASUREMENTS_STORAGE,
+    );
+
+    let task_stop_measurements_handle = TASK_STOP_MEASUREMENTS_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_events(&task_stop_measurements_handle, [CommandEvent::Stop.into()]);
 
     // Post-init
 
