@@ -33,7 +33,7 @@ use core::marker::PhantomData;
 
 use self::{config::MasterConfig, metadata::SPIMetadata, status_reader::StatusReader};
 
-pub mod chip_select;
+pub mod chip_select_config;
 pub mod config;
 pub mod interrupts;
 pub mod master;
@@ -59,7 +59,7 @@ pub struct Master {
     /// If this flag is set, then the chip with ID equal to the index is configured and can be used
     /// for transactions. Trying to start a transaction with unconfigured chip should always result
     /// in a runtime error.
-    _is_chip_select_configured: [bool; SUPPORTED_CHIP_AMOUNT],
+    is_chip_select_configured: [bool; SUPPORTED_CHIP_AMOUNT],
 }
 
 impl State for NotConfigured {}
@@ -75,7 +75,7 @@ pub struct Spi<Instance: SPIMetadata, CurrentState: State> {
     /// PAC SPI instance metadata.
     _meta: PhantomData<Instance>,
     /// State metadata.
-    _state: CurrentState,
+    state: CurrentState,
 }
 
 impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
@@ -92,7 +92,7 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
         Self {
             status_reader: Some(StatusReader::new()),
             _meta: PhantomData,
-            _state: NotConfigured,
+            state: NotConfigured,
         }
         .reset()
     }
@@ -191,7 +191,7 @@ impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
         Self {
             status_reader: spi.status_reader,
             _meta: PhantomData,
-            _state: Default::default(),
+            state: Default::default(),
         }
     }
 }
