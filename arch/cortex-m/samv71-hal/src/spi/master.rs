@@ -65,8 +65,8 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
 
     /// Configures specified chip with provided configuration.
     /// Previous configuration is overwritten.
-    /// **Chip must be configured before performing a transaction, trying to perform a transaction
-    /// before chip configuration will result in runtime error.**
+    /// **Chip must be configured before performing a transaction, otherwise the Reader/Writer's
+    /// behavior is undefined.**
     pub fn configure_chip(&mut self, chip: SelectedChip, config: ChipSelectConfig) {
         let (csaat_bit, csnaat_bit) = match config.chip_select_behavior {
             ChipSelectBehavior::DeactivateAfterLastTransfer => (false, false),
@@ -177,6 +177,9 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     }
 
     /// Returns Reader instance, or None if Reader has already been taken.
+    ///
+    /// # Safety
+    /// Chip select must be configured before trying to use Reader.
     pub fn take_reader(&mut self) -> Option<Reader<Instance>> {
         self.reader.take()
     }
@@ -193,6 +196,9 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     }
 
     /// Returns Writer instance, or None if Writer has already been taken.
+    ///
+    /// # Safety
+    /// Chip select must be configured before trying to use Writer.
     pub fn take_writer(&mut self) -> Option<Writer<Instance>> {
         self.writer.take()
     }
