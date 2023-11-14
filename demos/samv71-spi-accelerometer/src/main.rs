@@ -6,9 +6,13 @@ extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
 pub mod command;
+pub mod events;
+pub mod task_start_measurements;
 pub mod task_uart_reader;
 
 use crate::command::*;
+use crate::events::*;
+use crate::task_start_measurements::*;
 use crate::task_uart_reader::*;
 
 use aerugo::{
@@ -35,8 +39,8 @@ use aerugo::{
     },
     logln,
     time::RateExtU32,
-    Aerugo, InitApi, MessageQueueHandle, MessageQueueStorage, SystemHardwareConfig, TaskletConfig,
-    TaskletStorage,
+    Aerugo, EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage,
+    SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 use rt::entry;
 
@@ -67,9 +71,14 @@ static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayTy
 
 static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
     TaskletStorage::new();
+static TASK_START_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStartMeasurementsContext, 0> =
+    TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
     MessageQueueStorage::new();
+
+static EVENT_START_STORAGE: EventStorage = EventStorage::new();
+static EVENT_STOP_STORAGE: EventStorage = EventStorage::new();
 
 #[entry]
 fn main() -> ! {
@@ -87,31 +96,12 @@ fn main() -> ! {
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
     init_xdmac(xdmac, &mut uart);
 
-    aerugo.create_message_queue(&QUEUE_COMMAND_STORAGE);
-    let queue_command_handle = QUEUE_COMMAND_STORAGE.create_handle().unwrap();
-
-    let task_uart_reader_config = TaskletConfig {
-        name: "UartReader",
-        ..Default::default()
-    };
-    let task_uart_reader_context = TaskUartReaderContext {};
-
-    aerugo.create_tasklet_with_context(
-        task_uart_reader_config,
-        task_uart_reader,
-        task_uart_reader_context,
-        &TASK_UART_READER_STORAGE,
-    );
-    let task_uart_reader_handle = TASK_UART_READER_STORAGE.create_handle().unwrap();
-
-    aerugo.subscribe_tasklet_to_queue(&task_uart_reader_handle, &queue_command_handle);
-
     let mut nvic = NVIC::new(peripherals.nvic.take().unwrap());
     nvic.enable(Interrupt::XDMAC);
 
-    unsafe {
-        XDMAC_COMMAND_QUEUE_HANDLE.replace(queue_command_handle.clone());
+    init_system(aerugo);
 
+    unsafe {
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
 
@@ -194,6 +184,54 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
 
     unsafe {
         XDMAC_RX_CHANNEL.replace(rx_channel);
+    }
+}
+
+fn init_system(aerugo: &'static impl InitApi) {
+    // Queues
+
+    aerugo.create_message_queue(&QUEUE_COMMAND_STORAGE);
+    let queue_command_handle = QUEUE_COMMAND_STORAGE.create_handle().unwrap();
+
+    // Events
+
+    aerugo.create_event(CommandEvent::Start.into(), &EVENT_START_STORAGE);
+    aerugo.create_event(CommandEvent::Stop.into(), &EVENT_STOP_STORAGE);
+
+    // UART reader
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "UartReader",
+            ..Default::default()
+        },
+        task_uart_reader,
+        &TASK_UART_READER_STORAGE,
+    );
+
+    let task_uart_reader_handle = TASK_UART_READER_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_queue(&task_uart_reader_handle, &queue_command_handle);
+
+    // Start measurements
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "StartMeasurements",
+            ..Default::default()
+        },
+        task_start_measurements,
+        &TASK_START_MEASUREMENTS_STORAGE,
+    );
+
+    let task_start_measurements_handle = TASK_START_MEASUREMENTS_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_events(&task_start_measurements_handle, [CommandEvent::Start.into()]);
+
+    // Post-init
+
+    unsafe {
+        XDMAC_COMMAND_QUEUE_HANDLE.replace(queue_command_handle);
     }
 }
 
