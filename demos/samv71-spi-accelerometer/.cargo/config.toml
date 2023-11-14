@@ -3,6 +3,7 @@ target = "thumbv7em-none-eabihf"
 
 [env]
 AERUGO_TASKLET_COUNT = { value = "2" }
+AERUGO_EVENT_COUNT = { value = "2" }
 
 [target.thumbv7em-none-eabihf]
 rustflags = [
