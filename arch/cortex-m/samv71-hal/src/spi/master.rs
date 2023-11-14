@@ -119,6 +119,25 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
         })
     }
 
+    /// Selects specified chip. If it hasn't been configured, it must be before first transaction.
+    /// Chip config is not cleared when chip is changed.
+    pub fn change_chip(&mut self, new_chip: SelectedChip) {
+        Instance::registers()
+            .mr
+            .modify(|_, w| w.pcs().variant(new_chip.into()));
+    }
+
+    /// Returns currently selected chip.
+    pub fn selected_chip(&self) -> SelectedChip {
+        Instance::registers()
+            .mr
+            .read()
+            .pcs()
+            .variant()
+            .unwrap()
+            .into()
+    }
+
     /// Enables loopback mode.
     pub fn enable_loopback(&mut self) {
         Instance::registers().mr.modify(|_, w| w.llb().set_bit());

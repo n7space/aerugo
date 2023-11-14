@@ -47,14 +47,12 @@ pub const SUPPORTED_CHIP_AMOUNT: usize = 4;
 /// Typestate trait representing generic SPI state.
 ///
 /// This is a super-trait for all SPI states.
-pub trait State: Default {}
+pub trait State {}
 
 /// Typestate struct representing SPI in not configured, post-reset state.
-#[derive(Default)]
 pub struct NotConfigured;
 
 /// Typestate struct representing SPI in configured Master state.
-#[derive(Default)]
 pub struct Master {
     /// If this flag is set, then the chip with ID equal to the index is configured and can be used
     /// for transactions. Trying to start a transaction with unconfigured chip should always result
@@ -122,17 +120,22 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
         });
         self.enable_hardware();
 
-        Spi::transform(self)
+        Spi::transform(
+            self,
+            Master {
+                is_chip_select_configured: [false, false, false, false],
+            },
+        )
     }
 }
 
-impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
+impl<Instance: SPIMetadata, CurrentState: State> Spi<Instance, CurrentState> {
     /// Disables SPI and restores the configuration to defaults.
     pub fn reset(mut self) -> Spi<Instance, NotConfigured> {
         self.disable_hardware();
         self.disable_all_irqs();
         self.reset_hardware();
-        Spi::transform(self)
+        Spi::transform(self, NotConfigured)
     }
 
     /// Returns status reader (or None if it's already been taken)
@@ -187,11 +190,11 @@ impl<Instance: SPIMetadata, AnyState: State> Spi<Instance, AnyState> {
 
     /// Transforms SPI into a different state. All state-related fields are reset to default in
     /// this process.
-    fn transform<OldState: State>(spi: Spi<Instance, OldState>) -> Self {
+    fn transform<OldState: State>(spi: Spi<Instance, OldState>, new_state: CurrentState) -> Self {
         Self {
             status_reader: spi.status_reader,
             _meta: PhantomData,
-            state: Default::default(),
+            state: new_state,
         }
     }
 }
