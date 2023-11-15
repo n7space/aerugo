@@ -2,7 +2,7 @@ use aerugo::{logln, RuntimeApi};
 
 #[derive(Copy, Clone, Debug)]
 pub enum OutputDataRate {
-    INVALID,
+    Invalid,
     Odr12,
     Odr26,
     Odr52,
@@ -28,7 +28,7 @@ impl From<u8> for OutputDataRate {
             0x08 => OutputDataRate::Odr1666,
             0x09 => OutputDataRate::Odr3332,
             0x0A => OutputDataRate::Odr6664,
-            _ => OutputDataRate::INVALID,
+            _ => OutputDataRate::Invalid,
         }
     }
 }

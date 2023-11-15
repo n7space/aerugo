@@ -2,7 +2,7 @@ use aerugo::{logln, RuntimeApi};
 
 #[derive(Copy, Clone, Debug)]
 pub enum AccelerometerScale {
-    INVALID,
+    Invalid,
     As2,
     As4,
     As8,
@@ -16,7 +16,7 @@ impl From<u8> for AccelerometerScale {
             0x02 => AccelerometerScale::As4,
             0x03 => AccelerometerScale::As8,
             0x04 => AccelerometerScale::As16,
-            _ => AccelerometerScale::INVALID
+            _ => AccelerometerScale::Invalid
         }
     }
 }
