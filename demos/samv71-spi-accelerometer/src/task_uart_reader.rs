@@ -1,9 +1,12 @@
-use crate::{Command, CommandEvent, CommandType, OutputDataRate, TransferArrayType};
+use crate::{
+    AccelerometerScale, Command, CommandEvent, CommandType, OutputDataRate, TransferArrayType,
+};
 
 use aerugo::{logln, MessageQueueHandle, RuntimeApi};
 
 pub struct TaskUartReaderContext {
     pub data_output_rate_queue: MessageQueueHandle<OutputDataRate, 2>,
+    pub accelerometer_scale_queue: MessageQueueHandle<AccelerometerScale, 2>,
 }
 
 pub fn task_uart_reader(
@@ -27,8 +30,13 @@ pub fn task_uart_reader(
                     .send_data(command.argument().into())
                     .expect("Failed to send data output rate");
             }
-            CommandType::SetAccelerometerScale => logln!("Got SetAccelerometerScale"),
             CommandType::SetGyroscopeScale => logln!("Got SetGyroscopeScale"),
+            CommandType::SetAccelerometerScale => {
+                context
+                    .accelerometer_scale_queue
+                    .send_data(command.argument().into())
+                    .expect("Failed to send accelerometer scale");
+            }
         },
         None => logln!("Received malformed command"),
     };

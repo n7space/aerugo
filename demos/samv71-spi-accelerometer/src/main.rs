@@ -7,6 +7,7 @@ extern crate panic_rtt_target;
 
 pub mod command;
 pub mod events;
+pub mod task_set_accelerometer_scale;
 pub mod task_set_data_output_rate;
 pub mod task_start_measurements;
 pub mod task_stop_measurements;
@@ -14,6 +15,7 @@ pub mod task_uart_reader;
 
 use crate::command::*;
 use crate::events::*;
+use crate::task_set_accelerometer_scale::*;
 use crate::task_set_data_output_rate::*;
 use crate::task_start_measurements::*;
 use crate::task_stop_measurements::*;
@@ -84,10 +86,17 @@ static TASK_SET_DATA_OUTPUT_RATE_STORAGE: TaskletStorage<
     TaskSetDataOutputRateContext,
     0,
 > = TaskletStorage::new();
+static TASK_SET_ACCELEROMETER_SCALE_STORAGE: TaskletStorage<
+    AccelerometerScale,
+    TaskSetAccelerometerScaleContext,
+    0,
+> = TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
     MessageQueueStorage::new();
 static QUEUE_SET_DATA_OUTPUT_RATE_STORAGE: MessageQueueStorage<OutputDataRate, 2> =
+    MessageQueueStorage::new();
+static QUEUE_SET_ACCELEROMETER_SCALE_STORAGE: MessageQueueStorage<AccelerometerScale, 2> =
     MessageQueueStorage::new();
 
 static EVENT_START_STORAGE: EventStorage = EventStorage::new();
@@ -210,6 +219,11 @@ fn init_system(aerugo: &'static impl InitApi) {
     let queue_set_data_output_rate_handle =
         QUEUE_SET_DATA_OUTPUT_RATE_STORAGE.create_handle().unwrap();
 
+    aerugo.create_message_queue(&QUEUE_SET_ACCELEROMETER_SCALE_STORAGE);
+    let queue_set_accelerometer_scale_handle = QUEUE_SET_ACCELEROMETER_SCALE_STORAGE
+        .create_handle()
+        .unwrap();
+
     // Events
 
     aerugo.create_event(CommandEvent::Start.into(), &EVENT_START_STORAGE);
@@ -219,6 +233,7 @@ fn init_system(aerugo: &'static impl InitApi) {
 
     let task_uart_reader_context = TaskUartReaderContext {
         data_output_rate_queue: queue_set_data_output_rate_handle.clone(),
+        accelerometer_scale_queue: queue_set_accelerometer_scale_handle.clone(),
     };
 
     aerugo.create_tasklet_with_context(
@@ -285,6 +300,26 @@ fn init_system(aerugo: &'static impl InitApi) {
     aerugo.subscribe_tasklet_to_queue(
         &task_set_data_output_rate_handle,
         &queue_set_data_output_rate_handle,
+    );
+
+    // Set accelerometer scale
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "SetAccelerometerScale",
+            ..Default::default()
+        },
+        task_set_accelerometer_scale,
+        &TASK_SET_ACCELEROMETER_SCALE_STORAGE,
+    );
+
+    let task_set_accelerometer_scale_handle = TASK_SET_ACCELEROMETER_SCALE_STORAGE
+        .create_handle()
+        .unwrap();
+
+    aerugo.subscribe_tasklet_to_queue(
+        &task_set_accelerometer_scale_handle,
+        &queue_set_accelerometer_scale_handle,
     );
 
     // Post-init
