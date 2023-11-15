@@ -2,7 +2,7 @@
 
 use super::{
     chip_select_config::{ChipSelectBehavior, ChipSelectConfig, SerialClockDivider},
-    config::SelectedChip,
+    config::{ChipSelectionDelay, MasterConfig, SelectedChip},
     interrupts::Interrupts,
     metadata::SPIMetadata,
     reader::Reader,
@@ -149,6 +149,17 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     /// Returns `true` if currently selected chip has been configured and is ready for transaction.
     pub fn is_current_chip_configured(&self) -> bool {
         self.state.is_chip_select_configured[self.selected_chip() as usize]
+    }
+
+    /// Returns current master mode configuration.
+    pub fn master_config(&self) -> MasterConfig {
+        let reg = Instance::registers().mr.read();
+
+        MasterConfig {
+            chip_selection_delay: ChipSelectionDelay::new(reg.dlybcs().bits()).unwrap(),
+            selected_chip: reg.pcs().variant().unwrap().into(),
+            enable_overrun_detection: reg.wdrbt().bit_is_set(),
+        }
     }
 
     /// Enables loopback mode.
