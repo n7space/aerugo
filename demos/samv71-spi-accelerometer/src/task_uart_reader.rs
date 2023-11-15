@@ -20,11 +20,11 @@ pub fn task_uart_reader(
         Some(command) => match command.command_type() {
             CommandType::Start => {
                 api.emit_event(CommandEvent::Start.into())
-                    .expect("Failed to emit CommandEvent::Start");
+                    .expect("Failed to emit Start");
             }
             CommandType::Stop => {
                 api.emit_event(CommandEvent::Stop.into())
-                    .expect("Failed to emit CommandEvent::Stop");
+                    .expect("Failed to emit Stop");
             }
             CommandType::SetDataOutputRate => {
                 context
@@ -43,6 +43,10 @@ pub fn task_uart_reader(
                     .gyroscope_scale_queue
                     .send_data(command.argument().into())
                     .expect("Failed to set gyroscope scale");
+            }
+            CommandType::GetExecutionStats => {
+                api.emit_event(CommandEvent::GetExecutionStats.into())
+                    .expect("Failed to emit GetExecutionStats");
             }
         },
         None => logln!("Received malformed command"),

@@ -7,6 +7,7 @@ pub enum CommandType {
     SetDataOutputRate,
     SetAccelerometerScale,
     SetGyroscopeScale,
+    GetExecutionStats,
 }
 
 impl CommandType {
@@ -17,6 +18,7 @@ impl CommandType {
             0x30 => Some(CommandType::SetDataOutputRate),
             0x40 => Some(CommandType::SetAccelerometerScale),
             0x50 => Some(CommandType::SetGyroscopeScale),
+            0x60 => Some(CommandType::GetExecutionStats),
             _ => None
         }
     }

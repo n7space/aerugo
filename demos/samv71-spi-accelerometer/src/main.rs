@@ -7,18 +7,20 @@ extern crate panic_rtt_target;
 
 pub mod command;
 pub mod events;
+pub mod task_get_execution_stats;
 pub mod task_set_accelerometer_scale;
-pub mod task_set_gyroscope_scale;
 pub mod task_set_data_output_rate;
+pub mod task_set_gyroscope_scale;
 pub mod task_start_measurements;
 pub mod task_stop_measurements;
 pub mod task_uart_reader;
 
 use crate::command::*;
 use crate::events::*;
+use crate::task_get_execution_stats::*;
 use crate::task_set_accelerometer_scale::*;
-use crate::task_set_gyroscope_scale::*;
 use crate::task_set_data_output_rate::*;
+use crate::task_set_gyroscope_scale::*;
 use crate::task_start_measurements::*;
 use crate::task_stop_measurements::*;
 use crate::task_uart_reader::*;
@@ -98,6 +100,11 @@ static TASK_SET_GYROSCOPE_SCALE_STORAGE: TaskletStorage<
     TaskSetGyroscopeScaleContext,
     0,
 > = TaskletStorage::new();
+static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<
+    EventId,
+    TaskGetExecutionStatsContext,
+    0,
+> = TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
     MessageQueueStorage::new();
@@ -110,6 +117,7 @@ static QUEUE_SET_GYROSCOPE_SCALE_STORAGE: MessageQueueStorage<GyroscopeScale, 2>
 
 static EVENT_START_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STOP_STORAGE: EventStorage = EventStorage::new();
+static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 
 #[entry]
 fn main() -> ! {
@@ -234,14 +242,14 @@ fn init_system(aerugo: &'static impl InitApi) {
         .unwrap();
 
     aerugo.create_message_queue(&QUEUE_SET_GYROSCOPE_SCALE_STORAGE);
-    let queue_set_gyroscope_scale_handle = QUEUE_SET_GYROSCOPE_SCALE_STORAGE
-        .create_handle()
-        .unwrap();
+    let queue_set_gyroscope_scale_handle =
+        QUEUE_SET_GYROSCOPE_SCALE_STORAGE.create_handle().unwrap();
 
     // Events
 
     aerugo.create_event(CommandEvent::Start.into(), &EVENT_START_STORAGE);
     aerugo.create_event(CommandEvent::Stop.into(), &EVENT_STOP_STORAGE);
+    aerugo.create_event(CommandEvent::GetExecutionStats.into(), &EVENT_STATS_STORAGE);
 
     // UART reader
 
@@ -348,14 +356,29 @@ fn init_system(aerugo: &'static impl InitApi) {
         &TASK_SET_GYROSCOPE_SCALE_STORAGE,
     );
 
-    let task_set_gyroscope_scale_handle = TASK_SET_GYROSCOPE_SCALE_STORAGE
-        .create_handle()
-        .unwrap();
+    let task_set_gyroscope_scale_handle = TASK_SET_GYROSCOPE_SCALE_STORAGE.create_handle().unwrap();
 
     aerugo.subscribe_tasklet_to_queue(
         &task_set_gyroscope_scale_handle,
         &queue_set_gyroscope_scale_handle,
     );
+
+    // Get execution stats
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "GetExecutionStats",
+            ..Default::default()
+        },
+        task_get_execution_stats,
+        &TASK_GET_EXECUTION_STATS_STORAGE,
+    );
+
+    let task_get_execution_stats_handle = TASK_GET_EXECUTION_STATS_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_events(
+        &task_get_execution_stats_handle,
+        [CommandEvent::GetExecutionStats.into()]);
 
     // Post-init
 
