@@ -7,12 +7,14 @@ extern crate panic_rtt_target;
 
 pub mod command;
 pub mod events;
+pub mod task_set_data_output_rate;
 pub mod task_start_measurements;
 pub mod task_stop_measurements;
 pub mod task_uart_reader;
 
 use crate::command::*;
 use crate::events::*;
+use crate::task_set_data_output_rate::*;
 use crate::task_start_measurements::*;
 use crate::task_stop_measurements::*;
 use crate::task_uart_reader::*;
@@ -77,8 +79,15 @@ static TASK_START_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStartMeasure
     TaskletStorage::new();
 static TASK_STOP_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStopMeasurementsContext, 0> =
     TaskletStorage::new();
+static TASK_SET_DATA_OUTPUT_RATE_STORAGE: TaskletStorage<
+    OutputDataRate,
+    TaskSetDataOutputRateContext,
+    0,
+> = TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
+    MessageQueueStorage::new();
+static QUEUE_SET_DATA_OUTPUT_RATE_STORAGE: MessageQueueStorage<OutputDataRate, 2> =
     MessageQueueStorage::new();
 
 static EVENT_START_STORAGE: EventStorage = EventStorage::new();
@@ -197,6 +206,10 @@ fn init_system(aerugo: &'static impl InitApi) {
     aerugo.create_message_queue(&QUEUE_COMMAND_STORAGE);
     let queue_command_handle = QUEUE_COMMAND_STORAGE.create_handle().unwrap();
 
+    aerugo.create_message_queue(&QUEUE_SET_DATA_OUTPUT_RATE_STORAGE);
+    let queue_set_data_output_rate_handle =
+        QUEUE_SET_DATA_OUTPUT_RATE_STORAGE.create_handle().unwrap();
+
     // Events
 
     aerugo.create_event(CommandEvent::Start.into(), &EVENT_START_STORAGE);
@@ -204,12 +217,17 @@ fn init_system(aerugo: &'static impl InitApi) {
 
     // UART reader
 
-    aerugo.create_tasklet(
+    let task_uart_reader_context = TaskUartReaderContext {
+        data_output_rate_queue: queue_set_data_output_rate_handle.clone(),
+    };
+
+    aerugo.create_tasklet_with_context(
         TaskletConfig {
             name: "UartReader",
             ..Default::default()
         },
         task_uart_reader,
+        task_uart_reader_context,
         &TASK_UART_READER_STORAGE,
     );
 
@@ -249,6 +267,25 @@ fn init_system(aerugo: &'static impl InitApi) {
     let task_stop_measurements_handle = TASK_STOP_MEASUREMENTS_STORAGE.create_handle().unwrap();
 
     aerugo.subscribe_tasklet_to_events(&task_stop_measurements_handle, [CommandEvent::Stop.into()]);
+
+    // Set data output rate
+
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "SetDataOutputRate",
+            ..Default::default()
+        },
+        task_set_data_output_rate,
+        &TASK_SET_DATA_OUTPUT_RATE_STORAGE,
+    );
+
+    let task_set_data_output_rate_handle =
+        TASK_SET_DATA_OUTPUT_RATE_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_queue(
+        &task_set_data_output_rate_handle,
+        &queue_set_data_output_rate_handle,
+    );
 
     // Post-init
 

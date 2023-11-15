@@ -4,6 +4,7 @@ use crate::TransferArrayType;
 pub enum CommandType {
     Start,
     Stop,
+    SetDataOutputRate,
     SetAccelerometerScale,
     SetGyroscopeScale,
 }
@@ -13,8 +14,9 @@ impl CommandType {
         match val {
             0x10 => Some(CommandType::Start),
             0x20 => Some(CommandType::Stop),
-            0x30 => Some(CommandType::SetAccelerometerScale),
-            0x40 => Some(CommandType::SetGyroscopeScale),
+            0x30 => Some(CommandType::SetDataOutputRate),
+            0x40 => Some(CommandType::SetAccelerometerScale),
+            0x50 => Some(CommandType::SetGyroscopeScale),
             _ => None
         }
     }

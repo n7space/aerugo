@@ -1,13 +1,14 @@
-use crate::{Command, CommandEvent, CommandType, TransferArrayType};
+use crate::{Command, CommandEvent, CommandType, OutputDataRate, TransferArrayType};
 
-use aerugo::{logln, RuntimeApi};
+use aerugo::{logln, MessageQueueHandle, RuntimeApi};
 
-#[derive(Default)]
-pub struct TaskUartReaderContext {}
+pub struct TaskUartReaderContext {
+    pub data_output_rate_queue: MessageQueueHandle<OutputDataRate, 2>,
+}
 
 pub fn task_uart_reader(
     val: TransferArrayType,
-    _: &mut TaskUartReaderContext,
+    context: &mut TaskUartReaderContext,
     api: &'static dyn RuntimeApi,
 ) {
     match Command::from_array(val) {
@@ -19,6 +20,12 @@ pub fn task_uart_reader(
             CommandType::Stop => {
                 api.emit_event(CommandEvent::Stop.into())
                     .expect("Failed to emit CommandEvent::Stop");
+            }
+            CommandType::SetDataOutputRate => {
+                context
+                    .data_output_rate_queue
+                    .send_data(command.argument().into())
+                    .expect("Failed to send data output rate");
             }
             CommandType::SetAccelerometerScale => logln!("Got SetAccelerometerScale"),
             CommandType::SetGyroscopeScale => logln!("Got SetGyroscopeScale"),
