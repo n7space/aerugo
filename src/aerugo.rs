@@ -703,12 +703,7 @@ impl InitApi for Aerugo {
     ///     aerugo.subscribe_tasklet_to_queue(&task_handle, &queue_handle)
     /// }
     /// ```
-    fn subscribe_tasklet_to_queue<
-        T: Default,
-        C,
-        const COND_COUNT: usize,
-        const QUEUE_SIZE: usize,
-    >(
+    fn subscribe_tasklet_to_queue<T, C, const COND_COUNT: usize, const QUEUE_SIZE: usize>(
         &'static self,
         tasklet_handle: &TaskletHandle<T, C, COND_COUNT>,
         queue_handle: &MessageQueueHandle<T, QUEUE_SIZE>,
