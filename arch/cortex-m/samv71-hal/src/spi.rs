@@ -36,7 +36,7 @@ use self::{
     writer::Writer,
 };
 
-pub mod chip_select_config;
+pub mod chip_config;
 pub mod config;
 pub mod interrupts;
 pub mod master;

@@ -1,7 +1,7 @@
 //! Implementation of SPI driver functionality in Master mode.
 
 use super::{
-    chip_select_config::{ChipSelectBehavior, ChipSelectConfig, SerialClockDivider},
+    chip_config::{ChipConfig, ChipSelectBehavior, SerialClockDivider},
     config::{ChipSelectionDelay, MasterConfig, SelectedChip},
     interrupts::Interrupts,
     metadata::SPIMetadata,
@@ -67,7 +67,7 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     /// Previous configuration is overwritten.
     /// **Chip must be configured before performing a transaction, otherwise the Reader/Writer's
     /// behavior is undefined.**
-    pub fn configure_chip(&mut self, chip: SelectedChip, config: ChipSelectConfig) {
+    pub fn configure_chip(&mut self, chip: SelectedChip, config: ChipConfig) {
         let (csaat_bit, csnaat_bit) = match config.chip_select_behavior {
             ChipSelectBehavior::DeactivateAfterLastTransfer => (false, false),
             ChipSelectBehavior::KeepActive => (true, false),
@@ -102,7 +102,7 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     }
 
     /// Returns specified chip's configuration, or None if the chip wasn't configured yet.
-    pub fn chip_config(&self, chip: SelectedChip) -> Option<ChipSelectConfig> {
+    pub fn chip_config(&self, chip: SelectedChip) -> Option<ChipConfig> {
         if !self.is_chip_configured(chip) {
             return None;
         }
@@ -116,7 +116,7 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
             (false, false) => ChipSelectBehavior::DeactivateAfterLastTransfer,
         };
 
-        Some(ChipSelectConfig {
+        Some(ChipConfig {
             clock_polarity: reg.cpol().variant().into(),
             clock_phase: reg.ncpha().variant().into(),
             chip_select_behavior,

@@ -6,7 +6,7 @@ use crate::utils::BoundedU8;
 
 /// Chip configuration.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct ChipSelectConfig {
+pub struct ChipConfig {
     /// Clock polarity configuration.
     pub clock_polarity: ClockPolarity,
     /// Clock phase configuration.
