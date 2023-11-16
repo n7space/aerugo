@@ -21,12 +21,12 @@
 //! * Hardware management of fixed Chip Select signal
 //! * Loopback mode
 //! * Interrupt configuration and status management
+//! * Mode Fault Detection
 //! * DMA transfers
 //!
 //! Specifically, it currently does **NOT** support:
 //! * SPI Client mode
 //! * Variable Chip Select signal management
-//! * Mode Fault Detection
 //! * Register Write Protection
 
 use core::marker::PhantomData;
@@ -119,7 +119,7 @@ impl<Instance: SPIMetadata> Spi<Instance, NotConfigured> {
                 .pcsdec()
                 .clear_bit() // Chip-select signal is connected directly to periph.
                 .modfdis()
-                .set_bit() // Mode fault detection disabled
+                .clear_bit() // Mode fault detection enabled
                 .wdrbt()
                 .variant(config.enable_overrun_detection)
                 .llb()
