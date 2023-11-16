@@ -19,6 +19,11 @@ use heapless::Vec;
 /// interrupts afterwards, as soon as the register is read.**
 pub struct StatusReader;
 
+/// Array type returned from StatusReader that contains the status of each channel's interrupt.
+/// If flag on index `i` is set to true, then the channel with id `i` has pending interrupt
+/// that should be handled immediately.
+pub type PendingChannels = Vec<bool, { Xdmac::SUPPORTED_CHANNELS }>;
+
 impl StatusReader {
     /// Returns an array of boolean values, where every n'th value indicates whether n'th channel
     /// currently has pending interrupt.
@@ -46,7 +51,7 @@ impl StatusReader {
     /// immediately handle all channels with pending IRQs.
     ///
     /// [`Channel`](super::Channel) provides similar structure for handling specific channel IRQs.
-    pub fn get_pending_channels(&mut self) -> Vec<bool, { Xdmac::SUPPORTED_CHANNELS }> {
+    pub fn get_pending_channels(&mut self) -> PendingChannels {
         let status = self.xdmac_registers_ref().gis.read();
         let status_bits = status.bits();
         status_bits.view_bits::<Lsb0>()[0..Xdmac::SUPPORTED_CHANNELS]
