@@ -2,7 +2,6 @@ use aerugo::{logln, RuntimeApi};
 
 #[derive(Copy, Clone, Debug)]
 pub enum OutputDataRate {
-    Invalid,
     Odr12,
     Odr26,
     Odr52,
@@ -15,20 +14,22 @@ pub enum OutputDataRate {
     Odr6664,
 }
 
-impl From<u8> for OutputDataRate {
-    fn from(val: u8) -> Self {
+impl TryFrom<u8> for OutputDataRate {
+    type Error = &'static str;
+        
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
         match val {
-            0x01 => OutputDataRate::Odr12,
-            0x02 => OutputDataRate::Odr26,
-            0x03 => OutputDataRate::Odr52,
-            0x04 => OutputDataRate::Odr104,
-            0x05 => OutputDataRate::Odr208,
-            0x06 => OutputDataRate::Odr416,
-            0x07 => OutputDataRate::Odr833,
-            0x08 => OutputDataRate::Odr1666,
-            0x09 => OutputDataRate::Odr3332,
-            0x0A => OutputDataRate::Odr6664,
-            _ => OutputDataRate::Invalid,
+            0x01 => Ok(OutputDataRate::Odr12),
+            0x02 => Ok(OutputDataRate::Odr26),
+            0x03 => Ok(OutputDataRate::Odr52),
+            0x04 => Ok(OutputDataRate::Odr104),
+            0x05 => Ok(OutputDataRate::Odr208),
+            0x06 => Ok(OutputDataRate::Odr416),
+            0x07 => Ok(OutputDataRate::Odr833),
+            0x08 => Ok(OutputDataRate::Odr1666),
+            0x09 => Ok(OutputDataRate::Odr3332),
+            0x0A => Ok(OutputDataRate::Odr6664),
+            _ => Err("Got unknown OutpuDataRate value")
         }
     }
 }

@@ -2,21 +2,22 @@ use aerugo::{logln, RuntimeApi};
 
 #[derive(Copy, Clone, Debug)]
 pub enum AccelerometerScale {
-    Invalid,
     As2,
     As4,
     As8,
     As16,
 }
 
-impl From<u8> for AccelerometerScale {
-    fn from(val: u8) -> Self {
+impl TryFrom<u8> for AccelerometerScale {
+    type Error = &'static str;
+
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
         match val {
-            0x01 => AccelerometerScale::As2,
-            0x02 => AccelerometerScale::As4,
-            0x03 => AccelerometerScale::As8,
-            0x04 => AccelerometerScale::As16,
-            _ => AccelerometerScale::Invalid
+            0x01 => Ok(AccelerometerScale::As2),
+            0x02 => Ok(AccelerometerScale::As4),
+            0x03 => Ok(AccelerometerScale::As8),
+            0x04 => Ok(AccelerometerScale::As16),
+            _ => Err("Got unknown AccelerometerScale value"),
         }
     }
 }
