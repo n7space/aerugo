@@ -412,10 +412,13 @@ fn XDMAC() {
     }
 
     unsafe {
-        XDMAC_COMMAND_QUEUE_HANDLE
+        let result = XDMAC_COMMAND_QUEUE_HANDLE
             .unwrap()
-            .send_data(MESSAGE_BUFFER)
-            .expect("Failed to send command to the queue");
+            .send_data(MESSAGE_BUFFER);
+
+        if result.is_err() {
+            logln!("Failed to send command to the queue");
+        }
     }
 
     rx_channel.repeat_transfer();
