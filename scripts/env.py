@@ -42,6 +42,8 @@ HOST_GDB_EXECUTABLE = "arm-none-eabi-gdb"
 # Aerugo constants. All constants are relative to Aerugo's root directory.
 INTEGRATION_TESTS_DIRECTORY = Path("./testbins")
 """Directory with integration tests projects"""
+DEMOS_DIRECTORY = Path("./demos")
+"""Directory with demo projects"""
 EXAMPLES_DIRECTORY = Path("./examples")
 """Directory with example projects"""
 LOGGER_INIT_FUNCTION_NAME = "aerugo_cortex_m::logger::init_log"
