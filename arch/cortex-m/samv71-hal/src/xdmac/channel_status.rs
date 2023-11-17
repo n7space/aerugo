@@ -27,7 +27,7 @@ impl ChannelStatusReader {
     ///
     /// **Reading the status register clears the flags inside it, so you should always handle
     /// pending interrupts as soon as possible after the status is read.**
-    pub fn get_pending_events(&mut self) -> ChannelEvents {
+    pub fn get_pending_events(&self) -> ChannelEvents {
         // Safety: This is safe, because pointer address is valid, as it's provided by Channel.
         unsafe { &*self.channel_status_register }.read().into()
     }

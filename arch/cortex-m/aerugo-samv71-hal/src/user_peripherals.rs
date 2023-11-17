@@ -1,8 +1,8 @@
 //! Module representing user-accessible peripherals.
 
 pub use samv71_hal::pac::{
-    CHIPID, CPUID, NVIC, PIOA, PIOB, PIOC, PIOD, PIOE, SCB, SYST, TC1, TC2, TC3, UART0, UART1,
-    UART2, UART3, UART4, XDMAC,
+    CHIPID, CPUID, NVIC, PIOA, PIOB, PIOC, PIOD, PIOE, SCB, SPI0, SPI1, SYST, TC1, TC2, TC3, UART0,
+    UART1, UART2, UART3, UART4, XDMAC,
 };
 pub use samv71_hal::pmc::PMC;
 
@@ -34,6 +34,10 @@ pub struct UserPeripherals {
     pub pmc: Option<PMC>,
     /// System Control Block
     pub scb: Option<SCB>,
+    /// SPI 0
+    pub spi_0: Option<SPI0>,
+    /// SPI 1
+    pub spi_1: Option<SPI1>,
     /// Systick.
     pub systick: Option<SYST>,
     /// Timer Counter 1.
