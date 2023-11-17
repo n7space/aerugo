@@ -9,7 +9,7 @@ use crate::utils::BoundedU8;
 pub struct MasterConfig {
     /// Delay between the inactivation and activation of chip select signal.
     pub chip_selection_delay: ChipSelectionDelay,
-    /// Peripheral chip select. This can later be changed using [`Spi::change_chip`].
+    /// Peripheral chip select. This can later be changed using [`Spi::change_chip`](super::Spi::change_chip).
     pub selected_chip: SelectedChip,
     /// If true, overrun detection will be enabled and an error will occur if data transmission will
     /// try to be started while there's unread data in RX data register.

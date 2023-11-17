@@ -54,7 +54,7 @@ pub enum ChipSelectBehavior {
     /// Chip select line is kept active until a new transfer is requested on a different chip select.
     KeepActive,
     /// Chip select line is deactivated after every data transfer. Duration of the inactivity period
-    /// can be controlled with `delay_between_transfers` field of [`ChipSelectConfig`].
+    /// can be controlled with `delay_between_transfers` field of [`ChipConfig`].
     DeactivateAfterEveryTransfer,
 }
 
