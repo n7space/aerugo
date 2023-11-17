@@ -76,7 +76,7 @@ static mut XDMAC_CHANNEL_STATUS_READER: Option<ChannelStatusReader> = None;
 static mut XDMAC_RX_CHANNEL: Option<Channel<Configured>> = None;
 /// This is used for passing command queue handle to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
-/// probram may panic.
+/// program may panic.
 static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayType, 10>> = None;
 
 static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
