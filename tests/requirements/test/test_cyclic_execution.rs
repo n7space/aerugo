@@ -1,5 +1,5 @@
-/// @SRS{ROS-FUN-RTOS-5010}
-/// @SRS{ROS-FUN-RTOS-5020}
+/// @SRS{ROS-FUN-RTOS-4010}
+/// @SRS{ROS-FUN-RTOS-4020}
 #[cfg_attr(not(doc), test)]
 #[cfg(feature = "test-aerugo-cortex-m")]
 fn req_test_cyclic_execution() {
