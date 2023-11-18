@@ -1108,6 +1108,10 @@ impl RuntimeApi for Aerugo {
         self.time_source.system_time()
     }
 
+    fn get_elapsed_time(&'static self) -> Duration {
+        self.time_source.elapsed_time()
+    }
+
     fn set_system_time_offset(&'static self, offset: Duration) -> Result<(), RuntimeError> {
         // SAFETY: This is safe, because it's called from non-IRQ context, and
         // system time cannot be accessed from IRQ context

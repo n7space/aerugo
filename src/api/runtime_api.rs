@@ -100,6 +100,9 @@ pub trait RuntimeApi {
     /// Gets current system time timestamp.
     fn get_system_time(&'static self) -> Instant;
 
+    /// Gets time elapsed since execution started.
+    fn get_elapsed_time(&'static self) -> Duration;
+
     /// Sets system time offset.
     ///
     /// # Parameters
