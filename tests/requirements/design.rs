@@ -12,13 +12,13 @@ fn des_tasklet_persistent_context_data() {}
 
 /// @SRS{ROS-FUN-RTOS-030}
 ///
-/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+/// Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_tasklet_user_data_safe_access() {}
 
 /// @SRS{ROS-FUN-RTOS-040}
 ///
-/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+/// Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_safe_access_to_shared_data() {}
 
@@ -39,6 +39,18 @@ fn des_ros_provide_driver_nvic() {}
 /// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_ros_provide_driver_scb() {}
+
+/// @SRS{ROS-FUN-BSP-SCB-060}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_provide_scb_dcache_invalidation() {}
+
+/// @SRS{ROS-FUN-BSP-SCB-070}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_provide_scb_dcache_clean() {}
 
 /// @SRS{ROS-FUN-BSP-SYST-010}
 ///
