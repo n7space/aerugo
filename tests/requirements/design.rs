@@ -100,11 +100,47 @@ fn des_ros_provide_driver_xdmac() {}
 #[cfg_attr(not(doc), test)]
 fn des_ros_provide_driver_fpu() {}
 
+/// @SRS{ROS-IF-010}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_demo_exposes_cnc_interface() {}
+
+/// @SRS{ROS-IF-020}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_demo_uses_ccsds_encapsulation() {}
+
+/// @SRS{ROS-IF-040}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_uart_driver_implements_embedded_hal() {}
+
+/// @SRS{ROS-IF-050}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_pio_driver_implements_embedded_hal() {}
+
+/// @SRS{ROS-IF-060}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_spi_driver_implements_embedded_hal() {}
+
 /// @SRS{ROS-RES-010}
 ///
 /// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
 #[cfg_attr(not(doc), test)]
 fn des_bsp_target_samv71() {}
+
+/// @SRS{ROS-RES-020}
+///
+/// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_demo_target_samv71() {}
 
 /// @SRS{ROS-DES-010}
 ///
