@@ -7,6 +7,8 @@
 //   40, 50, 70, 80, 110)
 // * Check if per2mem transfer can be suspended and disabled using UART in loopback mode (90, 100)
 
+/// @SRS{ROS-FUN-BSP-UART-100}
+/// @SRS{ROS-FUN-BSP-UART-110}
 /// @SRS{ROS-FUN-BSP-XDMAC-020}
 /// @SRS{ROS-FUN-BSP-XDMAC-030}
 /// @SRS{ROS-FUN-BSP-XDMAC-040}
