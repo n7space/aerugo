@@ -178,12 +178,12 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
     }
 
     /// Returns an address to SPI RX register for XDMAC.
-    pub fn xdmac_rx_address(&mut self) -> *const () {
+    pub fn xdmac_rx_address(&self) -> *const () {
         Instance::registers().rdr.as_ptr() as *const ()
     }
 
     /// Returns an address to SPI TX register for XDMAC.
-    pub fn xdmac_tx_address(&mut self) -> *const () {
+    pub fn xdmac_tx_address(&self) -> *const () {
         Instance::registers().tdr.as_ptr() as *const ()
     }
 
