@@ -1,6 +1,7 @@
 //! Module containing meta-traits and their implementation for HAL SPI driver
 use crate::pac::spi0::RegisterBlock;
 pub use crate::pac::{SPI0, SPI1};
+use crate::xdmac::transfer::Peripheral;
 
 /// Trait for PAC SPI instances.
 ///
@@ -9,6 +10,10 @@ pub use crate::pac::{SPI0, SPI1};
 pub trait SPIMetadata {
     /// Pointer to SPI registers.
     const REGISTERS: *const RegisterBlock;
+    /// Peripheral ID for XDMAC RX transfer from this SPI instance.
+    const DMA_RX_PERIPHERAL: Peripheral;
+    /// Peripheral ID for XDMAC TX transfer from this SPI instance.
+    const DMA_TX_PERIPHERAL: Peripheral;
 
     /// Returns a reference to SPI register block.
     ///
@@ -23,8 +28,12 @@ pub trait SPIMetadata {
 
 impl SPIMetadata for SPI0 {
     const REGISTERS: *const RegisterBlock = SPI0::PTR;
+    const DMA_RX_PERIPHERAL: Peripheral = Peripheral::SPI0_RX;
+    const DMA_TX_PERIPHERAL: Peripheral = Peripheral::SPI0_TX;
 }
 
 impl SPIMetadata for SPI1 {
     const REGISTERS: *const RegisterBlock = SPI1::PTR;
+    const DMA_RX_PERIPHERAL: Peripheral = Peripheral::SPI1_RX;
+    const DMA_TX_PERIPHERAL: Peripheral = Peripheral::SPI1_TX;
 }

@@ -13,6 +13,7 @@ mod test_hal_nvic;
 mod test_hal_pio;
 mod test_hal_pmc;
 mod test_hal_scb;
+mod test_hal_spi;
 mod test_hal_systick;
 mod test_hal_timer;
 mod test_hal_uart;
