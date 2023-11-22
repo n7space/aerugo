@@ -3,12 +3,13 @@
 //! # SPI configuration guide for embedded-hal traits usage
 //!
 //! This should be a separate typestate, but there's no time for that.
-//! Embedded-hal implementation is 100% blocking (polling). Interrupts must be disabled in order to
-//! use it. Performing parallel XDMAC operations while using SPI is obviously very much unsafe.
+//! Embedded-hal implementation is 100% blocking (polling). **SPI interrupts must be disabled in NVIC,
+//! but RX/TX-related interrupts must be unmasked in via SPI driver, otherwise every operation
+//! will hang.** Performing parallel XDMAC operations while using SPI is obviously very much unsafe.
 //!
 //! Reader, Writer and StatusReader **must be present in driver's instance**, every operation checks
-//! their presence and will fail if those are missing. Flush, requires only StatusReader - missing
-//! Reader or Writer will not fail it, but all I/O operations require all three of them.
+//! their presence and will fail if those are missing. Flush requires only StatusReader - missing
+//! Reader or Writer will not fail it, but all I/O operations require all three of them to be present.
 
 use super::{metadata::SPIMetadata, status_reader::StatusReader, Master, Spi};
 pub use embedded_hal::spi::SpiBus;
