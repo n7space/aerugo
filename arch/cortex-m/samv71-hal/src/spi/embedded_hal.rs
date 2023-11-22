@@ -31,8 +31,6 @@ pub enum SpiError {
     ModeFault,
     /// Overrun error.
     Overrun,
-    /// Buffers provided for transfer operation have different sizes.
-    BuffersHaveDifferentSizes,
 }
 
 impl Error for SpiError {
@@ -43,7 +41,6 @@ impl Error for SpiError {
             SpiError::StatusReaderNotAvailable => ErrorKind::Other,
             SpiError::ModeFault => ErrorKind::ModeFault,
             SpiError::Overrun => ErrorKind::Overrun,
-            SpiError::BuffersHaveDifferentSizes => ErrorKind::Other,
         }
     }
 }
@@ -66,7 +63,6 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
     fn read(&mut self, words: &mut [u8]) -> Result<(), Self::Error> {
         let status_reader = self.get_status_reader_ref()?;
         self.check_io_presence()?;
-        self.flush_and_discard(status_reader);
 
         for word in words {
             self.transmit_value(0);
@@ -92,7 +88,6 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
     fn write(&mut self, words: &[u8]) -> Result<(), Self::Error> {
         let status_reader = self.get_status_reader_ref()?;
         self.check_io_presence()?;
-        self.flush_and_discard(status_reader);
 
         for &word in words {
             self.transmit_value(word as u16);
@@ -115,25 +110,59 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
     /// # Parameters
     /// * `read` - Slice for incoming data.
     /// * `write` - Slice of words to be transmitted.
-    /// Both buffers must have equal sizes, otherwise [`SpiError::BuffersHaveDifferentSizes`] will
-    /// be returned.
     ///
     /// # Returns
-    /// Ok(()) on success, [`SpiError`] on SPI error or invalid arguments.
+    /// Ok(()) on success, [`SpiError`] on SPI error.
     fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), Self::Error> {
-        if read.len() != write.len() {
-            return Err(SpiError::BuffersHaveDifferentSizes);
-        }
-
         let status_reader = self.get_status_reader_ref()?;
         self.check_io_presence()?;
-        self.flush_and_discard(status_reader);
 
-        for (read_word, &write_word) in read.iter_mut().zip(write.iter()) {
-            self.transmit_value(write_word as u16);
-            status_reader
-                .wait_for_status(|status| status.interrupts.rx_data_register_full, usize::MAX);
-            *read_word = self.get_received_data() as u8;
+        // At the start of transaction, if it's length is >= 2, two words must be put into SPI
+        // buffers to fill both the FIFO and TX holding register. TX holding register must be fed
+        // as quickly as possible, and at the same time, data from RX holding register must be
+        // read as soon as the RX full flag rises.
+
+        // In other words, the loop must feed the TX register and read from RX register at the same
+        // time, as soon as possible, so a normal iter-chain approach is replaced with following:
+        let mut read_index = 0usize;
+        let mut write_index = 0usize;
+        let mut write_in_progress = true;
+        let mut read_in_progress = true;
+
+        while write_in_progress || read_in_progress {
+            let status = status_reader.status();
+
+            if write_in_progress && status.interrupts.tx_data_register_empty {
+                if write_index < write.len() {
+                    self.transmit_value(write[write_index] as u16);
+                    write_index += 1;
+                }
+
+                // Check post-increment to immediately notify about end-of-write
+                if write_index >= write.len() {
+                    write_in_progress = false;
+                }
+            }
+
+            if read_in_progress && status.interrupts.rx_data_register_full {
+                if read_index < read.len() {
+                    read[read_index] = self.get_received_data() as u8;
+                    read_index += 1;
+                }
+
+                // Check post-increment to immediately notify about end-of-read
+                if read_index >= read.len() {
+                    read_in_progress = false;
+                }
+            }
+
+            if status.interrupts.overrun_error {
+                return Err(SpiError::Overrun);
+            }
+
+            if status.interrupts.mode_fault_error {
+                return Err(SpiError::ModeFault);
+            }
         }
 
         Ok(())
@@ -153,13 +182,49 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
     fn transfer_in_place(&mut self, words: &mut [u8]) -> Result<(), Self::Error> {
         let status_reader = self.get_status_reader_ref()?;
         self.check_io_presence()?;
-        self.flush_and_discard(status_reader);
 
-        for word in words {
-            self.transmit_value(*word as u16);
-            status_reader
-                .wait_for_status(|status| status.interrupts.rx_data_register_full, usize::MAX);
-            *word = self.get_received_data() as u8;
+        // Since the buffer is shared, we cannot just re-use the `transfer` implementation.
+        // Instead, index-based approach will be used. Memory should never be violated, as data
+        // is always transmitted before being received.
+        let mut read_index = 0usize;
+        let mut write_index = 0usize;
+        let mut write_in_progress = true;
+        let mut read_in_progress = true;
+
+        while write_in_progress || read_in_progress {
+            let status = status_reader.status();
+
+            if write_in_progress && status.interrupts.tx_data_register_empty {
+                if write_index < words.len() {
+                    self.transmit_value(words[write_index] as u16);
+                    write_index += 1;
+                }
+
+                // Check post-increment to immediately notify about end-of-write
+                if write_index >= words.len() {
+                    write_in_progress = false;
+                }
+            }
+
+            if read_in_progress && status.interrupts.rx_data_register_full {
+                if read_index < words.len() {
+                    words[read_index] = self.get_received_data() as u8;
+                    read_index += 1;
+                }
+
+                // Check post-increment to immediately notify about end-of-read
+                if read_index >= words.len() {
+                    read_in_progress = false;
+                }
+            }
+
+            if status.interrupts.overrun_error {
+                return Err(SpiError::Overrun);
+            }
+
+            if status.interrupts.mode_fault_error {
+                return Err(SpiError::ModeFault);
+            }
         }
 
         Ok(())
@@ -199,13 +264,7 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
         Ok(())
     }
 
-    /// Flushes the TX register and discards any incoming data by reading RX register.
-    fn flush_and_discard(&self, status_reader: &StatusReader<Instance>) {
-        status_reader.wait_for_status(|status| status.interrupts.tx_registers_empty, usize::MAX);
-        self.get_received_data();
-    }
-
-    /// Sets the value that will be transmitted via SPI.
+    /// Sets the value that will be transmitted via SPI by putting it in TX data register.
     ///
     /// # Remarks
     /// There's no runtime check for value width, so you have to make sure that you don't try to
@@ -214,7 +273,7 @@ impl<Instance: SPIMetadata> Spi<Instance, Master> {
         Instance::registers().tdr.write(|w| w.td().variant(value));
     }
 
-    /// Returns the data currently stored in RX register.
+    /// Returns the data currently stored in RX data register.
     ///
     /// Before reading the data you should make sure that it's available by checking
     /// `rx_data_register_full` field of [`SpiStatus`](super::status::SpiStatus) structure.
