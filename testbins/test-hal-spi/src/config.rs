@@ -56,7 +56,7 @@ fn perform_status_reader_test(mut spi: Spi<SPI0, NotConfigured>) -> Spi<SPI0, No
     write_str("SPI status reader test started.");
 
     assert!(spi.is_status_reader_available());
-    let mut status_reader = spi.take_status_reader().unwrap();
+    let status_reader = spi.take_status_reader().unwrap();
     assert!(!spi.is_status_reader_available());
 
     let status = status_reader.status();

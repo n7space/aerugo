@@ -42,6 +42,8 @@ def main() -> None:
             "Interrupt 12-bit transfer successful!",
             "Interrupt transfer test successfully finished!",
             "All SPI communication tests done!",
+            "Beginning SPI communication tests via embedded-hal traits...",
+            "All SPI communication tests via embedded-hal traits done!",
             "Beginning LSM6DSO communication tests w/ XDMAC...",
             "All LSM6DSO communication tests w/ XDMAC done!",
             "All SPI tests done!",
