@@ -17,7 +17,7 @@ impl<Instance: SPIMetadata> StatusReader<Instance> {
     /// Some status bits are automatically cleared after they are read, so all status bits must
     /// be handled immediately after reading them, otherwise some information about SPI state may
     /// be lost.
-    pub fn status(&mut self) -> SpiStatus {
+    pub fn status(&self) -> SpiStatus {
         Instance::registers().sr.read().into()
     }
 
@@ -29,7 +29,7 @@ impl<Instance: SPIMetadata> StatusReader<Instance> {
     ///
     /// # Returns
     /// `true` when `f` returns `true`, `false` on timeout.
-    pub fn wait_for_status<F: Fn(SpiStatus) -> bool>(&mut self, f: F, mut timeout: usize) -> bool {
+    pub fn wait_for_status<F: Fn(SpiStatus) -> bool>(&self, f: F, mut timeout: usize) -> bool {
         while timeout > 0 {
             timeout -= 1;
 
