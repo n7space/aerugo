@@ -9,6 +9,7 @@ members = [
     "arch/x86/aerugo-x86-hal",
     "utils/env-parser",
     "utils/env-parser-tests",
+    "utils/lsm6dso",
     "calldwell/calldwell-rs",
 ]
 exclude = ["demos", "examples", "testbins", "calldwell/examples"]
