@@ -8,6 +8,7 @@ use aerugo::hal::{
         },
         config::{MasterConfig, SelectedChip},
         embedded_hal::SpiBus,
+        interrupts::Interrupts,
         NotConfigured, Spi,
     },
     user_peripherals::SPI0,
@@ -30,6 +31,15 @@ pub fn perform_test(spi: Spi<SPI0, NotConfigured>) -> Spi<SPI0, NotConfigured> {
             delay_between_consecutive_transfers: 0,
         },
     );
+    spi.set_interrupts_state(Interrupts {
+        rx_data_register_full: true,
+        tx_data_register_empty: true,
+        mode_fault_error: true,
+        overrun_error: true,
+        nss_rising: false,
+        tx_registers_empty: true,
+        underrun_error: false,
+    });
     spi.enable_loopback();
 
     // Only `transfer` can be tested via loopback.
@@ -42,7 +52,8 @@ pub fn perform_test(spi: Spi<SPI0, NotConfigured>) -> Spi<SPI0, NotConfigured> {
         *word = (TEST_OFFSET + i) as u8;
     }
 
-    spi.transfer(&mut read_buffer, &write_buffer).unwrap();
+    assert_ne!(read_buffer, write_buffer);
+    assert_eq!(spi.transfer(&mut read_buffer, &write_buffer), Ok(()));
     assert_eq!(read_buffer, write_buffer);
 
     write_str("All SPI communication tests via embedded-hal traits done!");
