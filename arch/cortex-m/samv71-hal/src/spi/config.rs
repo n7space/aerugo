@@ -37,12 +37,12 @@ impl MasterConfig {
     /// Creates new MasterConfig with provided chip following defaults:
     ///
     /// * Minimum chip selection delay (6 peripheral clock cycles)
-    /// * Overrun detection disabled
+    /// * Overrun detection enabled
     pub fn new(selected_chip: SelectedChip) -> Self {
         Self {
             chip_selection_delay: ChipSelectionDelay::new(ChipSelectionDelay::LOW).unwrap(),
             selected_chip,
-            enable_overrun_detection: false,
+            enable_overrun_detection: true,
         }
     }
 }

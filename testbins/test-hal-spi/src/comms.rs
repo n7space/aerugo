@@ -75,7 +75,7 @@ fn perform_synchronous_loopback_transfer_test(
 
     let reader = spi.take_reader().unwrap();
     let mut writer = spi.take_writer().unwrap();
-    let mut status_reader = spi.take_status_reader().unwrap();
+    let status_reader = spi.take_status_reader().unwrap();
 
     for byte in 0..=u8::MAX {
         writer.transmit_value(byte as u16);

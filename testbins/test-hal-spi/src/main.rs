@@ -22,6 +22,7 @@ use rt::entry;
 
 mod comms;
 mod config;
+mod embedded_hal;
 mod lsm6dso;
 
 fn configure_pmc(pmc: &mut PMC) {
@@ -59,6 +60,7 @@ fn main() -> ! {
 
     let spi = config::perform_test(spi);
     let spi = comms::perform_test(spi, &mut nvic);
+    let spi = embedded_hal::perform_test(spi);
     lsm6dso::perform_test(spi, &mut xdmac, &mut nvic);
 
     write_str("All SPI tests done!");
