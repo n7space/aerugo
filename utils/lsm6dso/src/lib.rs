@@ -15,25 +15,26 @@ mod bounded_int;
 pub mod config;
 mod registers;
 
-use config::{FifoConfig, FifoConfigBuffer};
-use registers::Register;
+use config::fifo::{FifoConfig, FifoConfigBuffer};
+use registers::{Register, WHO_AM_I_VALUE};
 
 pub use embedded_hal::spi::SpiBus;
-pub use registers::WHO_AM_I_VALUE;
 
 /// LSM6DSO driver structure.
 ///
 /// # Generic parameters
 /// * `SPI` - An SPI bus instance that LSM6DSO driver will use to communicate with the sensor
-pub struct LSM6DSO<SPI: SpiBus> {
+pub struct LSM6DSO<SPI: SpiBus, const BUFFER_SIZE: usize = 32> {
     /// SPI instance.
     spi: SPI,
+    /// Buffer for internal operations
+    buffer: [u8; BUFFER_SIZE],
 }
 
 /// Constant representing a mask applied to value being read from LSM6DSO via SPI
 const READ_REQUEST_MASK: u8 = 0x80;
 
-impl<SPI: SpiBus> LSM6DSO<SPI> {
+impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
     /// Creates new LSM6DSO instance. Consumes the SPI bus.
     ///
     /// SPI must be configured with following settings for LSM6DSO to work correctly:
@@ -45,7 +46,14 @@ impl<SPI: SpiBus> LSM6DSO<SPI> {
     /// * Serial clock divider: Serial clock must be less than 10MHz
     /// * Delay before first clock and consecutive transfers: 0
     pub fn new(spi: SPI) -> Result<Self, SPI::Error> {
-        let mut lsm = Self { spi };
+        assert!(
+            BUFFER_SIZE >= 2,
+            "LSM6DSO buffer must be at least 2 bytes long"
+        );
+        let mut lsm = Self {
+            spi,
+            buffer: [0; BUFFER_SIZE],
+        };
         // First transaction usually fails to communicate with LSM and returns junk, so it's done
         // here to prevent failing user operations.
         lsm.id()?;
@@ -82,6 +90,13 @@ impl<SPI: SpiBus> LSM6DSO<SPI> {
         Ok(data_buffer[1])
     }
 
+    /// Writes a value to LSM6DSO register.
+    fn _write_register(&mut self, register: Register, value: u8) -> Result<(), SPI::Error> {
+        let write_request = [register as u8, value];
+        self.spi.write(&write_request)?;
+        Ok(())
+    }
+
     /// Read the value from multiple registers, starting with specified one.
     /// Amount of read registers depends on the size of the buffer slice.
     /// Buffer must be at least 2 bytes long, otherwise this function will panic.
@@ -90,16 +105,23 @@ impl<SPI: SpiBus> LSM6DSO<SPI> {
         first_register: Register,
         buffer: &mut [u8],
     ) -> Result<(), SPI::Error> {
-        assert!(buffer.len() >= 2);
-        buffer[0] = READ_REQUEST_MASK | (first_register as u8);
-        self.spi.transfer_in_place(buffer)?;
-        Ok(())
-    }
+        let user_buffer_length = buffer.len();
+        // at least 1 byte for data
+        assert!(user_buffer_length > 0, "provided buffer is too small");
+        // +1 byte for address
+        assert!(
+            BUFFER_SIZE > user_buffer_length,
+            "LSM6DSO buffer is too small for this operation"
+        );
 
-    /// Writes a value to LSM6DSO register.
-    fn _write_register(&mut self, register: Register, value: u8) -> Result<(), SPI::Error> {
-        let write_request = [register as u8, value];
-        self.spi.write(&write_request)?;
+        // Prepare transfer
+        self.buffer[0] = READ_REQUEST_MASK | (first_register as u8);
+        // Get data from sensor
+        self.spi
+            .transfer_in_place(&mut self.buffer[0..user_buffer_length])?;
+        // Copy to user's buffer
+        buffer.copy_from_slice(&self.buffer[1..=user_buffer_length]);
+
         Ok(())
     }
 
@@ -109,8 +131,20 @@ impl<SPI: SpiBus> LSM6DSO<SPI> {
         first_register: Register,
         values: &[u8],
     ) -> Result<(), SPI::Error> {
-        self.spi.write(&[first_register as u8])?;
-        self.spi.write(values)?;
+        let user_buffer_length = values.len();
+        // at least 1 byte for data
+        assert!(user_buffer_length > 0, "provided buffer is too small");
+        // +1 byte for address
+        assert!(
+            BUFFER_SIZE > user_buffer_length,
+            "LSM6DSO buffer is too small for this operation"
+        );
+
+        // Prepare transfer
+        self.buffer[0] = first_register as u8;
+        self.buffer[1..=user_buffer_length].copy_from_slice(values);
+        // Write data
+        self.spi.write(&self.buffer[0..=user_buffer_length])?;
         Ok(())
     }
 }

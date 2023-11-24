@@ -86,7 +86,7 @@ pub(crate) enum Register {
 pub const WHO_AM_I_VALUE: u8 = 0x6C;
 
 /// Trait for single-register fields
-pub trait RegisterField
+pub(crate) trait RegisterField
 where
     Self: Copy,
 {
@@ -98,7 +98,7 @@ where
 
 /// Trait for fields that span multiple registers. The order of masks and offsets must be defined
 /// respective to the order of registers this field spans, smaller address first.
-pub trait MultiRegisterField<const REGISTER_SPAN: usize = 2>
+pub(crate) trait MultiRegisterField<const REGISTER_SPAN: usize = 2>
 where
     Self: Copy,
 {
@@ -108,7 +108,7 @@ where
     const OFFSETS: [usize; REGISTER_SPAN];
 }
 
-pub trait RegisterConversion
+pub(crate) trait RegisterConversion
 where
     Self: Copy + RegisterField,
 {
