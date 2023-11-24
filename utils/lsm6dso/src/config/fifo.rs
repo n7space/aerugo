@@ -1,7 +1,6 @@
-//! Module with config-related items
-
 use crate::{
     bounded_int::BoundedU16,
+    config::templates,
     registers::{MultiRegisterConversion, MultiRegisterField, RegisterConversion, RegisterField},
 };
 
@@ -45,54 +44,17 @@ impl MultiRegisterConversion for FifoDataLength {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum DataRateChangeBatching {
-    Enabled = 1,
+templates::register_enum!(DataRateChangeBatching [mask=0x10, offset=4] {
     Disabled = 0,
-}
-impl RegisterField for DataRateChangeBatching {
-    const MASK: u8 = 0x10;
-    const OFFSET: usize = 4;
-}
-impl RegisterConversion for DataRateChangeBatching {
-    fn to_reg(self) -> u8 {
-        (self as u8) << Self::OFFSET
-    }
+    Enabled = 1,
+});
 
-    fn from_reg(reg: u8) -> Self {
-        if reg & Self::MASK != 0 {
-            DataRateChangeBatching::Enabled
-        } else {
-            DataRateChangeBatching::Disabled
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum StopOnWatermarkThreshold {
+templates::register_enum!(StopOnWatermarkThreshold [mask=0x80, offset=7]{
     Yes = 1,
     No = 0,
-}
-impl RegisterField for StopOnWatermarkThreshold {
-    const MASK: u8 = 0x80;
-    const OFFSET: usize = 7;
-}
-impl RegisterConversion for StopOnWatermarkThreshold {
-    fn to_reg(self) -> u8 {
-        (self as u8) << Self::OFFSET
-    }
+});
 
-    fn from_reg(reg: u8) -> Self {
-        if reg & Self::MASK != 0 {
-            StopOnWatermarkThreshold::Yes
-        } else {
-            StopOnWatermarkThreshold::No
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum GyroscopeBatchingRate {
+templates::register_enum!(GyroscopeBatchingRate [mask=0xF0, offset=4] {
     NoBatching = 0b0000,
     Batch12_5Hz = 0b0001,
     Batch26Hz = 0b0010,
@@ -105,39 +67,9 @@ pub enum GyroscopeBatchingRate {
     Batch3333Hz = 0b1001,
     Batch6667Hz = 0b1010,
     Batch6_5Hz = 0b1011,
-}
-impl RegisterField for GyroscopeBatchingRate {
-    const MASK: u8 = 0xF0;
-    const OFFSET: usize = 4;
-}
-impl RegisterConversion for GyroscopeBatchingRate {
-    fn to_reg(self) -> u8 {
-        (self as u8) << Self::OFFSET
-    }
+});
 
-    fn from_reg(reg: u8) -> Self {
-        match (reg & Self::MASK) >> Self::OFFSET {
-            0b0000 => GyroscopeBatchingRate::NoBatching,
-            0b0001 => GyroscopeBatchingRate::Batch12_5Hz,
-            0b0010 => GyroscopeBatchingRate::Batch26Hz,
-            0b0011 => GyroscopeBatchingRate::Batch52Hz,
-            0b0100 => GyroscopeBatchingRate::Batch104Hz,
-            0b0101 => GyroscopeBatchingRate::Batch208Hz,
-            0b0110 => GyroscopeBatchingRate::Batch417Hz,
-            0b0111 => GyroscopeBatchingRate::Batch833Hz,
-            0b1000 => GyroscopeBatchingRate::Batch1667Hz,
-            0b1001 => GyroscopeBatchingRate::Batch3333Hz,
-            0b1010 => GyroscopeBatchingRate::Batch6667Hz,
-            0b1011 => GyroscopeBatchingRate::Batch6_5Hz,
-            other => {
-                panic!("Unexpected value tried to be parsed as GyroscopeBatchingRate: {other:2X}");
-            }
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum AccelerometerBatchingRate {
+templates::register_enum!(AccelerometerBatchingRate [mask=0x0F, offset=0] {
     NoBatching = 0b0000,
     Batch12_5Hz = 0b0001,
     Batch26Hz = 0b0010,
@@ -150,41 +82,9 @@ pub enum AccelerometerBatchingRate {
     Batch3333Hz = 0b1001,
     Batch6667Hz = 0b1010,
     Batch1_6Hz = 0b1011,
-}
-impl RegisterField for AccelerometerBatchingRate {
-    const MASK: u8 = 0x0F;
-    const OFFSET: usize = 0;
-}
-impl RegisterConversion for AccelerometerBatchingRate {
-    fn to_reg(self) -> u8 {
-        (self as u8) << Self::OFFSET
-    }
+});
 
-    fn from_reg(reg: u8) -> Self {
-        match (reg & Self::MASK) >> Self::OFFSET {
-            0b0000 => AccelerometerBatchingRate::NoBatching,
-            0b0001 => AccelerometerBatchingRate::Batch12_5Hz,
-            0b0010 => AccelerometerBatchingRate::Batch26Hz,
-            0b0011 => AccelerometerBatchingRate::Batch52Hz,
-            0b0100 => AccelerometerBatchingRate::Batch104Hz,
-            0b0101 => AccelerometerBatchingRate::Batch208Hz,
-            0b0110 => AccelerometerBatchingRate::Batch417Hz,
-            0b0111 => AccelerometerBatchingRate::Batch833Hz,
-            0b1000 => AccelerometerBatchingRate::Batch1667Hz,
-            0b1001 => AccelerometerBatchingRate::Batch3333Hz,
-            0b1010 => AccelerometerBatchingRate::Batch6667Hz,
-            0b1011 => AccelerometerBatchingRate::Batch1_6Hz,
-            other => {
-                panic!(
-                    "Unexpected value tried to be parsed as AccelerometerBatchingRate: {other:2X}"
-                );
-            }
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum FifoMode {
+templates::register_enum!(FifoMode [mask=0x07, offset=0] {
     /// FIFO disabled.
     Bypass = 0b000,
     /// FIFO enabled and sensor stops collecting data when FIFO is full.
@@ -197,30 +97,7 @@ pub enum FifoMode {
     Continuous = 0b110,
     /// Bypass mode until trigger is deasserted, then FIFO mode.
     BypassToFifo = 0b111,
-}
-impl RegisterField for FifoMode {
-    const MASK: u8 = 0x07;
-    const OFFSET: usize = 0;
-}
-impl RegisterConversion for FifoMode {
-    fn to_reg(self) -> u8 {
-        (self as u8) << Self::OFFSET
-    }
-
-    fn from_reg(reg: u8) -> Self {
-        match (reg & Self::MASK) >> Self::OFFSET {
-            0b000 => FifoMode::Bypass,
-            0b001 => FifoMode::Fifo,
-            0b011 => FifoMode::ContinuousToFifo,
-            0b101 => FifoMode::BypassToContinuous,
-            0b110 => FifoMode::Continuous,
-            0b111 => FifoMode::BypassToFifo,
-            other => {
-                panic!("Unexpected value tried to be parsed as FifoMode: {other:2X}");
-            }
-        }
-    }
-}
+});
 
 /// Structure representing LSM6DSO FIFO configuration.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]

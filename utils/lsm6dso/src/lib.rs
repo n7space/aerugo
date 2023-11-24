@@ -8,14 +8,18 @@
 //! When SAMV71 HAL will support [`SpiDevice`](embedded_hal::spi::SpiDevice), this library should
 //! be refactored to use it, instead of the whole bus.
 
+extern crate derive_more;
 extern crate embedded_hal;
 extern crate paste;
 
 mod bounded_int;
 pub mod config;
-mod registers;
+pub(crate) mod registers;
 
-use config::fifo::{FifoConfig, FifoConfigBuffer};
+use config::{
+    fifo::{FifoConfig, FifoConfigBuffer},
+    interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
+};
 use registers::{Register, WHO_AM_I_VALUE};
 
 pub use embedded_hal::spi::SpiBus;
@@ -81,6 +85,26 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         let mut buffer = [0u8, 0, 0, 0];
         self.read_registers(Register::FIFO_CTRL1, &mut buffer)?;
         Ok(buffer.into())
+    }
+
+    pub fn set_int1_interrupts(&mut self, interrupts: INT1Interrupts) -> Result<(), SPI::Error> {
+        let config_reg: InterruptConfigBuffer = interrupts.into();
+        self._write_register(Register::INT1_CTRL, config_reg)?;
+        Ok(())
+    }
+
+    pub fn get_int1_interrupts(&mut self) -> Result<INT1Interrupts, SPI::Error> {
+        Ok(self.read_register(Register::INT1_CTRL)?.into())
+    }
+
+    pub fn set_int2_interrupts(&mut self, interrupts: INT2Interrupts) -> Result<(), SPI::Error> {
+        let config_reg: InterruptConfigBuffer = interrupts.into();
+        self._write_register(Register::INT2_CTRL, config_reg)?;
+        Ok(())
+    }
+
+    pub fn get_int2_interrupts(&mut self) -> Result<INT2Interrupts, SPI::Error> {
+        Ok(self.read_register(Register::INT2_CTRL)?.into())
     }
 
     /// Reads the value from a single LSM6DSO register and returns it.
