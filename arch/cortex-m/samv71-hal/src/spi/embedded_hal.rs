@@ -83,6 +83,15 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
     /// # Parameters
     /// * `words` - Slice of words to be transmitted.
     ///
+    /// # Remarks
+    /// This function may behave unexpectedly in some scenarios, as it waits for RX data register
+    /// full event, instead of TX data register empty event, as the latter doesn't happen after
+    /// first word is transmitted for unknown reasons in some SPI configurations. The issue may
+    /// happen if the device expects the write to be a single transaction, and SPI is configured in
+    /// a way that will make every word to be a separate transaction with CS deactivations in
+    /// between. Verify if this function works for your scenario, or use `transfer`/`transfer_in_place`
+    /// for writing.
+    ///
     /// # Returns
     /// Ok(()) on success, [`SpiError`] on SPI error.
     fn write(&mut self, words: &[u8]) -> Result<(), Self::Error> {
@@ -91,10 +100,13 @@ impl<Instance: SPIMetadata> SpiBus<u8> for Spi<Instance, Master> {
 
         for &word in words {
             self.transmit_value(word as u16);
-            status_reader.wait_for_status(
-                |status| status.interrupts.tx_data_register_empty,
-                usize::MAX,
-            );
+            // This should, in theory, check the state of TX data register. However, when it does
+            // that, the transfer hangs at 2nd word, as the flag never rises again. A workaround
+            // is to wait for RX data flag, as it'll be risen after the word is transmitted, but it's
+            // not guaranteed to work in every case (as it doesn't guarantee that the transfer will
+            // be a single SPI transaction, which may sometimes be necessary).
+            status_reader
+                .wait_for_status(|status| status.interrupts.rx_data_register_full, usize::MAX);
             // Dummy read to prevent overrun error
             self.get_received_data();
         }
