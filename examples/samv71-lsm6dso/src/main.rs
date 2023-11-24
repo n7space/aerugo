@@ -11,7 +11,7 @@ use aerugo::{
     logln, Aerugo, InitApi, SystemHardwareConfig,
 };
 use lsm6dso::{
-    config::{
+    config::fifo::{
         AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
         FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
     },
@@ -35,11 +35,12 @@ fn main() -> ! {
     let _lsm_pins = hardware_config::configure_pio(port_d);
     let lsm_spi = hardware_config::configure_spi(spi);
 
-    let mut lsm = LSM6DSO::new(lsm_spi).unwrap();
+    let mut lsm: LSM6DSO<_, 32> = LSM6DSO::new(lsm_spi).unwrap();
 
     logln!("LSM id: {:2X?}", lsm.id());
     logln!("Is LSM alive? {:?}", lsm.is_alive());
     logln!("Current LSM config: {:#?}", lsm.get_fifo_config());
+
     let test_config = FifoConfig {
         watermark_threshold: FifoWatermarkThreshold::new(123).unwrap(),
         odr_change_batched: DataRateChangeBatching::Enabled,
@@ -49,6 +50,9 @@ fn main() -> ! {
         mode: FifoMode::Fifo,
     };
     lsm.set_fifo_config(test_config).unwrap();
-    logln!("New LSM config: {:#?}", lsm.get_fifo_config());
+    let read_config = lsm.get_fifo_config();
+    logln!("New LSM config: {:#?}", read_config);
+    assert_eq!(read_config.unwrap(), test_config);
+
     aerugo.start();
 }

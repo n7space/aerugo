@@ -20,9 +20,8 @@ use aerugo::hal::{
 
 /// LSM6DSO chip select signal.
 const LSM6DSO_CHIP: SelectedChip = SelectedChip::Chip1;
-/// LSM6DSO SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz,
-/// but for safety a 480kHz clock will be used instead (12MHz/25).
-const LSM6DSO_SPI_CLOCK_DIVIDER: u8 = 25;
+/// LSM6DSO SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
+const LSM6DSO_SPI_CLOCK_DIVIDER: u8 = 100;
 
 pub struct LSM6DSOPins {
     pub miso: Pin<PeripheralMode>,
@@ -67,8 +66,8 @@ pub fn configure_spi(spi: Spi<SPI0, NotConfigured>) -> Spi<SPI0, Master> {
     spi.set_interrupts_state(Interrupts {
         rx_data_register_full: true,
         tx_data_register_empty: true,
-        mode_fault_error: false,
-        overrun_error: false,
+        mode_fault_error: true,
+        overrun_error: true,
         nss_rising: false,
         tx_registers_empty: true,
         underrun_error: false,
