@@ -22,6 +22,7 @@ use config::{
         GyroscopeConfigBuffer, GyroscopeTestMode, IrqActivationLevel, IrqPinMode,
         RebootMemoryContent, SoftwareReset,
     },
+    data_types::{AngularRate, FromBuffer, LinearAcceleration, Temperature},
     fifo_config::{FifoConfig, FifoConfigBuffer},
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
@@ -217,6 +218,24 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         Ok(GyroscopeTestMode::from_reg(
             self.read_register(Register::CTRL5_C)?,
         ))
+    }
+
+    pub fn get_temperature(&mut self) -> Result<Temperature, SPI::Error> {
+        let mut data_buffer = [0u8; 2];
+        self.read_registers(Register::OUT_TEMP_L, &mut data_buffer)?;
+        Ok(Temperature::from_buffer(&data_buffer))
+    }
+
+    pub fn get_angular_rate(&mut self) -> Result<AngularRate, SPI::Error> {
+        let mut data_buffer = [0u8; 6];
+        self.read_registers(Register::OUTX_L_G, &mut data_buffer)?;
+        Ok(AngularRate::from_buffer(&data_buffer))
+    }
+
+    pub fn get_linear_acceleration(&mut self) -> Result<LinearAcceleration, SPI::Error> {
+        let mut data_buffer = [0u8; 6];
+        self.read_registers(Register::OUTX_L_A, &mut data_buffer)?;
+        Ok(AngularRate::from_buffer(&data_buffer))
     }
 
     /// Reads the value from a single LSM6DSO register and returns it.

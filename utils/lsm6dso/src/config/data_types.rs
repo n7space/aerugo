@@ -5,8 +5,8 @@ pub struct Vec3D<T> {
 }
 
 pub type Temperature = i16;
-pub type AccelerometerData = Vec3D<i16>;
-pub type GyroscopeData = Vec3D<i16>;
+pub type LinearAcceleration = Vec3D<i16>;
+pub type AngularRate = Vec3D<i16>;
 
 pub(crate) trait FromBuffer<const DATA_LENGTH: usize> {
     fn from_buffer(buffer: &[u8; DATA_LENGTH]) -> Self;
@@ -18,7 +18,7 @@ impl FromBuffer<2> for Temperature {
     }
 }
 
-impl FromBuffer<6> for AccelerometerData {
+impl FromBuffer<6> for LinearAcceleration {
     fn from_buffer(buffer: &[u8; 6]) -> Self {
         Self {
             x: i16::from_le_bytes([buffer[0], buffer[1]]),
