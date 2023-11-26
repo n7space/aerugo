@@ -120,7 +120,7 @@ where
     fn from_reg(reg: u8) -> Self;
 }
 
-pub trait MultiRegisterConversion<const REGISTER_SPAN: usize = 2>
+pub(crate) trait MultiRegisterConversion<const REGISTER_SPAN: usize = 2>
 where
     Self: Copy + MultiRegisterField<REGISTER_SPAN>,
 {

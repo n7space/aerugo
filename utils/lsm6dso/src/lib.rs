@@ -17,6 +17,9 @@ pub mod config;
 pub(crate) mod registers;
 
 use config::{
+    control::{
+        AccelerometerConfig, AccelerometerConfigBuffer, GyroscopeConfig, GyroscopeConfigBuffer,
+    },
     fifo::{FifoConfig, FifoConfigBuffer},
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
@@ -89,7 +92,7 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
 
     pub fn set_int1_interrupts(&mut self, interrupts: INT1Interrupts) -> Result<(), SPI::Error> {
         let config_reg: InterruptConfigBuffer = interrupts.into();
-        self._write_register(Register::INT1_CTRL, config_reg)?;
+        self.write_register(Register::INT1_CTRL, config_reg)?;
         Ok(())
     }
 
@@ -99,12 +102,53 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
 
     pub fn set_int2_interrupts(&mut self, interrupts: INT2Interrupts) -> Result<(), SPI::Error> {
         let config_reg: InterruptConfigBuffer = interrupts.into();
-        self._write_register(Register::INT2_CTRL, config_reg)?;
+        self.write_register(Register::INT2_CTRL, config_reg)?;
         Ok(())
     }
 
     pub fn get_int2_interrupts(&mut self) -> Result<INT2Interrupts, SPI::Error> {
         Ok(self.read_register(Register::INT2_CTRL)?.into())
+    }
+
+    pub fn set_accelerometer_config(
+        &mut self,
+        config: AccelerometerConfig,
+    ) -> Result<(), SPI::Error> {
+        let config_reg: AccelerometerConfigBuffer = config.into();
+        self.write_register(Register::CTRL1_XL, config_reg)?;
+        Ok(())
+    }
+
+    pub fn get_accelerometer_config(&mut self) -> Result<AccelerometerConfig, SPI::Error> {
+        Ok(self.read_register(Register::CTRL1_XL)?.into())
+    }
+
+    pub fn set_gyroscope_config(&mut self, config: GyroscopeConfig) -> Result<(), SPI::Error> {
+        let config_reg: GyroscopeConfigBuffer = config.into();
+        self.write_register(Register::CTRL2_G, config_reg)?;
+        Ok(())
+    }
+
+    pub fn get_gyroscope_config(&mut self) -> Result<GyroscopeConfig, SPI::Error> {
+        Ok(self.read_register(Register::CTRL2_G)?.into())
+    }
+
+    pub fn reboot_memory_content(&mut self) -> Result<(), SPI::Error> {
+        const REBOOT_MEMORY_BIT_MASK: u8 = 0x80;
+        let ctrl_reg = self.read_register(Register::CTRL3_C)? | REBOOT_MEMORY_BIT_MASK;
+        self.write_register(Register::CTRL3_C, ctrl_reg)?;
+        Ok(())
+    }
+
+    pub fn software_reset(&mut self) -> Result<(), SPI::Error> {
+        const RESET_BIT_MASH: u8 = 0x01;
+        let ctrl_reg = self.read_register(Register::CTRL3_C)? | RESET_BIT_MASH;
+        self.write_register(Register::CTRL3_C, ctrl_reg)?;
+        Ok(())
+    }
+
+    pub fn get_reg(&mut self) -> u8 {
+        self.read_register(Register::CTRL1_XL).unwrap()
     }
 
     /// Reads the value from a single LSM6DSO register and returns it.
@@ -115,9 +159,9 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
     }
 
     /// Writes a value to LSM6DSO register.
-    fn _write_register(&mut self, register: Register, value: u8) -> Result<(), SPI::Error> {
-        let write_request = [register as u8, value];
-        self.spi.write(&write_request)?;
+    fn write_register(&mut self, register: Register, value: u8) -> Result<(), SPI::Error> {
+        let mut write_request = [register as u8, value];
+        self.spi.transfer_in_place(&mut write_request)?;
         Ok(())
     }
 
@@ -168,7 +212,8 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         self.buffer[0] = first_register as u8;
         self.buffer[1..=user_buffer_length].copy_from_slice(values);
         // Write data
-        self.spi.write(&self.buffer[0..=user_buffer_length])?;
+        self.spi
+            .transfer_in_place(&mut self.buffer[0..=user_buffer_length])?;
         Ok(())
     }
 }

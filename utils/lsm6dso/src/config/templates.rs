@@ -18,10 +18,12 @@ macro_rules! register_enum {
 
         impl crate::registers::RegisterConversion for $name {
             fn to_reg(self) -> u8 {
+                use crate::registers::RegisterField;
                 (self as u8) << Self::OFFSET
             }
 
             fn from_reg(reg: u8) -> Self {
+                use crate::registers::RegisterField;
                 ((reg & Self::MASK) >> Self::OFFSET).try_into().unwrap()
             }
         }
