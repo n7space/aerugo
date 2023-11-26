@@ -26,6 +26,11 @@ macro_rules! register_enum {
                 use crate::registers::RegisterField;
                 ((reg & Self::MASK) >> Self::OFFSET).try_into().unwrap()
             }
+
+            fn apply_to_reg(self, reg: u8) -> u8 {
+                use crate::registers::RegisterField;
+                (reg & !Self::MASK) | self.to_reg()
+            }
         }
     };
 }

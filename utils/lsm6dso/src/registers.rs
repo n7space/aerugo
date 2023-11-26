@@ -118,6 +118,9 @@ where
 
     /// This function should extract the field's value from the register and return it.
     fn from_reg(reg: u8) -> Self;
+
+    /// This function modifies existing register's bits and returns it's new value with applied field.
+    fn apply_to_reg(self, reg: u8) -> u8;
 }
 
 pub(crate) trait MultiRegisterConversion<const REGISTER_SPAN: usize = 2>

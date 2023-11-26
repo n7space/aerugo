@@ -51,9 +51,27 @@ register_enum!(GyroscopeScale [mask=0x0E, offset=1] {
     Scale2000dps = 0b110,
 });
 
-register_enum!(InterruptPinMode [mask=0x20, offset=5] {
+register_enum!(RebootMemoryContent [mask=0x80, offset=7] {
+    Yes = 1,
+});
+
+register_enum!(IrqActivationLevel [mask=0x20, offset=5] {
+    ActiveHigh = 0,
+    ActiveLow = 1,
+});
+
+register_enum!(IrqPinMode [mask=0x20, offset=5] {
     PushPull = 0,
     OpenDrain = 1,
+});
+
+register_enum!(SoftwareReset [mask=0x01, offset=0] {
+    Yes = 1,
+});
+
+register_enum!(DataReadyState [mask=0x08, offset=3] {
+    Disabled = 0,
+    Enabled = 1,
 });
 
 register_enum!(GyroscopeTestMode [mask=0x0C, offset=2] {
