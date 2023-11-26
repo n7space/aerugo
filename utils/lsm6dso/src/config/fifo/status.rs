@@ -1,6 +1,6 @@
 use crate::registers::FromRegister;
 
-use super::templates::register_enum;
+use crate::config::templates::register_enum;
 
 register_enum!(Watermark [mask=0x80, offset=7] {
     NotReached = 0,

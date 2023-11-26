@@ -23,7 +23,10 @@ use config::{
         RebootMemoryContent, SoftwareReset,
     },
     data_types::{AngularRate, FromBuffer, LinearAcceleration, Temperature},
-    fifo_config::{FifoConfig, FifoConfigBuffer},
+    fifo::{
+        config::{FifoConfig, FifoConfigBuffer},
+        data::FifoWord,
+    },
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
 use registers::{ApplyToRegister, FromRegister, Register, WHO_AM_I_VALUE};
@@ -236,6 +239,12 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         let mut data_buffer = [0u8; 6];
         self.read_registers(Register::OUTX_L_A, &mut data_buffer)?;
         Ok(AngularRate::from_buffer(&data_buffer))
+    }
+
+    pub fn get_next_fifo_word(&mut self) -> Result<FifoWord, SPI::Error> {
+        let mut data_buffer = [0u8; 7];
+        self.read_registers(Register::FIFO_DATA_OUT_TAG, &mut data_buffer)?;
+        Ok(FifoWord::from_buffer(&data_buffer))
     }
 
     /// Reads the value from a single LSM6DSO register and returns it.
