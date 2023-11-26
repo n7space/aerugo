@@ -1,7 +1,7 @@
 use crate::{
     bounded_int::BoundedU16,
     config::templates::register_enum,
-    registers::{MultiRegisterConversion, MultiRegisterField, RegisterConversion},
+    registers::{FromMultiRegister, FromRegister, MultiRegisterField, ToMultiRegister, ToRegister},
 };
 
 /// Type representing FIFO watermark threshold as FIFO records (6 bytes of sensor data + tag)
@@ -11,11 +11,13 @@ impl MultiRegisterField for FifoWatermarkThreshold {
     const OFFSETS: [usize; 2] = [0, 0];
 }
 
-impl MultiRegisterConversion for FifoWatermarkThreshold {
+impl ToMultiRegister for FifoWatermarkThreshold {
     fn to_regs(self) -> [u8; 2] {
         self.to_le_bytes()
     }
+}
 
+impl FromMultiRegister for FifoWatermarkThreshold {
     fn from_regs(regs: &[u8]) -> Self {
         assert!(regs.len() >= 2);
         let value_lsb = regs[0];
@@ -31,11 +33,13 @@ impl MultiRegisterField for FifoDataLength {
     const OFFSETS: [usize; 2] = [0, 0];
 }
 
-impl MultiRegisterConversion for FifoDataLength {
+impl ToMultiRegister for FifoDataLength {
     fn to_regs(self) -> [u8; 2] {
         self.to_le_bytes()
     }
+}
 
+impl FromMultiRegister for FifoDataLength {
     fn from_regs(regs: &[u8]) -> Self {
         assert!(regs.len() >= 2);
         let value_lsb = regs[0];

@@ -1,4 +1,7 @@
-use crate::{config::templates::register_enum, registers::RegisterConversion};
+use crate::{
+    config::templates::register_enum,
+    registers::{FromRegister, ToRegister},
+};
 
 register_enum!(AccelerometerDataRate [mask=0xF0, offset=4] {
     PowerDown = 0b0000,

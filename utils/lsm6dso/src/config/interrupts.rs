@@ -1,3 +1,4 @@
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct INT1Interrupts {
     pub data_ready: bool,
     pub counter_bdr: bool,
@@ -9,6 +10,7 @@ pub struct INT1Interrupts {
     pub accel_data_ready: bool,
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct INT2Interrupts {
     pub counter_bdr: bool,
     pub fifo_full: bool,

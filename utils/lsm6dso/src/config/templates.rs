@@ -16,19 +16,25 @@ macro_rules! register_enum {
             const OFFSET: usize = $offset;
         }
 
-        impl crate::registers::RegisterConversion for $name {
+        impl crate::registers::ToRegister for $name {
             fn to_reg(self) -> u8 {
                 use crate::registers::RegisterField;
                 (self as u8) << Self::OFFSET
             }
+        }
 
+        impl crate::registers::FromRegister for $name {
             fn from_reg(reg: u8) -> Self {
                 use crate::registers::RegisterField;
                 ((reg & Self::MASK) >> Self::OFFSET).try_into().unwrap()
             }
+        }
 
+        impl crate::registers::ApplyToRegister for $name
+            where Self: crate::registers::ToRegister
+        {
             fn apply_to_reg(self, reg: u8) -> u8 {
-                use crate::registers::RegisterField;
+                use crate::registers::{RegisterField, ToRegister};
                 (reg & !Self::MASK) | self.to_reg()
             }
         }

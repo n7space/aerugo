@@ -108,29 +108,44 @@ where
     const OFFSETS: [usize; REGISTER_SPAN];
 }
 
-pub(crate) trait RegisterConversion
+pub(crate) trait ToRegister
 where
     Self: Copy + RegisterField,
 {
     /// This function should return the value of current register field that can be OR'd with
     /// register's content to set it.
     fn to_reg(self) -> u8;
+}
 
+pub(crate) trait FromRegister
+where
+    Self: Copy + RegisterField,
+{
     /// This function should extract the field's value from the register and return it.
     fn from_reg(reg: u8) -> Self;
+}
 
+pub(crate) trait ApplyToRegister
+where
+    Self: Copy + RegisterField,
+{
     /// This function modifies existing register's bits and returns it's new value with applied field.
     fn apply_to_reg(self, reg: u8) -> u8;
 }
 
-pub(crate) trait MultiRegisterConversion<const REGISTER_SPAN: usize = 2>
+pub(crate) trait ToMultiRegister<const REGISTER_SPAN: usize = 2>
 where
     Self: Copy + MultiRegisterField<REGISTER_SPAN>,
 {
     /// This function should return the value of provided registers as an array. Unused bits should
     /// remain 0.
     fn to_regs(self) -> [u8; REGISTER_SPAN];
+}
 
+pub(crate) trait FromMultiRegister<const REGISTER_SPAN: usize = 2>
+where
+    Self: Copy + MultiRegisterField<REGISTER_SPAN>,
+{
     /// This function should extract the field's value from the register and return it.
     fn from_regs(regs: &[u8]) -> Self;
 }

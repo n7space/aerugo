@@ -22,10 +22,10 @@ use config::{
         GyroscopeConfigBuffer, GyroscopeTestMode, IrqActivationLevel, IrqPinMode,
         RebootMemoryContent, SoftwareReset,
     },
-    fifo::{FifoConfig, FifoConfigBuffer},
+    fifo_config::{FifoConfig, FifoConfigBuffer},
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
-use registers::{Register, RegisterConversion, WHO_AM_I_VALUE};
+use registers::{ApplyToRegister, FromRegister, Register, WHO_AM_I_VALUE};
 
 pub use embedded_hal::spi::SpiBus;
 
