@@ -11,9 +11,9 @@ use aerugo::{
     logln, Aerugo, InitApi, SystemHardwareConfig,
 };
 use lsm6dso::{
-    config::fifo::{
-        AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
-        FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+    config::control::{
+        AccelerometerConfig, AccelerometerDataRate, AccelerometerOutputSelection,
+        AccelerometerScale,
     },
     LSM6DSO,
 };
@@ -39,20 +39,29 @@ fn main() -> ! {
 
     logln!("LSM id: {:2X?}", lsm.id());
     logln!("Is LSM alive? {:?}", lsm.is_alive());
-    logln!("Current LSM config: {:#?}", lsm.get_fifo_config());
+    logln!("Pre-reboot LSM config: {:#?}", lsm.get_fifo_config());
+    lsm.software_reset().unwrap();
+    lsm.reboot_memory_content().unwrap();
 
-    let test_config = FifoConfig {
-        watermark_threshold: FifoWatermarkThreshold::new(123).unwrap(),
-        odr_change_batched: DataRateChangeBatching::Enabled,
-        stop_on_watermark: StopOnWatermarkThreshold::Yes,
-        gyroscope_batching_rate: GyroscopeBatchingRate::Batch26Hz,
-        accelerometer_batching_rate: AccelerometerBatchingRate::Batch417Hz,
-        mode: FifoMode::Fifo,
+    let accel_cfg_a = AccelerometerConfig {
+        data_rate: AccelerometerDataRate::Rate208Hz,
+        scale: AccelerometerScale::Scale4g,
+        output_selection: AccelerometerOutputSelection::FirstStageFilter,
     };
-    lsm.set_fifo_config(test_config).unwrap();
-    let read_config = lsm.get_fifo_config();
-    logln!("New LSM config: {:#?}", read_config);
-    assert_eq!(read_config.unwrap(), test_config);
+    let accel_cfg_b = AccelerometerConfig {
+        data_rate: AccelerometerDataRate::Rate3333Hz,
+        scale: AccelerometerScale::Scale8g,
+        output_selection: AccelerometerOutputSelection::LPF2SecondFilter,
+    };
+
+    logln!("Original config: {:#?}", lsm.get_accelerometer_config());
+    logln!("Register value: {:#02X?}", lsm.get_reg());
+    lsm.set_accelerometer_config(accel_cfg_a).unwrap();
+    logln!("New config A: {:#?}", lsm.get_accelerometer_config());
+    logln!("Register value: {:#02X?}", lsm.get_reg());
+    lsm.set_accelerometer_config(accel_cfg_b).unwrap();
+    logln!("New config B: {:#?}", lsm.get_accelerometer_config());
+    logln!("Register value: {:#02X?}", lsm.get_reg());
 
     aerugo.start();
 }
