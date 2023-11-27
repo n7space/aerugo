@@ -11,13 +11,22 @@ use aerugo::{
     logln, Aerugo, InitApi, SystemHardwareConfig,
 };
 use lsm6dso::{
-    config::control::{
-        AccelerometerConfig, AccelerometerDataRate, AccelerometerOutputSelection,
-        AccelerometerScale,
+    config::{
+        control::{
+            AccelerometerConfig, AccelerometerDataRate, AccelerometerOutputSelection,
+            AccelerometerScale, AccelerometerTestMode, GyroscopeConfig, GyroscopeDataRate,
+            GyroscopeScale, GyroscopeTestMode,
+        },
+        fifo::config::{
+            AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
+            FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+        },
     },
     LSM6DSO,
 };
 use rt::entry;
+
+use crate::tasklets::init_system;
 
 mod hardware_config;
 mod tasklets;
@@ -39,29 +48,55 @@ fn main() -> ! {
 
     logln!("LSM id: {:2X?}", lsm.id());
     logln!("Is LSM alive? {:?}", lsm.is_alive());
-    logln!("Pre-reboot LSM config: {:#?}", lsm.get_fifo_config());
     lsm.software_reset().unwrap();
     lsm.reboot_memory_content().unwrap();
 
-    let accel_cfg_a = AccelerometerConfig {
-        data_rate: AccelerometerDataRate::Rate208Hz,
+    let fifo_config = FifoConfig {
+        watermark_threshold: FifoWatermarkThreshold::new(50).unwrap(),
+        odr_change_batched: DataRateChangeBatching::Enabled,
+        stop_on_watermark: StopOnWatermarkThreshold::No,
+        gyroscope_batching_rate: GyroscopeBatchingRate::Batch12_5Hz,
+        accelerometer_batching_rate: AccelerometerBatchingRate::Batch12_5Hz,
+        mode: FifoMode::Fifo,
+    };
+    lsm.set_fifo_config(fifo_config).unwrap();
+    logln!("New LSM FIFO config: {:#?}", lsm.get_fifo_config());
+
+    let accelerometer_config = AccelerometerConfig {
+        data_rate: AccelerometerDataRate::Rate12_5Hz,
         scale: AccelerometerScale::Scale4g,
         output_selection: AccelerometerOutputSelection::FirstStageFilter,
     };
-    let accel_cfg_b = AccelerometerConfig {
-        data_rate: AccelerometerDataRate::Rate3333Hz,
-        scale: AccelerometerScale::Scale8g,
-        output_selection: AccelerometerOutputSelection::LPF2SecondFilter,
+
+    let gyroscope_config = GyroscopeConfig {
+        data_rate: GyroscopeDataRate::Rate12_5Hz,
+        scale: GyroscopeScale::Scale500dps,
     };
 
-    logln!("Original config: {:#?}", lsm.get_accelerometer_config());
-    logln!("Register value: {:#02X?}", lsm.get_reg());
-    lsm.set_accelerometer_config(accel_cfg_a).unwrap();
-    logln!("New config A: {:#?}", lsm.get_accelerometer_config());
-    logln!("Register value: {:#02X?}", lsm.get_reg());
-    lsm.set_accelerometer_config(accel_cfg_b).unwrap();
-    logln!("New config B: {:#?}", lsm.get_accelerometer_config());
-    logln!("Register value: {:#02X?}", lsm.get_reg());
+    lsm.set_accelerometer_test_mode(AccelerometerTestMode::Negative)
+        .unwrap();
+    lsm.set_gyroscope_test_mode(GyroscopeTestMode::Positive)
+        .unwrap();
 
+    logln!(
+        "Accelerometer mode: {:?}, gyroscope mode: {:?}",
+        lsm.get_accelerometer_test_mode(),
+        lsm.get_gyroscope_test_mode()
+    );
+
+    lsm.set_accelerometer_config(accelerometer_config).unwrap();
+    lsm.set_gyroscope_config(gyroscope_config).unwrap();
+    logln!(
+        "New LSM accelerometer config: {:#?}",
+        lsm.get_accelerometer_config()
+    );
+    logln!(
+        "New LSM gyroscope config: {:#?}",
+        lsm.get_gyroscope_config()
+    );
+
+    init_system(aerugo, lsm);
+
+    logln!("System is starting!");
     aerugo.start();
 }
