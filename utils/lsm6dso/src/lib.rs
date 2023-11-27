@@ -10,6 +10,7 @@
 
 extern crate derive_more;
 extern crate embedded_hal;
+extern crate fugit;
 extern crate paste;
 
 mod bounded_int;
@@ -26,12 +27,14 @@ use config::{
     fifo::{
         config::{FifoConfig, FifoConfigBuffer},
         data::FifoWord,
+        status::{FifoStatus, FifoStatusBuffer},
     },
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
-use registers::{ApplyToRegister, FromRegister, Register, WHO_AM_I_VALUE};
+use registers::{ApplyToRegister, FromRegister, Register};
 
 pub use embedded_hal::spi::SpiBus;
+pub use registers::WHO_AM_I_VALUE;
 
 use crate::config::control::DataReadyState;
 
@@ -86,18 +89,23 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         Ok(self.id()? == WHO_AM_I_VALUE)
     }
 
+    /// Sets FIFO configuration.
     pub fn set_fifo_config(&mut self, config: FifoConfig) -> Result<(), SPI::Error> {
         let fifo_config_regs: FifoConfigBuffer = config.into();
         self.write_registers(Register::FIFO_CTRL1, &fifo_config_regs)?;
         Ok(())
     }
 
+    /// Returns current FIFO configuration.
     pub fn get_fifo_config(&mut self) -> Result<FifoConfig, SPI::Error> {
         let mut buffer = [0u8, 0, 0, 0];
         self.read_registers(Register::FIFO_CTRL1, &mut buffer)?;
         Ok(buffer.into())
     }
 
+    /// Sets which interrupts will trigger INT1 pin.
+    ///
+    /// Activation level and pin mode can be set using [`set_irq_activation_level`](LSM6DSO::set_irq_activation_level)
     pub fn set_int1_interrupts(&mut self, interrupts: INT1Interrupts) -> Result<(), SPI::Error> {
         let config_reg: InterruptConfigBuffer = interrupts.into();
         self.write_register(Register::INT1_CTRL, config_reg)?;
@@ -241,6 +249,12 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         Ok(AngularRate::from_buffer(&data_buffer))
     }
 
+    pub fn get_fifo_status(&mut self) -> Result<FifoStatus, SPI::Error> {
+        let mut data_buffer: FifoStatusBuffer = [0u8; 2];
+        self.read_registers(Register::FIFO_STATUS1, &mut data_buffer)?;
+        Ok(FifoStatus::from(data_buffer))
+    }
+
     pub fn get_next_fifo_word(&mut self) -> Result<FifoWord, SPI::Error> {
         let mut data_buffer = [0u8; 7];
         self.read_registers(Register::FIFO_DATA_OUT_TAG, &mut data_buffer)?;
@@ -282,7 +296,7 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         self.buffer[0] = READ_REQUEST_MASK | (first_register as u8);
         // Get data from sensor
         self.spi
-            .transfer_in_place(&mut self.buffer[0..user_buffer_length])?;
+            .transfer_in_place(&mut self.buffer[0..=user_buffer_length])?;
         // Copy to user's buffer
         buffer.copy_from_slice(&self.buffer[1..=user_buffer_length]);
 

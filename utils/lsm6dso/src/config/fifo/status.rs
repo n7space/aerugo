@@ -27,6 +27,7 @@ register_enum!(LatchedOverrun [mask=0x08, offset=3] {
     FifoFull = 1,
 });
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FifoStatus {
     pub stored_words: u16,
     pub latched_overrun: LatchedOverrun,
