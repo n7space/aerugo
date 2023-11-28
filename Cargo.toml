@@ -10,6 +10,8 @@ members = [
     "utils/env-parser",
     "utils/env-parser-tests",
     "utils/lsm6dso",
+    "utils/bitfield-enum",
+    "utils/bounded-int",
     "calldwell/calldwell-rs",
 ]
 exclude = ["demos", "examples", "testbins", "calldwell/examples"]
