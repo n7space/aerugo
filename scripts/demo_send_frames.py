@@ -1,4 +1,4 @@
-"""Helper script for Aerugo SPI accelerometer demonstation application that sends testing frames."""
+"""Helper script for Aerugo SPI accelerometer demonstration application that sends testing frames"""
 import logging
 import sys
 
