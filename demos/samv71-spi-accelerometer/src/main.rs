@@ -4,6 +4,7 @@
 extern crate bitfield_enum;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
+extern crate lsm6dso;
 extern crate panic_rtt_target;
 
 mod bounded_int;
@@ -56,6 +57,8 @@ use aerugo::{
     SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
 use rt::entry;
+
+const UART_BAUD_RATE: u32 = 57600;
 
 const TELECOMMAND_LENGTH: usize = 7;
 type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
@@ -123,7 +126,7 @@ static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
-    logln!("Hello, world!");
+    logln!("Hello world, starting the demo...");
 
     logln!("Initializing clocks...");
     let pmc = peripherals.pmc.unwrap();
@@ -135,7 +138,7 @@ fn main() -> ! {
     init_pio(port);
     logln!("PIO initialized!");
 
-    logln!("Initializing UART...");
+    logln!("Initializing UART with {}bps baudrate...", UART_BAUD_RATE);
     let uart = Uart::new(peripherals.uart_4.take().unwrap());
     let mut uart = init_uart(uart);
     logln!("UART initialized!");
@@ -158,7 +161,7 @@ fn main() -> ! {
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
 
-    logln!("Starting the system...");
+    logln!("System is starting!");
     aerugo.start();
 }
 
@@ -181,7 +184,7 @@ fn init_pio(port: Port<PIOD>) {
 }
 
 fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
-    let uart_config = Config::new(9600, 12.MHz()).unwrap();
+    let uart_config = Config::new(UART_BAUD_RATE, 12.MHz()).unwrap();
     let recv_config = ReceiverConfig {
         rx_filter_enabled: true,
     };
@@ -191,7 +194,7 @@ fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
 
 fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     // Place XDMAC status reader in IRQ storage.
-    // This is safe, because XDMAC IRQ should be disabled.
+    // This is safe as long as XDMAC IRQ is disabled.
     unsafe { XDMAC_STATUS_READER.replace(xdmac.take_status_reader().unwrap()) };
 
     let rx_source_location = TransferLocation {
@@ -218,9 +221,6 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     .with_microblock_length(transfer_microblock_length);
 
     let mut rx_channel = xdmac.take_next_free_channel().unwrap();
-
-    // RX channel will be queried using an interrupt. End of RX implies end of TX, as both transfers
-    // have the same data length.
     rx_channel.set_events_state(ChannelEvents {
         end_of_block: true,
         end_of_list: true,
@@ -234,11 +234,12 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
 
     let mut rx_channel = rx_channel.configure_transfer(rx_transfer);
 
-    unsafe { XDMAC_CHANNEL_STATUS_READER.replace(rx_channel.take_status_reader().unwrap()) };
-
+    // Place RX channel and it's status reader in IRQ storage.
+    // This is safe as long as XDMAC IRQ is disabled.
     unsafe {
+        XDMAC_CHANNEL_STATUS_READER.replace(rx_channel.take_status_reader().unwrap());
         XDMAC_RX_CHANNEL.replace(rx_channel);
-    }
+    };
 }
 
 fn init_system(aerugo: &'static impl InitApi) {
@@ -405,8 +406,6 @@ fn init_system(aerugo: &'static impl InitApi) {
 
 #[interrupt]
 fn XDMAC() {
-    logln!("XDMAC");
-
     let rx_channel = unsafe { XDMAC_RX_CHANNEL.as_mut().unwrap() };
 
     let channel_status_reader = unsafe { XDMAC_CHANNEL_STATUS_READER.as_mut().unwrap() };

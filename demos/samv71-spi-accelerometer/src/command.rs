@@ -1,4 +1,4 @@
-use crate::{ccsds::CCSDSPrimaryHeader, TelecommandBuffer};
+use crate::ccsds::CCSDSPrimaryHeader;
 
 #[derive(Copy, Clone)]
 pub enum CommandType {
@@ -39,25 +39,16 @@ impl TryFrom<CCSDSPrimaryHeader> for CommandType {
 }
 
 impl Command {
-    pub fn from_telecommand(buffer: TelecommandBuffer) -> Option<Self> {
-        let header = match CCSDSPrimaryHeader::try_from(&buffer[0..=5].try_into().unwrap()) {
-            Ok(header) => header,
-            Err(_) => return None,
-        };
-
+    pub fn from_telecommand(header: CCSDSPrimaryHeader, data: &[u8]) -> Result<Self, &'static str> {
         if header.data_length != 1 {
-            return None;
+            return Err("unexpected data length, expected 1 byte");
         }
 
-        let command_type: Result<CommandType, u8> = header.try_into();
+        let command_type: CommandType = header.try_into().map_err(|_| "invalid command type")?;
 
-        if command_type.is_err() {
-            return None;
-        }
-
-        Some(Self {
-            command_type: command_type.unwrap(),
-            argument: buffer[6],
+        Ok(Self {
+            command_type,
+            argument: data[0],
         })
     }
 
@@ -67,5 +58,69 @@ impl Command {
 
     pub fn argument(&self) -> u8 {
         self.argument
+    }
+}
+
+pub trait FromCommandArgument
+where
+    Self: Sized,
+{
+    type Error;
+    fn from_command_argument(argument: u8) -> Result<Self, Self::Error>;
+}
+
+pub mod arguments {
+    use super::FromCommandArgument;
+    use crate::task_set_accelerometer_scale::AccelerometerScale;
+    use crate::task_set_data_output_rate::OutputDataRate;
+    use crate::task_set_gyroscope_scale::GyroscopeScale;
+
+    impl FromCommandArgument for OutputDataRate {
+        type Error = u8;
+
+        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+            match argument {
+                0x01 => Ok(OutputDataRate::Odr12_5Hz),
+                0x02 => Ok(OutputDataRate::Odr26Hz),
+                0x03 => Ok(OutputDataRate::Odr52Hz),
+                0x04 => Ok(OutputDataRate::Odr104Hz),
+                0x05 => Ok(OutputDataRate::Odr208Hz),
+                0x06 => Ok(OutputDataRate::Odr416Hz),
+                0x07 => Ok(OutputDataRate::Odr833Hz),
+                0x08 => Ok(OutputDataRate::Odr1667Hz),
+                0x09 => Ok(OutputDataRate::Odr3333Hz),
+                0x0A => Ok(OutputDataRate::Odr6667Hz),
+                other => Err(other),
+            }
+        }
+    }
+
+    impl FromCommandArgument for AccelerometerScale {
+        type Error = u8;
+
+        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+            match argument {
+                0x01 => Ok(AccelerometerScale::Scale2g),
+                0x02 => Ok(AccelerometerScale::Scale4g),
+                0x03 => Ok(AccelerometerScale::Scale8g),
+                0x04 => Ok(AccelerometerScale::Scale16g),
+                other => Err(other),
+            }
+        }
+    }
+
+    impl FromCommandArgument for GyroscopeScale {
+        type Error = u8;
+
+        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+            match argument {
+                0x01 => Ok(GyroscopeScale::Scale125dps),
+                0x02 => Ok(GyroscopeScale::Scale250dps),
+                0x03 => Ok(GyroscopeScale::Scale500dps),
+                0x04 => Ok(GyroscopeScale::Scale1000dps),
+                0x05 => Ok(GyroscopeScale::Scale2000dps),
+                other => Err(other),
+            }
+        }
     }
 }

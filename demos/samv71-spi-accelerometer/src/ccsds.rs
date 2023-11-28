@@ -15,6 +15,7 @@ use crate::bitfield_enum::bitfield_enum;
 use crate::bounded_int::BoundedU16;
 
 /// CCSDS packet's primary header structure.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct CCSDSPrimaryHeader {
     /// Packet version number
     pub version_number: PacketVersionNumber,
@@ -27,6 +28,7 @@ pub struct CCSDSPrimaryHeader {
 }
 
 /// A segment of CCSDS packet's primary header that identifies the packet.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Identity {
     /// Packet type
     pub packet_type: PacketType,
@@ -37,6 +39,7 @@ pub struct Identity {
 }
 
 /// A segment of CCSDS packet's primary header that provides information about packet's ID
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SequenceControl {
     /// Sequence flags
     pub flags: SequenceFlags,
@@ -118,6 +121,7 @@ impl MultiByteBitFieldFromBytes for PacketName {
 pub type CCSDSPrimaryHeaderBuffer = [u8; 6];
 
 /// Every error contains the raw value of the field it failed to recognize.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PacketParsingError {
     InvalidVersionNumber(u8),
 }

@@ -23,6 +23,7 @@ derive_more = { version = "1.0.0-beta.6", features = [
     "try_from",
     "try_into",
 ], default-features = false }
+lsm6dso = { path = "../../utils/lsm6dso" }
 
 [features]
 rt = ["aerugo/rt"]
