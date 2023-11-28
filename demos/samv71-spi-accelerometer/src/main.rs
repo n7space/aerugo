@@ -5,6 +5,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
 
+mod bounded_int;
+mod ccsds;
 pub mod command;
 pub mod events;
 pub mod task_get_execution_stats;
@@ -100,11 +102,8 @@ static TASK_SET_GYROSCOPE_SCALE_STORAGE: TaskletStorage<
     TaskSetGyroscopeScaleContext,
     0,
 > = TaskletStorage::new();
-static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<
-    EventId,
-    TaskGetExecutionStatsContext,
-    0,
-> = TaskletStorage::new();
+static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<EventId, TaskGetExecutionStatsContext, 0> =
+    TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
     MessageQueueStorage::new();
@@ -378,7 +377,8 @@ fn init_system(aerugo: &'static impl InitApi) {
 
     aerugo.subscribe_tasklet_to_events(
         &task_get_execution_stats_handle,
-        [CommandEvent::GetExecutionStats.into()]);
+        [CommandEvent::GetExecutionStats.into()],
+    );
 
     // Post-init
 
