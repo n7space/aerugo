@@ -1,3 +1,4 @@
+#![no_std]
 //! Library with implementation of Bounded integer types.
 use paste::paste;
 
