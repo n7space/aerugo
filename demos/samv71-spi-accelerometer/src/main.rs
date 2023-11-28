@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+extern crate bitfield_enum;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 extern crate panic_rtt_target;
