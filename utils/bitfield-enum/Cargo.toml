@@ -1,0 +1,17 @@
+[package]
+name = "bitfield-enum"
+version = "1.0.0"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+description = "Library with macro for creating bitfield enums with automatic conversion from/to bytes. Also provides traits for bitfield-to-bytes/bytes-to-bitfield conversion"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+derive_more = { version = "1.0.0-beta.6", features = [
+    "try_from",
+    "try_into",
+], default-features = false }
