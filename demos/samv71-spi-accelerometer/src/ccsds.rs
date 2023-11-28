@@ -60,6 +60,7 @@ bitfield_enum!(SecondaryHeaderPresence [mask=0x08, offset=3] {
 
 pub type ApplicationProcessIdentifier = BoundedU16<0, 0x7FF>;
 /// Constant representing the APID of an idle CCSDS packet.
+#[allow(dead_code)]
 pub const IDLE_PACKET_APID: ApplicationProcessIdentifier =
     ApplicationProcessIdentifier::new_saturated(ApplicationProcessIdentifier::HIGH);
 
@@ -114,17 +115,17 @@ impl MultiByteBitFieldFromBytes for PacketName {
     }
 }
 
-pub type PacketPrimaryHeaderBuffer = [u8; 6];
+pub type CCSDSPrimaryHeaderBuffer = [u8; 6];
 
 /// Every error contains the raw value of the field it failed to recognize.
 pub enum PacketParsingError {
     InvalidVersionNumber(u8),
 }
 
-impl TryFrom<PacketPrimaryHeaderBuffer> for CCSDSPrimaryHeader {
+impl TryFrom<&CCSDSPrimaryHeaderBuffer> for CCSDSPrimaryHeader {
     type Error = PacketParsingError;
 
-    fn try_from(buffer: PacketPrimaryHeaderBuffer) -> Result<Self, Self::Error> {
+    fn try_from(buffer: &CCSDSPrimaryHeaderBuffer) -> Result<Self, Self::Error> {
         let version_number = PacketVersionNumber::try_from_byte(buffer[0])
             .map_err(|err| PacketParsingError::InvalidVersionNumber(err.input))?;
 
@@ -144,7 +145,7 @@ impl TryFrom<PacketPrimaryHeaderBuffer> for CCSDSPrimaryHeader {
     }
 }
 
-impl From<CCSDSPrimaryHeader> for PacketPrimaryHeaderBuffer {
+impl From<CCSDSPrimaryHeader> for CCSDSPrimaryHeaderBuffer {
     fn from(header: CCSDSPrimaryHeader) -> Self {
         let apid = header.identity.apid.to_bytes();
         let name = header.sequence_control.name.to_bytes();

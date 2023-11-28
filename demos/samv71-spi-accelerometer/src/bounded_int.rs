@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Module with implementation of Bounded integer types.
 use paste::paste;
 

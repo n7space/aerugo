@@ -1,4 +1,4 @@
-use crate::TransferArrayType;
+use crate::{ccsds::CCSDSPrimaryHeader, TelecommandBuffer};
 
 #[derive(Copy, Clone)]
 pub enum CommandType {
@@ -19,7 +19,7 @@ impl CommandType {
             0x40 => Some(CommandType::SetAccelerometerScale),
             0x50 => Some(CommandType::SetGyroscopeScale),
             0x60 => Some(CommandType::GetExecutionStats),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -29,23 +29,35 @@ pub struct Command {
     argument: u8,
 }
 
-impl Command {
-    pub fn from_array(arr: TransferArrayType) -> Option<Self> {
-        let data_length = ((arr[4] as u16) << 8) | (arr[5] as u16);
+impl TryFrom<CCSDSPrimaryHeader> for CommandType {
+    type Error = u8;
 
-        if data_length != 1 {
+    fn try_from(header: CCSDSPrimaryHeader) -> Result<Self, Self::Error> {
+        let opcode = header.sequence_control.name.get() as u8;
+        CommandType::from_byte(opcode).ok_or(opcode)
+    }
+}
+
+impl Command {
+    pub fn from_telecommand(buffer: TelecommandBuffer) -> Option<Self> {
+        let header = match CCSDSPrimaryHeader::try_from(&buffer[0..=5].try_into().unwrap()) {
+            Ok(header) => header,
+            Err(_) => return None,
+        };
+
+        if header.data_length != 1 {
             return None;
         }
 
-        let command_type = CommandType::from_byte(arr[3]);
+        let command_type: Result<CommandType, u8> = header.try_into();
 
-        if command_type.is_none() {
+        if command_type.is_err() {
             return None;
         }
 
         Some(Self {
             command_type: command_type.unwrap(),
-            argument: arr[6],
+            argument: buffer[6],
         })
     }
 

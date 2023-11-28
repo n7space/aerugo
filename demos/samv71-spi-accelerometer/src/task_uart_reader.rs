@@ -1,6 +1,6 @@
 use crate::{
     AccelerometerScale, Command, CommandEvent, CommandType, GyroscopeScale, OutputDataRate,
-    TransferArrayType,
+    TelecommandBuffer,
 };
 
 use aerugo::{logln, MessageQueueHandle, RuntimeApi};
@@ -12,11 +12,11 @@ pub struct TaskUartReaderContext {
 }
 
 pub fn task_uart_reader(
-    val: TransferArrayType,
+    buffer: TelecommandBuffer,
     context: &mut TaskUartReaderContext,
     api: &'static dyn RuntimeApi,
 ) {
-    match Command::from_array(val) {
+    match Command::from_telecommand(buffer) {
         Some(command) => match command.command_type() {
             CommandType::Start => {
                 let result = api.emit_event(CommandEvent::Start.into());

@@ -57,10 +57,10 @@ use aerugo::{
 };
 use rt::entry;
 
-const TRANSFER_LENGTH: usize = 7;
-type TransferArrayType = [u8; TRANSFER_LENGTH];
+const TELECOMMAND_LENGTH: usize = 7;
+type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
 
-static mut MESSAGE_BUFFER: TransferArrayType = [0; TRANSFER_LENGTH];
+static mut TELECOMMAND_BUFFER: TelecommandBuffer = [0; TELECOMMAND_LENGTH];
 
 /// This is used for passing XDMAC's status reader to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
@@ -80,9 +80,9 @@ static mut XDMAC_RX_CHANNEL: Option<Channel<Configured>> = None;
 /// This is used for passing command queue handle to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
 /// program may panic.
-static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayType, 10>> = None;
+static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TelecommandBuffer, 10>> = None;
 
-static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
+static TASK_UART_READER_STORAGE: TaskletStorage<TelecommandBuffer, TaskUartReaderContext, 0> =
     TaskletStorage::new();
 static TASK_START_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStartMeasurementsContext, 0> =
     TaskletStorage::new();
@@ -106,7 +106,7 @@ static TASK_SET_GYROSCOPE_SCALE_STORAGE: TaskletStorage<
 static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<EventId, TaskGetExecutionStatsContext, 0> =
     TaskletStorage::new();
 
-static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
+static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TelecommandBuffer, 10> =
     MessageQueueStorage::new();
 static QUEUE_SET_DATA_OUTPUT_RATE_STORAGE: MessageQueueStorage<OutputDataRate, 2> =
     MessageQueueStorage::new();
@@ -123,27 +123,42 @@ static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
+    logln!("Hello, world!");
+
+    logln!("Initializing clocks...");
     let pmc = peripherals.pmc.unwrap();
     init_clocks(pmc);
+    logln!("Clock initialized!");
 
+    logln!("Initializing PIO...");
     let port = Port::new(peripherals.pio_d.take().unwrap());
     init_pio(port);
+    logln!("PIO initialized!");
 
+    logln!("Initializing UART...");
     let uart = Uart::new(peripherals.uart_4.take().unwrap());
     let mut uart = init_uart(uart);
+    logln!("UART initialized!");
 
+    logln!("Initializing DMA...");
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
     init_xdmac(xdmac, &mut uart);
+    logln!("DMA initialized!");
 
+    logln!("Initializing NVIC...");
     let mut nvic = NVIC::new(peripherals.nvic.take().unwrap());
     nvic.enable(Interrupt::XDMAC);
+    logln!("NVIC initialized!");
 
+    logln!("Initializing the system...");
     init_system(aerugo);
+    logln!("System initialized!");
 
     unsafe {
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
 
+    logln!("Starting the system...");
     aerugo.start();
 }
 
@@ -186,12 +201,12 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     };
 
     let rx_destination_location = TransferLocation {
-        address: unsafe { MESSAGE_BUFFER.as_mut_ptr() as *const () },
+        address: unsafe { TELECOMMAND_BUFFER.as_mut_ptr() as *const () },
         interface: SystemBus::Interface1,
         addressing_mode: AddressingMode::Incremented,
     };
 
-    let transfer_microblock_length = MicroblockLength::new(TRANSFER_LENGTH as u32).unwrap();
+    let transfer_microblock_length = MicroblockLength::new(TELECOMMAND_LENGTH as u32).unwrap();
 
     let rx_transfer = TransferBlock::new(
         rx_source_location,
@@ -415,7 +430,7 @@ fn XDMAC() {
     unsafe {
         let result = XDMAC_COMMAND_QUEUE_HANDLE
             .unwrap()
-            .send_data(MESSAGE_BUFFER);
+            .send_data(TELECOMMAND_BUFFER);
 
         if result.is_err() {
             logln!("Failed to send command to the queue");
