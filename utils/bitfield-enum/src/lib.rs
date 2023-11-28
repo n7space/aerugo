@@ -37,19 +37,31 @@ macro_rules! bitfield_enum {
             }
         }
 
-        impl $crate::BitFieldFromByte for $name {
-            fn from_byte(byte: u8) -> Self {
-                use $crate::BitField;
-                ((byte & Self::MASK) >> Self::OFFSET).try_into().unwrap()
-            }
-        }
-
         impl $crate::ApplyBitFieldToByte for $name
             where Self: $crate::BitField
         {
             fn apply_to_byte(self, byte: u8) -> u8 {
                 use $crate::{BitField, BitFieldToByte};
                 (byte & !Self::MASK) | self.to_byte()
+            }
+        }
+
+        impl $crate::BitFieldFromByte for $name {
+            /// Implementation of this function uses `BitFieldTryFromByte` as base, and performs
+            /// `unwrap`. This should be used only when it's guaranteed that bitfield will have
+            /// valid value.
+            fn from_byte(byte: u8) -> Self {
+                use $crate::BitFieldTryFromByte;
+                Self::try_from_byte(byte).unwrap()
+            }
+        }
+
+        impl $crate::BitFieldTryFromByte for $name {
+            type Error = $crate::derive_more::TryFromReprError<u8>;
+
+            fn try_from_byte(byte: u8) -> Result<Self, Self::Error> {
+                use $crate::BitField;
+                ((byte & Self::MASK) >> Self::OFFSET).try_into()
             }
         }
     };
@@ -74,20 +86,30 @@ where
     fn to_byte(self) -> u8;
 }
 
-pub trait BitFieldFromByte
-where
-    Self: Copy + BitField,
-{
-    /// This function should extract the field's value from the bitfield and return it.
-    fn from_byte(byte: u8) -> Self;
-}
-
 pub trait ApplyBitFieldToByte
 where
     Self: Copy + BitField,
 {
     /// This function modifies existing byte's bits and returns it's new value with applied bitfield.
     fn apply_to_byte(self, byte: u8) -> u8;
+}
+
+pub trait BitFieldFromByte
+where
+    Self: Copy + BitField,
+{
+    /// This function should extract the field's value from the bitfield and return it.
+    /// If this extraction can fail, use [`BitFieldTryFromByte`].
+    fn from_byte(byte: u8) -> Self;
+}
+
+pub trait BitFieldTryFromByte
+where
+    Self: Copy + BitField,
+{
+    type Error;
+    /// This function should try to extract the field's value from the bitfield and return it.
+    fn try_from_byte(byte: u8) -> Result<Self, Self::Error>;
 }
 
 /// Trait for bitfields that span multiple bytes. The order of masks and offsets must be defined
@@ -116,5 +138,16 @@ where
     Self: Copy + MultiByteBitField<BITFIELD_SPAN>,
 {
     /// This function should extract the field's value from the bitfield and return it.
+    /// If this extraction can fail, use [`MultiByteBitFieldTryFromBytes`].
     fn from_bytes(bytes: &[u8]) -> Self;
+}
+
+pub trait MultiByteBitFieldTryFromBytes<const BITFIELD_SPAN: usize = 2>
+where
+    Self: Copy + MultiByteBitField<BITFIELD_SPAN>,
+{
+    type Error;
+    /// This function should extract the field's value from the bitfield and return it.
+    /// If this extraction can fail, use [`MultiByteBitFieldTryFromBytes`].
+    fn try_from_bytes(bytes: &[u8]) -> Result<Self, Self::Error>;
 }
