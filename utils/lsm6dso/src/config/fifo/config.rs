@@ -1,51 +1,51 @@
 use crate::{
     bitfield_enum::{
-        bitfield_enum, FromMultiRegister, FromRegister, MultiRegisterField, ToMultiRegister,
-        ToRegister,
+        bitfield_enum, BitFieldFromByte, BitFieldToByte, MultiByteBitField,
+        MultiByteBitFieldFromBytes, MultiByteBitFieldToBytes,
     },
     bounded_int::BoundedU16,
 };
 
 /// Type representing FIFO watermark threshold as FIFO records (6 bytes of sensor data + tag)
 pub type FifoWatermarkThreshold = BoundedU16<0, 0x1FF>;
-impl MultiRegisterField for FifoWatermarkThreshold {
+impl MultiByteBitField for FifoWatermarkThreshold {
     const MASKS: [u8; 2] = [0xFF, 0x01];
     const OFFSETS: [usize; 2] = [0, 0];
 }
 
-impl ToMultiRegister for FifoWatermarkThreshold {
-    fn to_regs(self) -> [u8; 2] {
+impl MultiByteBitFieldToBytes for FifoWatermarkThreshold {
+    fn to_bytes(self) -> [u8; 2] {
         self.to_le_bytes()
     }
 }
 
-impl FromMultiRegister for FifoWatermarkThreshold {
-    fn from_regs(regs: &[u8]) -> Self {
-        assert!(regs.len() >= 2);
-        let value_lsb = regs[0];
-        let value_msb = regs[1] & Self::MASKS[1];
+impl MultiByteBitFieldFromBytes for FifoWatermarkThreshold {
+    fn from_bytes(bytes: &[u8]) -> Self {
+        assert!(bytes.len() >= 2);
+        let value_lsb = bytes[0];
+        let value_msb = bytes[1] & Self::MASKS[1];
         Self::new(u16::from_le_bytes([value_lsb, value_msb])).unwrap()
     }
 }
 
 /// Type representing amount of items in FIFO as FIFO records (6 bytes of sensor data + tag)
 pub type FifoDataLength = BoundedU16<0, 0x3FF>;
-impl MultiRegisterField for FifoDataLength {
+impl MultiByteBitField for FifoDataLength {
     const MASKS: [u8; 2] = [0xFF, 0x03];
     const OFFSETS: [usize; 2] = [0, 0];
 }
 
-impl ToMultiRegister for FifoDataLength {
-    fn to_regs(self) -> [u8; 2] {
+impl MultiByteBitFieldToBytes for FifoDataLength {
+    fn to_bytes(self) -> [u8; 2] {
         self.to_le_bytes()
     }
 }
 
-impl FromMultiRegister for FifoDataLength {
-    fn from_regs(regs: &[u8]) -> Self {
-        assert!(regs.len() >= 2);
-        let value_lsb = regs[0];
-        let value_msb = regs[1] & Self::MASKS[1];
+impl MultiByteBitFieldFromBytes for FifoDataLength {
+    fn from_bytes(bytes: &[u8]) -> Self {
+        assert!(bytes.len() >= 2);
+        let value_lsb = bytes[0];
+        let value_msb = bytes[1] & Self::MASKS[1];
         Self::new(u16::from_le_bytes([value_lsb, value_msb])).unwrap()
     }
 }
@@ -127,14 +127,14 @@ pub type FifoConfigBuffer = [u8; 4];
 
 impl From<FifoConfig> for FifoConfigBuffer {
     fn from(config: FifoConfig) -> Self {
-        let watermark_threshold_bytes = config.watermark_threshold.to_regs();
+        let watermark_threshold_bytes = config.watermark_threshold.to_bytes();
         [
             watermark_threshold_bytes[0],
             watermark_threshold_bytes[1]
-                | config.odr_change_batched.to_reg()
-                | config.stop_on_watermark.to_reg(),
-            config.accelerometer_batching_rate.to_reg() | config.gyroscope_batching_rate.to_reg(),
-            config.mode.to_reg(),
+                | config.odr_change_batched.to_byte()
+                | config.stop_on_watermark.to_byte(),
+            config.accelerometer_batching_rate.to_byte() | config.gyroscope_batching_rate.to_byte(),
+            config.mode.to_byte(),
         ]
     }
 }
@@ -142,12 +142,12 @@ impl From<FifoConfig> for FifoConfigBuffer {
 impl From<FifoConfigBuffer> for FifoConfig {
     fn from(regs: FifoConfigBuffer) -> Self {
         FifoConfig {
-            watermark_threshold: FifoWatermarkThreshold::from_regs(&regs[0..=1]),
-            odr_change_batched: DataRateChangeBatching::from_reg(regs[1]),
-            stop_on_watermark: StopOnWatermarkThreshold::from_reg(regs[1]),
-            gyroscope_batching_rate: GyroscopeBatchingRate::from_reg(regs[2]),
-            accelerometer_batching_rate: AccelerometerBatchingRate::from_reg(regs[2]),
-            mode: FifoMode::from_reg(regs[3]),
+            watermark_threshold: FifoWatermarkThreshold::from_bytes(&regs[0..=1]),
+            odr_change_batched: DataRateChangeBatching::from_byte(regs[1]),
+            stop_on_watermark: StopOnWatermarkThreshold::from_byte(regs[1]),
+            gyroscope_batching_rate: GyroscopeBatchingRate::from_byte(regs[2]),
+            accelerometer_batching_rate: AccelerometerBatchingRate::from_byte(regs[2]),
+            mode: FifoMode::from_byte(regs[3]),
         }
     }
 }

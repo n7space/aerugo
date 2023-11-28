@@ -1,5 +1,5 @@
 use crate::{
-    bitfield_enum::{bitfield_enum, FromRegister},
+    bitfield_enum::{bitfield_enum, BitFieldFromByte},
     config::data_types::{AngularRate, FromBuffer, LinearAcceleration, Temperature, Timestamp},
 };
 
@@ -36,7 +36,7 @@ pub struct FifoWordStruct {
 impl FromBuffer<7> for FifoWordStruct {
     fn from_buffer(buffer: &[u8; 7]) -> Self {
         FifoWordStruct {
-            tag: Tag::from_reg(buffer[0]),
+            tag: Tag::from_byte(buffer[0]),
             data: buffer[1..7].try_into().unwrap(),
         }
     }

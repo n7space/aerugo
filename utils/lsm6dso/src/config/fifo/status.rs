@@ -1,4 +1,4 @@
-use bitfield_enum::{bitfield_enum, FromRegister};
+use bitfield_enum::{bitfield_enum, BitFieldFromByte};
 
 bitfield_enum!(Watermark [mask=0x80, offset=7] {
     NotReached = 0,
@@ -42,11 +42,11 @@ impl From<FifoStatusBuffer> for FifoStatus {
         const STORED_WORDS_MASK: u8 = 0x03;
         Self {
             stored_words: u16::from_le_bytes([buffer[0], buffer[1] & STORED_WORDS_MASK]),
-            latched_overrun: LatchedOverrun::from_reg(buffer[1]),
-            counter_threshold: CounterThreshold::from_reg(buffer[1]),
-            smart_fifo: SmartStatus::from_reg(buffer[1]),
-            overrun: Overrun::from_reg(buffer[1]),
-            watermark: Watermark::from_reg(buffer[1]),
+            latched_overrun: LatchedOverrun::from_byte(buffer[1]),
+            counter_threshold: CounterThreshold::from_byte(buffer[1]),
+            smart_fifo: SmartStatus::from_byte(buffer[1]),
+            overrun: Overrun::from_byte(buffer[1]),
+            watermark: Watermark::from_byte(buffer[1]),
         }
     }
 }

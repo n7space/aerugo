@@ -12,7 +12,7 @@
 pub extern crate derive_more;
 
 #[macro_export]
-/// Macro creating an bitfield enum with methods for converting it from/to register value.
+/// Macro creating an bitfield enum with methods for converting it from/to bitfield value.
 macro_rules! bitfield_enum {
     ($name:ident [mask = $mask:literal, offset = $offset:literal] { $( $(#[doc = $doc:expr])? $variant_name:ident = $variant_value:literal,)+ }) => {
         #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, $crate::derive_more::TryFrom)]
@@ -25,97 +25,96 @@ macro_rules! bitfield_enum {
             )+
         }
 
-        impl $crate::RegisterField for $name {
+        impl $crate::BitField for $name {
             const MASK: u8 = $mask;
             const OFFSET: usize = $offset;
         }
 
-        impl $crate::ToRegister for $name {
-            fn to_reg(self) -> u8 {
-                use $crate::RegisterField;
+        impl $crate::BitFieldToByte for $name {
+            fn to_byte(self) -> u8 {
+                use $crate::BitField;
                 (self as u8) << Self::OFFSET
             }
         }
 
-        impl $crate::FromRegister for $name {
-            fn from_reg(reg: u8) -> Self {
-                use $crate::RegisterField;
-                ((reg & Self::MASK) >> Self::OFFSET).try_into().unwrap()
+        impl $crate::BitFieldFromByte for $name {
+            fn from_byte(byte: u8) -> Self {
+                use $crate::BitField;
+                ((byte & Self::MASK) >> Self::OFFSET).try_into().unwrap()
             }
         }
 
-        impl $crate::ApplyToRegister for $name
-            where Self: $crate::ToRegister
+        impl $crate::ApplyBitFieldToByte for $name
+            where Self: $crate::BitField
         {
-            fn apply_to_reg(self, reg: u8) -> u8 {
-                use $crate::{RegisterField, ToRegister};
-                (reg & !Self::MASK) | self.to_reg()
+            fn apply_to_byte(self, byte: u8) -> u8 {
+                use $crate::{BitField, BitFieldToByte};
+                (byte & !Self::MASK) | self.to_byte()
             }
         }
     };
 }
 
-/// Trait for single-register fields
-pub trait RegisterField
+/// Trait for single-byte bitfields
+pub trait BitField
 where
     Self: Copy,
 {
-    /// Field mask, per datasheet (as-in register).
+    // Bitfield mask.
     const MASK: u8;
-    /// Offset of the field's LSB to register's LSB.
+    /// Offset of the field's LSB.
     const OFFSET: usize;
 }
 
-pub trait ToRegister
+pub trait BitFieldToByte
 where
-    Self: Copy + RegisterField,
+    Self: Copy + BitField,
 {
-    /// This function should return the value of current register field that can be OR'd with
-    /// register's content to set it.
-    fn to_reg(self) -> u8;
+    /// This function should return the value of current bitfield with unused bits set to 0.
+    fn to_byte(self) -> u8;
 }
 
-pub trait FromRegister
+pub trait BitFieldFromByte
 where
-    Self: Copy + RegisterField,
+    Self: Copy + BitField,
 {
-    /// This function should extract the field's value from the register and return it.
-    fn from_reg(reg: u8) -> Self;
+    /// This function should extract the field's value from the bitfield and return it.
+    fn from_byte(byte: u8) -> Self;
 }
 
-pub trait ApplyToRegister
+pub trait ApplyBitFieldToByte
 where
-    Self: Copy + RegisterField,
+    Self: Copy + BitField,
 {
-    /// This function modifies existing register's bits and returns it's new value with applied field.
-    fn apply_to_reg(self, reg: u8) -> u8;
+    /// This function modifies existing byte's bits and returns it's new value with applied bitfield.
+    fn apply_to_byte(self, byte: u8) -> u8;
 }
 
-/// Trait for fields that span multiple registers. The order of masks and offsets must be defined
-/// respective to the order of registers this field spans, smaller address first.
-pub trait MultiRegisterField<const REGISTER_SPAN: usize = 2>
+/// Trait for bitfields that span multiple bytes. The order of masks and offsets must be defined
+/// respective to the order of bytes this field spans.
+pub trait MultiByteBitField<const BITFIELD_SPAN: usize = 2>
 where
     Self: Copy,
 {
-    /// Field masks, per datasheet (as-in register).
-    const MASKS: [u8; REGISTER_SPAN];
-    /// Offsets of the field's LSB from register's LSB.
-    const OFFSETS: [usize; REGISTER_SPAN];
+    /// Field masks.
+    const MASKS: [u8; BITFIELD_SPAN];
+    /// Offsets of the field's LSB.
+    const OFFSETS: [usize; BITFIELD_SPAN];
 }
 
-pub trait ToMultiRegister<const REGISTER_SPAN: usize = 2>
+pub trait MultiByteBitFieldToBytes<const BITFIELD_SPAN: usize = 2>
 where
-    Self: Copy + MultiRegisterField<REGISTER_SPAN>,
+    Self: Copy + MultiByteBitField<BITFIELD_SPAN>,
 {
-    /// This function should return the value of provided registers as an array. Unused bits should
+    /// This function should return the value of provided bitfield as an array. Unused bits should
     /// remain 0.
-    fn to_regs(self) -> [u8; REGISTER_SPAN];
+    fn to_bytes(self) -> [u8; BITFIELD_SPAN];
 }
 
-pub trait FromMultiRegister<const REGISTER_SPAN: usize = 2>
+pub trait MultiByteBitFieldFromBytes<const BITFIELD_SPAN: usize = 2>
 where
-    Self: Copy + MultiRegisterField<REGISTER_SPAN>,
+    Self: Copy + MultiByteBitField<BITFIELD_SPAN>,
 {
-    /// This function should extract the field's value from the register and return it.
-    fn from_regs(regs: &[u8]) -> Self;
+    /// This function should extract the field's value from the bitfield and return it.
+    fn from_bytes(bytes: &[u8]) -> Self;
 }

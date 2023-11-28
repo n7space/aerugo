@@ -1,4 +1,4 @@
-use bitfield_enum::{bitfield_enum, FromRegister, ToRegister};
+use bitfield_enum::{bitfield_enum, BitFieldFromByte, BitFieldToByte};
 
 bitfield_enum!(AccelerometerDataRate [mask=0xF0, offset=4] {
     PowerDown = 0b0000,
@@ -98,16 +98,16 @@ pub struct AccelerometerConfig {
 
 impl From<AccelerometerConfig> for AccelerometerConfigBuffer {
     fn from(config: AccelerometerConfig) -> Self {
-        config.output_selection.to_reg() | config.scale.to_reg() | config.data_rate.to_reg()
+        config.output_selection.to_byte() | config.scale.to_byte() | config.data_rate.to_byte()
     }
 }
 
 impl From<AccelerometerConfigBuffer> for AccelerometerConfig {
     fn from(value: AccelerometerConfigBuffer) -> Self {
         AccelerometerConfig {
-            data_rate: AccelerometerDataRate::from_reg(value),
-            scale: AccelerometerScale::from_reg(value),
-            output_selection: AccelerometerOutputSelection::from_reg(value),
+            data_rate: AccelerometerDataRate::from_byte(value),
+            scale: AccelerometerScale::from_byte(value),
+            output_selection: AccelerometerOutputSelection::from_byte(value),
         }
     }
 }
@@ -120,15 +120,15 @@ pub struct GyroscopeConfig {
 
 impl From<GyroscopeConfig> for GyroscopeConfigBuffer {
     fn from(config: GyroscopeConfig) -> Self {
-        config.scale.to_reg() | config.data_rate.to_reg()
+        config.scale.to_byte() | config.data_rate.to_byte()
     }
 }
 
 impl From<GyroscopeConfigBuffer> for GyroscopeConfig {
     fn from(value: GyroscopeConfigBuffer) -> Self {
         GyroscopeConfig {
-            data_rate: GyroscopeDataRate::from_reg(value),
-            scale: GyroscopeScale::from_reg(value),
+            data_rate: GyroscopeDataRate::from_byte(value),
+            scale: GyroscopeScale::from_byte(value),
         }
     }
 }

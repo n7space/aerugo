@@ -17,7 +17,7 @@ mod bounded_int;
 pub mod config;
 pub(crate) mod registers;
 
-use bitfield_enum::{ApplyToRegister, FromRegister};
+use bitfield_enum::{ApplyBitFieldToByte, BitFieldFromByte};
 use config::{
     control::{
         AccelerometerConfig, AccelerometerConfigBuffer, AccelerometerTestMode, GyroscopeConfig,
@@ -154,7 +154,7 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         let ctrl_reg = self.read_register(Register::CTRL3_C)?;
         self.write_register(
             Register::CTRL3_C,
-            RebootMemoryContent::Yes.apply_to_reg(ctrl_reg),
+            RebootMemoryContent::Yes.apply_to_byte(ctrl_reg),
         )?;
         Ok(())
     }
@@ -164,40 +164,45 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         activation_level: IrqActivationLevel,
     ) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL3_C)?;
-        self.write_register(Register::CTRL3_C, activation_level.apply_to_reg(ctrl_reg))?;
+        self.write_register(Register::CTRL3_C, activation_level.apply_to_byte(ctrl_reg))?;
         Ok(())
     }
 
     pub fn get_irq_activation_level(&mut self) -> Result<IrqActivationLevel, SPI::Error> {
-        Ok(IrqActivationLevel::from_reg(
+        Ok(IrqActivationLevel::from_byte(
             self.read_register(Register::CTRL3_C)?,
         ))
     }
 
     pub fn set_irq_pin_mode(&mut self, pin_mode: IrqPinMode) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL3_C)?;
-        self.write_register(Register::CTRL3_C, pin_mode.apply_to_reg(ctrl_reg))?;
+        self.write_register(Register::CTRL3_C, pin_mode.apply_to_byte(ctrl_reg))?;
         Ok(())
     }
 
     pub fn get_irq_pin_mode(&mut self) -> Result<IrqPinMode, SPI::Error> {
-        Ok(IrqPinMode::from_reg(self.read_register(Register::CTRL3_C)?))
+        Ok(IrqPinMode::from_byte(
+            self.read_register(Register::CTRL3_C)?,
+        ))
     }
 
     pub fn software_reset(&mut self) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL3_C)?;
-        self.write_register(Register::CTRL3_C, SoftwareReset::Yes.apply_to_reg(ctrl_reg))?;
+        self.write_register(
+            Register::CTRL3_C,
+            SoftwareReset::Yes.apply_to_byte(ctrl_reg),
+        )?;
         Ok(())
     }
 
     pub fn set_data_ready_state(&mut self, state: DataReadyState) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL4_C)?;
-        self.write_register(Register::CTRL4_C, state.apply_to_reg(ctrl_reg))?;
+        self.write_register(Register::CTRL4_C, state.apply_to_byte(ctrl_reg))?;
         Ok(())
     }
 
     pub fn get_data_ready_state(&mut self) -> Result<DataReadyState, SPI::Error> {
-        Ok(DataReadyState::from_reg(
+        Ok(DataReadyState::from_byte(
             self.read_register(Register::CTRL4_C)?,
         ))
     }
@@ -207,12 +212,12 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         test_mode: AccelerometerTestMode,
     ) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL5_C)?;
-        self.write_register(Register::CTRL5_C, test_mode.apply_to_reg(ctrl_reg))?;
+        self.write_register(Register::CTRL5_C, test_mode.apply_to_byte(ctrl_reg))?;
         Ok(())
     }
 
     pub fn get_accelerometer_test_mode(&mut self) -> Result<AccelerometerTestMode, SPI::Error> {
-        Ok(AccelerometerTestMode::from_reg(
+        Ok(AccelerometerTestMode::from_byte(
             self.read_register(Register::CTRL5_C)?,
         ))
     }
@@ -222,12 +227,12 @@ impl<SPI: SpiBus, const BUFFER_SIZE: usize> LSM6DSO<SPI, { BUFFER_SIZE }> {
         test_mode: GyroscopeTestMode,
     ) -> Result<(), SPI::Error> {
         let ctrl_reg = self.read_register(Register::CTRL5_C)?;
-        self.write_register(Register::CTRL5_C, test_mode.apply_to_reg(ctrl_reg))?;
+        self.write_register(Register::CTRL5_C, test_mode.apply_to_byte(ctrl_reg))?;
         Ok(())
     }
 
     pub fn get_gyroscope_test_mode(&mut self) -> Result<GyroscopeTestMode, SPI::Error> {
-        Ok(GyroscopeTestMode::from_reg(
+        Ok(GyroscopeTestMode::from_byte(
             self.read_register(Register::CTRL5_C)?,
         ))
     }
