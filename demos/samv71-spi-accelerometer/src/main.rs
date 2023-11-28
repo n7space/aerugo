@@ -67,14 +67,23 @@ use aerugo::{
     Aerugo, EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage,
     SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
+use lsm6dso::{
+    config::fifo::config::{
+        AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
+        FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+    },
+    LSM6DSO,
+};
 use rt::entry;
 
 const UART_BAUD_RATE: u32 = 57600;
 
-/// LSM6DSO chip select signal.
-const LSM6DSO_CHIP: SelectedChip = SelectedChip::Chip1;
-/// LSM6DSO SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
-const LSM6DSO_SPI_CLOCK_DIVIDER: u8 = 100;
+/// IMU chip select signal.
+const IMU_CHIP: SelectedChip = SelectedChip::Chip1;
+/// IMU SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
+const IMU_SPI_CLOCK_DIVIDER: u8 = 100;
+
+type IMU = LSM6DSO<Spi<SPI0, Master>, 32>;
 
 const TELECOMMAND_LENGTH: usize = 7;
 type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
@@ -138,6 +147,9 @@ static EVENT_START_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STOP_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 
+/// IMU will never be accessed from an interrupt, so it's safe to access from tasklets.
+static mut IMU_STORAGE: Option<IMU> = None;
+
 #[entry]
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
@@ -159,8 +171,14 @@ fn main() -> ! {
     logln!("UART initialized!");
 
     logln!("Initializing SPI...");
-    let _spi = init_spi(Spi::new(peripherals.spi_0.take().unwrap()));
+    let spi = init_spi(Spi::new(peripherals.spi_0.take().unwrap()));
     logln!("SPI initialized!");
+
+    logln!("Initializing IMU...");
+    let imu = init_imu(spi);
+    // This is safe, because IMU storage is never accessed from IRQ.
+    unsafe { IMU_STORAGE.replace(imu) };
+    logln!("IMU initialized!");
 
     logln!("Initializing DMA...");
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
@@ -176,6 +194,7 @@ fn main() -> ! {
     init_system(aerugo);
     logln!("System initialized!");
 
+    // This is safe, because this channel is currently idle.
     unsafe {
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
@@ -230,15 +249,15 @@ fn init_uart(uart: Uart<UART4, UartNotConfigured>) -> Uart<UART4, Bidirectional>
 }
 
 fn init_spi(spi: Spi<SPI0, SpiNotConfigured>) -> Spi<SPI0, Master> {
-    let mut spi = spi.into_master(MasterConfig::new(LSM6DSO_CHIP));
+    let mut spi = spi.into_master(MasterConfig::new(IMU_CHIP));
     spi.configure_chip(
-        LSM6DSO_CHIP,
+        IMU_CHIP,
         ChipConfig {
             clock_polarity: ClockPolarity::HighWhenInactive,
             clock_phase: ClockPhase::DataChangedOnLeadingEdge,
             chip_select_behavior: ChipSelectBehavior::DeactivateAfterLastTransfer,
             bits_per_transfer: BitsPerTransfer::Bits8,
-            clock_divider: SerialClockDivider::new(LSM6DSO_SPI_CLOCK_DIVIDER).unwrap(),
+            clock_divider: SerialClockDivider::new(IMU_SPI_CLOCK_DIVIDER).unwrap(),
             delay_before_first_clock: 0,
             delay_between_consecutive_transfers: 0,
         },
@@ -254,6 +273,31 @@ fn init_spi(spi: Spi<SPI0, SpiNotConfigured>) -> Spi<SPI0, Master> {
     });
 
     spi
+}
+
+fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
+    let mut imu = match IMU::new(spi) {
+        Ok(imu) => imu,
+        Err(reason) => panic!("Could not initialize IMU: {reason:?}"),
+    };
+
+    logln!(
+        "Is IMU responsive: {}",
+        if imu.is_alive().unwrap() { "yes" } else { "no" }
+    );
+
+    let fifo_config = FifoConfig {
+        watermark_threshold: FifoWatermarkThreshold::new(50).unwrap(),
+        odr_change_batched: DataRateChangeBatching::Enabled,
+        stop_on_watermark: StopOnWatermarkThreshold::No,
+        gyroscope_batching_rate: GyroscopeBatchingRate::NoBatching,
+        accelerometer_batching_rate: AccelerometerBatchingRate::NoBatching,
+        mode: FifoMode::Fifo,
+    };
+    imu.set_fifo_config(fifo_config).unwrap();
+    assert_eq!(fifo_config, imu.get_fifo_config().unwrap());
+
+    imu
 }
 
 fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
