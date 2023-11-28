@@ -35,7 +35,18 @@ use aerugo::{
             nvic::{Interrupt, NVIC},
             pio::{pin::Peripheral as PioPeripheral, Port},
             pmc::config::PeripheralId,
-            uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, Uart},
+            spi::{
+                chip_config::{
+                    BitsPerTransfer, ChipConfig, ChipSelectBehavior, ClockPhase, ClockPolarity,
+                    SerialClockDivider,
+                },
+                config::{MasterConfig, SelectedChip},
+                interrupts::Interrupts as SpiInterrupts,
+                Master, NotConfigured as SpiNotConfigured, Spi,
+            },
+            uart::{
+                Bidirectional, Config, NotConfigured as UartNotConfigured, ReceiverConfig, Uart,
+            },
             xdmac::{
                 channel::{Channel, Configured},
                 channel_status::ChannelStatusReader,
@@ -49,7 +60,7 @@ use aerugo::{
             },
         },
         interrupt,
-        user_peripherals::{PIOD, PMC, UART4},
+        user_peripherals::{PIOD, PMC, SPI0, UART4},
     },
     logln,
     time::RateExtU32,
@@ -59,6 +70,11 @@ use aerugo::{
 use rt::entry;
 
 const UART_BAUD_RATE: u32 = 57600;
+
+/// LSM6DSO chip select signal.
+const LSM6DSO_CHIP: SelectedChip = SelectedChip::Chip1;
+/// LSM6DSO SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
+const LSM6DSO_SPI_CLOCK_DIVIDER: u8 = 100;
 
 const TELECOMMAND_LENGTH: usize = 7;
 type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
@@ -139,9 +155,12 @@ fn main() -> ! {
     logln!("PIO initialized!");
 
     logln!("Initializing UART with {}bps baudrate...", UART_BAUD_RATE);
-    let uart = Uart::new(peripherals.uart_4.take().unwrap());
-    let mut uart = init_uart(uart);
+    let mut uart = init_uart(Uart::new(peripherals.uart_4.take().unwrap()));
     logln!("UART initialized!");
+
+    logln!("Initializing SPI...");
+    let _spi = init_spi(Spi::new(peripherals.spi_0.take().unwrap()));
+    logln!("SPI initialized!");
 
     logln!("Initializing DMA...");
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
@@ -167,29 +186,74 @@ fn main() -> ! {
 
 fn init_clocks(mut pmc: PMC) {
     pmc.enable_peripheral_clock(PeripheralId::PIOD);
+    pmc.enable_peripheral_clock(PeripheralId::SPI0);
     pmc.enable_peripheral_clock(PeripheralId::UART4);
     pmc.enable_peripheral_clock(PeripheralId::XDMAC);
 }
 
 fn init_pio(port: Port<PIOD>) {
     let mut pins = port.into_pins();
-    pins[18]
+    let _uart_rx = pins[18]
         .take()
         .unwrap()
         .into_peripheral_pin(PioPeripheral::C);
-    pins[19]
+    let _uart_tx = pins[19]
         .take()
         .unwrap()
         .into_peripheral_pin(PioPeripheral::D);
+    let _spi_miso = pins[20]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _spi_mosi = pins[21]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _spi_sck = pins[22]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _lsm6dso_cs = pins[25]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _lsm6dso_int1 = pins[28].take().unwrap().into_input_pin();
 }
 
-fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
+fn init_uart(uart: Uart<UART4, UartNotConfigured>) -> Uart<UART4, Bidirectional> {
     let uart_config = Config::new(UART_BAUD_RATE, 12.MHz()).unwrap();
     let recv_config = ReceiverConfig {
         rx_filter_enabled: true,
     };
 
     uart.into_bidirectional(uart_config, recv_config)
+}
+
+fn init_spi(spi: Spi<SPI0, SpiNotConfigured>) -> Spi<SPI0, Master> {
+    let mut spi = spi.into_master(MasterConfig::new(LSM6DSO_CHIP));
+    spi.configure_chip(
+        LSM6DSO_CHIP,
+        ChipConfig {
+            clock_polarity: ClockPolarity::HighWhenInactive,
+            clock_phase: ClockPhase::DataChangedOnLeadingEdge,
+            chip_select_behavior: ChipSelectBehavior::DeactivateAfterLastTransfer,
+            bits_per_transfer: BitsPerTransfer::Bits8,
+            clock_divider: SerialClockDivider::new(LSM6DSO_SPI_CLOCK_DIVIDER).unwrap(),
+            delay_before_first_clock: 0,
+            delay_between_consecutive_transfers: 0,
+        },
+    );
+    spi.set_interrupts_state(SpiInterrupts {
+        rx_data_register_full: true,
+        tx_data_register_empty: true,
+        mode_fault_error: true,
+        overrun_error: true,
+        nss_rising: false,
+        tx_registers_empty: true,
+        underrun_error: false,
+    });
+
+    spi
 }
 
 fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
