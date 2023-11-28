@@ -1,28 +1,26 @@
-use crate::registers::FromRegister;
+use bitfield_enum::{bitfield_enum, FromRegister};
 
-use crate::config::templates::register_enum;
-
-register_enum!(Watermark [mask=0x80, offset=7] {
+bitfield_enum!(Watermark [mask=0x80, offset=7] {
     NotReached = 0,
     Reached = 1,
 });
 
-register_enum!(Overrun [mask=0x40, offset=6] {
+bitfield_enum!(Overrun [mask=0x40, offset=6] {
     FifoNotFull = 0,
     FifoFull = 1,
 });
 
-register_enum!(SmartStatus [mask=0x20, offset=5] {
+bitfield_enum!(SmartStatus [mask=0x20, offset=5] {
     FifoNotFull = 0,
     FifoWillBeFullAtNextODR = 1,
 });
 
-register_enum!(CounterThreshold [mask=0x10, offset=4] {
+bitfield_enum!(CounterThreshold [mask=0x10, offset=4] {
     NotReached = 0,
     Reached = 1,
 });
 
-register_enum!(LatchedOverrun [mask=0x08, offset=3] {
+bitfield_enum!(LatchedOverrun [mask=0x08, offset=3] {
     FifoNotFull = 0,
     FifoFull = 1,
 });

@@ -8,7 +8,7 @@
 //! When SAMV71 HAL will support [`SpiDevice`](embedded_hal::spi::SpiDevice), this library should
 //! be refactored to use it, instead of the whole bus.
 
-extern crate derive_more;
+extern crate bitfield_enum;
 extern crate embedded_hal;
 extern crate fugit;
 extern crate paste;
@@ -17,6 +17,7 @@ mod bounded_int;
 pub mod config;
 pub(crate) mod registers;
 
+use bitfield_enum::{ApplyToRegister, FromRegister};
 use config::{
     control::{
         AccelerometerConfig, AccelerometerConfigBuffer, AccelerometerTestMode, GyroscopeConfig,
@@ -31,7 +32,7 @@ use config::{
     },
     interrupts::{INT1Interrupts, INT2Interrupts, InterruptConfigBuffer},
 };
-use registers::{ApplyToRegister, FromRegister, Register};
+use registers::Register;
 
 pub use embedded_hal::spi::SpiBus;
 pub use registers::WHO_AM_I_VALUE;

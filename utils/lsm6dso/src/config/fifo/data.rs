@@ -1,12 +1,9 @@
 use crate::{
-    config::{
-        data_types::{AngularRate, FromBuffer, LinearAcceleration, Temperature, Timestamp},
-        templates::register_enum,
-    },
-    registers::FromRegister,
+    bitfield_enum::{bitfield_enum, FromRegister},
+    config::data_types::{AngularRate, FromBuffer, LinearAcceleration, Temperature, Timestamp},
 };
 
-register_enum!(Tag [mask=0xF8, offset=3] {
+bitfield_enum!(Tag [mask=0xF8, offset=3] {
     GyroscopeNC = 0x01,
     AccelerometerNC = 0x02,
     Temperature = 0x03,

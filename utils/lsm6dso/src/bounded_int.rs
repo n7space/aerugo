@@ -1,5 +1,4 @@
 //! Module with implementation of Bounded integer types.
-#![allow(dead_code)]
 use paste::paste;
 
 /// Macro creating a generic bounded value type, which allows for storing a value of specific type
@@ -56,14 +55,4 @@ macro_rules! generic_bounded_value {
     };
 }
 
-generic_bounded_value!(u8);
 generic_bounded_value!(u16);
-generic_bounded_value!(u32);
-generic_bounded_value!(u64);
-generic_bounded_value!(usize);
-
-generic_bounded_value!(i8);
-generic_bounded_value!(i16);
-generic_bounded_value!(i32);
-generic_bounded_value!(i64);
-generic_bounded_value!(isize);

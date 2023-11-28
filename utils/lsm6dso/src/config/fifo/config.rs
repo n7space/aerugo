@@ -1,7 +1,9 @@
 use crate::{
+    bitfield_enum::{
+        bitfield_enum, FromMultiRegister, FromRegister, MultiRegisterField, ToMultiRegister,
+        ToRegister,
+    },
     bounded_int::BoundedU16,
-    config::templates::register_enum,
-    registers::{FromMultiRegister, FromRegister, MultiRegisterField, ToMultiRegister, ToRegister},
 };
 
 /// Type representing FIFO watermark threshold as FIFO records (6 bytes of sensor data + tag)
@@ -48,17 +50,17 @@ impl FromMultiRegister for FifoDataLength {
     }
 }
 
-register_enum!(DataRateChangeBatching [mask=0x10, offset=4] {
+bitfield_enum!(DataRateChangeBatching [mask=0x10, offset=4] {
     Disabled = 0,
     Enabled = 1,
 });
 
-register_enum!(StopOnWatermarkThreshold [mask=0x80, offset=7]{
+bitfield_enum!(StopOnWatermarkThreshold [mask=0x80, offset=7]{
     Yes = 1,
     No = 0,
 });
 
-register_enum!(GyroscopeBatchingRate [mask=0xF0, offset=4] {
+bitfield_enum!(GyroscopeBatchingRate [mask=0xF0, offset=4] {
     NoBatching = 0b0000,
     Batch12_5Hz = 0b0001,
     Batch26Hz = 0b0010,
@@ -73,7 +75,7 @@ register_enum!(GyroscopeBatchingRate [mask=0xF0, offset=4] {
     Batch6_5Hz = 0b1011,
 });
 
-register_enum!(AccelerometerBatchingRate [mask=0x0F, offset=0] {
+bitfield_enum!(AccelerometerBatchingRate [mask=0x0F, offset=0] {
     NoBatching = 0b0000,
     Batch12_5Hz = 0b0001,
     Batch26Hz = 0b0010,
@@ -88,7 +90,7 @@ register_enum!(AccelerometerBatchingRate [mask=0x0F, offset=0] {
     Batch1_6Hz = 0b1011,
 });
 
-register_enum!(FifoMode [mask=0x07, offset=0] {
+bitfield_enum!(FifoMode [mask=0x07, offset=0] {
     /// FIFO disabled.
     Bypass = 0b000,
     /// FIFO enabled and sensor stops collecting data when FIFO is full.
