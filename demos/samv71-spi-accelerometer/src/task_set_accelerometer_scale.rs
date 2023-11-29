@@ -1,5 +1,8 @@
 use aerugo::{logln, RuntimeApi};
+use lsm6dso::config::control::AccelerometerConfig;
 pub use lsm6dso::config::control::AccelerometerScale;
+
+use crate::IMU_STORAGE;
 
 #[derive(Default)]
 pub struct TaskSetAccelerometerScaleContext {}
@@ -9,5 +12,19 @@ pub fn task_set_accelerometer_scale(
     _: &mut TaskSetAccelerometerScaleContext,
     _: &'static dyn RuntimeApi,
 ) {
-    logln!("Set accelerometer scale: {:?}", scale);
+    // This is safe, because it's a single-core system and IMU_STORAGE is never accessed from any IRQ
+    let imu = unsafe { IMU_STORAGE.as_mut().unwrap() };
+
+    // Read old config, update it, verify if it's updated successfully.
+    let accelerometer_config = AccelerometerConfig {
+        scale,
+        ..imu.get_accelerometer_config().unwrap()
+    };
+    imu.set_accelerometer_config(accelerometer_config).unwrap();
+    assert_eq!(
+        accelerometer_config,
+        imu.get_accelerometer_config().unwrap()
+    );
+
+    logln!("Accelerometer scale set to {:?}", scale);
 }

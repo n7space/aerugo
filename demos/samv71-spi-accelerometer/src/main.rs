@@ -148,7 +148,12 @@ static EVENT_STOP_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 
 /// IMU will never be accessed from an interrupt, so it's safe to access from tasklets.
-static mut IMU_STORAGE: Option<IMU> = None;
+/// This is an "unsafe" alternative to `Mutex<RefCell<Option<T>>>` that's 100% safe in this specific
+/// scenario. Wrapping IMU in a mutex would require doing all IMU operations in critical sections,
+/// which is very suboptimal, as we want to limit the amount of critical sections to minimum.
+///
+/// For mutex-based storage example, see [`IMU_DATA_RATE_CONFIG`]
+pub static mut IMU_STORAGE: Option<IMU> = None;
 
 #[entry]
 fn main() -> ! {
