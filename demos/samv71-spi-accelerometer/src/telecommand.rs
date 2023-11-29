@@ -1,7 +1,7 @@
 use crate::ccsds::CCSDSPrimaryHeader;
 
 #[derive(Copy, Clone)]
-pub enum CommandType {
+pub enum TelecommandType {
     Start,
     Stop,
     SetDataOutputRate,
@@ -10,31 +10,31 @@ pub enum CommandType {
     GetExecutionStats,
 }
 
-impl CommandType {
+impl TelecommandType {
     pub const fn from_byte(val: u8) -> Option<Self> {
         match val {
-            0x10 => Some(CommandType::Start),
-            0x20 => Some(CommandType::Stop),
-            0x30 => Some(CommandType::SetDataOutputRate),
-            0x40 => Some(CommandType::SetAccelerometerScale),
-            0x50 => Some(CommandType::SetGyroscopeScale),
-            0x60 => Some(CommandType::GetExecutionStats),
+            0x10 => Some(TelecommandType::Start),
+            0x20 => Some(TelecommandType::Stop),
+            0x30 => Some(TelecommandType::SetDataOutputRate),
+            0x40 => Some(TelecommandType::SetAccelerometerScale),
+            0x50 => Some(TelecommandType::SetGyroscopeScale),
+            0x60 => Some(TelecommandType::GetExecutionStats),
             _ => None,
         }
     }
 }
 
 pub struct Command {
-    command_type: CommandType,
+    command_type: TelecommandType,
     argument: u8,
 }
 
-impl TryFrom<CCSDSPrimaryHeader> for CommandType {
+impl TryFrom<CCSDSPrimaryHeader> for TelecommandType {
     type Error = u8;
 
     fn try_from(header: CCSDSPrimaryHeader) -> Result<Self, Self::Error> {
         let opcode = header.sequence_control.name.get() as u8;
-        CommandType::from_byte(opcode).ok_or(opcode)
+        TelecommandType::from_byte(opcode).ok_or(opcode)
     }
 }
 
@@ -44,7 +44,8 @@ impl Command {
             return Err("unexpected data length, expected 1 byte");
         }
 
-        let command_type: CommandType = header.try_into().map_err(|_| "invalid command type")?;
+        let command_type: TelecommandType =
+            header.try_into().map_err(|_| "invalid command type")?;
 
         Ok(Self {
             command_type,
@@ -52,7 +53,7 @@ impl Command {
         })
     }
 
-    pub fn command_type(&self) -> CommandType {
+    pub fn command_type(&self) -> TelecommandType {
         self.command_type
     }
 

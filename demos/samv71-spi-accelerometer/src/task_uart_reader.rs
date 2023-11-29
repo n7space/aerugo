@@ -1,7 +1,7 @@
 use crate::{
     ccsds::{CCSDSPrimaryHeader, PacketType},
-    command::FromCommandArgument,
-    AccelerometerScale, Command, CommandEvent, CommandType, GyroscopeScale, OutputDataRate,
+    telecommand::FromCommandArgument,
+    AccelerometerScale, Command, CommandEvent, TelecommandType, GyroscopeScale, OutputDataRate,
     TelecommandBuffer,
 };
 
@@ -37,21 +37,21 @@ pub fn task_uart_reader(
 
     match Command::from_telecommand(header, &buffer[6..]) {
         Ok(command) => match command.command_type() {
-            CommandType::Start => {
+            TelecommandType::Start => {
                 let result = api.emit_event(CommandEvent::Start.into());
 
                 if result.is_err() {
                     logln!("Failed to emit Start event");
                 }
             }
-            CommandType::Stop => {
+            TelecommandType::Stop => {
                 let result = api.emit_event(CommandEvent::Stop.into());
 
                 if result.is_err() {
                     logln!("Failed to emit Stop event");
                 }
             }
-            CommandType::SetDataOutputRate => {
+            TelecommandType::SetDataOutputRate => {
                 match OutputDataRate::from_command_argument(command.argument()) {
                     Ok(output_data_rate) => {
                         let result = context.data_output_rate_queue.send_data(output_data_rate);
@@ -63,7 +63,7 @@ pub fn task_uart_reader(
                     Err(msg) => logln!("Could not parse output data rate: {:02X}", msg),
                 }
             }
-            CommandType::SetAccelerometerScale => {
+            TelecommandType::SetAccelerometerScale => {
                 match AccelerometerScale::from_command_argument(command.argument()) {
                     Ok(accelerometer_scale) => {
                         let result = context
@@ -77,7 +77,7 @@ pub fn task_uart_reader(
                     Err(msg) => logln!("Could not parse accelerometer scale: {:02X}", msg),
                 }
             }
-            CommandType::SetGyroscopeScale => {
+            TelecommandType::SetGyroscopeScale => {
                 match GyroscopeScale::from_command_argument(command.argument()) {
                     Ok(gyroscope_scale) => {
                         let result = context.gyroscope_scale_queue.send_data(gyroscope_scale);
@@ -89,7 +89,7 @@ pub fn task_uart_reader(
                     Err(msg) => logln!("Could not parse gyroscope scale: {:02X}", msg),
                 }
             }
-            CommandType::GetExecutionStats => {
+            TelecommandType::GetExecutionStats => {
                 let result = api.emit_event(CommandEvent::GetExecutionStats.into());
 
                 if result.is_err() {

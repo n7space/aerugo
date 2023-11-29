@@ -9,7 +9,7 @@ extern crate panic_rtt_target;
 
 mod bounded_int;
 mod ccsds;
-pub mod command;
+pub mod telecommand;
 pub mod events;
 pub mod task_get_execution_stats;
 pub mod task_set_accelerometer_scale;
@@ -19,7 +19,7 @@ pub mod task_start_measurements;
 pub mod task_stop_measurements;
 pub mod task_uart_reader;
 
-use crate::command::*;
+use crate::telecommand::*;
 use crate::events::*;
 use crate::task_get_execution_stats::*;
 use crate::task_set_accelerometer_scale::*;
