@@ -84,7 +84,7 @@ use rt::entry;
 // == Configuration constants ==
 
 /// Baudrate of UART used to communicate with desktop application
-const UART_BAUD_RATE: u32 = 57600;
+const UART_BAUD_RATE: u32 = 57_600;
 /// Demo's telemetry Application Identifier field value
 pub const DEMO_TELEMETRY_APID: u16 = 42;
 
@@ -94,7 +94,7 @@ const IMU_CHIP: SelectedChip = SelectedChip::Chip1;
 const IMU_SPI_CLOCK_DIVIDER: u8 = 25;
 
 /// Delay between calls to task fetching the data from IMU and transmitting it via UART.
-const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(1000);
+const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(10);
 
 // == End of configuration constants ==
 
@@ -310,6 +310,9 @@ fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
         "Is IMU responsive: {}",
         if imu.is_alive().unwrap() { "yes" } else { "no" }
     );
+
+    imu.software_reset().unwrap();
+    imu.reboot_memory_content().unwrap();
 
     let fifo_config = FifoConfig {
         watermark_threshold: FifoWatermarkThreshold::new_saturated(FifoWatermarkThreshold::LOW),
