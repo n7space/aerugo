@@ -1,31 +1,22 @@
+use derive_more::TryFrom;
+
 use crate::ccsds::CCSDSPrimaryHeader;
 
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, TryFrom)]
+#[repr(u8)]
+#[try_from(repr)]
 pub enum TelecommandType {
-    Start,
-    Stop,
-    SetDataOutputRate,
-    SetAccelerometerScale,
-    SetGyroscopeScale,
-    GetExecutionStats,
+    Start = 0x10,
+    Stop = 0x20,
+    SetDataOutputRate = 0x30,
+    SetAccelerometerScale = 0x40,
+    SetGyroscopeScale = 0x50,
+    GetExecutionStats = 0x60,
 }
 
-impl TelecommandType {
-    pub const fn from_byte(val: u8) -> Option<Self> {
-        match val {
-            0x10 => Some(TelecommandType::Start),
-            0x20 => Some(TelecommandType::Stop),
-            0x30 => Some(TelecommandType::SetDataOutputRate),
-            0x40 => Some(TelecommandType::SetAccelerometerScale),
-            0x50 => Some(TelecommandType::SetGyroscopeScale),
-            0x60 => Some(TelecommandType::GetExecutionStats),
-            _ => None,
-        }
-    }
-}
-
-pub struct Command {
-    command_type: TelecommandType,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Telecommand {
+    telecommand_type: TelecommandType,
     argument: u8,
 }
 
@@ -34,27 +25,27 @@ impl TryFrom<CCSDSPrimaryHeader> for TelecommandType {
 
     fn try_from(header: CCSDSPrimaryHeader) -> Result<Self, Self::Error> {
         let opcode = header.sequence_control.name.get() as u8;
-        TelecommandType::from_byte(opcode).ok_or(opcode)
+        TelecommandType::try_from(opcode).map_err(|err| err.input)
     }
 }
 
-impl Command {
-    pub fn from_telecommand(header: CCSDSPrimaryHeader, data: &[u8]) -> Result<Self, &'static str> {
+impl Telecommand {
+    pub fn from_ccsds_packet(
+        header: CCSDSPrimaryHeader,
+        data: &[u8],
+    ) -> Result<Self, &'static str> {
         if header.data_length != 1 {
             return Err("unexpected data length, expected 1 byte");
         }
 
-        let command_type: TelecommandType =
-            header.try_into().map_err(|_| "invalid command type")?;
-
         Ok(Self {
-            command_type,
+            telecommand_type: header.try_into().map_err(|_| "invalid command type")?,
             argument: data[0],
         })
     }
 
     pub fn command_type(&self) -> TelecommandType {
-        self.command_type
+        self.telecommand_type
     }
 
     pub fn argument(&self) -> u8 {
@@ -62,24 +53,24 @@ impl Command {
     }
 }
 
-pub trait FromCommandArgument
+pub trait FromTelecommandArgument
 where
     Self: Sized,
 {
     type Error;
-    fn from_command_argument(argument: u8) -> Result<Self, Self::Error>;
+    fn from_telecommand_argument(argument: u8) -> Result<Self, Self::Error>;
 }
 
 pub mod arguments {
-    use super::FromCommandArgument;
+    use super::FromTelecommandArgument;
     use crate::task_set_accelerometer_scale::AccelerometerScale;
     use crate::task_set_data_output_rate::OutputDataRate;
     use crate::task_set_gyroscope_scale::GyroscopeScale;
 
-    impl FromCommandArgument for OutputDataRate {
+    impl FromTelecommandArgument for OutputDataRate {
         type Error = u8;
 
-        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+        fn from_telecommand_argument(argument: u8) -> Result<Self, Self::Error> {
             match argument {
                 0x01 => Ok(OutputDataRate::Odr12_5Hz),
                 0x02 => Ok(OutputDataRate::Odr26Hz),
@@ -96,10 +87,10 @@ pub mod arguments {
         }
     }
 
-    impl FromCommandArgument for AccelerometerScale {
+    impl FromTelecommandArgument for AccelerometerScale {
         type Error = u8;
 
-        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+        fn from_telecommand_argument(argument: u8) -> Result<Self, Self::Error> {
             match argument {
                 0x01 => Ok(AccelerometerScale::Scale2g),
                 0x02 => Ok(AccelerometerScale::Scale4g),
@@ -110,10 +101,10 @@ pub mod arguments {
         }
     }
 
-    impl FromCommandArgument for GyroscopeScale {
+    impl FromTelecommandArgument for GyroscopeScale {
         type Error = u8;
 
-        fn from_command_argument(argument: u8) -> Result<Self, Self::Error> {
+        fn from_telecommand_argument(argument: u8) -> Result<Self, Self::Error> {
             match argument {
                 0x01 => Ok(GyroscopeScale::Scale125dps),
                 0x02 => Ok(GyroscopeScale::Scale250dps),

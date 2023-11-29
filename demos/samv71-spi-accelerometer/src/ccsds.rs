@@ -118,7 +118,8 @@ impl MultiByteBitFieldFromBytes for PacketName {
     }
 }
 
-pub type CCSDSPrimaryHeaderBuffer = [u8; 6];
+pub const CCSDS_PRIMARY_HEADER_LENGTH: usize = 6;
+pub type CCSDSPrimaryHeaderBuffer = [u8; CCSDS_PRIMARY_HEADER_LENGTH];
 
 /// Every error contains the raw value of the field it failed to recognize.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

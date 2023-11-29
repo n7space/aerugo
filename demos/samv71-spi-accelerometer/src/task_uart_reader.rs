@@ -1,8 +1,8 @@
 use crate::{
     ccsds::{CCSDSPrimaryHeader, PacketType},
-    telecommand::FromCommandArgument,
-    AccelerometerScale, Command, CommandEvent, TelecommandType, GyroscopeScale, OutputDataRate,
-    TelecommandBuffer,
+    telecommand::FromTelecommandArgument,
+    AccelerometerScale, CommandEvent, GyroscopeScale, OutputDataRate, Telecommand,
+    TelecommandBuffer, TelecommandType,
 };
 
 use aerugo::{logln, MessageQueueHandle, RuntimeApi};
@@ -35,7 +35,7 @@ pub fn task_uart_reader(
         return;
     }
 
-    match Command::from_telecommand(header, &buffer[6..]) {
+    match Telecommand::from_ccsds_packet(header, &buffer[6..]) {
         Ok(command) => match command.command_type() {
             TelecommandType::Start => {
                 let result = api.emit_event(CommandEvent::Start.into());
@@ -52,7 +52,7 @@ pub fn task_uart_reader(
                 }
             }
             TelecommandType::SetDataOutputRate => {
-                match OutputDataRate::from_command_argument(command.argument()) {
+                match OutputDataRate::from_telecommand_argument(command.argument()) {
                     Ok(output_data_rate) => {
                         let result = context.data_output_rate_queue.send_data(output_data_rate);
 
@@ -64,7 +64,7 @@ pub fn task_uart_reader(
                 }
             }
             TelecommandType::SetAccelerometerScale => {
-                match AccelerometerScale::from_command_argument(command.argument()) {
+                match AccelerometerScale::from_telecommand_argument(command.argument()) {
                     Ok(accelerometer_scale) => {
                         let result = context
                             .accelerometer_scale_queue
@@ -78,7 +78,7 @@ pub fn task_uart_reader(
                 }
             }
             TelecommandType::SetGyroscopeScale => {
-                match GyroscopeScale::from_command_argument(command.argument()) {
+                match GyroscopeScale::from_telecommand_argument(command.argument()) {
                     Ok(gyroscope_scale) => {
                         let result = context.gyroscope_scale_queue.send_data(gyroscope_scale);
 

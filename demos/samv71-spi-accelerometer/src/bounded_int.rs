@@ -46,11 +46,28 @@ macro_rules! generic_bounded_value {
                 }
             }
 
-            impl<const LOW: $underlying_type, const HIGH: $underlying_type> core::ops::Deref for [<Bounded$underlying_type:upper>]<{ LOW }, { HIGH }> {
+            impl<const LOW: $underlying_type, const HIGH: $underlying_type> core::ops::Deref
+            for [<Bounded$underlying_type:upper>]<{ LOW }, { HIGH }> {
                 type Target = $underlying_type;
 
                 fn deref(&self) -> &Self::Target {
                     &self.0
+                }
+            }
+
+            impl<const LOW: $underlying_type, const HIGH: $underlying_type> core::convert::TryFrom<$underlying_type>
+            for [<Bounded$underlying_type:upper>]<{ LOW }, { HIGH }> {
+                type Error = $underlying_type;
+
+                fn try_from(value: $underlying_type) -> Result<Self, Self::Error> {
+                    Self::new(value).ok_or(value)
+                }
+            }
+
+            impl<const LOW: $underlying_type, const HIGH: $underlying_type> core::convert::From<[<Bounded$underlying_type:upper>]<{ LOW }, { HIGH }>>
+            for $underlying_type {
+                fn from(value: [<Bounded$underlying_type:upper>]<{ LOW }, { HIGH }>) -> Self {
+                    value.get()
                 }
             }
         }

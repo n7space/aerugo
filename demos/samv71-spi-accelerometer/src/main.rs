@@ -9,7 +9,6 @@ extern crate panic_rtt_target;
 
 mod bounded_int;
 mod ccsds;
-pub mod telecommand;
 pub mod events;
 pub mod task_get_execution_stats;
 pub mod task_set_accelerometer_scale;
@@ -17,9 +16,11 @@ pub mod task_set_data_output_rate;
 pub mod task_set_gyroscope_scale;
 pub mod task_start_measurements;
 pub mod task_stop_measurements;
+pub mod task_transmit_imu_data;
 pub mod task_uart_reader;
+pub mod telecommand;
+pub mod telemetry;
 
-use crate::telecommand::*;
 use crate::events::*;
 use crate::task_get_execution_stats::*;
 use crate::task_set_accelerometer_scale::*;
@@ -27,8 +28,11 @@ use crate::task_set_data_output_rate::*;
 use crate::task_set_gyroscope_scale::*;
 use crate::task_start_measurements::*;
 use crate::task_stop_measurements::*;
+use crate::task_transmit_imu_data::*;
 use crate::task_uart_reader::*;
+use crate::telecommand::*;
 
+use aerugo::Duration;
 use aerugo::{
     hal::{
         drivers::{
@@ -76,18 +80,27 @@ use lsm6dso::{
 };
 use rt::entry;
 
+// == Configuration constants ==
+
+/// Baudrate of UART used to communicate with desktop application
 const UART_BAUD_RATE: u32 = 57600;
+/// Demo's telemetry Application Identifier field value
+pub const DEMO_TELEMETRY_APID: u16 = 42;
 
 /// IMU chip select signal.
 const IMU_CHIP: SelectedChip = SelectedChip::Chip1;
 /// IMU SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
-const IMU_SPI_CLOCK_DIVIDER: u8 = 100;
+const IMU_SPI_CLOCK_DIVIDER: u8 = 25;
+
+/// Delay between calls to task fetching the data from IMU and transmitting it via UART.
+const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(10);
+
+// == End of configuration constants ==
 
 type IMU = LSM6DSO<Spi<SPI0, Master>, 32>;
 
 const TELECOMMAND_LENGTH: usize = 7;
 type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
-
 static mut TELECOMMAND_BUFFER: TelecommandBuffer = [0; TELECOMMAND_LENGTH];
 
 /// This is used for passing XDMAC's status reader to IRQ.
@@ -132,6 +145,8 @@ static TASK_SET_GYROSCOPE_SCALE_STORAGE: TaskletStorage<
     0,
 > = TaskletStorage::new();
 static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<EventId, TaskGetExecutionStatsContext, 0> =
+    TaskletStorage::new();
+static TASK_TRANSMIT_IMU_DATA_STORAGE: TaskletStorage<(), TaskTransmitImuDataContext, 0> =
     TaskletStorage::new();
 
 static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TelecommandBuffer, 10> =
@@ -292,7 +307,7 @@ fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
     );
 
     let fifo_config = FifoConfig {
-        watermark_threshold: FifoWatermarkThreshold::new(50).unwrap(),
+        watermark_threshold: FifoWatermarkThreshold::new_saturated(FifoWatermarkThreshold::LOW),
         odr_change_batched: DataRateChangeBatching::Enabled,
         stop_on_watermark: StopOnWatermarkThreshold::No,
         gyroscope_batching_rate: GyroscopeBatchingRate::NoBatching,
@@ -508,6 +523,24 @@ fn init_system(aerugo: &'static impl InitApi) {
     aerugo.subscribe_tasklet_to_events(
         &task_get_execution_stats_handle,
         [CommandEvent::GetExecutionStats.into()],
+    );
+
+    // Transmit IMU data
+    aerugo.create_tasklet(
+        TaskletConfig {
+            name: "TransmitIMUData",
+            ..Default::default()
+        },
+        task_transmit_imu_data,
+        &TASK_TRANSMIT_IMU_DATA_STORAGE,
+    );
+
+    let task_transmit_imu_data_handle = TASK_TRANSMIT_IMU_DATA_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_cyclic(
+        &task_transmit_imu_data_handle,
+        Some(TRANSMIT_IMU_DATA_TASK_DELAY),
+        None,
     );
 
     // Post-init

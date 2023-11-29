@@ -2,7 +2,7 @@
 target = "thumbv7em-none-eabihf"
 
 [env]
-AERUGO_TASKLET_COUNT = { value = "7" }
+AERUGO_TASKLET_COUNT = { value = "8" }
 AERUGO_EVENT_COUNT = { value = "3" }
 
 [target.thumbv7em-none-eabihf]
