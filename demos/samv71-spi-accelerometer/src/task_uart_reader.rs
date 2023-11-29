@@ -1,8 +1,9 @@
 use crate::{
     ccsds::{CCSDSPrimaryHeader, PacketType},
     telecommand::FromTelecommandArgument,
+    telemetry::{InvalidTelecommandError, SetValueError, Telemetry},
     AccelerometerScale, CommandEvent, GyroscopeScale, OutputDataRate, Telecommand,
-    TelecommandBuffer, TelecommandType,
+    TelecommandBuffer, TelecommandType, UART_WRITER_STORAGE,
 };
 
 use aerugo::{logln, MessageQueueHandle, RuntimeApi};
@@ -21,6 +22,8 @@ pub fn task_uart_reader(
     let header = match CCSDSPrimaryHeader::try_from(&buffer[0..=5].try_into().unwrap()) {
         Ok(header) => header,
         Err(reason) => {
+            Telemetry::new_invalid_telecommand_error(InvalidTelecommandError::InvalidCCSDSHeader)
+                .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
             logln!(
                 "Could not parse CCSDS primary header of received telecommand ({:?}): {:02X?}",
                 reason,
@@ -31,6 +34,10 @@ pub fn task_uart_reader(
     };
 
     if header.identity.packet_type != PacketType::Telecommand {
+        Telemetry::new_invalid_telecommand_error(
+            InvalidTelecommandError::UnexpectedTelemetryReceived,
+        )
+        .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
         logln!("Received unexpected telemetry packet: {:#?}", header);
         return;
     }
@@ -60,7 +67,11 @@ pub fn task_uart_reader(
                             logln!("Failed to send data output rate command to queue");
                         }
                     }
-                    Err(msg) => logln!("Could not parse output data rate: {:02X}", msg),
+                    Err(msg) => {
+                        Telemetry::new_set_data_output_rate_error(SetValueError::InvalidValue)
+                            .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
+                        logln!("Could not parse output data rate: {:02X}", msg)
+                    }
                 }
             }
             TelecommandType::SetAccelerometerScale => {
@@ -74,7 +85,11 @@ pub fn task_uart_reader(
                             logln!("Failed to send accelerometer scale command to queue");
                         }
                     }
-                    Err(msg) => logln!("Could not parse accelerometer scale: {:02X}", msg),
+                    Err(msg) => {
+                        Telemetry::new_set_accelerometer_scale_error(SetValueError::InvalidValue)
+                            .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
+                        logln!("Could not parse accelerometer scale: {:02X}", msg);
+                    }
                 }
             }
             TelecommandType::SetGyroscopeScale => {
@@ -86,7 +101,11 @@ pub fn task_uart_reader(
                             logln!("Failed to set gyroscope scale command to queue");
                         }
                     }
-                    Err(msg) => logln!("Could not parse gyroscope scale: {:02X}", msg),
+                    Err(msg) => {
+                        Telemetry::new_set_gyroscope_scale_error(SetValueError::InvalidValue)
+                            .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
+                        logln!("Could not parse gyroscope scale: {:02X}", msg);
+                    }
                 }
             }
             TelecommandType::GetExecutionStats => {
@@ -97,11 +116,15 @@ pub fn task_uart_reader(
                 }
             }
         },
-        Err(message) => logln!(
-            "Received malformed command ({}): {:02X?}\nwith following CCSDS header: {:#?}",
-            message,
-            buffer,
-            header
-        ),
+        Err(message) => {
+            Telemetry::new_invalid_telecommand_error(InvalidTelecommandError::MalformedPacket)
+                .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
+            logln!(
+                "Received malformed command ({}): {:02X?}\nwith following CCSDS header: {:#?}",
+                message,
+                buffer,
+                header
+            );
+        }
     };
 }

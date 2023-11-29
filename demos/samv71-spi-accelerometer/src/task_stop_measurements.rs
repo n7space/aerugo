@@ -3,7 +3,7 @@ use lsm6dso::config::control::{
     AccelerometerConfig, AccelerometerDataRate, GyroscopeConfig, GyroscopeDataRate,
 };
 
-use crate::IMU_STORAGE;
+use crate::{telemetry::Telemetry, IMU_STORAGE, UART_WRITER_STORAGE};
 
 #[derive(Default)]
 pub struct TaskStopMeasurementsContext {}
@@ -33,6 +33,9 @@ pub fn task_stop_measurements(
         imu.get_accelerometer_config().unwrap()
     );
     assert_eq!(gyroscope_config, imu.get_gyroscope_config().unwrap());
+
+    Telemetry::new_stop_confirmation()
+        .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
 
     logln!("Measurements stopped");
 }

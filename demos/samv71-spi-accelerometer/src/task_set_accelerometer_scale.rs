@@ -2,7 +2,7 @@ use aerugo::{logln, RuntimeApi};
 use lsm6dso::config::control::AccelerometerConfig;
 pub use lsm6dso::config::control::AccelerometerScale;
 
-use crate::IMU_STORAGE;
+use crate::{telemetry::Telemetry, IMU_STORAGE, UART_WRITER_STORAGE};
 
 #[derive(Default)]
 pub struct TaskSetAccelerometerScaleContext {}
@@ -25,6 +25,9 @@ pub fn task_set_accelerometer_scale(
         accelerometer_config,
         imu.get_accelerometer_config().unwrap()
     );
+
+    Telemetry::new_set_accelerometer_scale_confirmation()
+        .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
 
     logln!("Accelerometer scale set to {:?}", scale);
 }

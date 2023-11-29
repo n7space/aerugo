@@ -6,7 +6,7 @@ use lsm6dso::config::{
     fifo::config::{AccelerometerBatchingRate, FifoConfig, GyroscopeBatchingRate},
 };
 
-use crate::IMU_STORAGE;
+use crate::{telemetry::Telemetry, IMU_STORAGE, UART_WRITER_STORAGE};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum OutputDataRate {
@@ -134,6 +134,9 @@ pub fn task_set_data_output_rate(
             gyroscope: output_rate.into(),
         })
     });
+
+    Telemetry::new_set_data_output_rate_confirmation()
+        .write_ccsds_packet(unsafe { UART_WRITER_STORAGE.as_mut().unwrap() });
 
     logln!("Data output rate set to {:?}", output_rate)
 }

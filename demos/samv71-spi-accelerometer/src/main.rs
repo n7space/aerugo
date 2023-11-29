@@ -32,6 +32,7 @@ use crate::task_transmit_imu_data::*;
 use crate::task_uart_reader::*;
 use crate::telecommand::*;
 
+use aerugo::hal::drivers::uart::writer::Writer;
 use aerugo::Duration;
 use aerugo::{
     hal::{
@@ -93,7 +94,7 @@ const IMU_CHIP: SelectedChip = SelectedChip::Chip1;
 const IMU_SPI_CLOCK_DIVIDER: u8 = 25;
 
 /// Delay between calls to task fetching the data from IMU and transmitting it via UART.
-const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(10);
+const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(1000);
 
 // == End of configuration constants ==
 
@@ -170,6 +171,9 @@ static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 /// For mutex-based storage example, see [`IMU_DATA_RATE_CONFIG`]
 pub static mut IMU_STORAGE: Option<IMU> = None;
 
+/// See [`IMU_STORAGE`] for explanation why is this a `pub static mut`.
+pub static mut UART_WRITER_STORAGE: Option<Writer<UART4>> = None;
+
 #[entry]
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
@@ -188,6 +192,7 @@ fn main() -> ! {
 
     logln!("Initializing UART with {}bps baudrate...", UART_BAUD_RATE);
     let mut uart = init_uart(Uart::new(peripherals.uart_4.take().unwrap()));
+    unsafe { UART_WRITER_STORAGE.replace(uart.take_writer().unwrap()) };
     logln!("UART initialized!");
 
     logln!("Initializing SPI...");
@@ -239,7 +244,7 @@ fn init_pio(port: Port<PIOD>) {
     let _uart_tx = pins[19]
         .take()
         .unwrap()
-        .into_peripheral_pin(PioPeripheral::D);
+        .into_peripheral_pin(PioPeripheral::C);
     let _spi_miso = pins[20]
         .take()
         .unwrap()
