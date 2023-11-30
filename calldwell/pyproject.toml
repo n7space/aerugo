@@ -7,10 +7,12 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<=3.12"
 pygdbmi = "^0.11.0.0"
 paramiko = "^3.3.1"
 option = "^2.1.0"
+matplotlib = "^3.8.2"
+pyside6 = "^6.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
