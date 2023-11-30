@@ -72,6 +72,8 @@ use aerugo::{
     Aerugo, EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage,
     SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
+use lsm6dso::config::control::AccelerometerTestMode;
+use lsm6dso::config::control::GyroscopeTestMode;
 use lsm6dso::{
     config::fifo::config::{
         AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
@@ -313,6 +315,10 @@ fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
 
     imu.software_reset().unwrap();
     imu.reboot_memory_content().unwrap();
+    imu.set_accelerometer_test_mode(AccelerometerTestMode::Normal)
+        .unwrap();
+    imu.set_gyroscope_test_mode(GyroscopeTestMode::Normal)
+        .unwrap();
 
     let fifo_config = FifoConfig {
         watermark_threshold: FifoWatermarkThreshold::new_saturated(FifoWatermarkThreshold::LOW),
