@@ -7,7 +7,7 @@ import struct
 import sys
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +28,7 @@ from scripts.env import (
 # == Configuration constants ==
 DEMO_UART_BAUDRATE = 57_600
 PLOT_WINDOW_DURATION_SECONDS = 10
-PLOT_UPDATE_INTERVAL_MS = 10
+PLOT_UPDATE_INTERVAL_MS = 100
 # == End of configuration constants ==
 
 
@@ -145,6 +145,17 @@ class Vec3D:
     x: int
     y: int
     z: int
+
+    def __add__(self: Vec3D, other: Vec3D) -> Vec3D:
+        return Vec3D(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __truediv__(self: Vec3D, other: int) -> Vec3D:
+        return Vec3D(int(self.x / other), int(self.y / other), int(self.z / other))
+
+    @staticmethod
+    def average_of(vectors: list[Vec3D]) -> Vec3D:
+        """Returns average calculated from vectors on the list"""
+        return sum(vectors, Vec3D(0, 0, 0)) / len(vectors)
 
 
 @dataclass
@@ -334,20 +345,32 @@ GYRO_DATA_Z = AxisWindow(
 )
 
 
-def handle_payload(payload: Telemetry) -> bool:
+def add_sample_to_plots(accelerometer_data: Vec3D, gyroscope_data: Vec3D) -> bool:
     """Returns `True` if adding a payload caused the window to widen"""
-    if (payload_data := payload.get_imu_data()) is not None:
-        if payload.telemetry_type == TelemetryType.ACCELEROMETER_DATA:
-            ACCEL_DATA_X.add_value(payload_data.x)
-            ACCEL_DATA_Y.add_value(payload_data.y)
-            return ACCEL_DATA_Z.add_value(payload_data.z)
+    ACCEL_DATA_X.add_value(accelerometer_data.x)
+    ACCEL_DATA_Y.add_value(accelerometer_data.y)
+    ACCEL_DATA_Z.add_value(accelerometer_data.z)
 
-        if payload.telemetry_type == TelemetryType.GYROSCOPE_DATA:
-            GYRO_DATA_X.add_value(payload_data.x)
-            GYRO_DATA_Y.add_value(payload_data.y)
-            return GYRO_DATA_Z.add_value(payload_data.z)
+    GYRO_DATA_X.add_value(gyroscope_data.x)
+    GYRO_DATA_Y.add_value(gyroscope_data.y)
+    return GYRO_DATA_Z.add_value(gyroscope_data.z)
 
-    return False
+
+def process_measurements(measurements: list[Telemetry]) -> tuple[Vec3D, Vec3D]:
+    """Processes a list of telecommands with measurements and returns averaged accelerometer and
+    gyroscope data"""
+    accelerometer_measurements = [
+        cast(Vec3D, measurement.get_imu_data())
+        for measurement in measurements
+        if measurement.telemetry_type == TelemetryType.ACCELEROMETER_DATA
+    ]
+    gyroscope_measurements = [
+        cast(Vec3D, measurement.get_imu_data())
+        for measurement in measurements
+        if measurement.telemetry_type == TelemetryType.GYROSCOPE_DATA
+    ]
+
+    return Vec3D.average_of(accelerometer_measurements), Vec3D.average_of(gyroscope_measurements)
 
 
 def fetch_new_data(uart: RemoteUARTConnection) -> None:
@@ -361,8 +384,13 @@ def fetch_new_data(uart: RemoteUARTConnection) -> None:
         msg = "data output rate must be set before starting the plot"
         raise RuntimeError(msg)
 
-    handle_payload(receive_telemetry(uart).unwrap())
-    handle_payload(receive_telemetry(uart).unwrap())
+    # we want to fetch at least 1 sample per sensor each update
+    data_to_fetch = max(int(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1)
+    # *2 because we have 2 sensors
+    measurements = [receive_telemetry(uart).unwrap() for _ in range(data_to_fetch * 2)]
+    average_acceleration, average_rotation = process_measurements(measurements)
+    add_sample_to_plots(average_acceleration, average_rotation)
+
     X_AXIS_DATA.current_index = min(ACCEL_DATA_Z.current_index, GYRO_DATA_Z.current_index)
 
 
