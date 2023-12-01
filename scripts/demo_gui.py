@@ -7,6 +7,7 @@ import struct
 import sys
 from dataclasses import dataclass
 from enum import IntEnum
+from math import ceil
 from typing import Any, cast
 
 import matplotlib.pyplot as plt
@@ -359,6 +360,7 @@ def add_sample_to_plots(accelerometer_data: Vec3D, gyroscope_data: Vec3D) -> boo
 def process_measurements(measurements: list[Telemetry]) -> tuple[Vec3D, Vec3D]:
     """Processes a list of telecommands with measurements and returns averaged accelerometer and
     gyroscope data"""
+
     accelerometer_measurements = [
         cast(Vec3D, measurement.get_imu_data())
         for measurement in measurements
@@ -370,7 +372,18 @@ def process_measurements(measurements: list[Telemetry]) -> tuple[Vec3D, Vec3D]:
         if measurement.telemetry_type == TelemetryType.GYROSCOPE_DATA
     ]
 
-    return Vec3D.average_of(accelerometer_measurements), Vec3D.average_of(gyroscope_measurements)
+    accel_avg = (
+        Vec3D.average_of(accelerometer_measurements)
+        if len(accelerometer_measurements) > 0
+        else Vec3D(0, 0, 0)
+    )
+    gyro_avg = (
+        Vec3D.average_of(gyroscope_measurements)
+        if len(gyroscope_measurements) > 0
+        else Vec3D(0, 0, 0)
+    )
+
+    return accel_avg, gyro_avg
 
 
 def fetch_new_data(uart: RemoteUARTConnection) -> None:
@@ -385,8 +398,9 @@ def fetch_new_data(uart: RemoteUARTConnection) -> None:
         raise RuntimeError(msg)
 
     # we want to fetch at least 1 sample per sensor each update
-    data_to_fetch = max(int(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1)
+    data_to_fetch = max(ceil(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1)
     # *2 because we have 2 sensors
+    logging.info(f"Data to fetch: {data_to_fetch}, ODR: {DATA_OUTPUT_RATE.to_hertz()}")
     measurements = [receive_telemetry(uart).unwrap() for _ in range(data_to_fetch * 2)]
     average_acceleration, average_rotation = process_measurements(measurements)
     add_sample_to_plots(average_acceleration, average_rotation)
@@ -417,6 +431,7 @@ def plot_incoming_data(uart: RemoteUARTConnection) -> None:
     def update_plot(_frame: int) -> tuple[Any, Any, Any, Any, Any, Any]:
         """Plot update function"""
         fetch_new_data(uart)
+
         accel_plot_x.set_xdata(X_AXIS_DATA.data[: X_AXIS_DATA.current_index])
         accel_plot_x.set_ydata(ACCEL_DATA_X.data[: X_AXIS_DATA.current_index])
         accel_plot_y.set_xdata(X_AXIS_DATA.data[: X_AXIS_DATA.current_index])
