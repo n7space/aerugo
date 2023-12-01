@@ -6,10 +6,7 @@ use crate::{
     },
     DEMO_TELEMETRY_APID,
 };
-use aerugo::{
-    hal::drivers::uart::{Error as IOError, Write},
-    logln,
-};
+use aerugo::hal::drivers::uart::{Error as IOError, Write};
 use lsm6dso::config::data_types::{AngularRate, LinearAcceleration};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -81,7 +78,6 @@ impl Telemetry {
 
     pub fn write_ccsds_packet(&self, writer: &mut dyn Write<Error = IOError>) {
         let data = self.to_ccsds_packet();
-        logln!("Writing {:02X?} via UART", data);
         writer.write_all(&data).unwrap();
     }
 

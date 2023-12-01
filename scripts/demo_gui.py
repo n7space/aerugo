@@ -277,7 +277,7 @@ def start_demo(uart: RemoteUARTConnection) -> None:
     )
 
     global DATA_OUTPUT_RATE  # noqa: PLW0603 pylint: disable=global-statement
-    DATA_OUTPUT_RATE = DataRate.ODR_26HZ
+    DATA_OUTPUT_RATE = DataRate.ODR_208HZ
     send_and_validate_telecommand(uart, TelecommandType.SET_DATA_OUTPUT_RATE, DATA_OUTPUT_RATE)
     send_and_validate_telecommand(uart, TelecommandType.START, 0x00)
 
@@ -400,7 +400,6 @@ def fetch_new_data(uart: RemoteUARTConnection) -> None:
     # we want to fetch at least 1 sample per sensor each update
     data_to_fetch = max(ceil(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1)
     # *2 because we have 2 sensors
-    logging.info(f"Data to fetch: {data_to_fetch}, ODR: {DATA_OUTPUT_RATE.to_hertz()}")
     measurements = [receive_telemetry(uart).unwrap() for _ in range(data_to_fetch * 2)]
     average_acceleration, average_rotation = process_measurements(measurements)
     add_sample_to_plots(average_acceleration, average_rotation)
@@ -423,7 +422,6 @@ def plot_incoming_data(uart: RemoteUARTConnection) -> None:
     axes.set(
         xlim=[0, PLOT_WINDOW_SIZE],
         ylim=[-65535, 65535],
-        xlabel="Time",
         ylabel="Value",
     )
     axes.legend()
