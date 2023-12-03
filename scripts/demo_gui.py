@@ -13,7 +13,9 @@ from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import ticker
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Button
 from option import Err, Ok, Result
 
 from calldwell import init_default_logger
@@ -31,6 +33,7 @@ from scripts.env import (
 DEMO_UART_BAUDRATE = 57_600
 PLOT_WINDOW_DURATION_SECONDS = 10
 PLOT_UPDATE_INTERVAL_MS = 100
+PLOT_SYMMETRIC_Y_AXIS_LIMIT = 65535
 # == End of configuration constants ==
 
 
@@ -103,6 +106,24 @@ class AccelerometerScale(IntEnum):
     SCALE_8G = 0x03
     SCALE_16G = 0x04
 
+    def to_g(self: AccelerometerScale) -> int:
+        """Returns the scale in g's"""
+        if self is AccelerometerScale.SCALE_2G:
+            return 2
+        if self is AccelerometerScale.SCALE_4G:
+            return 4
+        if self is AccelerometerScale.SCALE_8G:
+            return 8
+        if self is AccelerometerScale.SCALE_16G:
+            return 16
+
+        msg = "handle all the values here"
+        raise RuntimeError(msg)
+
+    def to_str(self: AccelerometerScale) -> str:
+        """Returns the scale as string"""
+        return f"{self.to_g()}g"
+
 
 class GyroscopeScale(IntEnum):
     """Gyroscope scale"""
@@ -112,6 +133,26 @@ class GyroscopeScale(IntEnum):
     SCALE_500DPS = 0x03
     SCALE_1000DPS = 0x04
     SCALE_2000DPS = 0x05
+
+    def to_dps(self: GyroscopeScale) -> int:
+        """Returns the scale in degree per second"""
+        if self is GyroscopeScale.SCALE_125DPS:
+            return 125
+        if self is GyroscopeScale.SCALE_250DPS:
+            return 250
+        if self is GyroscopeScale.SCALE_500DPS:
+            return 500
+        if self is GyroscopeScale.SCALE_1000DPS:
+            return 1000
+        if self is GyroscopeScale.SCALE_2000DPS:
+            return 2000
+
+        msg = "handle all the values here"
+        raise RuntimeError(msg)
+
+    def to_str(self: GyroscopeScale) -> str:
+        """Returns the scale as string"""
+        return f"{self.to_dps()}dps"
 
 
 class TelemetryType(IntEnum):
@@ -268,13 +309,13 @@ def start_demo(uart: RemoteUARTConnection) -> None:
     send_and_validate_telecommand(
         uart,
         TelecommandType.SET_ACCELEROMETER_SCALE,
-        AccelerometerScale.SCALE_8G,
+        CurrentScales.accelerometer,
     )
 
     send_and_validate_telecommand(
         uart,
         TelecommandType.SET_GYROSCOPE_SCALE,
-        GyroscopeScale.SCALE_250DPS,
+        CurrentScales.gyroscope,
     )
 
     global DATA_OUTPUT_RATE  # noqa: PLW0603 pylint: disable=global-statement
@@ -347,6 +388,46 @@ GYRO_DATA_Z = AxisWindow(
 )
 
 
+class CurrentScales:
+    """Class storing current accelerometer/gyroscope scales and providing methods to get next
+    scales in order"""
+
+    accelerometer = AccelerometerScale.SCALE_2G
+    gyroscope = GyroscopeScale.SCALE_250DPS
+
+    @classmethod
+    def get_next_accelerometer_scale(cls: type[CurrentScales]) -> AccelerometerScale:
+        """Changes the accelerometer scale to next one and returns it"""
+        return {
+            AccelerometerScale.SCALE_2G: AccelerometerScale.SCALE_4G,
+            AccelerometerScale.SCALE_4G: AccelerometerScale.SCALE_8G,
+            AccelerometerScale.SCALE_8G: AccelerometerScale.SCALE_16G,
+            AccelerometerScale.SCALE_16G: AccelerometerScale.SCALE_2G,
+        }[cls.accelerometer]
+
+    @classmethod
+    def get_next_gyroscope_scale(cls: type[CurrentScales]) -> GyroscopeScale:
+        """Changes the gyroscope scale to next one and returns it"""
+        return {
+            GyroscopeScale.SCALE_250DPS: GyroscopeScale.SCALE_500DPS,
+            GyroscopeScale.SCALE_500DPS: GyroscopeScale.SCALE_1000DPS,
+            GyroscopeScale.SCALE_1000DPS: GyroscopeScale.SCALE_2000DPS,
+            GyroscopeScale.SCALE_2000DPS: GyroscopeScale.SCALE_250DPS,
+        }[cls.gyroscope]
+
+    @classmethod
+    def switch_to_next_accelerometer_state(cls: type[CurrentScales]) -> AccelerometerScale:
+        """Modifies the state of this class to store next accelerometer scale and returns it"""
+        cls.accelerometer = cls.get_next_accelerometer_scale()
+        return cls.accelerometer
+
+    @classmethod
+    def switch_to_next_gyroscope_state(cls: type[CurrentScales]) -> GyroscopeScale:
+        """Modifies the state of this class to store next gyroscope scale and returns it"""
+        cls.gyroscope = cls.get_next_gyroscope_scale()
+        return cls.gyroscope
+
+
 def add_sample_to_plots(accelerometer_data: Vec3D, gyroscope_data: Vec3D) -> bool:
     """Returns `True` if adding a payload caused the window to widen"""
     ACCEL_DATA_X.add_value(accelerometer_data.x)
@@ -408,7 +489,27 @@ def fetch_new_data(uart: RemoteUARTConnection) -> None:
     X_AXIS_DATA.current_index = min(ACCEL_DATA_Z.current_index, GYRO_DATA_Z.current_index)
 
 
-def plot_incoming_data(uart: RemoteUARTConnection) -> None:
+def set_next_accelerometer_scale(uart: RemoteUARTConnection) -> None:
+    """Sets a telecommand for demo app to set next accelerometer scale"""
+    send_telecommand(
+        uart,
+        TelecommandType.SET_ACCELEROMETER_SCALE,
+        CurrentScales.switch_to_next_accelerometer_state(),
+    )
+
+
+def set_next_gyroscope_scale(uart: RemoteUARTConnection) -> None:
+    """Sets a telecommand for demo app to set next gyroscope scale"""
+    send_telecommand(
+        uart,
+        TelecommandType.SET_GYROSCOPE_SCALE,
+        CurrentScales.switch_to_next_gyroscope_state(),
+    )
+
+
+def plot_incoming_data(  # noqa: PLR0915 pylint: disable=too-many-locals
+    uart: RemoteUARTConnection,
+) -> None:
     """Creates a plot that's updated in real-time by fetching the data from demo application"""
     figure, axes = plt.subplots()
 
@@ -422,10 +523,56 @@ def plot_incoming_data(uart: RemoteUARTConnection) -> None:
 
     axes.set(
         xlim=[0, PLOT_WINDOW_SIZE],
-        ylim=[-65535, 65535],
-        ylabel="Value",
+        ylim=[-PLOT_SYMMETRIC_Y_AXIS_LIMIT, PLOT_SYMMETRIC_Y_AXIS_LIMIT],
+        ylabel="Scale %",
     )
+
+    def update_title() -> None:
+        """Updates the plot title with current accelerometer/gyroscope scales"""
+        accel_scale = CurrentScales.accelerometer.to_str()
+        gyro_scale = CurrentScales.gyroscope.to_str()
+        axes.set_title(f"Accelerometer scale: {accel_scale}\nGyroscope scale: {gyro_scale}")
+
+    update_title()
+
+    def format_y_label(x: float, _pos: int) -> str:
+        offset_position = x + float(PLOT_SYMMETRIC_Y_AXIS_LIMIT)
+        full_scale = float(PLOT_SYMMETRIC_Y_AXIS_LIMIT) * 2.0
+        percentage = offset_position / full_scale
+        return f"{percentage*100:.2f}"
+
+    axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_y_label))
     axes.legend()
+
+    axis_set_accel_scale = figure.add_axes((0.1, 0.01, 0.4, 0.05))
+    button_set_accel_scale = Button(
+        axis_set_accel_scale,
+        f"Set accelerometer scale to {CurrentScales.get_next_accelerometer_scale().to_str()}",
+    )
+
+    def set_accel_scale_action(_event: Any) -> None:  # noqa: ANN401
+        set_next_accelerometer_scale(uart)
+        button_set_accel_scale.label.set_text(
+            f"Set accelerometer scale to {CurrentScales.get_next_accelerometer_scale().to_str()}",
+        )
+        update_title()
+
+    button_set_accel_scale.on_clicked(set_accel_scale_action)
+
+    axis_set_gyro_scale = figure.add_axes((0.5, 0.01, 0.4, 0.05))
+    button_set_gyro_scale = Button(
+        axis_set_gyro_scale,
+        f"Set gyroscope scale to {CurrentScales.get_next_gyroscope_scale().to_str()}",
+    )
+
+    def set_gyro_scale_action(_event: Any) -> None:  # noqa: ANN401
+        set_next_gyroscope_scale(uart)
+        button_set_gyro_scale.label.set_text(
+            f"Set gyroscope scale to {CurrentScales.get_next_gyroscope_scale().to_str()}",
+        )
+        update_title()
+
+    button_set_gyro_scale.on_clicked(set_gyro_scale_action)
 
     def update_plot(_frame: int) -> tuple[Any, Any, Any, Any, Any, Any]:
         """Plot update function"""
