@@ -2,6 +2,7 @@
 and plotting it in real-time."""
 from __future__ import annotations
 
+import atexit
 import logging
 import struct
 import sys
@@ -281,18 +282,18 @@ def start_demo(uart: RemoteUARTConnection) -> None:
     send_and_validate_telecommand(uart, TelecommandType.SET_DATA_OUTPUT_RATE, DATA_OUTPUT_RATE)
     send_and_validate_telecommand(uart, TelecommandType.START, 0x00)
 
+    atexit.register(lambda: stop_measurements(uart))
+
 
 def _print_data_from_demo(uart: RemoteUARTConnection) -> None:
-    """Continuously prints the data from demo application, call it right after starting the
-    measurements"""
-    while True:
-        telemetry = receive_telemetry(uart).unwrap()
-        data_kind = (
-            "acceleration"
-            if telemetry.telemetry_type == TelemetryType.ACCELEROMETER_DATA
-            else "angular rotation"
-        )
-        print(f"Received {data_kind} data: {telemetry.get_imu_data()}")
+    """Prints the data from demo application, call it right after starting the measurements"""
+    telemetry = receive_telemetry(uart).unwrap()
+    data_kind = (
+        "acceleration"
+        if telemetry.telemetry_type == TelemetryType.ACCELEROMETER_DATA
+        else "angular rotation"
+    )
+    print(f"Received {data_kind} data: {telemetry.get_imu_data()}")
 
 
 @dataclass
@@ -454,6 +455,11 @@ def plot_incoming_data(uart: RemoteUARTConnection) -> None:
         repeat=False,
     )
     plt.show()
+
+
+def stop_measurements(uart: RemoteUARTConnection) -> None:
+    """Immediately stops measurements without waiting for response"""
+    send_telecommand(uart, TelecommandType.STOP, 0x42)
 
 
 if __name__ == "__main__":
