@@ -34,6 +34,7 @@ use crate::telecommand::*;
 
 use aerugo::hal::drivers::uart::writer::Writer;
 use aerugo::Duration;
+use aerugo::TaskletId;
 use aerugo::{
     hal::{
         drivers::{
@@ -175,6 +176,24 @@ pub static mut IMU_STORAGE: Option<IMU> = None;
 
 /// See [`IMU_STORAGE`] for explanation why is this a `pub static mut`.
 pub static mut UART_WRITER_STORAGE: Option<Writer<UART4>> = None;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DemoTaskletName {
+    GetExecutionStats,
+    SetAccelerometerScale,
+    SetGyroscopeScale,
+    SetDataOutputRate,
+    StartMeasurements,
+    StopMeasurements,
+    TransmitImuData,
+    UartReader,
+}
+
+pub type TaskletMap = [(DemoTaskletName, TaskletId); 8];
+
+/// This is a mapping of app's tasklet IDs to Aerugo's tasklet IDs.
+/// Should be filled by the system @ init.
+pub static mut TASKLET_MAP: Option<TaskletMap> = None;
 
 #[entry]
 fn main() -> ! {
@@ -558,6 +577,43 @@ fn init_system(aerugo: &'static impl InitApi) {
     );
 
     // Post-init
+
+    unsafe {
+        TASKLET_MAP = Some([
+            (
+                DemoTaskletName::GetExecutionStats,
+                task_get_execution_stats_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::SetAccelerometerScale,
+                task_set_accelerometer_scale_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::SetGyroscopeScale,
+                task_set_accelerometer_scale_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::SetDataOutputRate,
+                task_set_data_output_rate_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::StartMeasurements,
+                task_start_measurements_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::StopMeasurements,
+                task_stop_measurements_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::TransmitImuData,
+                task_transmit_imu_data_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::UartReader,
+                task_uart_reader_handle.get_id(),
+            ),
+        ])
+    };
 
     unsafe {
         XDMAC_COMMAND_QUEUE_HANDLE.replace(queue_command_handle);
