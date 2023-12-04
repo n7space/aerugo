@@ -1,0 +1,23 @@
+[package]
+name = "lsm6dso"
+version = "1.0.0"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+description = "LSM6DSO driver library"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitfield-enum = { path = "../bitfield-enum" }
+derive_more = { version = "1.0.0-beta.6", features = [
+    "try_from",
+    "try_into",
+], default-features = false }
+embedded-hal = "1.0.0-rc.1"
+fugit = "0.3.7"
+paste = "1.0.14"
+
+[features]
