@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sys
 
-from test_utils import finish_test, init_test, wait_for_messages
+from test_utils import finish_test, init_test, wait_for_messages, wait_for_uart_messages
 
 from calldwell import init_default_logger
 from calldwell.uart import RemoteUARTConfig, RemoteUARTConnection
@@ -38,9 +38,16 @@ def main() -> None:
         rtt,
         ssh,
         [
-            "icache tests successful",
-            "dcache tests successful",
-            "all tests finished successfully",
+            "I-Cache management test successful",
+        ],
+    )
+
+    wait_for_uart_messages(
+        uart,
+        ssh,
+        [
+            "D-Cache management test successful",
+            "All SCB tests finished successfully!",
         ],
     )
 
