@@ -33,7 +33,7 @@ from scripts.env import (
 DEMO_UART_BAUDRATE = 57_600
 PLOT_WINDOW_DURATION_SECONDS = 10
 PLOT_UPDATE_INTERVAL_MS = 100
-PLOT_SYMMETRIC_Y_AXIS_LIMIT = 65535
+PLOT_SYMMETRIC_Y_AXIS_LIMIT = 32768
 # == End of configuration constants ==
 
 
@@ -538,8 +538,8 @@ def plot_incoming_data(  # noqa: PLR0915 pylint: disable=too-many-locals
     def format_y_label(x: float, _pos: int) -> str:
         offset_position = x + float(PLOT_SYMMETRIC_Y_AXIS_LIMIT)
         full_scale = float(PLOT_SYMMETRIC_Y_AXIS_LIMIT) * 2.0
-        percentage = offset_position / full_scale
-        return f"{percentage*100:.2f}"
+        percentage = ((offset_position / full_scale) - 0.5) * 2.0
+        return f"{(percentage*100):.2f}"
 
     axes.yaxis.set_major_formatter(ticker.FuncFormatter(format_y_label))
     axes.legend()
