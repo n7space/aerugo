@@ -17,7 +17,7 @@ mod tasklet_status;
 mod tasklet_storage;
 mod tasklet_vtable;
 
-pub(crate) use self::tasklet_id::TaskletId;
+pub use self::tasklet_id::TaskletId;
 pub(crate) use self::tasklet_ptr::TaskletPtr;
 pub(crate) use self::tasklet_status::TaskletStatus;
 pub(crate) use self::tasklet_vtable::{tasklet_vtable, TaskletVTable};
