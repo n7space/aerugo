@@ -7,7 +7,7 @@ import logging
 import struct
 import sys
 from dataclasses import dataclass
-from enum import IntEnum
+from enum import Enum, IntEnum, auto
 from math import ceil
 from typing import Any, cast
 
@@ -108,17 +108,12 @@ class AccelerometerScale(IntEnum):
 
     def to_g(self: AccelerometerScale) -> int:
         """Returns the scale in g's"""
-        if self is AccelerometerScale.SCALE_2G:
-            return 2
-        if self is AccelerometerScale.SCALE_4G:
-            return 4
-        if self is AccelerometerScale.SCALE_8G:
-            return 8
-        if self is AccelerometerScale.SCALE_16G:
-            return 16
-
-        msg = "handle all the values here"
-        raise RuntimeError(msg)
+        return {
+            AccelerometerScale.SCALE_2G: 2,
+            AccelerometerScale.SCALE_4G: 4,
+            AccelerometerScale.SCALE_8G: 8,
+            AccelerometerScale.SCALE_16G: 16,
+        }[self]
 
     def to_str(self: AccelerometerScale) -> str:
         """Returns the scale as string"""
@@ -136,19 +131,13 @@ class GyroscopeScale(IntEnum):
 
     def to_dps(self: GyroscopeScale) -> int:
         """Returns the scale in degree per second"""
-        if self is GyroscopeScale.SCALE_125DPS:
-            return 125
-        if self is GyroscopeScale.SCALE_250DPS:
-            return 250
-        if self is GyroscopeScale.SCALE_500DPS:
-            return 500
-        if self is GyroscopeScale.SCALE_1000DPS:
-            return 1000
-        if self is GyroscopeScale.SCALE_2000DPS:
-            return 2000
-
-        msg = "handle all the values here"
-        raise RuntimeError(msg)
+        return {
+            GyroscopeScale.SCALE_125DPS: 125,
+            GyroscopeScale.SCALE_250DPS: 250,
+            GyroscopeScale.SCALE_500DPS: 500,
+            GyroscopeScale.SCALE_1000DPS: 1000,
+            GyroscopeScale.SCALE_2000DPS: 2000,
+        }[self]
 
     def to_str(self: GyroscopeScale) -> str:
         """Returns the scale as string"""
@@ -169,8 +158,59 @@ class TelemetryType(IntEnum):
     SET_ACCELEROMETER_SCALE_ERROR = 0x42
     SET_GYROSCOPE_SCALE_CONFIRMED = 0x51
     SET_GYROSCOPE_SCALE_ERROR = 0x52
-    EXECUTION_STATISTICS = 0x61
+    EXECUTION_STATISTICS_GET_EXEC_STATS = 0x61
+    EXECUTION_STATISTICS_SET_ACCEL_SCALE = 0x62
+    EXECUTION_STATISTICS_SET_GYRO_SCALE = 0x63
+    EXECUTION_STATISTICS_SET_DATA_RATE = 0x64
+    EXECUTION_STATISTICS_START_MEASUREMENTS = 0x65
+    EXECUTION_STATISTICS_STOP_MEASUREMENTS = 0x66
+    EXECUTION_STATISTICS_TRANSMIT_IMU_DATA = 0x67
+    EXECUTION_STATISTICS_UART_READER = 0x68
     INVALID_TELECOMMAND_ERROR = 0xFA
+
+
+class Tasklet(Enum):
+    """Tasklets from demo app"""
+
+    GET_EXECUTION_STATISTICS = auto()
+    SET_ACCELEROMETER_SCALE = auto()
+    SET_GYROSCOPE_SCALE = auto()
+    SET_DATA_RATE = auto()
+    START_MEASUREMENTS = auto()
+    STOP_MEASUREMENTS = auto()
+    TRANSMIT_IMU_DATA = auto()
+    UART_READER = auto()
+
+    @staticmethod
+    def from_telemetry_type(telemetry_type: TelemetryType) -> Tasklet | None:
+        """Extract tasklet ID out of telemetry type, if telemetry contains execution statistics.
+        Otherwise, returns None."""
+        return {
+            TelemetryType.EXECUTION_STATISTICS_GET_EXEC_STATS: Tasklet.GET_EXECUTION_STATISTICS,
+            TelemetryType.EXECUTION_STATISTICS_SET_ACCEL_SCALE: Tasklet.SET_ACCELEROMETER_SCALE,
+            TelemetryType.EXECUTION_STATISTICS_SET_GYRO_SCALE: Tasklet.SET_GYROSCOPE_SCALE,
+            TelemetryType.EXECUTION_STATISTICS_SET_DATA_RATE: Tasklet.SET_DATA_RATE,
+            TelemetryType.EXECUTION_STATISTICS_START_MEASUREMENTS: Tasklet.START_MEASUREMENTS,
+            TelemetryType.EXECUTION_STATISTICS_STOP_MEASUREMENTS: Tasklet.STOP_MEASUREMENTS,
+            TelemetryType.EXECUTION_STATISTICS_TRANSMIT_IMU_DATA: Tasklet.TRANSMIT_IMU_DATA,
+            TelemetryType.EXECUTION_STATISTICS_UART_READER: Tasklet.UART_READER,
+        }.get(telemetry_type)
+
+
+@dataclass
+class ExecutionStatistics:
+    """Execution statistics for a tasklet inside demo app"""
+
+    tasklet: Tasklet
+    avg_duration: int
+    min_duration: int
+    max_duration: int
+
+    def __str__(self: ExecutionStatistics) -> str:
+        avg_duration = str(self.avg_duration) if self.avg_duration > 0 else "<1"
+        min_duration = str(self.min_duration) if self.min_duration > 0 else "<1"
+        max_duration = str(self.max_duration) if self.max_duration > 0 else "<1"
+        return f"{self.tasklet}, avg: {avg_duration}us, min {min_duration}us, max: {max_duration}us"
 
 
 CCSDS_HEADER_LENGTH = 6
@@ -238,27 +278,42 @@ class Telemetry:
         return self.telemetry_type in (
             TelemetryType.ACCELEROMETER_DATA,
             TelemetryType.GYROSCOPE_DATA,
-            TelemetryType.EXECUTION_STATISTICS,
+        )
+
+    def is_exec_stats(self: Telemetry) -> bool:
+        """Returns `True` if telemetry contains execution statistics"""
+        return self.telemetry_type in (
+            TelemetryType.EXECUTION_STATISTICS_GET_EXEC_STATS,
+            TelemetryType.EXECUTION_STATISTICS_SET_ACCEL_SCALE,
+            TelemetryType.EXECUTION_STATISTICS_SET_GYRO_SCALE,
+            TelemetryType.EXECUTION_STATISTICS_SET_DATA_RATE,
+            TelemetryType.EXECUTION_STATISTICS_START_MEASUREMENTS,
+            TelemetryType.EXECUTION_STATISTICS_STOP_MEASUREMENTS,
+            TelemetryType.EXECUTION_STATISTICS_TRANSMIT_IMU_DATA,
+            TelemetryType.EXECUTION_STATISTICS_UART_READER,
         )
 
     def get_imu_data(self: Telemetry) -> Vec3D | None:
         """Returns data from IMU, or None if telemetry doesn't contain data"""
-        if self.telemetry_type not in (
-            TelemetryType.ACCELEROMETER_DATA,
-            TelemetryType.GYROSCOPE_DATA,
-        ):
+        if not self.is_data():
             return None
 
         x, y, z = struct.unpack("<hhh", self.payload)
         return Vec3D(x, y, z)
 
-    def get_execution_stats(self: Telemetry) -> int | None:
+    def get_execution_stats(self: Telemetry) -> ExecutionStatistics | None:
         """Returns execution statistics, or None if telemetry doesn't contain execution
         statistics"""
-        if self.telemetry_type is not TelemetryType.EXECUTION_STATISTICS:
+        if not self.is_exec_stats():
             return None
 
-        return 42
+        total_duration_ms, min_duration_ms, max_duration_ms = struct.unpack("<HHH", self.payload)
+        return ExecutionStatistics(
+            cast(Tasklet, Tasklet.from_telemetry_type(self.telemetry_type)),
+            total_duration_ms,
+            min_duration_ms,
+            max_duration_ms,
+        )
 
 
 def create_demo_telecommand(command: TelecommandType, payload: int) -> bytes:
@@ -319,7 +374,7 @@ def start_demo(uart: RemoteUARTConnection) -> None:
     )
 
     global DATA_OUTPUT_RATE  # noqa: PLW0603 pylint: disable=global-statement
-    DATA_OUTPUT_RATE = DataRate.ODR_208HZ
+    DATA_OUTPUT_RATE = DataRate.ODR_104HZ
     send_and_validate_telecommand(uart, TelecommandType.SET_DATA_OUTPUT_RATE, DATA_OUTPUT_RATE)
     send_and_validate_telecommand(uart, TelecommandType.START, 0x00)
 
@@ -479,10 +534,19 @@ def fetch_new_data(uart: RemoteUARTConnection) -> None:
         msg = "data output rate must be set before starting the plot"
         raise RuntimeError(msg)
 
-    # we want to fetch at least 1 sample per sensor each update
-    data_to_fetch = max(ceil(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1)
-    # *2 because we have 2 sensors
-    measurements = [receive_telemetry(uart).unwrap() for _ in range(data_to_fetch * 2)]
+    # we want to fetch at least 1 sample per sensor each update.
+    # *2 because we have 2 sensors.
+    data_packets_to_fetch = (
+        max(ceil(DATA_OUTPUT_RATE.to_hertz() * (PLOT_UPDATE_INTERVAL_MS / 1000)), 1) * 2
+    )
+    measurements: list[Telemetry] = []
+    while len(measurements) < data_packets_to_fetch:
+        next_telemetry = receive_telemetry(uart).unwrap()
+        if next_telemetry.is_data():
+            measurements.append(next_telemetry)
+        if next_telemetry.is_exec_stats():
+            print(f"Execution statistics received: {next_telemetry.get_execution_stats()}")
+
     average_acceleration, average_rotation = process_measurements(measurements)
     add_sample_to_plots(average_acceleration, average_rotation)
 
@@ -573,6 +637,13 @@ def plot_incoming_data(  # noqa: PLR0915 pylint: disable=too-many-locals
         update_title()
 
     button_set_gyro_scale.on_clicked(set_gyro_scale_action)
+
+    axis_send_exec_stats = figure.add_axes((0.02, 0.9, 0.3, 0.07))
+    button_send_exec_stats = Button(axis_send_exec_stats, "Send execution statistics")
+
+    button_send_exec_stats.on_clicked(
+        lambda _event: send_telecommand(uart, TelecommandType.GET_EXECUTION_STATS, 0x00),
+    )
 
     def update_plot(_frame: int) -> tuple[Any, Any, Any, Any, Any, Any]:
         """Plot update function"""

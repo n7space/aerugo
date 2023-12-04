@@ -180,8 +180,9 @@ impl Telemetry {
         let mut data_buffer = [0u8; 6];
         data_buffer[0..2].copy_from_slice(
             &stats
-                .total_execution_time()
-                .to_millis()
+                .average_execution_time()
+                .unwrap_or(Duration::micros(0))
+                .to_micros()
                 .try_into()
                 .unwrap_or(u16::MAX)
                 .to_le_bytes(),
@@ -189,8 +190,8 @@ impl Telemetry {
         data_buffer[2..4].copy_from_slice(
             &stats
                 .minimum_execution_time()
-                .unwrap_or(Duration::millis(u16::MAX as u64))
-                .to_millis()
+                .unwrap_or(Duration::micros(u16::MAX as u64))
+                .to_micros()
                 .try_into()
                 .unwrap_or(u16::MAX)
                 .to_le_bytes(),
@@ -198,8 +199,8 @@ impl Telemetry {
         data_buffer[4..6].copy_from_slice(
             &stats
                 .maximum_execution_time()
-                .unwrap_or(Duration::millis(0))
-                .to_millis()
+                .unwrap_or(Duration::micros(0))
+                .to_micros()
                 .try_into()
                 .unwrap_or(u16::MAX)
                 .to_le_bytes(),
