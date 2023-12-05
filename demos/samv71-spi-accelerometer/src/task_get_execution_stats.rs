@@ -1,17 +1,17 @@
 use aerugo::{logln, EventId, RuntimeApi};
 
-use crate::{telemetry::Telemetry, TASKLET_MAP, UART_WRITER_STORAGE};
+use crate::{telemetry::Telemetry, TaskletMap, UART_WRITER_STORAGE};
 
-#[derive(Default)]
-pub struct TaskGetExecutionStatsContext {}
+pub struct TaskGetExecutionStatsContext {
+    pub tasklet_map: TaskletMap,
+}
 
 pub fn task_get_execution_stats(
     _: EventId,
-    _: &mut TaskGetExecutionStatsContext,
+    context: &mut TaskGetExecutionStatsContext,
     api: &'static dyn RuntimeApi,
 ) {
-    let tasklet_map = unsafe { &TASKLET_MAP.unwrap() };
-    for (name, id) in tasklet_map {
+    for (name, id) in &context.tasklet_map {
         match api.get_execution_statistics(id) {
             Some(stats) => {
                 Telemetry::new_execution_statistics(*name, stats)

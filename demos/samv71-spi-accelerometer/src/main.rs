@@ -73,12 +73,13 @@ use aerugo::{
     Aerugo, EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage,
     SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
-use lsm6dso::config::control::AccelerometerTestMode;
-use lsm6dso::config::control::GyroscopeTestMode;
 use lsm6dso::{
-    config::fifo::config::{
-        AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
-        FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+    config::{
+        control::{AccelerometerTestMode, GyroscopeTestMode},
+        fifo::config::{
+            AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
+            FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+        },
     },
     LSM6DSO,
 };
@@ -189,11 +190,7 @@ pub enum DemoTaskletName {
     UartReader,
 }
 
-pub type TaskletMap = [(DemoTaskletName, TaskletId); 8];
-
-/// This is a mapping of app's tasklet IDs to Aerugo's tasklet IDs.
-/// Should be filled by the system @ init.
-pub static mut TASKLET_MAP: Option<TaskletMap> = None;
+pub type TaskletMap = [(DemoTaskletName, TaskletId); 7];
 
 #[entry]
 fn main() -> ! {
@@ -212,12 +209,14 @@ fn main() -> ! {
     logln!("PIO initialized!");
 
     logln!("Initializing UART with {}bps baudrate...", UART_BAUD_RATE);
-    let mut uart = init_uart(Uart::new(peripherals.uart_4.take().unwrap()));
+    let uart = Uart::new(peripherals.uart_4.take().unwrap());
+    let mut uart = init_uart(uart);
     unsafe { UART_WRITER_STORAGE.replace(uart.take_writer().unwrap()) };
     logln!("UART initialized!");
 
     logln!("Initializing SPI...");
-    let spi = init_spi(Spi::new(peripherals.spi_0.take().unwrap()));
+    let spi = Spi::new(peripherals.spi_0.take().unwrap());
+    let spi = init_spi(spi);
     logln!("SPI initialized!");
 
     logln!("Initializing IMU...");
@@ -327,10 +326,9 @@ fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
         Err(reason) => panic!("Could not initialize IMU: {reason:?}"),
     };
 
-    logln!(
-        "Is IMU responsive: {}",
-        if imu.is_alive().unwrap() { "yes" } else { "no" }
-    );
+    if !imu.is_alive().unwrap() {
+        panic!("IMU is not responsive, shutting down...");
+    }
 
     imu.software_reset().unwrap();
     imu.reboot_memory_content().unwrap();
@@ -540,24 +538,6 @@ fn init_system(aerugo: &'static impl InitApi) {
         &queue_set_gyroscope_scale_handle,
     );
 
-    // Get execution stats
-
-    aerugo.create_tasklet(
-        TaskletConfig {
-            name: "GetExecutionStats",
-            ..Default::default()
-        },
-        task_get_execution_stats,
-        &TASK_GET_EXECUTION_STATS_STORAGE,
-    );
-
-    let task_get_execution_stats_handle = TASK_GET_EXECUTION_STATS_STORAGE.create_handle().unwrap();
-
-    aerugo.subscribe_tasklet_to_events(
-        &task_get_execution_stats_handle,
-        [CommandEvent::GetExecutionStats.into()],
-    );
-
     // Transmit IMU data
     aerugo.create_tasklet(
         TaskletConfig {
@@ -576,14 +556,9 @@ fn init_system(aerugo: &'static impl InitApi) {
         None,
     );
 
-    // Post-init
-
-    unsafe {
-        TASKLET_MAP = Some([
-            (
-                DemoTaskletName::GetExecutionStats,
-                task_get_execution_stats_handle.get_id(),
-            ),
+    // Get execution stats
+    let task_get_execution_stats_context = TaskGetExecutionStatsContext {
+        tasklet_map: [
             (
                 DemoTaskletName::SetAccelerometerScale,
                 task_set_accelerometer_scale_handle.get_id(),
@@ -612,8 +587,27 @@ fn init_system(aerugo: &'static impl InitApi) {
                 DemoTaskletName::UartReader,
                 task_uart_reader_handle.get_id(),
             ),
-        ])
+        ],
     };
+
+    aerugo.create_tasklet_with_context(
+        TaskletConfig {
+            name: "GetExecutionStats",
+            ..Default::default()
+        },
+        task_get_execution_stats,
+        task_get_execution_stats_context,
+        &TASK_GET_EXECUTION_STATS_STORAGE,
+    );
+
+    let task_get_execution_stats_handle = TASK_GET_EXECUTION_STATS_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_events(
+        &task_get_execution_stats_handle,
+        [CommandEvent::GetExecutionStats.into()],
+    );
+
+    // Post-init
 
     unsafe {
         XDMAC_COMMAND_QUEUE_HANDLE.replace(queue_command_handle);

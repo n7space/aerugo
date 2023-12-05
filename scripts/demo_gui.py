@@ -378,7 +378,7 @@ def start_demo(uart: RemoteUARTConnection) -> None:
     send_and_validate_telecommand(uart, TelecommandType.SET_DATA_OUTPUT_RATE, DATA_OUTPUT_RATE)
     send_and_validate_telecommand(uart, TelecommandType.START, 0x00)
 
-    atexit.register(lambda: stop_measurements(uart))
+    atexit.register(lambda: on_exit(uart))
 
 
 def _print_data_from_demo(uart: RemoteUARTConnection) -> None:
@@ -675,9 +675,10 @@ def plot_incoming_data(  # noqa: PLR0915 pylint: disable=too-many-locals
     plt.show()
 
 
-def stop_measurements(uart: RemoteUARTConnection) -> None:
-    """Immediately stops measurements without waiting for response"""
+def on_exit(uart: RemoteUARTConnection) -> None:
+    """Immediately stops measurements without waiting for response and closes UART connection"""
     send_telecommand(uart, TelecommandType.STOP, 0x42)
+    uart.close_uart()
 
 
 if __name__ == "__main__":
