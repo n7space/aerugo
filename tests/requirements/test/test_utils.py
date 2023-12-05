@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from calldwell.gdb_client import GDBClient
     from calldwell.rtt_client import CalldwellRTTClient
     from calldwell.ssh_client import SSHClient
+    from calldwell.uart import RemoteUARTConnection
 
 
 def init_test(
@@ -91,5 +92,29 @@ def wait_for_messages(
                 "TEST FAILED: UNEXPECTED MESSAGE RECEIVED "
                 f"(expected '{message}', got '{received_message}')",
             )
+            finish_test(ssh)
+            sys.exit(2)
+
+
+def wait_for_uart_messages(
+    uart: RemoteUARTConnection,
+    ssh: SSHClient,
+    expected_messages: list[str],
+) -> None:
+    """Same as `wait_for_messages`, but via UART.
+    Assumes that every message ends with single newline (`\\n`) character."""
+    for message in expected_messages:
+        logging.info(f"Expecting '{message}' via UART")
+        received_message = uart.read_string(b"\n")
+        logging.info(f"Received '{received_message}'")
+        if (
+            received_message.is_ok
+            and (received_message_content := received_message.unwrap().strip()) != message
+        ):
+            logging.critical(
+                "TEST FAILED: UNEXPECTED MESSAGE RECEIVED VIA UART "
+                f"(expected '{message}', got '{received_message_content}')",
+            )
+            uart.close_uart()
             finish_test(ssh)
             sys.exit(2)

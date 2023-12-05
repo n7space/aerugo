@@ -1,3 +1,13 @@
+//! In this test, D-Cache and I-Cache management is tested.
+//!
+//! Because of lack of reasonable way to access RTT data buffer, and lack of MPU driver, it's not
+//! possible to use RTT to reliably communicate with test host. Therefore, this test writes out
+//! it's D-cache test results via UART after performing a simple handshake with test platform to
+//! mitigate that issue.
+//!
+//! It's also worth noting that neither D-Cache nor I-Cache effects can't be "observed", they serve
+//! as a "black box", so the validation is performed by analysis of output assembly code that
+//! confirms the proper instructions were placed to manage the caches.
 #![no_std]
 #![no_main]
 
@@ -6,7 +16,19 @@ extern crate calldwell;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
 
-use aerugo::hal::user_peripherals::{CPUID, SCB};
+use core::fmt::Arguments;
+
+use aerugo::hal::{
+    drivers::{
+        pio::{pin::Peripheral, Port},
+        pmc::config::PeripheralId,
+        uart::{
+            writer::Writer, Bidirectional, Config as UartConfig, Read, ReceiverConfig, Uart, Write,
+        },
+    },
+    user_peripherals::{CPUID, PIOD, PMC, SCB, UART4},
+};
+use aerugo::time::RateExtU32;
 use aerugo::{Aerugo, InitApi, SystemHardwareConfig};
 use calldwell::write_str;
 use rt::entry;
@@ -28,6 +50,9 @@ impl Default for DummyData {
 
 fn perform_dcache_tests(scb: &mut SCB, cpuid: &mut CPUID) {
     // Check cache enabling/disabling
+    // From now on, all test data will be sent via UART, because with RTT the cache must be disabled
+    // as currently it's not possible to disable RTT region caching due to lack of support from
+    // `rtt_target` library for that.
     scb.enable_dcache(cpuid);
     assert!(
         SCB::dcache_enabled(),
@@ -48,16 +73,13 @@ fn perform_dcache_tests(scb: &mut SCB, cpuid: &mut CPUID) {
 
     scb.clean_invalidate_dcache(cpuid);
 
-    // TODO: Migrate from RTT to UART, because with RTT the cache must be
-    // disabled as currently it's not possible to disable RTT region
-    // caching due to lack of support from `rtt_target` library for that.
-    // scb.disable_dcache(cpuid);
-    // assert!(
-    //     !SCB::dcache_enabled(),
-    //     "D-Cache was disabled, yet it's reported as enabled"
-    // );
+    scb.disable_dcache(cpuid);
+    assert!(
+        !SCB::dcache_enabled(),
+        "D-Cache was disabled, yet it's reported as enabled"
+    );
 
-    write_str("dcache tests successful");
+    write_via_uart(format_args!("D-Cache management test successful\n"));
 }
 
 fn perform_icache_tests(scb: &mut SCB) {
@@ -77,13 +99,44 @@ fn perform_icache_tests(scb: &mut SCB) {
         !SCB::icache_enabled(),
         "I-Cache was disabled, yet it's reported as enabled"
     );
-    write_str("icache tests successful");
+    write_str("I-Cache management test successful");
 }
 
 fn perform_scb_tests(mut scb: SCB, mut cpuid: CPUID) {
     perform_icache_tests(&mut scb);
     perform_dcache_tests(&mut scb, &mut cpuid);
-    write_str("all tests finished successfully");
+    write_via_uart(format_args!("All SCB tests finished successfully!\n"));
+}
+
+fn configure_uart_io(port: Port<PIOD>) {
+    let mut pins = port.into_pins();
+    pins[18].take().unwrap().into_peripheral_pin(Peripheral::C);
+    pins[19].take().unwrap().into_peripheral_pin(Peripheral::C);
+}
+
+fn configure_uart_pmc(pmc: &mut PMC) {
+    pmc.enable_peripheral_clock(PeripheralId::PIOD);
+    pmc.enable_peripheral_clock(PeripheralId::UART4);
+}
+
+fn perform_uart_handshake(uart: &mut Uart<UART4, Bidirectional>) {
+    let mut reader = uart.take_reader().unwrap();
+    let mut writer = uart.take_writer().unwrap();
+    let mut handshake_buffer = [0u8; 6];
+
+    reader.read_exact(&mut handshake_buffer).unwrap();
+    assert_eq!(handshake_buffer, "Hello!".as_bytes());
+    writer.write_fmt(format_args!("World!")).unwrap();
+
+    uart.put_reader(reader);
+    unsafe { UART_WRITER.replace(writer) };
+}
+
+static mut UART_WRITER: Option<Writer<UART4>> = None;
+
+/// This function will panic if called before `perform_uart_handshake`.
+fn write_via_uart(fmt: Arguments) {
+    unsafe { UART_WRITER.as_mut().unwrap().write_fmt(fmt).unwrap() };
 }
 
 #[entry]
@@ -93,6 +146,22 @@ fn main() -> ! {
 
     let mut scb = peripherals.scb.take().unwrap();
     let mut cpu_id = peripherals.cpu_id.take().unwrap();
+
+    let mut pmc = peripherals.pmc.take().unwrap();
+    configure_uart_pmc(&mut pmc);
+
+    let uart_port = Port::new(peripherals.pio_d.take().unwrap());
+    configure_uart_io(uart_port);
+
+    let mut uart = Uart::new(peripherals.uart_4.take().unwrap()).into_bidirectional(
+        UartConfig::new(57600, 12.MHz()).unwrap(),
+        ReceiverConfig {
+            rx_filter_enabled: true,
+        },
+    );
+
+    perform_uart_handshake(&mut uart);
+
     scb.disable_dcache(&mut cpu_id);
     scb.disable_icache();
 
