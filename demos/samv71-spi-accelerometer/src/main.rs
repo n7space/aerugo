@@ -1,11 +1,14 @@
 #![no_std]
 #![no_main]
 
+extern crate bitfield_enum;
 extern crate cortex_m;
 extern crate cortex_m_rt as rt;
+extern crate lsm6dso;
 extern crate panic_rtt_target;
 
-pub mod command;
+mod bounded_int;
+mod ccsds;
 pub mod events;
 pub mod task_get_execution_stats;
 pub mod task_set_accelerometer_scale;
@@ -13,9 +16,11 @@ pub mod task_set_data_output_rate;
 pub mod task_set_gyroscope_scale;
 pub mod task_start_measurements;
 pub mod task_stop_measurements;
+pub mod task_transmit_imu_data;
 pub mod task_uart_reader;
+pub mod telecommand;
+pub mod telemetry;
 
-use crate::command::*;
 use crate::events::*;
 use crate::task_get_execution_stats::*;
 use crate::task_set_accelerometer_scale::*;
@@ -23,15 +28,31 @@ use crate::task_set_data_output_rate::*;
 use crate::task_set_gyroscope_scale::*;
 use crate::task_start_measurements::*;
 use crate::task_stop_measurements::*;
+use crate::task_transmit_imu_data::*;
 use crate::task_uart_reader::*;
+use crate::telecommand::*;
 
+use aerugo::hal::drivers::uart::writer::Writer;
+use aerugo::Duration;
+use aerugo::TaskletId;
 use aerugo::{
     hal::{
         drivers::{
             nvic::{Interrupt, NVIC},
             pio::{pin::Peripheral as PioPeripheral, Port},
             pmc::config::PeripheralId,
-            uart::{Bidirectional, Config, NotConfigured, ReceiverConfig, Uart},
+            spi::{
+                chip_config::{
+                    BitsPerTransfer, ChipConfig, ChipSelectBehavior, ClockPhase, ClockPolarity,
+                    SerialClockDivider,
+                },
+                config::{MasterConfig, SelectedChip},
+                interrupts::Interrupts as SpiInterrupts,
+                Master, NotConfigured as SpiNotConfigured, Spi,
+            },
+            uart::{
+                Bidirectional, Config, NotConfigured as UartNotConfigured, ReceiverConfig, Uart,
+            },
             xdmac::{
                 channel::{Channel, Configured},
                 channel_status::ChannelStatusReader,
@@ -45,19 +66,47 @@ use aerugo::{
             },
         },
         interrupt,
-        user_peripherals::{PIOD, PMC, UART4},
+        user_peripherals::{PIOD, PMC, SPI0, UART4},
     },
     logln,
     time::RateExtU32,
     Aerugo, EventId, EventStorage, InitApi, MessageQueueHandle, MessageQueueStorage,
     SystemHardwareConfig, TaskletConfig, TaskletStorage,
 };
+use lsm6dso::{
+    config::{
+        control::{AccelerometerTestMode, GyroscopeTestMode},
+        fifo::config::{
+            AccelerometerBatchingRate, DataRateChangeBatching, FifoConfig, FifoMode,
+            FifoWatermarkThreshold, GyroscopeBatchingRate, StopOnWatermarkThreshold,
+        },
+    },
+    LSM6DSO,
+};
 use rt::entry;
 
-const TRANSFER_LENGTH: usize = 7;
-type TransferArrayType = [u8; TRANSFER_LENGTH];
+// == Configuration constants ==
 
-static mut MESSAGE_BUFFER: TransferArrayType = [0; TRANSFER_LENGTH];
+/// Baudrate of UART used to communicate with desktop application
+const UART_BAUD_RATE: u32 = 57_600;
+/// Demo's telemetry Application Identifier field value
+pub const DEMO_TELEMETRY_APID: u16 = 42;
+
+/// IMU chip select signal.
+const IMU_CHIP: SelectedChip = SelectedChip::Chip1;
+/// IMU SPI clock divider. Default peripheral clock is 12MHz, LSM6DSO can work with up to 10MHz.
+const IMU_SPI_CLOCK_DIVIDER: u8 = 25;
+
+/// Delay between calls to task fetching the data from IMU and transmitting it via UART.
+const TRANSMIT_IMU_DATA_TASK_DELAY: Duration = Duration::millis(10);
+
+// == End of configuration constants ==
+
+type IMU = LSM6DSO<Spi<SPI0, Master>, 32>;
+
+const TELECOMMAND_LENGTH: usize = 7;
+type TelecommandBuffer = [u8; TELECOMMAND_LENGTH];
+static mut TELECOMMAND_BUFFER: TelecommandBuffer = [0; TELECOMMAND_LENGTH];
 
 /// This is used for passing XDMAC's status reader to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
@@ -77,9 +126,9 @@ static mut XDMAC_RX_CHANNEL: Option<Channel<Configured>> = None;
 /// This is used for passing command queue handle to IRQ.
 /// It must be initialized before starting an IRQ-synchronized XDMAC transaction, otherwise the
 /// program may panic.
-static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TransferArrayType, 10>> = None;
+static mut XDMAC_COMMAND_QUEUE_HANDLE: Option<MessageQueueHandle<TelecommandBuffer, 10>> = None;
 
-static TASK_UART_READER_STORAGE: TaskletStorage<TransferArrayType, TaskUartReaderContext, 0> =
+static TASK_UART_READER_STORAGE: TaskletStorage<TelecommandBuffer, TaskUartReaderContext, 0> =
     TaskletStorage::new();
 static TASK_START_MEASUREMENTS_STORAGE: TaskletStorage<EventId, TaskStartMeasurementsContext, 0> =
     TaskletStorage::new();
@@ -100,13 +149,12 @@ static TASK_SET_GYROSCOPE_SCALE_STORAGE: TaskletStorage<
     TaskSetGyroscopeScaleContext,
     0,
 > = TaskletStorage::new();
-static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<
-    EventId,
-    TaskGetExecutionStatsContext,
-    0,
-> = TaskletStorage::new();
+static TASK_GET_EXECUTION_STATS_STORAGE: TaskletStorage<EventId, TaskGetExecutionStatsContext, 0> =
+    TaskletStorage::new();
+static TASK_TRANSMIT_IMU_DATA_STORAGE: TaskletStorage<(), TaskTransmitImuDataContext, 0> =
+    TaskletStorage::new();
 
-static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TransferArrayType, 10> =
+static QUEUE_COMMAND_STORAGE: MessageQueueStorage<TelecommandBuffer, 10> =
     MessageQueueStorage::new();
 static QUEUE_SET_DATA_OUTPUT_RATE_STORAGE: MessageQueueStorage<OutputDataRate, 2> =
     MessageQueueStorage::new();
@@ -119,54 +167,125 @@ static EVENT_START_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STOP_STORAGE: EventStorage = EventStorage::new();
 static EVENT_STATS_STORAGE: EventStorage = EventStorage::new();
 
+/// IMU will never be accessed from an interrupt, so it's safe to access from tasklets.
+/// This is an "unsafe" alternative to `Mutex<RefCell<Option<T>>>` that's 100% safe in this specific
+/// scenario. Wrapping IMU in a mutex would require doing all IMU operations in critical sections,
+/// which is very suboptimal, as we want to limit the amount of critical sections to minimum.
+///
+/// For mutex-based storage example, see [`IMU_DATA_RATE_CONFIG`]
+pub static mut IMU_STORAGE: Option<IMU> = None;
+
+/// See [`IMU_STORAGE`] for explanation why is this a `pub static mut`.
+pub static mut UART_WRITER_STORAGE: Option<Writer<UART4>> = None;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DemoTaskletName {
+    GetExecutionStats,
+    SetAccelerometerScale,
+    SetGyroscopeScale,
+    SetDataOutputRate,
+    StartMeasurements,
+    StopMeasurements,
+    TransmitImuData,
+    UartReader,
+}
+
+pub type TaskletMap = [(DemoTaskletName, TaskletId); 7];
+
 #[entry]
 fn main() -> ! {
     let (aerugo, mut peripherals) = Aerugo::initialize(SystemHardwareConfig::default());
 
+    logln!("Hello world, starting the demo...");
+
+    logln!("Initializing clocks...");
     let pmc = peripherals.pmc.unwrap();
     init_clocks(pmc);
+    logln!("Clock initialized!");
 
+    logln!("Initializing PIO...");
     let port = Port::new(peripherals.pio_d.take().unwrap());
     init_pio(port);
+    logln!("PIO initialized!");
 
+    logln!("Initializing UART with {}bps baudrate...", UART_BAUD_RATE);
     let uart = Uart::new(peripherals.uart_4.take().unwrap());
     let mut uart = init_uart(uart);
+    unsafe { UART_WRITER_STORAGE.replace(uart.take_writer().unwrap()) };
+    logln!("UART initialized!");
 
+    logln!("Initializing SPI...");
+    let spi = Spi::new(peripherals.spi_0.take().unwrap());
+    let spi = init_spi(spi);
+    logln!("SPI initialized!");
+
+    logln!("Initializing IMU...");
+    let imu = init_imu(spi);
+    // This is safe, because IMU storage is never accessed from IRQ.
+    unsafe { IMU_STORAGE.replace(imu) };
+    logln!("IMU initialized!");
+
+    logln!("Initializing DMA...");
     let xdmac = Xdmac::new(peripherals.xdmac.take().unwrap());
     init_xdmac(xdmac, &mut uart);
+    logln!("DMA initialized!");
 
+    logln!("Initializing NVIC...");
     let mut nvic = NVIC::new(peripherals.nvic.take().unwrap());
     nvic.enable(Interrupt::XDMAC);
+    logln!("NVIC initialized!");
 
+    logln!("Initializing the system...");
     init_system(aerugo);
+    logln!("System initialized!");
 
+    // This is safe, because this channel is currently idle.
     unsafe {
         XDMAC_RX_CHANNEL.as_mut().unwrap().enable();
     }
 
+    logln!("System is starting!");
     aerugo.start();
 }
 
 fn init_clocks(mut pmc: PMC) {
     pmc.enable_peripheral_clock(PeripheralId::PIOD);
+    pmc.enable_peripheral_clock(PeripheralId::SPI0);
     pmc.enable_peripheral_clock(PeripheralId::UART4);
     pmc.enable_peripheral_clock(PeripheralId::XDMAC);
 }
 
 fn init_pio(port: Port<PIOD>) {
     let mut pins = port.into_pins();
-    pins[18]
+    let _uart_rx = pins[18]
         .take()
         .unwrap()
         .into_peripheral_pin(PioPeripheral::C);
-    pins[19]
+    let _uart_tx = pins[19]
         .take()
         .unwrap()
-        .into_peripheral_pin(PioPeripheral::D);
+        .into_peripheral_pin(PioPeripheral::C);
+    let _spi_miso = pins[20]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _spi_mosi = pins[21]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _spi_sck = pins[22]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _lsm6dso_cs = pins[25]
+        .take()
+        .unwrap()
+        .into_peripheral_pin(PioPeripheral::B);
+    let _lsm6dso_int1 = pins[28].take().unwrap().into_input_pin();
 }
 
-fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
-    let uart_config = Config::new(9600, 12.MHz()).unwrap();
+fn init_uart(uart: Uart<UART4, UartNotConfigured>) -> Uart<UART4, Bidirectional> {
+    let uart_config = Config::new(UART_BAUD_RATE, 12.MHz()).unwrap();
     let recv_config = ReceiverConfig {
         rx_filter_enabled: true,
     };
@@ -174,9 +293,67 @@ fn init_uart(uart: Uart<UART4, NotConfigured>) -> Uart<UART4, Bidirectional> {
     uart.into_bidirectional(uart_config, recv_config)
 }
 
+fn init_spi(spi: Spi<SPI0, SpiNotConfigured>) -> Spi<SPI0, Master> {
+    let mut spi = spi.into_master(MasterConfig::new(IMU_CHIP));
+    spi.configure_chip(
+        IMU_CHIP,
+        ChipConfig {
+            clock_polarity: ClockPolarity::HighWhenInactive,
+            clock_phase: ClockPhase::DataChangedOnLeadingEdge,
+            chip_select_behavior: ChipSelectBehavior::DeactivateAfterLastTransfer,
+            bits_per_transfer: BitsPerTransfer::Bits8,
+            clock_divider: SerialClockDivider::new(IMU_SPI_CLOCK_DIVIDER).unwrap(),
+            delay_before_first_clock: 0,
+            delay_between_consecutive_transfers: 0,
+        },
+    );
+    spi.set_interrupts_state(SpiInterrupts {
+        rx_data_register_full: true,
+        tx_data_register_empty: true,
+        mode_fault_error: true,
+        overrun_error: true,
+        nss_rising: false,
+        tx_registers_empty: true,
+        underrun_error: false,
+    });
+
+    spi
+}
+
+fn init_imu(spi: Spi<SPI0, Master>) -> IMU {
+    let mut imu = match IMU::new(spi) {
+        Ok(imu) => imu,
+        Err(reason) => panic!("Could not initialize IMU: {reason:?}"),
+    };
+
+    if !imu.is_alive().unwrap() {
+        panic!("IMU is not responsive, shutting down...");
+    }
+
+    imu.software_reset().unwrap();
+    imu.reboot_memory_content().unwrap();
+    imu.set_accelerometer_test_mode(AccelerometerTestMode::Normal)
+        .unwrap();
+    imu.set_gyroscope_test_mode(GyroscopeTestMode::Normal)
+        .unwrap();
+
+    let fifo_config = FifoConfig {
+        watermark_threshold: FifoWatermarkThreshold::new_saturated(FifoWatermarkThreshold::LOW),
+        odr_change_batched: DataRateChangeBatching::Enabled,
+        stop_on_watermark: StopOnWatermarkThreshold::No,
+        gyroscope_batching_rate: GyroscopeBatchingRate::NoBatching,
+        accelerometer_batching_rate: AccelerometerBatchingRate::NoBatching,
+        mode: FifoMode::Fifo,
+    };
+    imu.set_fifo_config(fifo_config).unwrap();
+    assert_eq!(fifo_config, imu.get_fifo_config().unwrap());
+
+    imu
+}
+
 fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     // Place XDMAC status reader in IRQ storage.
-    // This is safe, because XDMAC IRQ should be disabled.
+    // This is safe as long as XDMAC IRQ is disabled.
     unsafe { XDMAC_STATUS_READER.replace(xdmac.take_status_reader().unwrap()) };
 
     let rx_source_location = TransferLocation {
@@ -186,12 +363,12 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     };
 
     let rx_destination_location = TransferLocation {
-        address: unsafe { MESSAGE_BUFFER.as_mut_ptr() as *const () },
+        address: unsafe { TELECOMMAND_BUFFER.as_mut_ptr() as *const () },
         interface: SystemBus::Interface1,
         addressing_mode: AddressingMode::Incremented,
     };
 
-    let transfer_microblock_length = MicroblockLength::new(TRANSFER_LENGTH as u32).unwrap();
+    let transfer_microblock_length = MicroblockLength::new(TELECOMMAND_LENGTH as u32).unwrap();
 
     let rx_transfer = TransferBlock::new(
         rx_source_location,
@@ -203,9 +380,6 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
     .with_microblock_length(transfer_microblock_length);
 
     let mut rx_channel = xdmac.take_next_free_channel().unwrap();
-
-    // RX channel will be queried using an interrupt. End of RX implies end of TX, as both transfers
-    // have the same data length.
     rx_channel.set_events_state(ChannelEvents {
         end_of_block: true,
         end_of_list: true,
@@ -219,11 +393,12 @@ fn init_xdmac(mut xdmac: Xdmac, uart: &mut Uart<UART4, Bidirectional>) {
 
     let mut rx_channel = rx_channel.configure_transfer(rx_transfer);
 
-    unsafe { XDMAC_CHANNEL_STATUS_READER.replace(rx_channel.take_status_reader().unwrap()) };
-
+    // Place RX channel and it's status reader in IRQ storage.
+    // This is safe as long as XDMAC IRQ is disabled.
     unsafe {
+        XDMAC_CHANNEL_STATUS_READER.replace(rx_channel.take_status_reader().unwrap());
         XDMAC_RX_CHANNEL.replace(rx_channel);
-    }
+    };
 }
 
 fn init_system(aerugo: &'static impl InitApi) {
@@ -363,14 +538,65 @@ fn init_system(aerugo: &'static impl InitApi) {
         &queue_set_gyroscope_scale_handle,
     );
 
-    // Get execution stats
-
+    // Transmit IMU data
     aerugo.create_tasklet(
+        TaskletConfig {
+            name: "TransmitIMUData",
+            ..Default::default()
+        },
+        task_transmit_imu_data,
+        &TASK_TRANSMIT_IMU_DATA_STORAGE,
+    );
+
+    let task_transmit_imu_data_handle = TASK_TRANSMIT_IMU_DATA_STORAGE.create_handle().unwrap();
+
+    aerugo.subscribe_tasklet_to_cyclic(
+        &task_transmit_imu_data_handle,
+        Some(TRANSMIT_IMU_DATA_TASK_DELAY),
+        None,
+    );
+
+    // Get execution stats
+    let task_get_execution_stats_context = TaskGetExecutionStatsContext {
+        tasklet_map: [
+            (
+                DemoTaskletName::SetAccelerometerScale,
+                task_set_accelerometer_scale_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::SetGyroscopeScale,
+                task_set_accelerometer_scale_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::SetDataOutputRate,
+                task_set_data_output_rate_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::StartMeasurements,
+                task_start_measurements_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::StopMeasurements,
+                task_stop_measurements_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::TransmitImuData,
+                task_transmit_imu_data_handle.get_id(),
+            ),
+            (
+                DemoTaskletName::UartReader,
+                task_uart_reader_handle.get_id(),
+            ),
+        ],
+    };
+
+    aerugo.create_tasklet_with_context(
         TaskletConfig {
             name: "GetExecutionStats",
             ..Default::default()
         },
         task_get_execution_stats,
+        task_get_execution_stats_context,
         &TASK_GET_EXECUTION_STATS_STORAGE,
     );
 
@@ -378,7 +604,8 @@ fn init_system(aerugo: &'static impl InitApi) {
 
     aerugo.subscribe_tasklet_to_events(
         &task_get_execution_stats_handle,
-        [CommandEvent::GetExecutionStats.into()]);
+        [CommandEvent::GetExecutionStats.into()],
+    );
 
     // Post-init
 
@@ -389,8 +616,6 @@ fn init_system(aerugo: &'static impl InitApi) {
 
 #[interrupt]
 fn XDMAC() {
-    logln!("XDMAC");
-
     let rx_channel = unsafe { XDMAC_RX_CHANNEL.as_mut().unwrap() };
 
     let channel_status_reader = unsafe { XDMAC_CHANNEL_STATUS_READER.as_mut().unwrap() };
@@ -414,7 +639,7 @@ fn XDMAC() {
     unsafe {
         let result = XDMAC_COMMAND_QUEUE_HANDLE
             .unwrap()
-            .send_data(MESSAGE_BUFFER);
+            .send_data(TELECOMMAND_BUFFER);
 
         if result.is_err() {
             logln!("Failed to send command to the queue");

@@ -37,9 +37,10 @@ pub use self::boolean_condition::{
     BooleanConditionHandle, BooleanConditionSet, BooleanConditionSetType, BooleanConditionStorage,
 };
 pub use self::event::{EventHandle, EventId, EventStorage};
+pub use self::execution_monitor::ExecutionStats;
 pub use self::message_queue::{MessageQueueHandle, MessageQueueStorage};
 pub use self::mutex::Mutex;
-pub use self::tasklet::{TaskletConfig, TaskletStorage};
+pub use self::tasklet::{TaskletConfig, TaskletId, TaskletStorage};
 
 /// Module for re-exporting time structures.
 pub mod time {
