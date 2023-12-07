@@ -207,6 +207,6 @@ mod tests {
         }
 
         let elapsed_time = time_source.elapsed_time();
-        assert!(elapsed_time > Duration::nanos(0));
+        assert!(elapsed_time.ticks() > 0);
     }
 }
