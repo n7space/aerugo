@@ -14,6 +14,8 @@ pub use samv71q21_pac as pac;
 /// Macro for interrupt handlers.
 pub use pac::interrupt;
 
+#[cfg(has_fpu)]
+pub mod fpu;
 pub mod nvic;
 pub mod pio;
 pub mod pmc;
