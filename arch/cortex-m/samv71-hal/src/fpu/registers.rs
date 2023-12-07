@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 //! FPU registers. Cortex-M crate does not provide mapping and lacks some registers
 
+use cortex_m::register::fpscr::RMode;
+
 /// Automatically preserve FP context on exception register offset.
 pub(crate) const FPU_FPCCR_ASPEN_OFFSET: u32 = 31u32;
 /// Automatically preserve FP context on exception register mask.
@@ -189,3 +191,210 @@ pub(crate) const FPU_FPSCR_DZC_MASK: u32 = 0x00000002u32;
 pub(crate) const FPU_FPSCR_IOC_OFFSET: u32 = 0u32;
 /// Invalid Operation cumulative exception bit register mask.
 pub(crate) const FPU_FPSCR_IOC_MASK: u32 = 0x00000001u32;
+
+/// Alternative half precision mode selection
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum HalfPrecisionMode {
+    /// IEEE-compliant
+    IEEE754_2008 = 0,
+    /// Alternative
+    Alternative = 1,
+}
+
+impl TryFrom<u32> for HalfPrecisionMode {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(HalfPrecisionMode::IEEE754_2008),
+            1 => Ok(HalfPrecisionMode::Alternative),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<bool> for HalfPrecisionMode {
+    fn from(value: bool) -> Self {
+        match value {
+            true => HalfPrecisionMode::Alternative,
+            false => HalfPrecisionMode::IEEE754_2008,
+        }
+    }
+}
+
+/// NaN modes
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NaNMode {
+    /// NaN operands propagate through to the output of a floating-point operation
+    PropagateNaNOperands = 0,
+    /// Any operation involving one or more NaNs returns the Default NaN.
+    ReturnDefaultNaN = 1,
+}
+
+impl TryFrom<u32> for NaNMode {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(NaNMode::PropagateNaNOperands),
+            1 => Ok(NaNMode::ReturnDefaultNaN),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<bool> for NaNMode {
+    fn from(value: bool) -> Self {
+        match value {
+            true => NaNMode::ReturnDefaultNaN,
+            false => NaNMode::PropagateNaNOperands,
+        }
+    }
+}
+
+/// Flush-to-zero modes
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FlushToZeroMode {
+    /// Flush-to-zero mode disabled, FPU is IEEE-754 compliant
+    Disabled = 0,
+    /// Flush-to-zero mode enabled,
+    Enabled = 1,
+}
+
+impl TryFrom<u32> for FlushToZeroMode {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(FlushToZeroMode::Disabled),
+            1 => Ok(FlushToZeroMode::Enabled),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<bool> for FlushToZeroMode {
+    fn from(value: bool) -> Self {
+        match value {
+            true => FlushToZeroMode::Enabled,
+            false => FlushToZeroMode::Disabled,
+        }
+    }
+}
+
+/// Rounding modes
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RoundingMode {
+    /// Round to nearest number
+    RoundToNearest = 0b00,
+    /// Round towards plus infinity
+    RoundTowardsPlusInfinity = 0b01,
+    /// Round towards minus infinity
+    RoundTowardsMinusInfinity = 0b10,
+    /// Round towards zero
+    RoundTowardsZero = 0b11,
+}
+
+impl TryFrom<u32> for RoundingMode {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0b00 => Ok(RoundingMode::RoundToNearest),
+            0b01 => Ok(RoundingMode::RoundTowardsPlusInfinity),
+            0b10 => Ok(RoundingMode::RoundTowardsMinusInfinity),
+            0b11 => Ok(RoundingMode::RoundTowardsZero),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Into<RMode> for RoundingMode {
+    fn into(self) -> RMode {
+        match self {
+            RoundingMode::RoundToNearest => RMode::Nearest,
+            RoundingMode::RoundTowardsPlusInfinity => RMode::PlusInfinity,
+            RoundingMode::RoundTowardsMinusInfinity => RMode::MinusInfinity,
+            RoundingMode::RoundTowardsZero => RMode::Zero,
+        }
+    }
+}
+
+impl Into<RoundingMode> for RMode {
+    fn into(self) -> RoundingMode {
+        match self {
+            RMode::Nearest => RoundingMode::RoundToNearest,
+            RMode::PlusInfinity => RoundingMode::RoundTowardsPlusInfinity,
+            RMode::MinusInfinity => RoundingMode::RoundTowardsMinusInfinity,
+            RMode::Zero => RoundingMode::RoundTowardsZero,
+        }
+    }
+}
+
+/// FPU configuration
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Config {
+    /// Is FPU context automatically preserved on exception?
+    pub is_context_preserved_on_exception: bool,
+    /// Address of the floating-point register space allocated on exception.
+    pub exception_register_space_address: u32,
+    /// Default context configuration.
+    pub default_context_config: ContextConfig,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// FPU context configuration
+pub struct ContextConfig {
+    /// Half-precision mode
+    pub half_precision_mode: HalfPrecisionMode,
+    /// NaN mode
+    pub nan_mode: NaNMode,
+    /// Flush-to-zero mode
+    pub flush_to_zero_mode: FlushToZeroMode,
+    /// Rounding mode
+    pub rounding_mode: RoundingMode,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// FPU context state
+pub struct ContextStateFlags {
+    /// Negative condition code flag
+    pub negative_condition: bool,
+    /// Zero condition code flag
+    pub zero_condition: bool,
+    /// Carry condition code flag
+    pub carry_condition: bool,
+    /// Overflow condition code flag
+    pub overflow_condition: bool,
+    /// Input denormal cumulative exception bit
+    pub input_denormal_exception: bool,
+    /// Inexact cumulative exception bit
+    pub inexact_exception: bool,
+    /// Underflow cumulative exception bit
+    pub underflow_exception: bool,
+    /// Overflow cumulative exception bit
+    pub overflow_exception: bool,
+    /// Division by zero cumulative exception bit
+    pub division_by_zero_exception: bool,
+    /// Invalid operation cumulative exception bit
+    pub invalid_operation_exception: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// FPU status
+pub struct Status {
+    /// Debug Monitor exception pending could be set
+    pub could_debug_monitor_exception_pending_be_set: bool,
+    /// Bus Fault exception pending could be set
+    pub could_bus_fault_exception_pending_be_set: bool,
+    /// Mem Manage exception pending could be set
+    pub could_mem_manage_exception_pending_be_set: bool,
+    /// Hard Fault exception pending could be set
+    pub could_hard_fault_exception_pending_be_set: bool,
+    /// Was processor in thread mode?
+    pub was_processor_in_thread_mode: bool,
+    /// Was processor in user mode?
+    pub was_processor_in_user_mode: bool,
+    /// Is lazy FP state preservation active?
+    pub is_lazy_fp_state_preservation_active: bool,
+}
