@@ -5,24 +5,19 @@ use cortex_m::register::fpscr::{read as read_fpscr, write as write_fpscr};
 use samv71q21_pac::{FPU, SCB};
 
 use self::registers::{
-    Config, ContextConfig, ContextStateFlags, FlushToZeroMode, HalfPrecisionMode, NaNMode,
-    RoundingMode, Status, FPU_FPCAR_ADDRESS_MASK, FPU_FPCAR_ADDRESS_OFFSET, FPU_FPCCR_ASPEN_MASK,
-    FPU_FPCCR_BFRDY_MASK, FPU_FPCCR_HFRDY_MASK, FPU_FPCCR_LSPACT_MASK, FPU_FPCCR_LSPEN_MASK,
-    FPU_FPCCR_MMRDY_MASK, FPU_FPCCR_MONRDY_MASK, FPU_FPCCR_THREAD_MASK, FPU_FPCCR_USER_MASK,
-    FPU_FPDSCR_AHP_MASK, FPU_FPDSCR_AHP_OFFSET, FPU_FPDSCR_DN_MASK, FPU_FPDSCR_DN_OFFSET,
-    FPU_FPDSCR_FZ_MASK, FPU_FPDSCR_FZ_OFFSET, FPU_FPDSCR_RMODE_MASK, FPU_FPDSCR_RMODE_OFFSET,
+    FPU_FPCAR_ADDRESS_MASK, FPU_FPCAR_ADDRESS_OFFSET, FPU_FPCCR_ASPEN_MASK, FPU_FPCCR_BFRDY_MASK,
+    FPU_FPCCR_HFRDY_MASK, FPU_FPCCR_LSPACT_MASK, FPU_FPCCR_LSPEN_MASK, FPU_FPCCR_MMRDY_MASK,
+    FPU_FPCCR_MONRDY_MASK, FPU_FPCCR_THREAD_MASK, FPU_FPCCR_USER_MASK, FPU_FPDSCR_AHP_MASK,
+    FPU_FPDSCR_AHP_OFFSET, FPU_FPDSCR_DN_MASK, FPU_FPDSCR_DN_OFFSET, FPU_FPDSCR_FZ_MASK,
+    FPU_FPDSCR_FZ_OFFSET, FPU_FPDSCR_RMODE_MASK, FPU_FPDSCR_RMODE_OFFSET,
 };
 
 mod registers;
 
-/*
-SRS list:
-- Support for default NaN operation mode
-- Support for full-compliance IEEE operation mode
-- Support for flush-to-zero operation mode
-- Support for handling invalid operands in default NaN/flush-to-zero mode
-- Lazy stacking enabled by default (LSPEN)
-*/
+pub use registers::{
+    Config, ContextConfig, ContextStateFlags, FlushToZeroMode, HalfPrecisionMode, NaNMode,
+    RoundingMode, Status,
+};
 
 /// Structure representing Floating Point Unit
 pub struct Fpu {
@@ -52,6 +47,11 @@ impl Fpu {
         scb.disable_fpu();
         dsb();
         isb();
+    }
+
+    /// Returns `true` if lazy stacking feature is enabled.
+    pub fn is_lazy_stacking_enabled(&self) -> bool {
+        self.fpu.fpccr.read() & FPU_FPCCR_LSPEN_MASK != 0
     }
 
     /// Sets FPU configuration.
