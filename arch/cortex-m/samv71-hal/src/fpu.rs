@@ -41,7 +41,7 @@ impl Fpu {
         isb();
     }
 
-    /// Disable the FPU. In addition to
+    /// Disable the FPU.
     /// You can use SCB for that instead, but you must provide memory barrier manually.
     pub fn disable(&mut self, scb: &mut SCB) {
         scb.disable_fpu();
