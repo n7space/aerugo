@@ -1,5 +1,5 @@
 use aerugo::{
-    logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
+    log, logln, Aerugo, Duration, InitApi, RuntimeApi, SystemHardwareConfig, TaskletConfig,
     TaskletStorage,
 };
 
@@ -13,17 +13,19 @@ fn monitor(_: (), context: &mut MonitorContext, api: &'static dyn RuntimeApi) {
         let execution_stats = api.get_execution_statistics(tasklet_id);
 
         if let Some(stats) = execution_stats {
-            logln!("Tasklet: #{}", stats.tasklet_id());
+            log!("T:{}|", stats.tasklet_id());
 
             if let Some(min) = stats.minimum_execution_time() {
-                logln!("Min: {}", min.to_millis());
+                log!("{}|", min.to_millis());
             }
             if let Some(max) = stats.maximum_execution_time() {
-                logln!("Max: {}", max.to_millis());
+                log!("{}|", max.to_millis());
             }
             if let Some(avg) = stats.average_execution_time() {
-                logln!("Avg: {}", avg.to_millis());
+                log!("{}", avg.to_millis());
             }
+
+            logln!();
         }
     }
 
@@ -42,9 +44,9 @@ fn task_a(_: (), context: &mut TaskAContext, _: &'static dyn RuntimeApi) {
     context.cnt = context.cnt.wrapping_add(1);
 
     let sleep_time = if context.cnt % 2 == 0 {
-        std::time::Duration::from_millis(10)
+        std::time::Duration::from_millis(100)
     } else {
-        std::time::Duration::from_millis(20)
+        std::time::Duration::from_millis(200)
     };
 
     std::thread::sleep(sleep_time);
@@ -59,9 +61,9 @@ fn task_b(_: (), context: &mut TaskBContext, _: &'static dyn RuntimeApi) {
     context.cnt = context.cnt.wrapping_add(1);
 
     let sleep_time = if context.cnt % 2 == 0 {
-        std::time::Duration::from_millis(20)
+        std::time::Duration::from_millis(200)
     } else {
-        std::time::Duration::from_millis(50)
+        std::time::Duration::from_millis(500)
     };
 
     std::thread::sleep(sleep_time);
