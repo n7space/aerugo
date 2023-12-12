@@ -3,6 +3,8 @@
 
 `aerugo` is a safety-critical applications oriented Real-Time Operating System.
 */
+
+#![doc = include_str!("../doc/user_manual.md")]
 #![no_std]
 #![warn(missing_docs)]
 #![warn(clippy::missing_docs_in_private_items)]
