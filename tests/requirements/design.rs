@@ -22,6 +22,18 @@ fn des_tasklet_user_data_safe_access() {}
 #[cfg_attr(not(doc), test)]
 fn des_safe_access_to_shared_data() {}
 
+/// @SRS{ROS-FUN-RTOS-6020}
+///
+/// Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_provides_time_with_accuracy_1_ms() {}
+
+/// @SRS{ROS-FUN-RTOS-6030}
+///
+/// Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
+#[cfg_attr(not(doc), test)]
+fn des_ros_provides_time_with_resolution_1_ns() {}
+
 /// @SRS{ROS-FUN-BSP-WDT-010}
 ///
 /// Design Analysis is described in N7S-ROS-SVSR-001, chapter 6.2.
