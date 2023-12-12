@@ -59,6 +59,7 @@ impl Hal {
                 Some(UserPeripherals {
                     chip_id: Some(mcu_peripherals.CHIPID),
                     cpu_id: Some(core_peripherals.CPUID),
+                    fpu: Some(core_peripherals.FPU),
                     nvic: Some(core_peripherals.NVIC),
                     pio_a: Some(mcu_peripherals.PIOA),
                     pio_b: Some(mcu_peripherals.PIOB),
