@@ -6,8 +6,6 @@
 /// @SRS{ROS-FUN-BSP-SCB-030}
 /// @SRS{ROS-FUN-BSP-SCB-040}
 /// @SRS{ROS-FUN-BSP-SCB-050}
-/// @SRS{ROS-FUN-BSP-SCB-060}
-/// @SRS{ROS-FUN-BSP-SCB-070}
 /// @SRS{ROS-FUN-BSP-SCB-080}
 /// @SRS{ROS-FUN-BSP-SCB-090}
 #[cfg_attr(not(doc), test)]

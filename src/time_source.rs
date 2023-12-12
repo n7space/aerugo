@@ -23,7 +23,7 @@ use crate::time::{Duration, Instant};
 pub(crate) struct TimeSource {
     /// Time when system scheduler started.
     system_start: OnceCell<Instant>,
-    /// Time since system's scheduler start.
+    /// Time it took to start the system scheduler.
     system_start_offset: OnceCell<Duration>,
     /// User-defined offset.
     user_offset: OnceCell<Duration>,
@@ -58,9 +58,9 @@ impl TimeSource {
     /// Return system time with offset if it was defined.
     ///
     /// # Safety
-    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::set_user_offset`] in parallel with this function (interrupt is treated as different
-    /// thread) is an undefined behavior.
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass
+    /// interrupt boundary. Calling [`TimeSource::set_user_offset`] in parallel with this function
+    /// (interrupt is treated as different thread) is an undefined behavior.
     pub(crate) fn system_time(&self) -> Instant {
         let start_time = self
             .time_since_start()
@@ -72,16 +72,27 @@ impl TimeSource {
         }
     }
 
-    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right before starting
-    /// the scheduler.
+    /// Return time elapsed since scheduler start.
+    ///
+    /// # Safety
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass
+    /// interrupt boundary. Calling [`TimeSource::set_system_start`] in parallel with this function
+    /// (interrupt is treated as different thread) is an undefined behavior.
+    pub(crate) fn elapsed_time(&self) -> Duration {
+        Hal::get_system_time() - *self.system_start.get().expect("System not started")
+    }
+
+    /// Saves current timestamp as the moment of system start. Should be called by `Aerugo` right
+    /// before starting the scheduler.
     ///
     /// # Return
     /// `()` is was set for the first time, `RuntimeError` otherwise.
     ///
     /// # Safety
-    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass interrupt boundary.
-    /// Calling [`TimeSource::startup_duration`], [`TimeSource::calculate_absolute_time`] in parallel with this
-    /// function (interrupt is treated as different thread) is an undefined behavior.
+    /// This is safe as long as it's used in single-core context, and `TimeSource` does not pass
+    /// interrupt boundary. Calling [`TimeSource::startup_duration`],
+    /// [`TimeSource::calculate_absolute_time`], [`TimeSource::elapsed_time`] in parallel with
+    /// this function (interrupt is treated as different thread) is an undefined behavior.
     pub(crate) unsafe fn set_system_start(&self) {
         let current_time = Hal::get_system_time();
 
@@ -178,5 +189,24 @@ impl TimeSource {
             time.checked_add_duration(*offset)
                 .expect("Failed to add user offset")
         })
+    }
+}
+
+#[cfg(any(doc, test))]
+mod tests {
+    use super::*;
+
+    /// @SRS{ROS-FUN-RTOS-6010}
+    #[cfg_attr(not(doc), test)]
+    #[allow(non_upper_case_globals)]
+    fn req_query_elapsed_time() {
+        let time_source = TimeSource::new();
+
+        unsafe {
+            time_source.set_system_start();
+        }
+
+        let elapsed_time = time_source.elapsed_time();
+        assert!(elapsed_time.ticks() > 0);
     }
 }

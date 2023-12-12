@@ -1,0 +1,11 @@
+1. Configure data output rate
+2. Configure accelerometer scale to +/- 2
+3. Configure gyroscope scale to +/- 500
+4. Start continuous measurements
+5. Observe measurements on the plot
+7. Reconfigure accelerometer scale to +/- 16
+8. Reconfigure gyroscope scale to +/- 2000
+9. Observe measurements on the plot
+10. Stop continuous measurements
+11. Send request for execution statistics
+12. Observe execution statistics

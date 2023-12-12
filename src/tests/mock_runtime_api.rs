@@ -54,6 +54,10 @@ impl RuntimeApi for MockRuntimeApi {
         todo!()
     }
 
+    fn get_elapsed_time(&'static self) -> Duration {
+        todo!()
+    }
+
     fn set_system_time_offset(&'static self, _offset: Duration) -> Result<(), RuntimeError> {
         todo!()
     }
