@@ -1,6 +1,7 @@
 //! System HAL implementation for Cortex-M SAMV71 target.
 
 use aerugo_hal::{AerugoHal, Instant, SystemHardwareConfig};
+use samv71_hal::cortex_m::interrupt;
 use samv71_hal::pmc::config::pck::{PCKConfig, PCKPrescaler, PCKSource, PCK};
 use samv71_hal::pmc::config::PeripheralId;
 
@@ -245,6 +246,10 @@ impl AerugoHal for Hal {
         };
 
         peripherals.watchdog.feed();
+    }
+
+    unsafe fn enable_interrupts() {
+        interrupt::enable();
     }
 }
 

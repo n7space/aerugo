@@ -40,4 +40,10 @@ pub trait AerugoHal {
 
     /// Feeds the system watchdog.
     fn feed_watchdog();
+
+    /// Enables global interrupts.
+    ///
+    /// # Safety
+    /// Must be called only after all system initialization is complete.
+    unsafe fn enable_interrupts();
 }

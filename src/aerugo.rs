@@ -1055,6 +1055,12 @@ impl InitApi for Aerugo {
         // system time cannot be accessed from IRQ context
         unsafe { self.time_source.set_system_start() }
 
+        // SAFETY: Enable global interrupts before entering the executor loop.
+        // All system initialization is complete at this point, so it's safe to
+        // start handling IRQs. Without this, PRIMASK stays set from boot and
+        // no hardware interrupt can ever fire.
+        unsafe { Hal::enable_interrupts() }
+
         self.run()
     }
 }

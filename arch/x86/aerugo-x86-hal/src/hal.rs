@@ -46,4 +46,8 @@ impl AerugoHal for Hal {
     fn feed_watchdog() {
         // There is no watchdog for x86 target.
     }
+
+    unsafe fn enable_interrupts() {
+        // There are no hardware interrupts on x86 target.
+    }
 }
