@@ -342,21 +342,21 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &mut PMC) -> Tc0Channels {
 /// Enables TC0 CH0, CH1 and CH2 peripheral clocks, and configures PCK6
 /// to generate proper clock for the timers.
 ///
-/// PCK6 uses MAINCK clock source (which is 12MHz by default), and divides it by 12 to get
+/// PCK6 uses MAINCK clock source (which is 10MHz on ICE board), and divides it by 10 to get
 /// 1MHz input clock, used by the timer to achieve 1ns resolution.
 ///
 /// # Parameters
 /// * `pmc` - HAL PMC instance
 fn configure_timer_clocks(pmc: &mut PMC) {
     // Configure PCK6 for 1MHz TC0 output
-    // Source: MAINCK (12MHz by default)
-    // Divider: /12
-    // Unwrap, since 12 is a valid prescaler.
+    // Source: MAINCK (10MHz by default on ICE board)
+    // Divider: /10
+    // Unwrap, since 10 is a valid prescaler.
     pmc.configure_programmable_clock(
         PCK::PCK6,
         PCKConfig {
             source: PCKSource::MainClock,
-            prescaler: PCKPrescaler::new(12).unwrap(),
+            prescaler: PCKPrescaler::new(10).unwrap(),
         },
     );
 
