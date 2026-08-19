@@ -228,9 +228,26 @@ impl AerugoHal for Hal {
             .as_ref()
             .expect("get_system_time called before HAL initialization");
 
-        let time_ch2 = ch2.counter_value();
-        let time_ch1 = ch1.counter_value();
-        let time_ch0 = ch0.counter_value();
+        // ch0/ch1/ch2 are chained (ch0 -> ch1 -> ch2), so a rollover of a less
+        // significant channel can increment a more significant one between two
+        // register reads. Reading most-significant-first (as this used to do)
+        // can therefore tear: e.g. ch2/ch1 are read just before ch0 rolls over
+        // and carries into ch1, so the returned value has old high bits paired
+        // with a post-rollover (near-zero) ch0, producing a timestamp that is
+        // *smaller* than one returned by an earlier, non-torn read. Bracket the
+        // low-order read with two reads of the higher-order channels and retry
+        // if they disagree, guaranteeing a self-consistent snapshot.
+        let (time_ch0, time_ch1, time_ch2) = loop {
+            let msb1 = ch2.counter_value();
+            let mid1 = ch1.counter_value();
+            let lsb = ch0.counter_value();
+            let mid2 = ch1.counter_value();
+            let msb2 = ch2.counter_value();
+
+            if mid1 == mid2 && msb1 == msb2 {
+                break (lsb, mid1, msb1);
+            }
+        };
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
         Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
