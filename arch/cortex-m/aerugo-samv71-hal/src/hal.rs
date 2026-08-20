@@ -237,16 +237,77 @@ impl AerugoHal for Hal {
         // low-order read with two reads of the higher-order channels and retry
         // if they disagree, guaranteeing a self-consistent snapshot.
         let (time_ch0, time_ch1, time_ch2) = loop {
+            let lsb0 = ch0.counter_value();
             let msb1 = ch2.counter_value();
             let mid1 = ch1.counter_value();
             let lsb = ch0.counter_value();
             let mid2 = ch1.counter_value();
             let msb2 = ch2.counter_value();
 
-            if mid1 == mid2 && msb1 == msb2 {
-                break (lsb, mid1, msb1);
+            if mid1 != mid2 || msb1 != msb2 {
+                continue;
             }
+
+            // The borrow below reads `ch0 == u16::MAX` as proof that the carry
+            // into ch1 has already happened. The carry is synchronised to the
+            // peripheral clock (Figure 50-3 "Clock Selection", p. 1479), so it
+            // lands a short, unspecified time after ch0 enters MAX; sampling
+            // inside that window would borrow from a ch1 that has not been
+            // incremented yet and push the timestamp 65536 ticks backwards.
+            // Requiring ch0 to have already read MAX at the top of the bracket
+            // puts two whole register reads between the carry and `mid1`.
+            // ch0 holds MAX for a full 1 MHz period, so the retry resolves on
+            // the next iteration.
+            if lsb == u16::MAX && lsb0 != u16::MAX {
+                continue;
+            }
+
+            break (lsb, mid1, msb1);
         };
+
+        // Correct for the early carry between chained channels.
+        //
+        // All references are to the SAMV71Q21RT data sheet, DS60001555E.
+        //
+        // The channels are chained TIOA0 -> XC1 -> ch1, TIOA1 -> XC2 -> ch2
+        // (Figure 50-2 "Clock Chaining Selection", p. 1479; TC_BMR.TC1XC1S = 2
+        // and TC_BMR.TC2XC2S = 3, p. 1523), and a channel's counter "is
+        // incremented at each positive edge of the selected clock"
+        // (Sec. 50.6.2 "16-bit Counter", p. 1478).
+        //
+        // `configure_timer` sets each channel to WAVSEL = 00 with RC = u16::MAX
+        // and TIOA set on RC compare. In WAVSEL = 00 the counter "is incremented
+        // from 0 to 2^16-1. Once 2^16-1 has been reached, the value of TC_CV is
+        // reset" (Sec. 50.6.12.1, p. 1484), and the counter "has reached the
+        // value 2^16-1 and passes to zero" (Sec. 50.6.2, p. 1478) -- so MAX is a
+        // real state, observable for one full clock period, and the RC compare
+        // that raises TIOA happens as the counter *enters* MAX, one tick before
+        // it wraps to 0.
+        //
+        // Consequence: while a channel reads MAX, the next, more significant
+        // channel has already been incremented for the period that is only about
+        // to start, and must be "borrowed" back by one to combine with the
+        // still-old low channel(s). Without this, the combined value jumps a full
+        // period ahead for one tick, then drops back down on the next read,
+        // breaking monotonicity.
+        //
+        // The borrow cascades, and both ways of reaching MAX on ch1 must count:
+        //   * ch1 reads MAX outright, or
+        //   * ch1 was borrowed back down to MAX because ch0 reads MAX
+        //     (i.e. ch1 had already rolled over early to 0).
+        // In both cases ch1's own RC compare has already fired and bumped ch2.
+        // Testing only the borrowed value misses the ch0 == ch1 == MAX tick,
+        // where the reported time would leap 2^32 us (~71.6 min) ahead for
+        // exactly 1 us, once every 2^32 us.
+        let mut time_ch1 = time_ch1;
+        let mut time_ch2 = time_ch2;
+        let ch1_reached_max = time_ch1 == u16::MAX;
+        if time_ch0 == u16::MAX {
+            time_ch1 = time_ch1.wrapping_sub(1);
+        }
+        if ch1_reached_max || time_ch1 == u16::MAX {
+            time_ch2 = time_ch2.wrapping_sub(1);
+        }
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
         Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
