@@ -235,7 +235,23 @@ impl AerugoHal for Hal {
         // with a post-rollover (near-zero) ch0, producing a timestamp that is
         // *smaller* than one returned by an earlier, non-torn read. Bracket the
         // low-order read with two reads of the higher-order channels and retry
-        // if they disagree, guaranteeing a self-consistent snapshot.
+        // if they disagree, guaranteeing a self-consistent snapshot. The bracket
+        // is also what makes this safe against preemption: an interrupt landing
+        // between two reads can stretch the sequence arbitrarily, and any
+        // channel that moves across it forces a retry.
+        //
+        // `configure_timer` chains the channels so that each TIOA rises exactly
+        // as its counter wraps, so the raw counter values combine directly into
+        // a 48-bit tick count with no carry correction needed.
+        //
+        // The one caveat is that a channel's clock input is synchronised to the
+        // peripheral clock (Figure 50-3 "Clock Selection", p. 1479), so the
+        // carry lands a short, unspecified time after ch0 wraps. Sampling inside
+        // that window would pair a fresh ch0 == 0 with a ch1 that has not been
+        // incremented yet, reporting a timestamp 65536 ticks too small.
+        // Rejecting a sample where ch0 has only just reached 0 puts two whole
+        // register reads between the wrap and the ch1 read, and ch0 holds 0 for
+        // a full 1 MHz period, so the retry resolves on the next iteration.
         let (time_ch0, time_ch1, time_ch2) = loop {
             let lsb0 = ch0.counter_value();
             let msb1 = ch2.counter_value();
@@ -248,66 +264,12 @@ impl AerugoHal for Hal {
                 continue;
             }
 
-            // The borrow below reads `ch0 == u16::MAX` as proof that the carry
-            // into ch1 has already happened. The carry is synchronised to the
-            // peripheral clock (Figure 50-3 "Clock Selection", p. 1479), so it
-            // lands a short, unspecified time after ch0 enters MAX; sampling
-            // inside that window would borrow from a ch1 that has not been
-            // incremented yet and push the timestamp 65536 ticks backwards.
-            // Requiring ch0 to have already read MAX at the top of the bracket
-            // puts two whole register reads between the carry and `mid1`.
-            // ch0 holds MAX for a full 1 MHz period, so the retry resolves on
-            // the next iteration.
-            if lsb == u16::MAX && lsb0 != u16::MAX {
+            if lsb == 0 && lsb0 != 0 {
                 continue;
             }
 
             break (lsb, mid1, msb1);
         };
-
-        // Correct for the early carry between chained channels.
-        //
-        // All references are to the SAMV71Q21RT data sheet, DS60001555E.
-        //
-        // The channels are chained TIOA0 -> XC1 -> ch1, TIOA1 -> XC2 -> ch2
-        // (Figure 50-2 "Clock Chaining Selection", p. 1479; TC_BMR.TC1XC1S = 2
-        // and TC_BMR.TC2XC2S = 3, p. 1523), and a channel's counter "is
-        // incremented at each positive edge of the selected clock"
-        // (Sec. 50.6.2 "16-bit Counter", p. 1478).
-        //
-        // `configure_timer` sets each channel to WAVSEL = 00 with RC = u16::MAX
-        // and TIOA set on RC compare. In WAVSEL = 00 the counter "is incremented
-        // from 0 to 2^16-1. Once 2^16-1 has been reached, the value of TC_CV is
-        // reset" (Sec. 50.6.12.1, p. 1484), and the counter "has reached the
-        // value 2^16-1 and passes to zero" (Sec. 50.6.2, p. 1478) -- so MAX is a
-        // real state, observable for one full clock period, and the RC compare
-        // that raises TIOA happens as the counter *enters* MAX, one tick before
-        // it wraps to 0.
-        //
-        // Consequence: while a channel reads MAX, the next, more significant
-        // channel has already been incremented for the period that is only about
-        // to start, and must be "borrowed" back by one to combine with the
-        // still-old low channel(s). Without this, the combined value jumps a full
-        // period ahead for one tick, then drops back down on the next read,
-        // breaking monotonicity.
-        //
-        // The borrow cascades, and both ways of reaching MAX on ch1 must count:
-        //   * ch1 reads MAX outright, or
-        //   * ch1 was borrowed back down to MAX because ch0 reads MAX
-        //     (i.e. ch1 had already rolled over early to 0).
-        // In both cases ch1's own RC compare has already fired and bumped ch2.
-        // Testing only the borrowed value misses the ch0 == ch1 == MAX tick,
-        // where the reported time would leap 2^32 us (~71.6 min) ahead for
-        // exactly 1 us, once every 2^32 us.
-        let mut time_ch1 = time_ch1;
-        let mut time_ch2 = time_ch2;
-        let ch1_reached_max = time_ch1 == u16::MAX;
-        if time_ch0 == u16::MAX {
-            time_ch1 = time_ch1.wrapping_sub(1);
-        }
-        if ch1_reached_max || time_ch1 == u16::MAX {
-            time_ch2 = time_ch2.wrapping_sub(1);
-        }
 
         // Timer's clock is 1MHz, so returned value is in microseconds.
         Instant::from_ticks(as_48bit_unsigned(time_ch0, time_ch1, time_ch2))
@@ -339,19 +301,30 @@ type Tc0Channels = (
 /// input clocks (configured via PMC), and chains it's channels to achieve high-resolution
 /// time source for the system.
 ///
-/// Timer's source clock first goes into channel 0, which generates RA and RC compare events that
-/// toggle it's TIOA0 output, effectively dividing the input frequency by the value of RC register.
-/// TIOA0 is connected via XC1 to channel 1, which does the same thing for TIOA1 output, which is
-/// connected via XC2 to channel 2.
+/// All data sheet references below are to the SAMV71Q21RT data sheet, DS60001555E.
 ///
-/// Since each channel increases it's counter value at each positive edge of input clock, to
-/// prevent unwanted clock divisions, TIOA outputs of all channels are cleared when their counter
-/// reaches some arbitrarily small value, and they are set when the counter reaches RC value, which
-/// is set to maximum.
+/// Timer's source clock first goes into channel 0. TIOA0 is connected via XC1 to channel 1,
+/// whose TIOA1 is connected via XC2 to channel 2 (Figure 50-2 "Clock Chaining Selection",
+/// p. 1479), and each channel increments its counter on every positive edge of its input
+/// (Sec. 50.6.2 "16-bit Counter", p. 1478). Effectively, each channel divides the previous
+/// one by 65536, so the three raw counter values concatenate into a single 48-bit tick count.
 ///
-/// Effectively, each channel drives next one with the same frequency as itself, allowing us to
-/// take raw values of each channel's counter and convert them into current time, giving us
-/// 48 bits of precision.
+/// The chaining edge has to land exactly on the counter wrap, or the more significant channel
+/// runs ahead of the less significant one and the concatenation is wrong for as long as the
+/// skew lasts. All channels therefore run in Waveform mode with WAVSEL = 00, where the counter
+/// always runs 0 to 2^16-1 and is reset on reaching 2^16-1, independently of RC -- in this mode
+/// RC neither resets the counter nor generates a trigger (Sec. 50.6.12.1, p. 1484). That leaves
+/// RC free, so the chaining edge is taken from RA instead:
+///
+/// * RA is 0 and sets TIOA, so TIOA rises exactly as the counter wraps to 0, which is the
+///   moment the next channel must count.
+/// * RC is 2^15 and clears TIOA, purely to bring the output back down in time for the next
+///   wrap. Its value only sets the duty cycle; each level lasts 32768 ticks, far longer than
+///   the peripheral clock period required by Sec. 50.6.3 note 2, p. 1478.
+///
+/// Note that RC compare fires as the counter *enters* RC, one tick before it wraps, so driving
+/// the chain from RC (RC = 2^16-1, set on RC compare) would clock the next channel one tick
+/// early and force `get_system_time` to correct for it.
 ///
 /// # Parameters
 /// * `timer` - HAL Timer instance
@@ -372,13 +345,13 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &mut PMC) -> Tc0Channels {
     let ch1 = timer.channel_1.take().expect("TC0 CH1 already taken");
     let ch2 = timer.channel_2.take().expect("TC0 CH2 already taken");
 
-    // Set channels to clear their TIOA on RA compare, and set on RC compare.
+    // Set channels to set their TIOA on RA compare, and clear it on RC compare.
     // Also clear them on software trigger to prevent unexpected behaviors.
     let waveform_config = WaveformModeConfig {
         tioa_effects: OutputSignalEffects {
             software_trigger: ComparisonEffect::Clear,
-            rx_comparison: ComparisonEffect::Clear,
-            rc_comparison: ComparisonEffect::Set,
+            rx_comparison: ComparisonEffect::Set,
+            rc_comparison: ComparisonEffect::Clear,
             ..Default::default()
         },
         ..Default::default()
@@ -388,16 +361,18 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &mut PMC) -> Tc0Channels {
     let mut ch1 = ch1.into_waveform_channel(waveform_config);
     let mut ch2 = ch2.into_waveform_channel(waveform_config);
 
-    // Set RA values for all channels to some arbitrary value that's smaller than RC,
-    // to reset TIOA outputs before next overflow happens.
-    ch0.set_ra(u16::MAX / 2);
-    ch1.set_ra(u16::MAX / 2);
-    ch2.set_ra(u16::MAX / 2);
+    // Set RA values for all channels to 0, so TIOA rises exactly when the counter wraps
+    // and the next channel in the chain counts in step with this one.
+    ch0.set_ra(0);
+    ch1.set_ra(0);
+    ch2.set_ra(0);
 
-    // Set RC values for all channels to max, so we can achieve full 48-bit resolution
-    ch0.set_rc(u16::MAX);
-    ch1.set_rc(u16::MAX);
-    ch2.set_rc(u16::MAX);
+    // Set RC values for all channels to half of the range, to bring TIOA back down before
+    // the next wrap. In WAVSEL = 00 the counter period is 65536 regardless of RC, so this
+    // only picks the duty cycle and does not cost any resolution.
+    ch0.set_rc(u16::MAX / 2);
+    ch1.set_rc(u16::MAX / 2);
+    ch2.set_rc(u16::MAX / 2);
 
     ch0.set_clock_source(ChannelClock::PmcPeripheralClock);
     ch1.set_clock_source(ChannelClock::XC1);
@@ -416,7 +391,7 @@ fn configure_timer(timer: &mut Timer<TC0>, pmc: &mut PMC) -> Tc0Channels {
 /// to generate proper clock for the timers.
 ///
 /// PCK6 uses MAINCK clock source (which is 12MHz by default), and divides it by 12 to get
-/// 1MHz input clock, used by the timer to achieve 1ns resolution.
+/// 1MHz input clock, used by the timer to achieve 1us resolution.
 ///
 /// # Parameters
 /// * `pmc` - HAL PMC instance
